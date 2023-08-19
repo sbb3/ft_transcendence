@@ -22,7 +22,7 @@ export class FtStrategy extends PassportStrategy(Strategy, '42') {
             familyName : profile.name.familyName,
             givenName : profile.name.givenName
         };
-
-    }
+    
+	}
 
 }
