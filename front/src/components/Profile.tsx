@@ -1,24 +1,44 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+
+interface UserProfile {
+	username : string;
+	given_name : string;
+	last_name : string;
+}
+
+function getAccessToken() : any {
+	return document.cookie.split(';')?.find(value => value.includes("tr_access_token"))?.split("=")[1];
+}
 
 function Profile() {
 
+	const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+
 	useEffect(() => {
 
-		let test;
+		let profile = fetch('http://localhost:3000/user/profile', {
+			headers : {
+				'Authorization' : 'Bearer ' + getAccessToken(),
+			},
+			credentials : 'include',
+		});
 
-		test = fetch('http://localhost:3000/auth/test');
-
-		test
+		profile 
 			.then(resp => resp.json())
-			.then(data => console.log(data))
-			.catch(error => console.log(error));
-
+			.then(data => setUserProfile(data))
+			.catch(error => console.log("Error : " + error));
+			
 	}, []);
 
 	return (
-		<h1>Hello from profile component</h1>
+		userProfile ?
+		<div id='user-infos'>
+			<h2>username : {userProfile.username}</h2>
+			<h2>name : {userProfile.given_name}</h2>
+			<h2>last name : {userProfile.last_name}</h2>
+		</div>
+		: <h1>Still waiting for data</h1>
 	);
-
 }
 
 export default Profile;

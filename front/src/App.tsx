@@ -4,13 +4,13 @@ import Profile from "./components/Profile"
 
 function App() {
 
-  return (
-	<BrowserRouter>
-	  <Routes>
-	  	<Route path='/' element={<Authentication />}/>
-		<Route path='/profile' element={<Profile />} />
-	  </Routes>
-	</BrowserRouter>
+	return (
+		<BrowserRouter>
+			<Routes>
+				<Route path='/' element={<Profile />}/>
+				<Route path='/authentication' element={<Authentication />} />
+			</Routes>
+		</BrowserRouter>
   );
 
 }
