@@ -1,14 +1,12 @@
-import { Controller, Get, Header, Headers, Options, Request } from '@nestjs/common';
+import { Controller, Get, UseGuards } from '@nestjs/common';
+import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('user')
 export class UserController {
 
     @Get('profile')
-    @Header('Access-Control-Allow-Origin', 'http://localhost:5173')
-    @Header('Access-Control-Allow-Credentials', 'true')
-    getProfile(@Request() request) {
-
-        console.log("Hello from the back-end");
+    @UseGuards(AuthGuard)
+    getProfile() {
 
         return ({
             given_name : 'Bob',
@@ -17,12 +15,4 @@ export class UserController {
         });
     }
 
-    @Options('profile')
-    @Header('Access-Control-Allow-Origin', 'http://localhost:5173')
-    @Header('Access-Control-Allow-Credentials', 'true')
-    @Header('Access-Control-Allow-Headers', 'authorization')
-    @Header('Access-Control-Allow-Methods', 'GET') // I can remove it
-    preflightRequest(@Headers('Access-Control-Request-Headers') h) {
-        
-    }
 }
