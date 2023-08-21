@@ -1,46 +1,34 @@
-import { Controller, Get, UseGuards, Request, Response, Header, Headers } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
-import { FtStrategy } from './auth.strategy';
+import { Controller, Get, UseGuards, Request, Response, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { JwtService } from '@nestjs/jwt';
+import { AuthGuard } from '@nestjs/passport';
+import { JwtGuard } from './guards/ft.guard';
+import { FtGuard } from './guards/jwt.guard';
 
 @Controller('auth')
 export class AuthController {
 
 	constructor(
-			private ftStrategy : FtStrategy,
 			private authService : AuthService,
-			private jwtService : JwtService,
 		) { }
-		
+
+	@UseGuards(FtGuard)
 	@Get('42/oauth2')
-	@UseGuards(AuthGuard('42'))
 	initOauth() {
 
 	}
 	
 	@Get('signin')
-	@UseGuards(AuthGuard('42'))
-	async generateTokens(@Request() req : any, @Response() resp) {
+	@UseGuards(FtGuard)
+	async generateTokens(@Request() req : any, @Response() response : any) {
+
 		const userProfile = req.user;
-		const accessToken = await this.authService.generateAccessToken(userProfile);
-		const refreshToken = await this.authService.generateRereshToken( { username : userProfile.username } );
+		
+		if (!userProfile)
+			throw new UnauthorizedException();
 
-		resp.cookie('tr_access_token', accessToken);
-		resp.cookie('tr_refresh_token', refreshToken, {
-			httpOnly : true,
-			secure : true 
-		});
-		console.log('Creation of tokens : ' + accessToken);
+		// Here I should implement the database logic
 
-		try {
-			const payload = this.jwtService.verifyAsync(accessToken, { secret : 'test-secret'});
-			
-			console.log(payload);
-		}
-		catch {
-			console.log("Errorrrr");
-		}
-		resp.redirect('http://localhost:5173/');
+		await this.authService.initCookies(userProfile, { username : userProfile.username}, response);
+		response.redirect('http://localhost:5173/profile');
 	}
 }

@@ -1,5 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Response } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { jwtConstants } from './auth.constants';
 
 @Injectable()
 export class AuthService {
@@ -9,17 +10,22 @@ export class AuthService {
 	}
 
 	async generateAccessToken(payload : any) {
-		return await this.jwtService.signAsync(payload, {expiresIn : '1d'});
+		return await this.jwtService.signAsync(payload, {expiresIn : '1d', secret : jwtConstants.atSecret});
 	}
 
 	async generateRereshToken(payload : any) {
-		return await this.jwtService.signAsync(payload, {expiresIn : '15d'});
+		return await this.jwtService.signAsync(payload, {expiresIn : '15d', secret : jwtConstants.rtSecret});
 	}
 
-	giveToken(authorizationHeader : string) {
+	async initCookies(accessPayload : any, refreshPayload : any, @Response() resp : any) {
+		
+		const accessToken = await this.generateAccessToken(accessPayload);
+		const refreshToken = await this.generateRereshToken(refreshPayload);
 
-		console.log(authorizationHeader)
-		return 'test';
+		resp.cookie('tr_access_token', accessToken); 
+		resp.cookie('tr_refresh_token', refreshToken, {
+			httpOnly : true, 
+			secure : true
+		});
 	}
-
 }
