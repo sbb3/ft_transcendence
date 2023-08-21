@@ -1,13 +1,10 @@
 import { useEffect, useState } from "react";
+import requestToken, { getAccessToken, isExpired } from "../utils/cookies";
 
 interface UserProfile {
 	username : string;
 	given_name : string;
 	last_name : string;
-}
-
-function getAccessToken() : any {
-	return document.cookie.split(';')?.find(value => value.includes("tr_access_token"))?.split("=")[1];
 }
 
 function Profile() {
@@ -16,18 +13,48 @@ function Profile() {
 
 	useEffect(() => {
 
-		let profile = fetch('http://localhost:3000/user/profile', {
-			headers : {
-				'Authorization' : 'Bearer ' + getAccessToken(),
-			},
-			credentials : 'include',
-		});
+		const token = getAccessToken();
+		let expired = false;
 
-		profile 
-			.then(resp => resp.json())
-			.then(data => setUserProfile(data))
-			.catch(error => console.log("Error : " + error));
-			
+		if (token)
+			expired = isExpired(token);
+
+		if (expired)
+		{
+			const newToken = fetch('http://localhost:3000/auth/refresh');
+
+			newToken
+				.then(resp => resp.json())
+				.then(data => {
+					
+					console.log("Here asking for a new access token");
+					let profile = fetch('http://localhost:3000/user/profile', {
+						headers : {
+							'Authorization' : 'Bearer ' + getAccessToken(),
+						},
+						credentials : 'include',
+					});
+		
+					profile 
+						.then(resp => resp.json())
+						.then(data => setUserProfile(data))
+						.catch(error => console.log("Error : " + error));
+					});
+		}
+		else
+		{
+			let profile = fetch('http://localhost:3000/user/profile', {
+				headers : {
+					'Authorization' : 'Bearer ' + getAccessToken(),
+				},
+				credentials : 'include',
+			});
+	
+			profile 
+				.then(resp => resp.json())
+				.then(data => setUserProfile(data))
+				.catch(error => console.log("Error : " + error));
+		}
 	}, []);
 
 	return (
@@ -39,6 +66,7 @@ function Profile() {
 		</div>
 		: <h1>Still waiting for data</h1>
 	);
+
 }
 
 export default Profile;

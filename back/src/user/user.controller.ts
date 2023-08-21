@@ -4,16 +4,16 @@ import { JwtGuard } from 'src/auth/guards/ft.guard';
 @Controller('user')
 export class UserController {
 
-    @UseGuards(JwtGuard)
-    @Get('profile')
-    getProfile() {
+	@UseGuards(JwtGuard)
+	@Get('profile')
+	getProfile() {
 
-        return ({
-            given_name : 'Bob',
-            last_name : 'Marley',
-            username : 'Bmarley',
-        });
+		return ({
+			given_name : 'Bob',
+			last_name : 'Marley',
+			username : 'Bmarley',
+		});
 
-    }
+	}
 
 }

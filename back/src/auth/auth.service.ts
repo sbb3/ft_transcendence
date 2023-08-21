@@ -10,7 +10,7 @@ export class AuthService {
 	}
 
 	async generateAccessToken(payload : any) {
-		return await this.jwtService.signAsync(payload, {expiresIn : '1d', secret : jwtConstants.atSecret});
+		return await this.jwtService.signAsync(payload, {expiresIn : '60s', secret : jwtConstants.atSecret});
 	}
 
 	async generateRereshToken(payload : any) {
