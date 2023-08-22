@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import requestToken, { getAccessToken, isExpired } from "../utils/cookies";
+import { tokenCheck } from "../utils/cookies";
 
 interface UserProfile {
 	username : string;
@@ -12,49 +12,7 @@ function Profile() {
 	const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
 
 	useEffect(() => {
-
-		const token = getAccessToken();
-		let expired = false;
-
-		if (token)
-			expired = isExpired(token);
-
-		if (expired)
-		{
-			const newToken = fetch('http://localhost:3000/auth/refresh');
-
-			newToken
-				.then(resp => resp.json())
-				.then(data => {
-					
-					console.log("Here asking for a new access token");
-					let profile = fetch('http://localhost:3000/user/profile', {
-						headers : {
-							'Authorization' : 'Bearer ' + getAccessToken(),
-						},
-						credentials : 'include',
-					});
-		
-					profile 
-						.then(resp => resp.json())
-						.then(data => setUserProfile(data))
-						.catch(error => console.log("Error : " + error));
-					});
-		}
-		else
-		{
-			let profile = fetch('http://localhost:3000/user/profile', {
-				headers : {
-					'Authorization' : 'Bearer ' + getAccessToken(),
-				},
-				credentials : 'include',
-			});
-	
-			profile 
-				.then(resp => resp.json())
-				.then(data => setUserProfile(data))
-				.catch(error => console.log("Error : " + error));
-		}
+		tokenCheck(setUserProfile);
 	}, []);
 
 	return (

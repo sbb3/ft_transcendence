@@ -8,6 +8,7 @@ export class UserController {
 	@Get('profile')
 	getProfile() {
 
+		console.log("here");
 		return ({
 			given_name : 'Bob',
 			last_name : 'Marley',

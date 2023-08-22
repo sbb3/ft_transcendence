@@ -18,7 +18,6 @@ export class FtStrategy extends PassportStrategy(Strategy, '42') {
         return {
             id : profile.id,
             username : profile.username,
-            full_name : profile.displayName,
             familyName : profile.name.familyName,
             givenName : profile.name.givenName
         };
