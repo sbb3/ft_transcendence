@@ -7,8 +7,6 @@ export class UserController {
 	@UseGuards(JwtGuard)
 	@Get('profile')
 	getProfile() {
-
-		console.log("here");
 		return ({
 			given_name : 'Bob',
 			last_name : 'Marley',

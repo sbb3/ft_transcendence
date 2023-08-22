@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { tokenCheck } from "../utils/cookies";
+import tokenCheck from "../utils/cookies";
 
 interface UserProfile {
 	username : string;
@@ -12,7 +12,7 @@ function Profile() {
 	const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
 
 	useEffect(() => {
-		tokenCheck(setUserProfile);
+		tokenCheck(setUserProfile, "http://localhost:3000/user/profile");
 	}, []);
 
 	return (

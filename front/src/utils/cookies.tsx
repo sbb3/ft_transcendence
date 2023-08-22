@@ -1,30 +1,20 @@
 import jwtDecode from "jwt-decode";
 
 function getAccessToken() : string | undefined {
-	console.log(document.cookie);
     return document.cookie.split(';')?.find(value => value.includes("tr_access_token"))?.split('=')[1];
 }
 
 function isExpired(token : string) : boolean {
 
-    // If it is not found, I should make  request to renew my token
     const decodedToken : any = jwtDecode(token);
 
     return decodedToken.exp <= Date.now() / 1000;
 }
 
-function requestToken() {
-    const token = getAccessToken();
-
-    if (!token || isExpired(token))
-        fetch('http://localhost:3000/auth/refresh');
-
-}
-
-function tokenCheck(setUserProfile : any)
+async function tokenCheck(setUserProfile : any, fetchUrl : string)
 {
         const token = getAccessToken();
-		let expired = false;
+		let expired = true;
 
 		if (token)
 			expired = isExpired(token);
@@ -36,15 +26,19 @@ function tokenCheck(setUserProfile : any)
 			});
 
 			newToken
-				.then(resp => resp.json())
+				.then(resp => {
+					if (resp.status == 401)
+						window.location.replace("http://localhost:5173");
+					return resp.json();
+				})
 				.then(data => {
-					let profile = fetch('http://localhost:3000/user/profile', {
+					let profile = fetch(fetchUrl, {
 						headers : {
 							'Authorization' : 'Bearer ' + data.access_token,
 						},
 						credentials : 'include',
 					});
-		
+	
 					profile 
 						.then(resp => resp.json())
 						.then(profileData => setUserProfile(profileData))
@@ -53,8 +47,7 @@ function tokenCheck(setUserProfile : any)
 		}
 		else
 		{
-			console.log("here trying to access cookies");
-			let profile = fetch('http://localhost:3000/user/profile', {
+			let profile = fetch(fetchUrl, {
 				headers : {
 					'Authorization' : 'Bearer ' + getAccessToken(),
 				},
@@ -64,9 +57,8 @@ function tokenCheck(setUserProfile : any)
 			profile 
 				.then(resp => resp.json())
 				.then(data => setUserProfile(data))
-				.catch(error => console.log("Error : " + error));
+				.catch(error => console.log("Error : " + error)); // To initialize here a variable to make sure that the user sees the error
 		}
 }
 
-export default requestToken;
-export { getAccessToken, isExpired, tokenCheck };
+export default tokenCheck;

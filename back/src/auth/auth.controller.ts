@@ -37,10 +37,8 @@ export class AuthController {
 
 		const refreshToken = req.cookies['tr_refresh_token'];
 
-		console.log("here again");
-		console.log(refreshToken);
 		if (!await this.authService.isRefreshTokenValid(refreshToken))
-			return new UnauthorizedException();
+			throw new UnauthorizedException();
 
 		const payload = this.authService.decodeToken(refreshToken);
 		const {id, username, familyName, givenName} = payload;

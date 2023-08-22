@@ -40,7 +40,6 @@ export class AuthService {
 			return true;
 		}
 		catch {
-			console.log("False");
 			return false;
 		}
 	}
