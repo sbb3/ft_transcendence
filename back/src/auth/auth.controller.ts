@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards, Req, UnauthorizedException, Res } from '@nestjs/common';
+import { Controller, Get, UseGuards, Req, UnauthorizedException, Res, Post, Body, BadRequestException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { FtGuard } from './guards/jwt.guard';
 import { Response, Request } from 'express';
@@ -32,11 +32,13 @@ export class AuthController {
 		response.redirect('http://localhost:5173/profile');
 	}
 
-	@Get('refresh')
-	async getNewAccessToken(@Req() req : Request, @Res() res : Response) {
+	@Post('refresh')
+	async getNewAccessToken(@Req() req : Request, @Res() res : Response, @Body('grant_type') grant : string | undefined) {
 
 		const refreshToken = req.cookies['tr_refresh_token'];
 
+		if (!grant || grant != "refresh_token")
+			throw new BadRequestException('Bad Grant Type');
 		if (!await this.authService.isRefreshTokenValid(refreshToken))
 			throw new UnauthorizedException();
 
@@ -47,6 +49,6 @@ export class AuthController {
 
 		this.authService.initCookie('tr_access_token', newAccessToken, {maxAge :  90 * 1000, sameSite : 'none', secure : true}, res);
 
-		res.status(200).json( { access_token : newAccessToken } );
+		res.status(201).json( { access_token : newAccessToken } );
 	}
 }

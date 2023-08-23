@@ -22,12 +22,17 @@ async function tokenCheck(setUserProfile : any, fetchUrl : string)
 		if (expired)
 		{
 			const newToken = fetch('http://localhost:3000/auth/refresh', {
-				credentials : 'include'
+				method : 'POST',
+				credentials : 'include',
+				headers : {
+						"Content-Type" : 'application/x-www-form-urlencoded'
+				},
+				body : "grant_type=refresh_token"
 			});
 
 			newToken
 				.then(resp => {
-					if (resp.status == 401)
+					if (resp.status != 201)
 						window.location.replace("http://localhost:5173");
 					return resp.json();
 				})
