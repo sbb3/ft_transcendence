@@ -1,4 +1,5 @@
-import { Controller, Get, UseGuards, Req, UnauthorizedException, Res, Post, Body, BadRequestException } from '@nestjs/common';
+import { Controller, Get, UseGuards, Req, UnauthorizedException, Res,
+	Post, Body, BadRequestException, Delete, NotFoundException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { FtGuard } from './guards/jwt.guard';
 import { Response, Request } from 'express';
@@ -15,7 +16,7 @@ export class AuthController {
 	initOauth() {
 
 	}
-	
+
 	@Get('signin')
 	@UseGuards(FtGuard)
 	async generateTokens(@Req() req : any, @Res() response : Response) {
@@ -51,4 +52,16 @@ export class AuthController {
 
 		res.status(201).json( { access_token : newAccessToken } );
 	}
+
+	@Delete('logout')
+	logout(@Req() request : Request, @Res() response : Response) {
+
+		if (!request.cookies['tr_access_token'] && !request.cookies['tr_refresh_token'])
+			throw new NotFoundException();
+		response.cookie('tr_access_token', '', {expires: new Date(0), sameSite : 'none', secure : true});
+		response.cookie('tr_refresh_token', '', {expires: new Date(0), sameSite : 'none', secure : true});
+		response.sendStatus(200);
+	}
+	
+	// Not to forget blacklist tokens functionnality
 }

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import checkTokenAndFetch from "../utils/cookies";
+import logout from "../utils/logout";
 
 interface UserProfile {
 	username : string;
@@ -17,10 +18,13 @@ function Profile() {
 
 	return (
 		userProfile ?
-		<div id='user-infos'>
-			<h2>username : {userProfile.username}</h2>
-			<h2>name : {userProfile.given_name}</h2>
-			<h2>last name : {userProfile.last_name}</h2>
+		<div id='profile-block'>
+			<div id='user-infos'>
+				<h2>username : {userProfile.username}</h2>
+				<h2>name : {userProfile.given_name}</h2>
+				<h2>last name : {userProfile.last_name}</h2>
+			</div>
+			<button onClick={() => logout()}>Logout</button>
 		</div>
 		: <h1>Still waiting for data</h1>
 	);

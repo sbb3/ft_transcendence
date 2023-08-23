@@ -3,7 +3,6 @@ import { JwtGuard } from 'src/auth/guards/ft.guard';
 
 @Controller('user')
 export class UserController {
-
 	@UseGuards(JwtGuard)
 	@Get('profile')
 	getProfile() {
@@ -13,5 +12,4 @@ export class UserController {
 			username : 'Bmarley',
 		});
 	}
-
 }
