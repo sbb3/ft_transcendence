@@ -12,7 +12,6 @@ export class UserController {
 			last_name : 'Marley',
 			username : 'Bmarley',
 		});
-
 	}
 
 }
