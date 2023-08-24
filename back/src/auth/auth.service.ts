@@ -1,11 +1,15 @@
 import { Injectable, Response, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { jwtConstants } from './auth.constants';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class AuthService {
 
-	constructor(private jwtService : JwtService) {
+	constructor(
+		private jwtService : JwtService,
+		private prismaService : PrismaService,
+		) {
 
 	}
 
@@ -50,5 +54,17 @@ export class AuthService {
 
 	decodeToken(token : string) : any {
 		return this.jwtService.decode(token);
+	}
+
+	async createUserIfNotFound(user : any) {
+		
+		const dbUser = await this.prismaService.findUser(user);
+
+		console.log({found : dbUser});
+		if (!dbUser)
+		{
+			const newDbUser = await this.prismaService.createUser(user);
+			console.log({new : newDbUser});
+		}
 	}
 }

@@ -22,14 +22,17 @@ export class AuthController {
 	async generateTokens(@Req() req : any, @Res() response : Response) {
 
 		const userProfile = req.user;
-
 		if (!userProfile)
 			throw new UnauthorizedException();
 
-		// Here I should implement the database logic
-		// Check if the user already exists
+		const user = {
+			username : userProfile.username,
+			lastName : userProfile.familyName,
+			name : userProfile.givenName,
+		}
+
+		this.authService.createUserIfNotFound(user);
 		await this.authService.initCookies(userProfile, userProfile, response);
-	
 		response.redirect('http://localhost:5173/profile');
 	}
 
