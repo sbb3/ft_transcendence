@@ -6,7 +6,6 @@ function logout() {
 
     logoutResponse
         .then(resp => {
-            console.log(resp);
             window.location.replace('http://localhost:5173/');
         })
 }

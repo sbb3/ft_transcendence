@@ -48,7 +48,7 @@ export class AuthController {
 	
 		const newAccessToken = await this.authService.generateAccessToken({id, username, familyName, givenName});
 
-		this.authService.initCookie('tr_access_token', newAccessToken, {maxAge :  90 * 1000, sameSite : 'none', secure : true}, res);
+		this.authService.initCookie('tr_access_token', newAccessToken, {maxAge :  15 * 60 * 1000, sameSite : 'none', secure : true}, res);
 
 		res.status(201).json( { access_token : newAccessToken } );
 	}
@@ -64,4 +64,5 @@ export class AuthController {
 	}
 	
 	// Not to forget blacklist tokens functionnality
+	// Check samesite options
 }

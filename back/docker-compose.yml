@@ -1,0 +1,16 @@
+version : '3.9'
+
+services : 
+  database : 
+    image : postgres:13.5
+    environment : 
+      - POSTGRES_USER=my_user
+      - POSTGRES_PASSWORD=my_password
+      - POSTGRES_DB=my_db
+    ports :
+      - '5432:5432'
+    volumes :
+      - my_volume:/var/lib/postgresql/data
+
+volumes : 
+  my_volume :

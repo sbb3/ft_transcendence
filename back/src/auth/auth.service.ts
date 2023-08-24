@@ -10,7 +10,7 @@ export class AuthService {
 	}
 
 	async generateAccessToken(payload : any) {
-		return await this.jwtService.signAsync(payload, {expiresIn : '60s', secret : jwtConstants.atSecret});
+		return await this.jwtService.signAsync(payload, {expiresIn : '30m', secret : jwtConstants.atSecret});
 	}
 
 	async generateRereshToken(payload : any) {
@@ -22,7 +22,7 @@ export class AuthService {
 		const accessToken = await this.generateAccessToken(accessPayload);
 		const refreshToken = await this.generateRereshToken(refreshPayload);
 
-		this.initCookie('tr_access_token', accessToken, {maxAge : 90 * 1000, sameSite : 'none', secure : true}, resp); // 90 seconds 
+		this.initCookie('tr_access_token', accessToken, {maxAge : 15 * 60 * 1000, sameSite : 'none', secure : true}, resp); // 90 seconds 
 		this.initCookie('tr_refresh_token', refreshToken, {
 		    maxAge: 24 * 16 * 60 * 60 * 1000, // 16 days
 			httpOnly : true, 
