@@ -11,10 +11,13 @@ datasource db {
 }
 
 model user {
-	id			Int @id @default(autoincrement())
-	name		String 
-	lastName	String
-	username	String @unique
-	createdAt	DateTime @default(now())
-	updatedAt	DateTime @updatedAt
+	id				Int @id @default(autoincrement())
+	name			String 
+	lastName		String
+	username		String @unique
+	authSecret		String
+	isTwoFaEnabled	Boolean @default(true)
+	isFaRegistered	Boolean @default(false)
+	createdAt		DateTime @default(now())
+	updatedAt		DateTime @updatedAt
 }

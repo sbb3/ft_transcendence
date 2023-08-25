@@ -2,6 +2,8 @@ import { Injectable, Response, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { jwtConstants } from './auth.constants';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { authenticator } from 'otplib';
+import { toDataURL } from 'qrcode';
 
 @Injectable()
 export class AuthService {
@@ -21,25 +23,28 @@ export class AuthService {
 		return await this.jwtService.signAsync(payload, {expiresIn : '15d', secret : jwtConstants.rtSecret});
 	}
 
+	async generateAuthToken(payload : any) {
+		return await this.jwtService.signAsync(payload, {expiresIn : '1d', secret : jwtConstants.authSecret});
+	}
+
 	async initCookies(accessPayload : any, refreshPayload : any, @Response() resp : any) {
 	
 		const accessToken = await this.generateAccessToken(accessPayload);
 		const refreshToken = await this.generateRereshToken(refreshPayload);
 
-		this.initCookie('tr_access_token', accessToken, {maxAge : 15 * 60 * 1000, sameSite : 'none', secure : true}, resp); // 90 seconds 
+		this.initCookie('tr_access_token', accessToken, {maxAge : 31 * 60 * 1000, sameSite : 'none', secure : true}, resp); // 31 minutes 
 		this.initCookie('tr_refresh_token', refreshToken, {
-		    maxAge: 24 * 16 * 60 * 60 * 1000, // 16 days
-			httpOnly : true, 
+			maxAge: 24 * 16 * 60 * 60 * 1000, // 16 days
+			httpOnly : true,
 			secure : true,
 			sameSite : 'none'
 		}, resp);
-
 	}
 
-	async isRefreshTokenValid(token : string) : Promise<any> {
+	async isTokenValid(token : string, secretKey : string) : Promise<any> {
 
 		try {
-			const payload = await this.jwtService.verifyAsync(token, { secret :jwtConstants.rtSecret });
+			const payload = await this.jwtService.verifyAsync(token, { secret : secretKey });
 
 			return true;
 		}
@@ -56,15 +61,16 @@ export class AuthService {
 		return this.jwtService.decode(token);
 	}
 
-	async createUserIfNotFound(user : any) {
+	async createUserIfNotFound(user : any) : Promise<any> {
+	
+		let dbUser = await this.prismaService.findUser(user);
 		
-		const dbUser = await this.prismaService.findUser(user);
-
-		console.log({found : dbUser});
 		if (!dbUser)
 		{
-			const newDbUser = await this.prismaService.createUser(user);
-			console.log({new : newDbUser});
+			user.authSecret = authenticator.generateSecret();
+			dbUser = await this.prismaService.createUser(user);
 		}
+		return dbUser;
 	}
+
 }
