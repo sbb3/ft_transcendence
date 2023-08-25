@@ -64,7 +64,7 @@ export class AuthService {
 	async createUserIfNotFound(user : any) : Promise<any> {
 	
 		let dbUser = await this.prismaService.findUser(user);
-		
+
 		if (!dbUser)
 		{
 			user.authSecret = authenticator.generateSecret();
@@ -73,4 +73,9 @@ export class AuthService {
 		return dbUser;
 	}
 
+	async generateQrCode(secret : string, account_name : string) : Promise<string> {
+		const otpURL = authenticator.keyuri(account_name, "Ft_Transcendence", secret);
+		
+		return await toDataURL(otpURL);
+	}
 }

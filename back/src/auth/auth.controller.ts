@@ -50,7 +50,6 @@ export class AuthController {
 		//  checks the jwt token and then generate a qrcode and return it
 		//  display it and make the user type the verification code (POST request)
 		//  check if the code is right, then generate the access and refresh tokens and redirect to profile
-
 		return ;
 	}
 
@@ -58,11 +57,13 @@ export class AuthController {
 	async getQrcode(@Req() request : Request) {
 		const authToken = request.cookies['tr_auth_token'];
 		const isValid = await this.authService.isTokenValid(authToken, jwtConstants.authSecret);
+		const payload = this.authService.decodeToken(authToken);
 
 		if (!isValid)
 			throw new UnauthorizedException();
 
-		return 'qr_code_here';
+		const qrCode = await this.authService.generateQrCode(authToken.authSecret, payload.username);
+		return {qrCode : qrCode};
 	}
 
 	@Post('refresh')
