@@ -78,4 +78,8 @@ export class AuthService {
 		
 		return await toDataURL(otpURL);
 	}
+
+	verifyTwoFaCode(code : string | undefined, secret : string) {
+		return authenticator.verify( {token : code, secret : secret} );
+	}
 }

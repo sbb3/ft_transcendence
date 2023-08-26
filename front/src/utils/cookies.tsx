@@ -40,14 +40,14 @@ function checkTokenAndFetch(stateSetter : any, fetchUrl : string)
 				method : 'POST',
 				credentials : 'include',
 				headers : {
-						"Content-Type" : 'application/x-www-form-urlencoded'
+						'Content-Type' : 'application/x-www-form-urlencoded'
 				},
-				body : "grant_type=refresh_token"
+				body : 'grant_type=refresh_token'
 			});
 			newToken
 				.then(resp => {
 					if (resp.status != 201)
-						window.location.replace("http://localhost:5173");
+						window.location.replace("http://localhost:5173"); // Create an error page
 					return resp.json();
 				})
 				.then(data => fetchAndSetData(stateSetter, fetchUrl, data.refresh_token));

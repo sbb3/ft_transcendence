@@ -6,6 +6,7 @@ function logout() {
 
     logoutResponse
         .then(resp => {
+            // Check for the 404 status and create a 404 page.
             window.location.replace('http://localhost:5173/');
         })
 }

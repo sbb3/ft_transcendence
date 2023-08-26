@@ -1,15 +1,17 @@
 import { Controller, Get, UseGuards, Req, UnauthorizedException, Res,
-	Post, Body, BadRequestException, Delete, NotFoundException } from '@nestjs/common';
+	Post, Body, BadRequestException, Delete, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { FtGuard } from './guards/jwt.guard';
 import { Response, Request } from 'express';
 import { jwtConstants } from './auth.constants';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Controller('auth')
 export class AuthController {
 
 	constructor(
 			private authService : AuthService,
+			private prismaService : PrismaService
 		) { }
 
 	@UseGuards(FtGuard)
@@ -23,6 +25,7 @@ export class AuthController {
 	async generateTokens(@Req() req : any, @Res() response : Response) {
 
 		const userProfile = req.user;
+
 		if (!userProfile)
 			throw new UnauthorizedException();
 
@@ -32,6 +35,7 @@ export class AuthController {
 			name : userProfile.givenName,
 		}
 
+		console.log(userProfile);
 		const dbUser = await this.authService.createUserIfNotFound(user);
 
 		if (!dbUser.isTwoFaEnabled)
@@ -42,14 +46,9 @@ export class AuthController {
 		}
 
 		const authToken = await this.authService.generateAuthToken(user);
-
 		this.authService.initCookie('tr_auth_token', authToken, {maxAge : 15 * 60 * 1000, sameSite : 'none', secure : true, httpOnly : true}, response);
 		response.redirect('http://localhost:5173/2fa');
-		//  check if the user has 2fa enabled, redirect to /2fa (front)
-		//  fetch /qrcode and display
-		//  checks the jwt token and then generate a qrcode and return it
-		//  display it and make the user type the verification code (POST request)
-		//  check if the code is right, then generate the access and refresh tokens and redirect to profile
+
 		return ;
 	}
 
@@ -57,13 +56,42 @@ export class AuthController {
 	async getQrcode(@Req() request : Request) {
 		const authToken = request.cookies['tr_auth_token'];
 		const isValid = await this.authService.isTokenValid(authToken, jwtConstants.authSecret);
+		
+		if (!isValid)
+			throw new UnauthorizedException();
+	
 		const payload = this.authService.decodeToken(authToken);
+		const {username, lastName, name} =  payload;
+		const user = await this.prismaService.findUser({username, lastName, name});
+
+		const qrCode = await this.authService.generateQrCode(user.authSecret, "Ft_Transcendence" + user.name);
+		return {qrCode : qrCode};
+	}
+
+	@Post('2fa/verification')
+	async verifyCode(@Req() request : Request, @Body('verificationCode') code : string | undefined, @Res() response : Response) {
+
+		const authToken = request.cookies['tr_auth_token'];
+		const isValid = await this.authService.isTokenValid(authToken, jwtConstants.authSecret);
+		const payload = this.authService.decodeToken(authToken);
+		const {username, lastName, name} = payload;
 
 		if (!isValid)
 			throw new UnauthorizedException();
 
-		const qrCode = await this.authService.generateQrCode(authToken.authSecret, payload.username);
-		return {qrCode : qrCode};
+		const user = await this.prismaService.findUser({username, lastName, name});
+
+		if (!user)
+			throw new UnauthorizedException();
+		const isCodeValid = this.authService.verifyTwoFaCode(code, user.authSecret);
+		
+		if (!isCodeValid)
+			throw new UnauthorizedException();
+		// Here I should create the final tokens
+		// Also Remove auth token
+		response.cookie('tr_auth_token', '', {expires: new Date(0), sameSite : 'none', secure : true});
+		await this.authService.initCookies({username, lastName, name}, {username, lastName, name}, response);
+		response.sendStatus(201);
 	}
 
 	@Post('refresh')
