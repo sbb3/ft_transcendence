@@ -1,15 +1,18 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Controller, Get, Req, UseGuards } from '@nestjs/common';
 import { JwtGuard } from 'src/auth/guards/ft.guard';
 
 @Controller('user')
 export class UserController {
 	@UseGuards(JwtGuard)
 	@Get('profile')
-	getProfile() {
+	getProfile(@Req() request : any) {
+
+		console.log(request.user);
+
 		return ({
-			given_name : 'Bob',
-			last_name : 'Marley',
-			username : 'Bmarley',
+			given_name : request.user.name,
+			last_name : request.user.lastName,
+			username : request.user.username,
 		});
 	}
 }

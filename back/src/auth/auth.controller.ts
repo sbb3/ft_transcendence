@@ -34,21 +34,19 @@ export class AuthController {
 			lastName : userProfile.familyName,
 			name : userProfile.givenName,
 		}
-
-		console.log(userProfile);
 		const dbUser = await this.authService.createUserIfNotFound(user);
 
 		if (!dbUser.isTwoFaEnabled)
 		{
-			await this.authService.initCookies(userProfile, userProfile, response);
+			await this.authService.initCookies(user, user, response);
 			response.redirect('http://localhost:5173/profile');
 			return ;
 		}
 
+		// Check if the user is registered (for the front-end to check if it should display the qrCode)
 		const authToken = await this.authService.generateAuthToken(user);
-		this.authService.initCookie('tr_auth_token', authToken, {maxAge : 15 * 60 * 1000, sameSite : 'none', secure : true, httpOnly : true}, response);
+		this.authService.initCookie('tr_auth_token', authToken, {maxAge : 10 * 60 * 1000, sameSite : 'none', secure : true, httpOnly : true}, response);
 		response.redirect('http://localhost:5173/2fa');
-
 		return ;
 	}
 
@@ -64,8 +62,7 @@ export class AuthController {
 		const {username, lastName, name} =  payload;
 		const user = await this.prismaService.findUser({username, lastName, name});
 
-		const qrCode = await this.authService.generateQrCode(user.authSecret, "Ft_Transcendence" + user.name);
-		return {qrCode : qrCode};
+		return {qrCode : await this.authService.generateQrCode(user.authSecret, "Ft_Transcendence" + user.username)};
 	}
 
 	@Post('2fa/verification')
@@ -87,8 +84,6 @@ export class AuthController {
 		
 		if (!isCodeValid)
 			throw new UnauthorizedException();
-		// Here I should create the final tokens
-		// Also Remove auth token
 		response.cookie('tr_auth_token', '', {expires: new Date(0), sameSite : 'none', secure : true});
 		await this.authService.initCookies({username, lastName, name}, {username, lastName, name}, response);
 		response.sendStatus(201);
@@ -105,9 +100,8 @@ export class AuthController {
 			throw new UnauthorizedException();
 
 		const payload = this.authService.decodeToken(refreshToken);
-		const {id, username, familyName, givenName} = payload;
-	
-		const newAccessToken = await this.authService.generateAccessToken({id, username, familyName, givenName});
+		const {username, lastName, name} = payload;
+		const newAccessToken = await this.authService.generateAccessToken({username, lastName, name});
 
 		this.authService.initCookie('tr_access_token', newAccessToken, {maxAge :  15 * 60 * 1000, sameSite : 'none', secure : true}, res);
 
@@ -126,5 +120,4 @@ export class AuthController {
 	
 	// Not to forget blacklist tokens functionnality
 	// Check samesite options
-
 }

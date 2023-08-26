@@ -20,9 +20,9 @@ function Profile() {
 		userProfile ?
 		<div id='profile-block'>
 			<div id='user-infos'>
-				<h2>username : {userProfile.username}</h2>
-				<h2>name : {userProfile.given_name}</h2>
-				<h2>last name : {userProfile.last_name}</h2>
+				<h2>Name : {userProfile.given_name}</h2>
+				<h2>Last name : {userProfile.last_name}</h2>
+				<h2>Username : {userProfile.username}</h2>
 			</div>
 			<button onClick={() => logout()}>Logout</button>
 		</div>

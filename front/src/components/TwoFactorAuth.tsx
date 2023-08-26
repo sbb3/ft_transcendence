@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import fetchQrCode from "../utils/qrCode";
 
 function sendCode(code : string | undefined) {
 	const responseData = fetch('http://localhost:3000/auth/2fa/verification', {
@@ -25,19 +26,7 @@ function TwoFactorAuth() {
 	const [code, setCode] = useState<string>("");
 
 	useEffect(() => {
-		let data = fetch('http://localhost:3000/auth/2fa', {
-			credentials : 'include'
-		});
-
-		data
-			.then(response => {
-				if (response.status != 200)
-					window.location.replace('http://localhost:5173');
-				return response.json()
-			})
-			.then(data => {
-				setQr(data.qrCode);
-			});
+		fetchQrCode(setQr);
 	});
 
 	return (

@@ -24,7 +24,7 @@ export class AuthService {
 	}
 
 	async generateAuthToken(payload : any) {
-		return await this.jwtService.signAsync(payload, {expiresIn : '1d', secret : jwtConstants.authSecret});
+		return await this.jwtService.signAsync(payload, {expiresIn : '10m', secret : jwtConstants.authSecret});
 	}
 
 	async initCookies(accessPayload : any, refreshPayload : any, @Response() resp : any) {
@@ -44,8 +44,7 @@ export class AuthService {
 	async isTokenValid(token : string, secretKey : string) : Promise<any> {
 
 		try {
-			const payload = await this.jwtService.verifyAsync(token, { secret : secretKey });
-
+			await this.jwtService.verifyAsync(token, { secret : secretKey });
 			return true;
 		}
 		catch {
