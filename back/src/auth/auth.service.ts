@@ -1,4 +1,4 @@
-import { Injectable, Response, UnauthorizedException } from '@nestjs/common';
+import { Injectable, Res, Response } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { jwtConstants } from './auth.constants';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -24,7 +24,7 @@ export class AuthService {
 	}
 
 	async generateAuthToken(payload : any) {
-		return await this.jwtService.signAsync(payload, {expiresIn : '10m', secret : jwtConstants.authSecret});
+		return await this.jwtService.signAsync(payload, {expiresIn : '5m', secret : jwtConstants.authSecret});
 	}
 
 	async initCookies(accessPayload : any, refreshPayload : any, @Response() resp : any) {
@@ -32,9 +32,9 @@ export class AuthService {
 		const accessToken = await this.generateAccessToken(accessPayload);
 		const refreshToken = await this.generateRereshToken(refreshPayload);
 
-		this.initCookie('tr_access_token', accessToken, {maxAge : 31 * 60 * 1000, sameSite : 'none', secure : true}, resp); // 31 minutes 
+		this.initCookie('tr_access_token', accessToken, {maxAge : 30 * 60 * 1000, sameSite : 'none', secure : true}, resp); // 31 minutes 
 		this.initCookie('tr_refresh_token', refreshToken, {
-			maxAge: 24 * 16 * 60 * 60 * 1000, // 16 days
+			maxAge: 24 * 15 * 60 * 60 * 1000, // 15 days
 			httpOnly : true,
 			secure : true,
 			sameSite : 'none'
@@ -64,6 +64,7 @@ export class AuthService {
 	
 		let dbUser = await this.prismaService.findUser(user);
 
+		// To consider : Generate the secret when the user activates the 2fa
 		if (!dbUser)
 		{
 			user.authSecret = authenticator.generateSecret();
@@ -80,5 +81,10 @@ export class AuthService {
 
 	verifyTwoFaCode(code : string | undefined, secret : string) {
 		return authenticator.verify( {token : code, secret : secret} );
+	}
+
+	removeCookie(@Res() response : any, cookieName : string, params : any) {
+
+		response.cookie(cookieName, '', params);
 	}
 }

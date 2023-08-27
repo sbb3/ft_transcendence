@@ -7,7 +7,7 @@ export class UserController {
 	@Get('profile')
 	getProfile(@Req() request : any) {
 
-		console.log(request.user);
+		console.log("Here : " + request.user);
 
 		return ({
 			given_name : request.user.name,

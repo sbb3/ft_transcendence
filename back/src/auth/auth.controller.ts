@@ -23,31 +23,23 @@ export class AuthController {
 	@Get('signin')
 	@UseGuards(FtGuard)
 	async generateTokens(@Req() req : any, @Res() response : Response) {
-
 		const userProfile = req.user;
 
 		if (!userProfile)
 			throw new UnauthorizedException();
-
-		const user = {
-			username : userProfile.username,
-			lastName : userProfile.familyName,
-			name : userProfile.givenName,
-		}
-		const dbUser = await this.authService.createUserIfNotFound(user);
+		const dbUser = await this.authService.createUserIfNotFound(userProfile);
 
 		if (!dbUser.isTwoFaEnabled)
 		{
-			await this.authService.initCookies(user, user, response);
+			await this.authService.initCookies(userProfile, userProfile, response);
 			response.redirect('http://localhost:5173/profile');
 			return ;
 		}
 
-		// Check if the user is registered (for the front-end to check if it should display the qrCode)
-		const authToken = await this.authService.generateAuthToken(user);
-		this.authService.initCookie('tr_auth_token', authToken, {maxAge : 10 * 60 * 1000, sameSite : 'none', secure : true, httpOnly : true}, response);
-		response.redirect('http://localhost:5173/2fa');
-		return ;
+		// Check if the userProfile is registered (for the front-end to check if it should display the qrCode)
+		const authToken = await this.authService.generateAuthToken(userProfile);
+		this.authService.initCookie('tr_auth_token', authToken, {maxAge : 5 * 60 * 1000, sameSite : 'none', secure : true, httpOnly : true}, response);
+		return response.redirect('http://localhost:5173/2fa');
 	}
 
 	@Get('2fa')
@@ -62,7 +54,7 @@ export class AuthController {
 		const {username, lastName, name} =  payload;
 		const user = await this.prismaService.findUser({username, lastName, name});
 
-		return {qrCode : await this.authService.generateQrCode(user.authSecret, "Ft_Transcendence" + user.username)};
+		return {qrCode : await this.authService.generateQrCode(user.authSecret, "Ft_" + user.username)};
 	}
 
 	@Post('2fa/verification')
@@ -70,23 +62,24 @@ export class AuthController {
 
 		const authToken = request.cookies['tr_auth_token'];
 		const isValid = await this.authService.isTokenValid(authToken, jwtConstants.authSecret);
-		const payload = this.authService.decodeToken(authToken);
-		const {username, lastName, name} = payload;
 
 		if (!isValid)
 			throw new UnauthorizedException();
 
+		const payload = this.authService.decodeToken(authToken);
+		const {username, lastName, name} = payload;
 		const user = await this.prismaService.findUser({username, lastName, name});
 
 		if (!user)
 			throw new UnauthorizedException();
 		const isCodeValid = this.authService.verifyTwoFaCode(code, user.authSecret);
-		
+
 		if (!isCodeValid)
 			throw new UnauthorizedException();
-		response.cookie('tr_auth_token', '', {expires: new Date(0), sameSite : 'none', secure : true});
+
+		this.authService.removeCookie(response, 'tr_auth_token', {expires: new Date(0), sameSite : 'none', secure : true});
 		await this.authService.initCookies({username, lastName, name}, {username, lastName, name}, response);
-		response.sendStatus(201);
+		return response.sendStatus(201);
 	}
 
 	@Post('refresh')
@@ -113,11 +106,10 @@ export class AuthController {
 
 		if (!request.cookies['tr_access_token'] && !request.cookies['tr_refresh_token'])
 			throw new NotFoundException();
-		response.cookie('tr_access_token', '', {expires: new Date(0), sameSite : 'none', secure : true});
-		response.cookie('tr_refresh_token', '', {expires: new Date(0), sameSite : 'none', secure : true});
+		this.authService.removeCookie(response, 'tr_access_token', {expires: new Date(0), sameSite : 'none', secure : true});
+		this.authService.removeCookie(response, 'tr_refresh_token', {expires: new Date(0), sameSite : 'none', secure : true});
 		response.sendStatus(200);
 	}
 	
-	// Not to forget blacklist tokens functionnality
-	// Check samesite options
+	// Not to forget the blacklist tokens functionnality
 }

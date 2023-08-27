@@ -24,7 +24,6 @@ function fetchAndSetData(stateSetter : any, fetchUrl : string, refresh_token : s
 		.then(resp => resp.json())
 		.then(data => stateSetter(data))
 		.catch(error => console.log("Error : " + error)); // Initialize a variable to make sure that the user sees the error
-
 }
 
 function checkTokenAndFetch(stateSetter : any, fetchUrl : string)

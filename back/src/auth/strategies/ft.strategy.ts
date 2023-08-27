@@ -16,10 +16,9 @@ export class FtStrategy extends PassportStrategy(Strategy, '42') {
     async validate(access_token : string, refresh_token : string, profile : any) : Promise<any> {
 
         return {
-            id : profile.id,
             username : profile.username,
-            familyName : profile.name.familyName,
-            givenName : profile.name.givenName
+            lastName : profile.name.familyName,
+            name : profile.name.givenName
         };
 	}
 

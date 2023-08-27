@@ -3,7 +3,7 @@
 
 function fetchQrCode(stateSetter : any) {
 	let data = fetch('http://localhost:3000/auth/2fa', {
-			credentials : 'include'
+			credentials : 'include',
 		});
 
 		data
