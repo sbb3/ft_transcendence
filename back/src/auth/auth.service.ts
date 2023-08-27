@@ -60,19 +60,6 @@ export class AuthService {
 		return this.jwtService.decode(token);
 	}
 
-	async createUserIfNotFound(user : any) : Promise<any> {
-	
-		let dbUser = await this.prismaService.findUser(user);
-
-		// To consider : Generate the secret when the user activates the 2fa
-		if (!dbUser)
-		{
-			user.authSecret = authenticator.generateSecret();
-			dbUser = await this.prismaService.createUser(user);
-		}
-		return dbUser;
-	}
-
 	async generateQrCode(secret : string, account_name : string) : Promise<string> {
 		const otpURL = authenticator.keyuri(account_name, "Ft_Transcendence", secret);
 		
@@ -86,5 +73,22 @@ export class AuthService {
 	removeCookie(@Res() response : any, cookieName : string, params : any) {
 
 		response.cookie(cookieName, '', params);
+	}
+
+	async createUserIfNotFound(user : any) : Promise<any> {
+	
+		let dbUser = await this.prismaService.findUser(user);
+
+		// To consider : Generate the secret when the user activates the 2fa
+		if (!dbUser)
+		{
+			user.authSecret = authenticator.generateSecret();
+			dbUser = await this.prismaService.createUser(user);
+		}
+		return dbUser;
+	}
+
+	async updateUserData(whichUser : any, toUpdate : any) {
+		return await this.prismaService.updateUserData(whichUser, toUpdate);
 	}
 }

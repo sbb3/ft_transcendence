@@ -56,3 +56,4 @@ function checkTokenAndFetch(stateSetter : any, fetchUrl : string)
 }
 
 export default checkTokenAndFetch;
+export { getAccessToken, isExpired };

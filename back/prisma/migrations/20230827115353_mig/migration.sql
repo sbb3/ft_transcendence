@@ -5,7 +5,7 @@ CREATE TABLE "user" (
     "lastName" TEXT NOT NULL,
     "username" TEXT NOT NULL,
     "authSecret" TEXT NOT NULL,
-    "isTwoFaEnabled" BOOLEAN NOT NULL DEFAULT true,
+    "isTwoFaEnabled" BOOLEAN NOT NULL DEFAULT false,
     "isFaRegistered" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,

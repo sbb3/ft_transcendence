@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import checkTokenAndFetch from "../utils/cookies";
 import logout from "../utils/logout";
+import activate2FA from "../utils/2faActivation";
 
 interface UserProfile {
 	username : string;
@@ -25,6 +26,9 @@ function Profile() {
 				<h2>Username : {userProfile.username}</h2>
 			</div>
 			<button onClick={() => logout()}>Logout</button>
+			<button onClick={() => {
+				activate2FA();
+			}} style={{marginTop : '10px'}}>Active 2 fa</button>
 		</div>
 		: <h1>Still waiting for data</h1>
 	);

@@ -1,10 +1,11 @@
 import { Controller, Get, UseGuards, Req, UnauthorizedException, Res,
-	Post, Body, BadRequestException, Delete, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
+	Post, Body, BadRequestException, Delete, NotFoundException, Put } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { FtGuard } from './guards/jwt.guard';
-import { Response, Request } from 'express';
+import { Request, Response } from 'express';
 import { jwtConstants } from './auth.constants';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { JwtGuard } from './guards/ft.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -110,6 +111,18 @@ export class AuthController {
 		this.authService.removeCookie(response, 'tr_refresh_token', {expires: new Date(0), sameSite : 'none', secure : true});
 		response.sendStatus(200);
 	}
-	
-	// Not to forget the blacklist tokens functionnality
+
+	// Should not forget the jwt guard
+	@Put('twoFactorAuthStatus')
+	@UseGuards(JwtGuard)
+	async enableTwoFA(@Req() request : any, @Body('isTwoFaEnabled') value : any) {
+		const {name, lastName, username} = request.user;
+
+		if (typeof value !== 'boolean')
+			throw new BadRequestException();
+		console.log(await this.authService.updateUserData({name, lastName, username}, {isTwoFaEnabled : value}));
+		// Maybe redirect here after a user enables two factor authentication
+		return ;
+	}
+	// Not to forget the blacklist tokens functionnality for security purposes
 }
