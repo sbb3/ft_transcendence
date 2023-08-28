@@ -14,8 +14,8 @@ export class PrismaService extends PrismaClient {
         });
     }
 
-    async createUser(data : any) {
-        return await this.user.create({data});
+    async createUser(userData : any) {
+        return await this.user.create({data : userData});
     }
 
     async updateUserData(whichUser : any, whichData : any) {

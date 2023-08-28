@@ -20,5 +20,6 @@ export class UserController {
 			username : user.username,
 			profileImage : user.profileImage,
 		});
+
 	}
 }
