@@ -5,8 +5,9 @@ import activate2FA from "../utils/2faActivation";
 
 interface UserProfile {
 	username : string;
-	given_name : string;
-	last_name : string;
+	name : string;
+	lastName : string;
+	profileImage : string;
 }
 
 function Profile() {
@@ -21,8 +22,9 @@ function Profile() {
 		userProfile ?
 		<div id='profile-block'>
 			<div id='user-infos'>
-				<h2>Name : {userProfile.given_name}</h2>
-				<h2>Last name : {userProfile.last_name}</h2>
+				<img src={userProfile.profileImage} id="profileImage"/>
+				<h2>Name : {userProfile.name}</h2>
+				<h2>Last name : {userProfile.lastName}</h2>
 				<h2>Username : {userProfile.username}</h2>
 			</div>
 			<button onClick={() => logout()}>Logout</button>

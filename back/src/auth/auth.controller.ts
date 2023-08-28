@@ -24,11 +24,13 @@ export class AuthController {
 	@Get('signin')
 	@UseGuards(FtGuard)
 	async generateTokens(@Req() req : any, @Res() response : Response) {
-		const userProfile = req.user;
+		const allInfos = req.user;
+		const {name, lastName, username} = req.user;
+		const userProfile = {name, lastName, username};
 
 		if (!userProfile)
 			throw new UnauthorizedException();
-		const dbUser = await this.authService.createUserIfNotFound(userProfile);
+		const dbUser = await this.authService.createUserIfNotFound(allInfos);
 
 		if (!dbUser.isTwoFaEnabled)
 		{
@@ -36,7 +38,6 @@ export class AuthController {
 			response.redirect('http://localhost:5173/profile');
 			return ;
 		}
-
 		// Check if the userProfile is registered (for the front-end to check if it should display the qrCode)
 		const authToken = await this.authService.generateAuthToken(userProfile);
 		this.authService.initCookie('tr_auth_token', authToken, {maxAge : 5 * 60 * 1000, sameSite : 'none', secure : true, httpOnly : true}, response);

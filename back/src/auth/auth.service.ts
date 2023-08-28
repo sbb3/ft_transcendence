@@ -60,7 +60,6 @@ export class AuthService {
 	
 		let dbUser = await this.prismaService.findUser(user);
 
-		// To consider : Generate the secret when the user activates the 2fa
 		if (!dbUser)
 			dbUser = await this.prismaService.createUser(user);
 		return dbUser;
@@ -78,18 +77,15 @@ export class AuthService {
 		return this.jwtService.decode(token);
 	}
 
-
 	verifyTwoFaCode(code : string | undefined, secret : string) {
 		return authenticator.verify( {token : code, secret : secret} );
 	}
 
 	removeCookie(@Res() response : any, cookieName : string, params : any) {
-
 		response.cookie(cookieName, '', params);
 	}
 
 	generateTwoFaSecret() : string {
 		return authenticator.generateSecret();
 	}
-
 }
