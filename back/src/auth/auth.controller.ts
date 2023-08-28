@@ -115,14 +115,27 @@ export class AuthController {
 	// Should not forget the jwt guard
 	@Put('twoFactorAuthStatus')
 	@UseGuards(JwtGuard)
-	async enableTwoFA(@Req() request : any, @Body('isTwoFaEnabled') value : any) {
+	async enableTwoFA(@Req() request : any, @Body('isTwoFaEnabled') value : any, @Res() response : any) {
 		const {name, lastName, username} = request.user;
 
 		if (typeof value !== 'boolean')
 			throw new BadRequestException();
-		console.log(await this.authService.updateUserData({name, lastName, username}, {isTwoFaEnabled : value}));
-		// Maybe redirect here after a user enables two factor authentication
-		return ;
+
+		const twoFaSecret = value ? this.authService.generateTwoFaSecret() : null;
+		const user = await this.authService.updateUserData({name, lastName, username}, {
+			isTwoFaEnabled : value,
+			authSecret : twoFaSecret,
+		});
+
+		if (!user)
+			return response.sendStatus(404);
+		if (value)
+		{
+			this.authService.removeCookie(response, 'tr_access_token', {expires: new Date(0), sameSite : 'none', secure : true});
+			this.authService.removeCookie(response, 'tr_refresh_token', {expires: new Date(0), sameSite : 'none', secure : true});
+			return response.sendStatus(200);
+		}
+		return response.sendStatus(200);
 	}
 	// Not to forget the blacklist tokens functionnality for security purposes
 }

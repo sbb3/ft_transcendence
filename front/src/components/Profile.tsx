@@ -27,8 +27,11 @@ function Profile() {
 			</div>
 			<button onClick={() => logout()}>Logout</button>
 			<button onClick={() => {
-				activate2FA();
-			}} style={{marginTop : '10px'}}>Active 2 fa</button>
+				activate2FA(true);
+			}} style={{marginTop : '10px'}}>Activate 2fa</button>
+			<button style={{marginTop : '10px'}} onClick={() => {
+				activate2FA(false);
+			}}>Deactivate 2fa</button>
 		</div>
 		: <h1>Still waiting for data</h1>
 	);

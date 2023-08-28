@@ -1,6 +1,6 @@
 import { getAccessToken, isExpired } from "./cookies";
 
-function activate2FA() {
+function activate2FA(activate : boolean) {
 
     // There is a repetition here, to change later (Test purposes)
     // To automate the fetching requests with the access_tokens + refresh token fetch
@@ -34,14 +34,18 @@ function activate2FA() {
                         'Content-Type' : 'application/json',
                         'Authorization' : 'Bearer ' + data.access_token,
                     },
-                    body : JSON.stringify({isTwoFaEnabled : true}),
+                    body : JSON.stringify({isTwoFaEnabled : activate}),
                 });
 
                 respData
-                    .then(resp => console.log(resp));
+                    .then(resp => {
+                        if (resp.status != 200)
+                            window.location.replace('http://localhost:5173/');
+                        window.location.replace('http://localhost:5173/profile');
+                    });
             });
     }
-
+    
     const respData = fetch('http://localhost:3000/auth/twoFactorAuthStatus', {
         method : 'PUT',
         credentials : 'include',
@@ -49,11 +53,15 @@ function activate2FA() {
             'Content-Type' : 'application/json',
 			'Authorization' : 'Bearer ' + (token),
         },
-        body : JSON.stringify({isTwoFaEnabled : false}),
+        body : JSON.stringify({isTwoFaEnabled : activate}),
     });
 
     respData
-        .then(resp => console.log(resp));
+        .then(resp => {
+            if (resp.status != 200)
+                window.location.replace('http://localhost:5173/');
+            window.location.replace('http://localhost:5173/profile');
+        });
 }
 
 export default activate2FA;

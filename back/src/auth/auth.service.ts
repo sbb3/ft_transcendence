@@ -11,9 +11,7 @@ export class AuthService {
 	constructor(
 		private jwtService : JwtService,
 		private prismaService : PrismaService,
-		) {
-
-	}
+		) { }
 
 	async generateAccessToken(payload : any) {
 		return await this.jwtService.signAsync(payload, {expiresIn : '30m', secret : jwtConstants.atSecret});
@@ -52,6 +50,26 @@ export class AuthService {
 		}
 	}
 
+	async generateQrCode(secret : string, account_name : string) : Promise<string> {
+		const otpURL = authenticator.keyuri(account_name, "Ft_Transcendence", secret);
+		
+		return await toDataURL(otpURL);
+	}
+
+	async createUserIfNotFound(user : any) : Promise<any> {
+	
+		let dbUser = await this.prismaService.findUser(user);
+
+		// To consider : Generate the secret when the user activates the 2fa
+		if (!dbUser)
+			dbUser = await this.prismaService.createUser(user);
+		return dbUser;
+	}
+
+	async updateUserData(whichUser : any, toUpdate : any) {
+		return await this.prismaService.updateUserData(whichUser, toUpdate);
+	}
+
 	initCookie(key : string, value : string, parameters : any, @Response() resp : any) {
 		resp.cookie(key, value, parameters);
 	}
@@ -60,11 +78,6 @@ export class AuthService {
 		return this.jwtService.decode(token);
 	}
 
-	async generateQrCode(secret : string, account_name : string) : Promise<string> {
-		const otpURL = authenticator.keyuri(account_name, "Ft_Transcendence", secret);
-		
-		return await toDataURL(otpURL);
-	}
 
 	verifyTwoFaCode(code : string | undefined, secret : string) {
 		return authenticator.verify( {token : code, secret : secret} );
@@ -75,20 +88,8 @@ export class AuthService {
 		response.cookie(cookieName, '', params);
 	}
 
-	async createUserIfNotFound(user : any) : Promise<any> {
-	
-		let dbUser = await this.prismaService.findUser(user);
-
-		// To consider : Generate the secret when the user activates the 2fa
-		if (!dbUser)
-		{
-			user.authSecret = authenticator.generateSecret();
-			dbUser = await this.prismaService.createUser(user);
-		}
-		return dbUser;
+	generateTwoFaSecret() : string {
+		return authenticator.generateSecret();
 	}
 
-	async updateUserData(whichUser : any, toUpdate : any) {
-		return await this.prismaService.updateUserData(whichUser, toUpdate);
-	}
 }
