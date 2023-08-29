@@ -83,3 +83,12 @@ button:hover
 {
 	margin: 10px;
 }
+
+#auth-block
+{
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	gap: 13px;
+	align-items: center;
+}

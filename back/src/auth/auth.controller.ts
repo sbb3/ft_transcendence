@@ -6,6 +6,7 @@ import { Request, Response } from 'express';
 import { jwtConstants } from './auth.constants';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { JwtGuard } from './guards/ft.guard';
+import { GoogleGuard } from './guards/google.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -15,8 +16,37 @@ export class AuthController {
 			private prismaService : PrismaService
 		) { }
 
-	@UseGuards(FtGuard)
+	@Get('google/oauth2')
+	@UseGuards(GoogleGuard)
+	initGoogleAuth() {
+
+	}
+
+	@Get('google/signin')
+	@UseGuards(GoogleGuard)
+	async googleSignIn(@Req() req : any, @Res() response : Response) {
+		const allInfos = req.user;
+		const {name, lastName, username} = req.user;
+		const userProfile = {name, lastName, username};
+
+		if (!userProfile)
+			throw new UnauthorizedException();
+		const dbUser = await this.authService.createUserIfNotFound(allInfos);
+
+		if (!dbUser.isTwoFaEnabled)
+		{
+			await this.authService.initCookies(userProfile, userProfile, response);
+			response.redirect('http://localhost:5173/profile');
+			return ;
+		}
+		// Check if the userProfile is registered (for the front-end to check if it should display the qrCode)
+		const authToken = await this.authService.generateAuthToken(userProfile);
+		this.authService.initCookie('tr_auth_token', authToken, {maxAge : 5 * 60 * 1000, sameSite : 'none', secure : true, httpOnly : true}, response);
+		return response.redirect('http://localhost:5173/2fa');
+	}
+
 	@Get('42/oauth2')
+	@UseGuards(FtGuard)
 	initOauth() {
 
 	}
