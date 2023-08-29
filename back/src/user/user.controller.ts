@@ -11,12 +11,11 @@ export class UserController {
 	@Get('profile')
 	async getProfile(@Req() request : any) {
 
-		const {name, lastName, username} = request.user;
-		const user : any = await this.prismaService.findUser({name, lastName, username});
+		const {name, username} = request.user;
+		const user : any = await this.prismaService.findUser({name, username});
 
 		return ({
 			name : user.name,
-			lastName : user.lastName,
 			username : user.username,
 			profileImage : user.profileImage,
 		});

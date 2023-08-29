@@ -21,7 +21,7 @@ function TwoFactorAuth() {
 
 			<label htmlFor="verification-code">Verification code</label>
 			<input type="text" id="verification-code" onChange={(e) => setCode(e.target.value)}/>
-			<button onClick={() => sendVerificationCode(code)}>Submit</button>
+			<button style={{marginTop : "10px"}}onClick={() => sendVerificationCode(code)}>Submit</button>
 		</div>
 	);
 }

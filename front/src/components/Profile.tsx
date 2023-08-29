@@ -6,7 +6,6 @@ import updateTwoFactorAuth from "../utils/updateTwoFactorAuth";
 interface UserProfile {
 	username : string;
 	name : string;
-	lastName : string;
 	profileImage : string;
 }
 
@@ -24,7 +23,6 @@ function Profile() {
 			<div id='user-infos'>
 				<img src={userProfile.profileImage} id="profileImage"/>
 				<h2>Name : {userProfile.name}</h2>
-				<h2>Last name : {userProfile.lastName}</h2>
 				<h2>Username : {userProfile.username}</h2>
 			</div>
 			<button onClick={() => logout()}>Logout</button>

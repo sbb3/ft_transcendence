@@ -26,8 +26,8 @@ export class AuthController {
 	@UseGuards(GoogleGuard)
 	async googleSignIn(@Req() req : any, @Res() response : Response) {
 		const allInfos = req.user;
-		const {name, lastName, username} = req.user;
-		const userProfile = {name, lastName, username};
+		const {name, username} = req.user;
+		const userProfile = {name, username};
 
 		if (!userProfile)
 			throw new UnauthorizedException();
@@ -55,8 +55,8 @@ export class AuthController {
 	@UseGuards(FtGuard)
 	async generateTokens(@Req() req : any, @Res() response : Response) {
 		const allInfos = req.user;
-		const {name, lastName, username} = req.user;
-		const userProfile = {name, lastName, username};
+		const {name, username} = req.user;
+		const userProfile = {name, username};
 
 		if (!userProfile)
 			throw new UnauthorizedException();
@@ -83,8 +83,8 @@ export class AuthController {
 			throw new UnauthorizedException();
 	
 		const payload = this.authService.decodeToken(authToken);
-		const {username, lastName, name} =  payload;
-		const user = await this.prismaService.findUser({username, lastName, name});
+		const {username, name} =  payload;
+		const user = await this.prismaService.findUser({username, name});
 
 		return {qrCode : await this.authService.generateQrCode(user.authSecret, "Ft_" + user.username)};
 	}
@@ -99,8 +99,8 @@ export class AuthController {
 			throw new UnauthorizedException();
 
 		const payload = this.authService.decodeToken(authToken);
-		const {username, lastName, name} = payload;
-		const user = await this.prismaService.findUser({username, lastName, name});
+		const {username, name} = payload;
+		const user = await this.prismaService.findUser({username, name});
 
 		if (!user)
 			throw new UnauthorizedException();
@@ -110,7 +110,7 @@ export class AuthController {
 			throw new UnauthorizedException();
 
 		this.authService.removeCookie(response, 'tr_auth_token', {expires: new Date(0), sameSite : 'none', secure : true});
-		await this.authService.initCookies({username, lastName, name}, {username, lastName, name}, response);
+		await this.authService.initCookies({username, name}, {username, name}, response);
 		return response.sendStatus(201);
 	}
 
@@ -125,8 +125,8 @@ export class AuthController {
 			throw new UnauthorizedException();
 
 		const payload = this.authService.decodeToken(refreshToken);
-		const {username, lastName, name} = payload;
-		const newAccessToken = await this.authService.generateAccessToken({username, lastName, name});
+		const {username, name} = payload;
+		const newAccessToken = await this.authService.generateAccessToken({username, name});
 
 		this.authService.initCookie('tr_access_token', newAccessToken, {maxAge :  15 * 60 * 1000, sameSite : 'none', secure : true}, res);
 
@@ -148,13 +148,13 @@ export class AuthController {
 	@Put('twoFactorAuthStatus')
 	@UseGuards(JwtGuard)
 	async enableTwoFA(@Req() request : any, @Body('isTwoFaEnabled') value : any, @Res() response : any) {
-		const {name, lastName, username} = request.user;
+		const {name, username} = request.user;
 
 		if (typeof value !== 'boolean')
 			throw new BadRequestException();
 
 		const twoFaSecret = value ? this.authService.generateTwoFaSecret() : null;
-		const user = await this.authService.updateUserData({name, lastName, username}, {
+		const user = await this.authService.updateUserData({name, username}, {
 			isTwoFaEnabled : value,
 			authSecret : twoFaSecret,
 		});

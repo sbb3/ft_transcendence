@@ -16,7 +16,6 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
 	async validate(access_token : string, refresh_token : string, profile : Profile) {
 		return { 
 			name : profile._json.given_name,
-			lastName : profile._json.family_name,
 			profileImage : profile._json.picture,
 			username : profile._json.email.split('@')[0],
 		 };

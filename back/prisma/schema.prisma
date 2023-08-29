@@ -13,10 +13,10 @@ datasource db {
 model user {
 	id				Int @id @default(autoincrement())
 	name			String
-	lastName		String
 	username		String @unique
 	authSecret		String?
-	profileImage	String?
+	lastName		String?
+	profileImage	String
 	isTwoFaEnabled	Boolean @default(false)
 	isFaRegistered	Boolean @default(false)
 	createdAt		DateTime @default(now())
