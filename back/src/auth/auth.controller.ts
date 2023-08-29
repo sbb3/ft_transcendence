@@ -104,6 +104,7 @@ export class AuthController {
 	}
 
 	@Delete('logout')
+	@UseGuards(JwtGuard)
 	logout(@Req() request : Request, @Res() response : Response) {
 
 		if (!request.cookies['tr_access_token'] && !request.cookies['tr_refresh_token'])

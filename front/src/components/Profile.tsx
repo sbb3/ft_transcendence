@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
-import GetAndSetData from "../utils/getDataFromDatabase";
+import getData from "../utils/getData";
 import logout from "../utils/logout";
-import sendTokenAndFetch from "../utils/generic";
-import updateTwoFactorAuth from "../utils/2faActivation";
+import updateTwoFactorAuth from "../utils/updateTwoFactorAuth";
 
 interface UserProfile {
 	username : string;
@@ -16,7 +15,7 @@ function Profile() {
 	const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
 
 	useEffect(() => {
-		sendTokenAndFetch(GetAndSetData(setUserProfile, "http://localhost:3000/user/profile"));
+		getData(setUserProfile, "http://localhost:3000/user/profile");
 	}, []);
 
 	return (
@@ -30,10 +29,10 @@ function Profile() {
 			</div>
 			<button onClick={() => logout()}>Logout</button>
 			<button onClick={() => {
-				sendTokenAndFetch(updateTwoFactorAuth(true, 'http://localhost:3000/auth/twoFactorAuthStatus'));
+				updateTwoFactorAuth(true);
 			}} style={{marginTop : '10px'}}>Activate 2fa</button>
 			<button style={{marginTop : '10px'}} onClick={() => {
-				sendTokenAndFetch(updateTwoFactorAuth(false, 'http://localhost:3000/auth/twoFactorAuthStatus'));
+				updateTwoFactorAuth(false);
 			}}>Deactivate 2fa</button>
 		</div>
 		: <h1>Still waiting for data</h1>

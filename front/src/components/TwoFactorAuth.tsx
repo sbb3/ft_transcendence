@@ -1,24 +1,7 @@
 import { useEffect, useState } from "react";
-import fetchQrCode from "../utils/qrCode";
+import getQrCode from "../utils/getQrCode";
+import sendVerificationCode from "../utils/sendVerificationCode";
 
-function sendCode(code : string | undefined) {
-	const responseData = fetch('http://localhost:3000/auth/2fa/verification', {
-		method : 'POST',
-		credentials : 'include',
-		headers : {
-			'Content-Type' : 'application/x-www-form-urlencoded',
-		},
-		body : 'verificationCode=' + code,
-	});
-
-	responseData
-		.then(resp => {
-			if (resp.status != 201)
-				window.location.replace('http://localhost:5173/');
-			else
-				window.location.replace('http://localhost:5173/profile');
-		})
-}
 
 function TwoFactorAuth() {
 
@@ -26,7 +9,7 @@ function TwoFactorAuth() {
 	const [code, setCode] = useState<string>("");
 
 	useEffect(() => {
-		fetchQrCode(setQr);
+		getQrCode(setQr);
 	});
 
 	return (
@@ -38,9 +21,8 @@ function TwoFactorAuth() {
 
 			<label htmlFor="verification-code">Verification code</label>
 			<input type="text" id="verification-code" onChange={(e) => setCode(e.target.value)}/>
-			<button onClick={() => sendCode(code)}>Submit</button>
+			<button onClick={() => sendVerificationCode(code)}>Submit</button>
 		</div>
-
 	);
 }
 

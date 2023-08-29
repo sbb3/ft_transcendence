@@ -1,7 +1,5 @@
+function getQrCode(stateSetter : Function) {
 
-
-
-function fetchQrCode(stateSetter : any) {
 	let data = fetch('http://localhost:3000/auth/2fa', {
 			credentials : 'include',
 		});
@@ -17,4 +15,4 @@ function fetchQrCode(stateSetter : any) {
 			});
 }
 
-export default fetchQrCode;
+export default getQrCode;
