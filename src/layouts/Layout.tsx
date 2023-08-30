@@ -3,9 +3,6 @@ import { Box, Flex } from "@chakra-ui/react";
 import Header from "./Header";
 import Sidebar from "src/components/Sidebar";
 
-import Header from './layouts/Header.tsx';
-
-
 const Layout = () => {
 	return (
 		<Box // outter-container - outter box

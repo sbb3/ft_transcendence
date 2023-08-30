@@ -1,45 +1,42 @@
-import './App.css'
 import { Routes, Route } from "react-router-dom";
 import Layout from './layouts/Layout.tsx';
-import Overview from './pages/Overview.tsx';
-import NotFoundPage from './pages/NotFoundPage.tsx';
-import Game from './pages/Game.tsx';
-import Chat from './pages/Chat.tsx';
-import Support from './pages/Support';
-import Settings from './pages/Settings';
-import Watch from './pages/Watch';
-import Login from './pages/Login';
 import AuthVerification from './features/auth/AuthVerification';
-// import { FileUploader } from "react-drag-drop-files";
+import StayLoggedIn from "./features/auth/StayLoggedIn.tsx";
+import { Overview, Settings, Game, Chat, Watch, Support, Login, NotFoundPage } from "./pages";
 
 function App() {
 	return (
 		<Routes>
-			<Route path="/login" element={<Login />} />
+			<Route path="/login" element={<StayLoggedIn />} >
+				<Route index element={<Login />} />
+			</Route>
 			<Route element={<AuthVerification />} >
 				{/* <Route element={<PrefetchUsers />} > */}
 				<Route path="/" element={<Layout />} >
 					<Route index element={<Overview />} />
 					<Route path="settings" element={<Settings />} />
-					<Route path="game" element={<Game />} />
+					<Route path="play" element={<Game />} />
 					<Route path="chat" element={<Chat />} />
 					<Route path="watch" element={<Watch />} />
 					<Route path="support" element={<Support />} />
 				</Route>
-				<Route path="*" element={<NotFoundPage />} />
 			</Route>
+			<Route path="*" element={<NotFoundPage />} />
 		</Routes>
 	)
 }
 
 export default App
 
+// TODO: set layout
+// TODO: set up theme
+// TODO: set up global styles
 // TODO: set up index routes and nested routes for chat, game, watch, settings
+// TODO: set up 2FA
+// TODO: set up expressjs server
 // TODO: set up login page AND navigate to overview page after login, and navigate to login page after logout
 // TODO: set up hooks for login and logout
 // TODO: create components for each page
-// TODO: set up theme
-// TODO: set up global styles
 // TODO: protect routes,
 // TODO: set up auth verification
 // TODO: set providesTags for query endpoints

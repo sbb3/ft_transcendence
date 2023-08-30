@@ -9,7 +9,7 @@ export default defineConfig({
       src: "/src",
     },
   },
-  server: {
-	host: true, // default host is localhost, set to true to allow all connections (http://lopez.5173)
-	},
+  // server: {
+	// // host: true,
+	// },
 })

@@ -14,8 +14,10 @@ const baseQuery = fetchBaseQuery({
 });
 
 // TODO: change query status code in the baseQuery
+// sending expired or invalid access token, we get new one using refresh token if this latter is not expired too
 const baseQueryJWTverify = async (args: any, api: any, extraOptions: any) => {
 	const originalQuery = await baseQuery(args, api, extraOptions);
+	console.log(`originalQuery?.error?.status: ${originalQuery?.error?.status}`);
 	if (originalQuery?.error?.status === 403) { //  access token  expired.  we get new access token using the refresh token.
 		const retryQueryWithRefreshToken = await baseQuery('/auth/refresh', api, extraOptions)
 		if (retryQueryWithRefreshToken?.data) { // success to get new access token, we retry the original request, but with the new access token.

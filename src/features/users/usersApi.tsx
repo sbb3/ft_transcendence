@@ -15,10 +15,10 @@ const usersApi = apiSlice.injectEndpoints({
             query: (email: string) => `users/${email}`,
         }),
         updateUser: builder.mutation({
-            query: ({ id, ...patch }) => ({
+            query: ({ id, data }: {id: number, data: any}) => ({
                 url: `users/${id}`,
                 method: "PATCH",
-                body: patch,
+                body: { ...data },
             }),
         }),
     }),

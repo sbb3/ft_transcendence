@@ -17,6 +17,7 @@ import { useToast } from "@chakra-ui/react";
 import { useLottie } from "lottie-react";
 import animationData from '/src/assets/animations/btnSend.json';
 import { Link as RouterLink } from "react-router-dom";
+import useTitle from "src/hooks/useTitle";
 
 interface FormData {
     name: string;
@@ -25,7 +26,7 @@ interface FormData {
 }
 
 function Support() {
-
+    useTitle("Support");
     const style = {
         width: '200px',
         color: 'purple',

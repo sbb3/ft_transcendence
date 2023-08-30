@@ -1,10 +1,10 @@
 import { apiSlice } from "../../app/api/apiSlice";
-import { setCredentials, logOut } from "/src/redux/slices/authSlice";
+import { setCredentials } from "./authSlice";
 
 const authApiEndpoints = apiSlice.injectEndpoints({
 	endpoints: (builder) => ({
 		sendLogIn: builder.mutation({
-			query: (credentials) => ({
+			query: (credentials: any) => ({
 				url: "/auth/login",
 				method: "POST",
 				body: { ...credentials },
@@ -16,11 +16,23 @@ const authApiEndpoints = apiSlice.injectEndpoints({
 				method: "POST",
 			}),
 		}),
-		getNewAccessToken: builder.query({
+		getNewAccessToken: builder.mutation({
 			query: () => ({
 				url: "/auth/refresh",
 				method: "GET",
 			}),
+			async onQueryStarted(_, { dispatch, queryFulfilled }) {
+				try {
+					const {data: {newAccessToken: accessToken}}: any = await queryFulfilled;
+					// const accessToken = data?.data?.newAccessToken;
+					// console.log(`newAccessToken: ${accessToken}`);
+					dispatch(setCredentials({ accessToken }));
+
+				} catch (err: any) {
+					console.log(`err: `, err);
+					return ;
+				}
+			}
 		}),
 	}),
 });
@@ -28,5 +40,5 @@ const authApiEndpoints = apiSlice.injectEndpoints({
 export const {
 	useSendLogInMutation,
 	useSendLogOutMutation,
-	useGetNewAccessTokenQuery,
+	useGetNewAccessTokenMutation,
 } = authApiEndpoints;

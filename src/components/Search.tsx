@@ -34,7 +34,7 @@ const Search = () => {
 	};
 
 	useEffect(() => {
-		fetchOptions();
+		// fetchOptions();
 	}
 		, []);
 	return (

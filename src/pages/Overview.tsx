@@ -1,11 +1,20 @@
+import { Button } from "@chakra-ui/react";
+import { useNavigate } from "react-router-dom";
 import useTitle from "src/hooks/useTitle";
-import Profile from './components/Profile.tsx';
 
 function Overview() {
-	useTitle("Ping Pong Dashboard");
+	useTitle("Overview");
+	const navigate = useNavigate();
 	return (
 		<div>
-			<h1>Dashboard</h1>
+			<h1>Overview</h1>
+			<Button colorScheme="purple" variant="solid" size="lg"
+				onClick={() => {
+					navigate("/settings");
+				}}
+			>
+				Settings
+			</Button>
 		</div>
 	);
 }
