@@ -28,7 +28,8 @@ function App() {
 
 export default App
 
-// TODO: set layout
+// TODO: set layout, bg, 
+// TODO: set the Button component customizations in theme.ts
 // TODO: set up theme
 // TODO: set up global styles
 // TODO: set up index routes and nested routes for chat, game, watch, settings
@@ -49,3 +50,4 @@ export default App
 // TODO: Solution1: usePrefetch onclick or onhover on the searchbar, `https://redux-toolkit.js.org/rtk-query/usage/prefetching` with force: true, Problem: when a new user login, I should now if he already in the db or not, so I could invalidate the getUsers cache and refetch it, for ex: in the search bar, when I search for a user, I should get the new user in the search result.
 // TODO: Solution2: fetch on scroll down,
 // TODO: Solution3: refetchOnMountOrArgChange and refetchOnFocus
+// TODO: color spinner 

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import useTitle from "src/hooks/useTitle";
 
 function Overview() {
-	useTitle("Overview");
+	useTitle("Ping Pong");
 	const navigate = useNavigate();
 	return (
 		<div>

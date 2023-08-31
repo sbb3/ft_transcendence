@@ -6,24 +6,26 @@ import Sidebar from "src/components/Sidebar";
 const Layout = () => {
 	return (
 		<Box // outter-container - outter box
+			pos="relative"
 			minW="100vw"
-			bg="#F5F5F5" // set colors in theme.ts
-			color="#2B373A"
+			minH="100vh"
+			bg="pong_bg_primary"
 			boxSizing="border-box"
 			m={0}
-			mb={6}
-			pos="relative"
 		>
 			<Flex // inner-container - inner box
-				mx="auto"
+				pos="relative"
+				justify="center"
+				align="center"
 				maxW={{ base: "full", md: 748, lg: 972, xl: 1260 }} // full of its parent Box, sm of its parent width, md of 708px, lg of 964px and so
-				// !! TODO: set maxH 
+				maxH={{ base: "full", md: 748, lg: 972, xl: 1260 }}
 				bg="red"
+				color={'whiteAlpha.900'}
 			>
 				<Flex
 					w="60px"
 					h="100vh"
-					bg="red"
+					bg="orange"
 				>
 					<Sidebar />
 				</Flex>
@@ -34,7 +36,7 @@ const Layout = () => {
 					<Header />
 					<Flex
 						flex={1}
-						bg="green"
+						bg="black"
 					>
 						<Outlet />
 					</Flex>
@@ -46,5 +48,5 @@ const Layout = () => {
 
 export default Layout;
 
-// ! TODO search and notification and sidebar
-// ! TODO set colors in theme.ts
+// TODO: search and notification and sidebar
+// TODO: set colors in theme.ts

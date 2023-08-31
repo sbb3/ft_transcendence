@@ -7,7 +7,7 @@ function Loader() {
                 thickness="4px"
                 speed="0.65s"
                 emptyColor="gray.200"
-                color="purple.500"
+                color="pong_cl_primary"
                 size="xl"
             />
         </HStack>
