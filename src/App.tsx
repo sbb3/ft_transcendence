@@ -1,18 +1,33 @@
 import { Routes, Route } from "react-router-dom";
-import Layout from './layouts/Layout.tsx';
-import AuthVerification from './features/auth/AuthVerification';
+import DashboardLayout from "./layouts/DashboardLayout.tsx";
+import AuthVerification from "./features/auth/AuthVerification";
 import StayLoggedIn from "./features/auth/StayLoggedIn.tsx";
-import { Overview, Settings, Game, Chat, Watch, Support, Login, NotFoundPage } from "./pages";
+import {
+  Overview,
+  Settings,
+  Game,
+  Chat,
+  Watch,
+  Support,
+  Login,
+  NotFoundPage,
+} from "./pages";
+import Background from "./Background.tsx";
+import { Flex } from "@chakra-ui/layout";
+import Layout from "./layouts/Layout.tsx";
 
 function App() {
-	return (
-		<Routes>
-			<Route path="/login" element={<StayLoggedIn />} >
+  return (
+      <Routes>
+		<Route path="/" element={<Layout />} >
+
+        {/* <Route path="/bg" element={<Background />} /> */}
+        {/* {/* <Route path="/login" element={<StayLoggedIn />} > */}
 				<Route index element={<Login />} />
-			</Route>
+				{/* <Route path="/login" element={<Login />} /> */}
+			{/* </Route>
 			<Route element={<AuthVerification />} >
-				{/* <Route element={<PrefetchUsers />} > */}
-				<Route path="/" element={<Layout />} >
+				<Route path="/" element={<DashboardLayout />} >
 					<Route index element={<Overview />} />
 					<Route path="settings" element={<Settings />} />
 					<Route path="play" element={<Game />} />
@@ -20,15 +35,21 @@ function App() {
 					<Route path="watch" element={<Watch />} />
 					<Route path="support" element={<Support />} />
 				</Route>
-			</Route>
-			<Route path="*" element={<NotFoundPage />} />
-		</Routes>
-	)
+			</Route> */}
+			
+		
+		</Route>
+	    {/* <Route path="*" element={<NotFoundPage />} /> */}
+      </Routes>
+  );
+}
+{
+  /* <Route element={<PrefetchUsers />} > */
 }
 
-export default App
+export default App;
 
-// TODO: set layout, bg, 
+// TODO: set layout, bg, login
 // TODO: set the Button component customizations in theme.ts
 // TODO: set up theme
 // TODO: set up global styles
@@ -50,4 +71,4 @@ export default App
 // TODO: Solution1: usePrefetch onclick or onhover on the searchbar, `https://redux-toolkit.js.org/rtk-query/usage/prefetching` with force: true, Problem: when a new user login, I should now if he already in the db or not, so I could invalidate the getUsers cache and refetch it, for ex: in the search bar, when I search for a user, I should get the new user in the search result.
 // TODO: Solution2: fetch on scroll down,
 // TODO: Solution3: refetchOnMountOrArgChange and refetchOnFocus
-// TODO: color spinner 
+// TODO: color spinner

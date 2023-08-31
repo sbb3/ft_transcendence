@@ -10,13 +10,13 @@ const Settings = () => {
     return (
         <div>
             Settings
-            <Button colorScheme="purple" variant="solid" size="lg"
+            {/* <Button colorScheme="purple" variant="solid" size="lg"
 				onClick={() => {
 					navigate(-1);
 				}}
 			>
 				go back to previous page
-			</Button>
+			</Button> */}
         </div>
     );
 };

@@ -8,13 +8,13 @@ function Overview() {
 	return (
 		<div>
 			<h1>Overview</h1>
-			<Button colorScheme="purple" variant="solid" size="lg"
+			{/* <Button colorScheme="purple" variant="solid" size="lg"
 				onClick={() => {
 					navigate("/settings");
 				}}
 			>
 				Settings
-			</Button>
+			</Button> */}
 		</div>
 	);
 }
