@@ -6,6 +6,10 @@ import { useSendLogInMutation } from "src/features/auth/authApi";
 import { useDispatch } from "react-redux";
 import { setCredentials } from "src/features/auth/authSlice";
 
+import { motion } from "framer-motion";
+
+const MotionFlex = motion(Flex);
+
 const Login = () => {
   // const isAuthenticated = useAuth();
   // const navigate = useNavigate();
@@ -41,20 +45,23 @@ const Login = () => {
   // // TODO: set iSLoading and isSucess and isError
 
   return (
-    <Flex // inner-container - inner box
+    <MotionFlex // inner-container - inner box
       pos="relative"
       justify="center"
       align="center"
       w={{ base: "full", md: 750, lg: 972, xl: 1260 }} // full of its parent Box, sm of its parent width, md of 708px, lg of 964px and so
       minH={{ base: 750}}  // todo: scroll bar
-      bg="green"
+      bg="pong_bg_primary"
       color={"whiteAlpha.900"}
       backgroundImage="url('src/assets/img/bgp.png')"
         backgroundPosition="center"
         backgroundSize="contain"
         // backgroundSize="cover" 
         backgroundRepeat="no-repeat"
-        opacity={0.9}
+        // opacity={0.8}
+        backgroundBlendMode={"lighten"}
+        //  animate={{ rotate: 360 }}
+        //     transition={{ ease: "linear", duration: 2, repeat: Infinity } as any}
         >
       {/* <HStack spacing="24px" justify="center" align="center" w="100%" h="100vh">
         <Text fontSize="3xl" fontWeight="bold" color="purple.500"> */}
@@ -83,7 +90,7 @@ const Login = () => {
           </Box> */}
         {/* </Text>
       </HStack> */}
-    </Flex>
+    </MotionFlex>
   );
 };
 
