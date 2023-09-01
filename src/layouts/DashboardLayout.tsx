@@ -6,10 +6,9 @@ import { useEffect, useState } from "react";
 import DetailsFormModal from "src/components/DetailsFormModal";
 
 const DashboardLayout = () => {
-// const { alreadyUser } = useSelector((state: any) => state.user);
+  // const { alreadyUser } = useSelector((state: any) => state.user);
 
-const shouldOpenDetailsModal = true;
-
+  const [shouldOpenDetailsModal, setShouldOpenDetailsModal] = useState(false);
 
   return (
     <Box // outter-container - outter box
@@ -35,7 +34,11 @@ const shouldOpenDetailsModal = true;
         <Flex flex={1} direction={"column"}>
           <Header />
           <Flex flex={1} bg="black">
-            {shouldOpenDetailsModal ? <DetailsFormModal /> : <Outlet />}
+            {shouldOpenDetailsModal ? (
+              <DetailsFormModal closeModal={setShouldOpenDetailsModal} />
+            ) : (
+              <Outlet />
+            )}
           </Flex>
         </Flex>
       </Flex>

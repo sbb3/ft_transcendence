@@ -17,50 +17,53 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import { useForm, UseFormRegisterReturn } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
 import { useToast } from "@chakra-ui/react";
 import { ReactNode, useEffect, useRef } from "react";
 
 import { Icon, InputGroup } from "@chakra-ui/react";
 import { FiFile } from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
 
 interface FormData {
   username: string;
   avatar: FileList;
 }
 
-type FileUploadProps = {
-  register: UseFormRegisterReturn;
-  accept?: string;
-  children?: ReactNode;
-};
+// const validationSchema = yup.object().shape({
+//   username: yup.string().required("Username is required").min(3).max(20).trim(),
+//   avatar: yup.mixed().required("Avatar is required").
+// });
 
-const FileUpload = (props: FileUploadProps) => {
-  const { register, accept, children } = props;
-  const inputRef = useRef<HTMLInputElement | null>(null);
-  const { ref, ...rest } = register as {
-    ref: (instance: HTMLInputElement | null) => void;
-  };
+const validationSchema = yup.object().shape({
+  username: yup
+    .string()
+    .required("Username is required")
+    .min(3, "Minimum length should be 3")
+    .max(20, "Maximum length should be 20")
+    .trim(),
+  avatar: yup
+    .mixed()
+    .required("Avatar is required")
+    // .test("fileRequired", "File is required", (value) => {
+    //   return value && value[0]?.length > 0;
+    // })
+    .test("fileSize", "Come on dude! Max file size is 5mb!", (value) => {
+      return value && value[0]?.size <= 2000000;
+    })
+    .test("fileFormat", "Only jpg, jpeg, png are accepted", (value) => {
+      return (
+        value &&
+        (value[0]?.type === "image/jpg" ||
+          value[0]?.type === "image/jpeg" ||
+          value[0]?.type === "image/png")
+      );
+    }),
+});
 
-  const handleClick = () => inputRef.current?.click();
-
-  return (
-    <InputGroup onClick={handleClick}>
-      <Input
-        type={"file"}
-        hidden
-        accept={accept}
-        {...rest}
-        ref={(e) => {
-          ref(e);
-          inputRef.current = e;
-        }}
-      />
-      <>{children}</>
-    </InputGroup>
-  );
-};
-
-const DetailsFormModal = () => {
+const DetailsFormModal = ({ closeModal }) => {
+  const navigate = useNavigate();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
   const {
@@ -68,7 +71,9 @@ const DetailsFormModal = () => {
     handleSubmit,
     formState: { errors, isSubmitting },
     reset,
-  } = useForm<FormData>();
+  } = useForm({
+    resolver: yupResolver(validationSchema),
+  });
 
   useEffect(() => {
     onOpen();
@@ -83,20 +88,14 @@ const DetailsFormModal = () => {
       duration: 2000,
       isClosable: true,
     });
-    reset();
-  };
-
-  const validateFile = (files: FileList) => {
-    // console.log("files: ", files);
-    if (files.length < 1) return "File is required";
-
-    const mb = 1024 * 1024;
-    const MAX_FILE_SIZE = 5; // 5mb
-    const fileSizeMb = files[0].size / mb;
-    if (fileSizeMb > MAX_FILE_SIZE)
-      return "Come on! Max file size is 5mb dude!";
-
-    return true;
+    reset({
+      username: "",
+      avatar: undefined,
+    });
+    closeModal(false);
+    // TODO: set user profile_complete to true
+    onClose();
+    navigate("/play");
   };
 
   // TODO: add validation with yup
@@ -105,6 +104,11 @@ const DetailsFormModal = () => {
   // TODO: add success state
   // TODO: add toast notification and remove toast from onSubmit
   // TODO: upload to cloudinary and save url to db
+  // TODO: change color scheme
+
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  const { ref, ...rest } = register("avatar");
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
@@ -128,42 +132,45 @@ const DetailsFormModal = () => {
               />
             </Box>
 
-            <Box w={"full"}>
+            <VStack spacing={6} w={"full"}>
               <FormControl isInvalid={!!errors.username} mt={6} isRequired>
                 <FormLabel htmlFor="username" fontSize="lg">
                   Username
                 </FormLabel>
                 <Input
-                  type="username"
                   id="username"
+                  type="text"
                   placeholder="username"
-                  {...register("username", {
-                    required: "This is required",
-                    minLength: {
-                      value: 3,
-                      message: "Minimum length should be 3",
-                    },
-                  })}
+                  {...register("username")}
                 />
                 <FormErrorMessage>
                   {errors.username && errors.username.message}
                 </FormErrorMessage>
               </FormControl>
               <FormControl isInvalid={!!errors.avatar} isRequired>
-                <FormLabel>Avatar</FormLabel>
-
-                <FileUpload
-                  accept={"image/*"}
-                  register={register("avatar", { validate: validateFile })}
-                >
+                <FormLabel htmlFor="avatar" fontSize="lg">
+                  Avatar
+                </FormLabel>
+                <InputGroup onClick={() => inputRef.current?.click()}>
+                  <Input
+                    id="avatar"
+                    type="file"
+                    hidden
+                    accept="image/*"
+                    {...rest}
+                    ref={(e) => {
+                      ref(e);
+                      inputRef.current = e;
+                    }}
+                  />
                   <Button leftIcon={<Icon as={FiFile} />}>Upload</Button>
-                </FileUpload>
+                </InputGroup>
 
                 <FormErrorMessage>
                   {errors.avatar && errors?.avatar.message}
                 </FormErrorMessage>
               </FormControl>
-            </Box>
+            </VStack>
           </VStack>
         </ModalBody>
 
@@ -172,6 +179,7 @@ const DetailsFormModal = () => {
             colorScheme="orange"
             mr={3}
             // isLoading={isLoading}
+            // isLoading={isFetching}
             // isDisabled={isSubmitting}
             cursor="pointer"
             onClick={handleSubmit(onSubmit)}
