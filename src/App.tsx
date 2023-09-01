@@ -23,25 +23,25 @@ function App() {
 
         {/* <Route path="/bg" element={<Background />} /> */}
         {/* {/* <Route path="/login" element={<StayLoggedIn />} > */}
-				<Route index element={<Login />} />
+				{/* <Route index element={<Login />} /> */}
 				{/* <Route path="/login" element={<Login />} /> */}
-			{/* </Route>
-			<Route element={<AuthVerification />} >
+			{/* </Route> */}
+			{/* <Route element={<AuthVerification />} > */}
 				<Route path="/" element={<DashboardLayout />} >
-				<Route index element={<Overview />} />
+					<Route index element={<Overview />} />
 					<Route path="settings" element={<Settings />} />
 					<Route path="play" element={<Game />} />
 					<Route path="chat" element={<Chat />} />
 					<Route path="watch" element={<Watch />} />
 					<Route path="support" element={<Support />} />
 				</Route>
-			</Route> */}
+			{/* </Route> */}
 			
 		
 		</Route>
 	    {/* <Route path="*" element={<NotFoundPage />} /> */}
       </Routes>
-				</>
+	</>
   );
 }
 {

@@ -11,8 +11,8 @@ const authApiEndpoints = apiSlice.injectEndpoints({
 			}),
 			async onQueryStarted(_, { dispatch, queryFulfilled }) {
 				try {
-					const { data: { accessToken } } = await queryFulfilled;
-					dispatch(setLogin({ accessToken }));
+					const { data: userInfo } = await queryFulfilled;
+					dispatch(setLogin(userInfo));
 				} catch (err: any) {
 					console.log(`err: `, err);
 					return ;
@@ -41,10 +41,11 @@ const authApiEndpoints = apiSlice.injectEndpoints({
 			}),
 			async onQueryStarted(_, { dispatch, queryFulfilled }) {
 				try {
-					const {data: {newAccessToken: accessToken}} = await queryFulfilled;
-					// const accessToken = data?.data?.newAccessToken;
+					const {data: userInfo} = await queryFulfilled;
+					// !! rename newAccessToken to accessToken
+					// !! const accessToken = data?.data?.newAccessToken;
 					// console.log(`newAccessToken: ${accessToken}`);
-					dispatch(setLogin({ accessToken }));
+					dispatch(setLogin(userInfo));
 
 				} catch (err: any) {
 					console.log(`err: `, err);

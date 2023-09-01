@@ -50,7 +50,7 @@ function Support() {
     const { submit } = useWeb3forms({
         apikey: import.meta.env.VITE_WEB3FORMS_API_KEY,
         onSuccess(successMessage, data) {
-            console.log({ data: { name: 'name', email: 'email@gmail.com', msg: 'eeee' }, message: "Email sent successfully!", success: true });
+            // console.log({ data: { name: 'name', email: 'email@gmail.com', msg: 'eeee' }, message: "Email sent successfully!", success: true });
             toast({
                 title: "Message sent.",
                 description: successMessage,

@@ -70,8 +70,8 @@ const Login = () => {
         bgSize="contain"
         bgRepeat="no-repeat"
         bgBlendMode="lighten"
-        animate={{ rotate: 360 }}
-        transition={{ ease: "linear", duration: 5, repeat: Infinity }}
+        // animate={{ rotate: 360 }}
+        // transition={{ ease: "linear", duration: 5, repeat: Infinity }}
         opacity={0.9}
       />
       <VStack
