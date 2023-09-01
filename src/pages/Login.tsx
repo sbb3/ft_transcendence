@@ -1,96 +1,103 @@
-import { Box, Button, Flex, HStack, Text, useToast } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Flex,
+  HStack,
+  Link,
+  Text,
+  VStack,
+  useToast,
+} from "@chakra-ui/react";
 import { useEffect } from "react";
 import useAuth from "src/hooks/useAuth";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Navigate } from "react-router-dom";
 import { useSendLogInMutation } from "src/features/auth/authApi";
 import { useDispatch } from "react-redux";
-import { setCredentials } from "src/features/auth/authSlice";
-
+import { setAccessToken } from "src/features/auth/authSlice";
 import { motion } from "framer-motion";
+import { css } from "@emotion/react";
+import "/src/styles/loginButton.css";
+import Loader from "src/components/Utils/Loader";
 
-const MotionFlex = motion(Flex);
+const MotionBox = motion(Box);
 
 const Login = () => {
-  // const isAuthenticated = useAuth();
-  // const navigate = useNavigate();
-  // const dispatch = useDispatch();
-  // const toast = useToast();
+  const isAuthenticated = useAuth();
+  const navigate = useNavigate();
+  const toast = useToast();
 
-  // const [sendLogIn, { isLoading }] = useSendLogInMutation();
+  const [sendLogIn, { isLoading, isSuccess, isError }] = useSendLogInMutation();
 
-  // useEffect(() => {
-  //     if (isAuthenticated)
-  //         navigate("/", { replace: true });
+  useEffect(() => {
+    if (isAuthenticated) navigate("/", { replace: true });
+  }, [isAuthenticated, navigate]);
 
-  // }, []);
+  const handleClick = async () => {
+    try {
+      await sendLogIn({}).unwrap();
+      navigate("/", { replace: true });
+    } catch (err: any) {
+      toast({
+        title: "Error Login",
+        description: "An error occured while logging in.",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
 
-  // const handleClick = async () => {
-  //     console.log("clicked");
-  //     try {
-  //         const { accessToken }: any = await sendLogIn({}).unwrap();
-  //         console.log(accessToken);
+  if (isLoading) return <Loader />;
 
-  //         dispatch(setCredentials({ accessToken }));
-  //         navigate("/", { replace: true });
-  //     } catch (err: any) {
-  //         toast({
-  //             title: "Error Login",
-  //             description: err.data.message,
-  //             status: "error",
-  //             duration: 3000,
-  //             isClosable: true,
-  //         });
-  //     }
-  // }
-  // // TODO: set iSLoading and isSucess and isError
+  if (isSuccess) return <Navigate to="/" replace={true} />;
 
   return (
-    <MotionFlex // inner-container - inner box
+    <Flex
       pos="relative"
       justify="center"
       align="center"
-      w={{ base: "full", md: 750, lg: 972, xl: 1260 }} // full of its parent Box, sm of its parent width, md of 708px, lg of 964px and so
-      minH={{ base: 750}}  // todo: scroll bar
-      bg="pong_bg_primary"
-      color={"whiteAlpha.900"}
-      backgroundImage="url('src/assets/img/bgp.png')"
-        backgroundPosition="center"
-        backgroundSize="contain"
-        // backgroundSize="cover" 
-        backgroundRepeat="no-repeat"
-        // opacity={0.8}
-        backgroundBlendMode={"lighten"}
-        //  animate={{ rotate: 360 }}
-        //     transition={{ ease: "linear", duration: 2, repeat: Infinity } as any}
-        >
-      {/* <HStack spacing="24px" justify="center" align="center" w="100%" h="100vh">
-        <Text fontSize="3xl" fontWeight="bold" color="purple.500"> */}
-          {/* change with Link */}
-          {/* Card */}
-          {/* <Box
-            minW='full'
-            minH='full'
-      backgroundImage="url('src/assets/img/CircleYellow.png')"
-      backgroundPosition="center"
-      backgroundSize="contain"
-      backgroundRepeat="no-repeat"
-
-          >
-          <Button
-            colorScheme="purple"
-            variant="solid"
-            size="lg"
-            // onClick={handleClick}
-            // isLoading={isLoading}
-            // isDisabled={isLoading}
-          >
-            Login
-          </Button>
-
-          </Box> */}
-        {/* </Text>
-      </HStack> */}
-    </MotionFlex>
+      w={{ base: "full", md: 750, lg: 972, xl: 1260 }}
+      minH={{ base: 750 }}
+      bg="#222222"
+      // color={"whiteAlpha.900"}
+    >
+      <MotionBox
+        pos="absolute"
+        w={{ base: "300px", sm: "400px", md: "550px" }}
+        h={{ base: "300px", sm: "400px", md: "550px" }}
+        bgImage="url('src/assets/img/cropped_circle_pong.png')"
+        bgPosition="center"
+        bgSize="contain"
+        bgRepeat="no-repeat"
+        bgBlendMode="lighten"
+        animate={{ rotate: 360 }}
+        transition={{ ease: "linear", duration: 5, repeat: Infinity }}
+        opacity={0.9}
+      />
+      <VStack
+        pos="relative"
+        justify="center"
+        align="center"
+        // w={{ base: "200px", sm: "300px", md: "400px" }}
+        // h={{ base: "90px", sm: "120px", md: "168px" }}
+        borderRadius={{ base: "15px", sm: "25px", md: "40px" }}
+        border="1px solid rgba(251, 102, 19, 0.69)"
+        boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.25)"
+        backdropFilter={"blur(20px)"}
+        bgImage={`url('src/assets/img/BlackNoise.png')`}
+        bgSize="cover"
+        bgRepeat="no-repeat"
+        p={{ base: 5 }}
+      >
+        <Link color="#000" onClick={handleClick}>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          CLICK TO EXPLORE
+        </Link>
+      </VStack>
+    </Flex>
   );
 };
 

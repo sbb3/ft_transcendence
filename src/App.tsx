@@ -13,11 +13,11 @@ import {
   NotFoundPage,
 } from "./pages";
 import Background from "./Background.tsx";
-import { Flex } from "@chakra-ui/layout";
 import Layout from "./layouts/Layout.tsx";
 
 function App() {
   return (
+	<>
       <Routes>
 		<Route path="/" element={<Layout />} >
 
@@ -28,7 +28,7 @@ function App() {
 			{/* </Route>
 			<Route element={<AuthVerification />} >
 				<Route path="/" element={<DashboardLayout />} >
-					<Route index element={<Overview />} />
+				<Route index element={<Overview />} />
 					<Route path="settings" element={<Settings />} />
 					<Route path="play" element={<Game />} />
 					<Route path="chat" element={<Chat />} />
@@ -41,6 +41,7 @@ function App() {
 		</Route>
 	    {/* <Route path="*" element={<NotFoundPage />} /> */}
       </Routes>
+				</>
   );
 }
 {

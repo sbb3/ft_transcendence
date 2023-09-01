@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { logOut } from "src/features/auth/authSlice";
+import { setLogout } from "src/features/auth/authSlice";
 
 const baseQuery = fetchBaseQuery({
 	baseUrl: "http://localhost:3000/api",
@@ -25,7 +25,7 @@ const baseQueryJWTverify = async (args: any, api: any, extraOptions: any) => {
 			return retryQueryWithNewToken;
 		} else { // we failed to get a new access token, send logout, then redirect to login.
 			if (retryQueryWithRefreshToken?.error?.status === 403) {
-				api.dispatch(logOut());
+				api.dispatch(setLogout());
 			}
 			return retryQueryWithRefreshToken;
 		}
