@@ -33,8 +33,7 @@ const Circle = () => {
 const Blackhole = () => {
   return (
     <Box
-    mixBlendMode="lighten"
-
+      mixBlendMode="lighten"
       // as="svg"
       position="absolute"
       top="50%"
@@ -65,24 +64,23 @@ const Blackhole = () => {
   );
 };
 
-const Background = ({children}) => {
+const Background = ({ children }) => {
   return (
-    
-      <Box
+    <Box
+      pos="relative"
+      outline="1px solid red"
+      w="750px"
+      // filter="blur(5px)"
+    >
+      {/* <Circle /> */}
+      {/* <Blackhole /> */}
+      <Flex
+        justify={"center"}
         pos="relative"
-        outline="1px solid red"
-        w="750px"
-        // filter="blur(5px)"
+        width="100%"
+        height="100%"
+        outline="1px solid green"
       >
-        {/* <Circle /> */}
-        {/* <Blackhole /> */}
-        <Flex
-        justify={'center'}
-            pos="relative"
-            width="100%"
-            height="100%"
-            outline="1px solid green"
-        >
         <MotionImage
           src="src/assets/img/ping-pong-bg.png"
           alt="ping pong background"
@@ -91,22 +89,21 @@ const Background = ({children}) => {
           // boxShadow="0px 0px 28px 0px rgba(0, 0, 0, 0.20)"
           //   filter="blur(7px)"
           opacity={0.8}
-            // animate={{ rotate: 360 }}
-            // transition={{ ease: "linear", duration: 2, repeat: Infinity } as any}
+          // animate={{ rotate: 360 }}
+          // transition={{ ease: "linear", duration: 2, repeat: Infinity } as any}
         />
-      <Button
-        colorScheme="purple"
-        variant="solid"
-        size="lg"
-        position="absolute"
-        top="50%"
-        left="50%"
+        <Button
+          colorScheme="purple"
+          variant="solid"
+          size="lg"
+          position="absolute"
+          top="50%"
+          left="50%"
         >
-            Button
+          Button
         </Button>
-
-        </Flex>
-      </Box>
+      </Flex>
+    </Box>
   );
 };
 

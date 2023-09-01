@@ -78,7 +78,7 @@ function Support() {
 
     //   style={{ border: "2px solid", borderColor: "green" }}
     return (
-        <VStack mt={8} spacing={8} align="stretch" w={{ base: "full", sm: "full", md: 620 }}>
+        <VStack mt={8} spacing={8}  w={{ base: "full", sm: "full", md: 620 }}>
             <VStack >
                 <Text
                     fontSize="3xl"
