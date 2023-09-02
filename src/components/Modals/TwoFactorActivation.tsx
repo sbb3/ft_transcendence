@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  Flex,
   FormControl,
   FormErrorMessage,
   FormLabel,
@@ -16,34 +17,53 @@ import {
   ModalOverlay,
   PinInput,
   PinInputField,
+  Text,
   VStack,
   useDisclosure,
 } from "@chakra-ui/react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
+import QRCode from "qrcode";
+import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useToast } from "@chakra-ui/react";
-import { ReactNode, useEffect, useRef } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 
 import { Icon, InputGroup } from "@chakra-ui/react";
 import { FiFile } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 
-const TwoFactorActivation = ({ closeModal }) => {
+const pinSchema = yup.object().shape({
+  pin: yup
+    .string()
+    .required("Verification code is required")
+    .min(6, "Minimum and Maximum length should be 6")
+    .trim(),
+});
+
+const TwoFactorActivation = ({ closeModal, otpauth_url }) => {
+  console.log("otpauth_url: ", otpauth_url);
+  const [qrCodeUrl, setQrCodeUrl] = useState("");
   const navigate = useNavigate();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors, isSubmitting },
     reset,
   } = useForm({
-    // resolver: yupResolver(validationSchema),
+    resolver: yupResolver(pinSchema),
   });
 
   useEffect(() => {
+    QRCode.toDataURL(otpauth_url)
+      .then(setQrCodeUrl)
+      .catch((err) => console.error(err));
     onOpen();
-  }, [onOpen]);
+    // TODO: check if user has 2FA enabled, if yes, redirect to /settings
+    // todo: fetch the otpauth_url or base32_secret from the server
+  }, [onOpen, otpauth_url]);
 
   const onSubmit = (data: any) => {
     console.log("data: ", data);
@@ -73,8 +93,8 @@ const TwoFactorActivation = ({ closeModal }) => {
         <ModalCloseButton />
         <ModalBody>
           <VStack
-            mt={8}
-            spacing={10}
+            mt={0}
+            spacing={4}
             //  w={{ base: "full", sm: "full", md: 620 }}
           >
             <Box>
@@ -82,30 +102,62 @@ const TwoFactorActivation = ({ closeModal }) => {
                 src="src/assets/svgs/2fa_activation.svg"
                 alt="Two Factor Authentication Activation"
                 borderRadius={20}
+                w="350px"
+                h="350px"
               />
             </Box>
 
-            <VStack spacing={6} w={"full"}>
-              <FormControl isInvalid={!!errors.pin} mt={6} isRequired>
+            <VStack spacing={3} w={"full"} align={"center"}>
+              <Text fontSize="md" fontWeight="semibold">
+                Scan QR Code with your 2-factor auth App to verify this device
+              </Text>
+              {/* white background */}
+              <Flex justify="center" align="center" w="full">
+                <Image
+                  src={qrCodeUrl}
+                  alt="qr code"
+                  w="240px"
+                  h="240px"
+                  // border="1px solid #ccc"
+                  border="1px solid"
+                  borderColor="pong_cl_primary"
+                  borderRadius={20}
+                  objectFit={"contain"}
+                />
+              </Flex>
+            </VStack>
+            <Box w={"full"}>
+              <FormControl isInvalid={!!errors.pin} mt={0} isRequired>
                 <FormLabel htmlFor="pin" fontSize="lg">
                   Verification Code
                 </FormLabel>
-                <HStack>
-                  <PinInput size="sm" otp manageFocus>
-                    <PinInputField {...(register("pin"), { required: true })} />
-                    <PinInputField {...register("pin")} />
-                    <PinInputField {...register("pin")} />
-                    <PinInputField {...register("pin")} />
-                    <PinInputField {...register("pin")} />
-                    <PinInputField {...register("pin")} />
-                  </PinInput>
-                </HStack>
-
+                <Controller
+                  name="pin"
+                  control={control}
+                  defaultValue=""
+                  render={({ field: { ref, ...restField } }) => (
+                    <PinInput
+                      size="lg"
+                      {...restField}
+                      errorBorderColor="red.300"
+                      focusBorderColor="orange.300"
+                      onComplete={(value) => console.log(value)}
+                      isInvalid={!!errors.pin}
+                    >
+                      <PinInputField ref={ref} />
+                      <PinInputField />
+                      <PinInputField />
+                      <PinInputField />
+                      <PinInputField />
+                      <PinInputField />
+                    </PinInput>
+                  )}
+                />
                 {errors?.pin && (
                   <FormErrorMessage>{errors?.pin?.message}</FormErrorMessage>
                 )}
               </FormControl>
-            </VStack>
+            </Box>
           </VStack>
         </ModalBody>
 

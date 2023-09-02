@@ -9,7 +9,7 @@ import TwoFactorActivation from "src/components/Modals/TwoFactorActivation";
 const DashboardLayout = () => {
   // const { alreadyUser } = useSelector((state: any) => state.user);
 
-  const [shouldOpenDetailsModal, setShouldOpenDetailsModal] = useState(true);
+  const [shouldOpenDetailsModal, setShouldOpenDetailsModal] = useState(false);
 
   return (
     <Flex // inner-container - inner box

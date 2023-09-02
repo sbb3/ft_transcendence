@@ -31,6 +31,7 @@ import { FiFile } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 
 import useTitle from "src/hooks/useTitle";
+import TwoFactorActivation from "src/components/Modals/TwoFactorActivation";
 
 // TODO: export validationSchema to a separate file
 const validationSchema = yup.object().shape({
@@ -61,6 +62,7 @@ const validationSchema = yup.object().shape({
 
 const Settings = () => {
   useTitle("Settings");
+  const [isSwitched, setIsSwitched] = useState<boolean>(false);
   const [otp_enabled, setOtp_enabled] = useState<boolean>(false);
   const navigate = useNavigate();
   const toast = useToast();
@@ -88,7 +90,7 @@ const Settings = () => {
     });
     // closeModal(false);
     // // TODO: set user profile_complete to true
-    // navigate("/play");
+    // navigate("/");
   };
 
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -123,22 +125,33 @@ const Settings = () => {
               <Switch
                 id="2fa"
                 colorScheme="orange"
-                isChecked={otp_enabled}
+                isChecked={isSwitched}
                 onChange={() => {
+                  if (!isSwitched) {
+                    // TODO: fetch otpauth_url and set otp_enabled to true
+                    setIsSwitched(true);
+                  }
+                  if (isSwitched) {
+                    // TODO: clear otpauth_url from db and set otp_enabled to false
+                    setIsSwitched(false);
+                  }
+                  // TODO: if enabled, show a modal with a QR code, if disabled, show a modal with a message
+                  // TODO: if enabled, fetch the otpauth_url or base32_secret, pass it as a prop to the modal here, then show a QR code to the user
                   //  TODO: set user otp_enabled to true or false in db
                   //   TODO: update the user otp_enabled state in redux, by dispatching an action or invalidate the user query cache and refetch it
-                  if (otp_enabled) {
-                    console.log("otp_enabled: ", otp_enabled, "set to false");
-                    // TODO: set user otp_enabled to false in db, then remove the already generated secret key from db,, refetch the user query
-                    setOtp_enabled(false);
-                  } else {
-                    console.log("otp_enabled: ", otp_enabled, "set to true");
-                    // TODO: set user otp_enabled to true in db, THEN generate a secret key and save it in db, then the modal, then show a QR code to the user
-                    setOtp_enabled(true);
-                  }
+                  // if (otp_enabled) {
+                  //   console.log("otp_enabled: ", otp_enabled, "set to false");
+                  //   // TODO: set user otp_enabled to false in db, then remove the already generated secret key from db,, refetch the user query
+                  //   setOtp_enabled(false);
+                  // } else {
+                  //   console.log("otp_enabled: ", otp_enabled, "set to true");
+                  //   // TODO: set user otp_enabled to true in db, THEN generate a secret key and save it in db, then the modal, then show a QR code to the user
+                  //   setOtp_enabled(true);
+                  // }
                 }}
               />
             </FormControl>
+            {isSwitched && <TwoFactorActivation otpauth_url="brutal" />}
             <VStack spacing={4} w={"full"}>
               <FormControl isInvalid={!!errors.username} mt={6} isRequired>
                 <FormLabel htmlFor="username" fontSize="lg">
