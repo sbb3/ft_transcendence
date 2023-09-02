@@ -11,38 +11,29 @@ const DashboardLayout = () => {
   const [shouldOpenDetailsModal, setShouldOpenDetailsModal] = useState(false);
 
   return (
-    <Box // outter-container - outter box
+    <Flex // inner-container - inner box
       pos="relative"
-      minW="100vw"
-      minH="100vh"
-      bg="pong_bg_primary"
-      boxSizing="border-box"
-      m={0}
+      // justify="center"
+      // align="center"
+      w={{ base: "full", md: 748, lg: 972, xl: 1260 }} // full of its parent Box, sm of its parent width, md of 708px, lg of 964px and so
+      h={{ base: "full", md: 650, lg: 750, xl: 1000 }}
+      bg="red"
+      color={"whiteAlpha.900"}
     >
-      <Flex // inner-container - inner box
-        pos="relative"
-        justify="center"
-        align="center"
-        maxW={{ base: "full", md: 748, lg: 972, xl: 1260 }} // full of its parent Box, sm of its parent width, md of 708px, lg of 964px and so
-        maxH={{ base: "full", md: 748, lg: 972, xl: 1260 }}
-        bg="red"
-        color={"whiteAlpha.900"}
-      >
-        <Flex w="60px" h="100vh" bg="orange">
-          <Sidebar />
-        </Flex>
-        <Flex flex={1} direction={"column"}>
-          <Header />
-          <Flex flex={1} bg="black">
-            {shouldOpenDetailsModal ? (
-              <DetailsFormModal closeModal={setShouldOpenDetailsModal} />
-            ) : (
-              <Outlet />
-            )}
-          </Flex>
+      <Flex w="60px" bg="orange">
+        <Sidebar />
+      </Flex>
+      <Flex flex={1} direction={"column"}>
+        <Header />
+        <Flex flex={1} bg="green" justify="center" align="center">
+          {shouldOpenDetailsModal ? (
+            <DetailsFormModal closeModal={setShouldOpenDetailsModal} />
+          ) : (
+            <Outlet />
+          )}
         </Flex>
       </Flex>
-    </Box>
+    </Flex>
   );
 };
 

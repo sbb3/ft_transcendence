@@ -98,7 +98,15 @@ const Settings = () => {
 
   return (
     <>
-      <Stack spacing={8} direction="column">
+      <VStack
+        spacing={8}
+        direction="column"
+        bg="gray.700"
+        p={8}
+        borderRadius={20}
+        boxShadow="lg"
+        // h={"480"}
+      >
         <Box>
           <Image
             src="src/assets/svgs/account_settings.svg"
@@ -180,10 +188,21 @@ const Settings = () => {
                   {errors.avatar && errors?.avatar.message}
                 </FormErrorMessage>
               </FormControl>
+              <Button
+                colorScheme="orange"
+                mr={3}
+                // isLoading={isLoading}
+                // isLoading={isFetching}
+                // isDisabled={isSubmitting}
+                cursor="pointer"
+                onClick={handleSubmit(onSubmit)}
+              >
+                Continue
+              </Button>
             </VStack>
           </Flex>
         </Flex>
-      </Stack>
+      </VStack>
     </>
   );
 };

@@ -1,45 +1,55 @@
 import useTitle from "src/hooks/useTitle";
 import {
-	AutoComplete,
-	AutoCompleteInput,
-	AutoCompleteItem,
-	AutoCompleteList,
+  AutoComplete,
+  AutoCompleteInput,
+  AutoCompleteItem,
+  AutoCompleteList,
 } from "@choc-ui/chakra-autocomplete";
-import { Stack, Text, InputGroup, InputLeftElement, Input, Avatar, Link, Box, Button } from "@chakra-ui/react";
+import {
+  Stack,
+  Text,
+  InputGroup,
+  InputLeftElement,
+  Input,
+  Avatar,
+  Link,
+  Box,
+  Button,
+} from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { Link as RouterLink } from "react-router-dom";
 import { SearchIcon } from "@chakra-ui/icons";
-import "/src/styles/search.css"
+import "/src/styles/search.css";
 
-
-{/* rollNavigation: when you reach the end of the list, it will roll back to the top */ }
+{
+  /* rollNavigation: when you reach the end of the list, it will roll back to the top */
+}
 const Search = () => {
-	useTitle("Search");
-	// const [options, setOptions] = useState<string[]>([]);
-	const [options, setOptions] = useState<{ name: string, image: string }[]>([]);
-	const [isLoading, setIsLoading] = useState<boolean>(false);
-	const [query, setQuery] = useState<string>("");
+  useTitle("Search");
+  // const [options, setOptions] = useState<string[]>([]);
+  const [options, setOptions] = useState<{ name: string; image: string }[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [query, setQuery] = useState<string>("");
 
-	const fetchOptions = async () => {
-		try {
-			setIsLoading(true);
-			const response = await fetch("http://localhost:5001/people");
-			const data = await response.json();
-			// console.log('data :', data);
-			setOptions(data);
-			setIsLoading(false);
-		} catch (error) {
-			console.log('error :', error);
-		}
-	};
+  const fetchOptions = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch("http://localhost:5001/people");
+      const data = await response.json();
+      // console.log('data :', data);
+      setOptions(data);
+      setIsLoading(false);
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
 
-	useEffect(() => {
-		// fetchOptions();
-	}
-		, []);
-	return (
-		<Box mt={4} >
-			{/* <Button
+  useEffect(() => {
+    // fetchOptions();
+  }, []);
+  return (
+    <Box mt={4}>
+      {/* <Button
 				bgGradient="linear(to-r, #FF4E50 0%, #F9D423 51%, #FF4E50 100%)"
 				margin="10px"
 				padding="15px 45px"
@@ -112,10 +122,9 @@ const Search = () => {
 					</AutoCompleteList>
 				</AutoComplete>
 			</Stack > */}
-			Search
-		</Box>
-
-	);
+      Search
+    </Box>
+  );
 };
 
 export default Search;
