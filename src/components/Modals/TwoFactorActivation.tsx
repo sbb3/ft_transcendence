@@ -57,15 +57,16 @@ const TwoFactorActivation = ({ closeModal, otpauth_url }) => {
   });
 
   useEffect(() => {
+    // TODO: check if user has 2FA enabled, if yes, redirect to /settings
+    // todo: fetch the otpauth_url or base32_secret from the server
     QRCode.toDataURL(otpauth_url)
       .then(setQrCodeUrl)
       .catch((err) => console.error(err));
     onOpen();
-    // TODO: check if user has 2FA enabled, if yes, redirect to /settings
-    // todo: fetch the otpauth_url or base32_secret from the server
   }, [onOpen, otpauth_url]);
 
   const onSubmit = (data: any) => {
+    // TODO: send the pin to the server for verification, if correct, redirect close modal, else show error
     console.log("data: ", data);
     toast({
       title: "2FA activated.",
@@ -141,7 +142,10 @@ const TwoFactorActivation = ({ closeModal, otpauth_url }) => {
                       {...restField}
                       errorBorderColor="red.300"
                       focusBorderColor="orange.300"
-                      onComplete={(value) => console.log(value)}
+                      onComplete={(value) => {
+                        // TODO: send the pin to the server for verification
+                        console.log(value);
+                      }}
                       isInvalid={!!errors.pin}
                     >
                       <PinInputField ref={ref} />

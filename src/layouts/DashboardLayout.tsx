@@ -5,6 +5,7 @@ import Sidebar from "src/components/Sidebar";
 import { useEffect, useState } from "react";
 import DetailsFormModal from "src/components/DetailsFormModal";
 import TwoFactorActivation from "src/components/Modals/TwoFactorActivation";
+import TwoFactorAccessBlocker from "src/components/Modals/TwoFactorAccessBlocker";
 
 const DashboardLayout = () => {
   // const { alreadyUser } = useSelector((state: any) => state.user);
@@ -29,7 +30,8 @@ const DashboardLayout = () => {
         <Flex flex={1} bg="green" justify="center" align="center">
           {shouldOpenDetailsModal ? (
             // <DetailsFormModal closeModal={setShouldOpenDetailsModal} />
-            <TwoFactorActivation closeModal={setShouldOpenDetailsModal} />
+            // <TwoFactorActivation closeModal={setShouldOpenDetailsModal} />
+            <TwoFactorAccessBlocker />
           ) : (
             <Outlet />
           )}
