@@ -4,11 +4,12 @@ import Header from "./Header";
 import Sidebar from "src/components/Sidebar";
 import { useEffect, useState } from "react";
 import DetailsFormModal from "src/components/DetailsFormModal";
+import TwoFactorActivation from "src/components/Modals/TwoFactorActivation";
 
 const DashboardLayout = () => {
   // const { alreadyUser } = useSelector((state: any) => state.user);
 
-  const [shouldOpenDetailsModal, setShouldOpenDetailsModal] = useState(false);
+  const [shouldOpenDetailsModal, setShouldOpenDetailsModal] = useState(true);
 
   return (
     <Flex // inner-container - inner box
@@ -27,7 +28,8 @@ const DashboardLayout = () => {
         <Header />
         <Flex flex={1} bg="green" justify="center" align="center">
           {shouldOpenDetailsModal ? (
-            <DetailsFormModal closeModal={setShouldOpenDetailsModal} />
+            // <DetailsFormModal closeModal={setShouldOpenDetailsModal} />
+            <TwoFactorActivation closeModal={setShouldOpenDetailsModal} />
           ) : (
             <Outlet />
           )}

@@ -88,8 +88,7 @@ const Settings = () => {
     });
     // closeModal(false);
     // // TODO: set user profile_complete to true
-    // onClose();
-    navigate("/play");
+    // navigate("/play");
   };
 
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -99,7 +98,7 @@ const Settings = () => {
   return (
     <>
       <VStack
-        spacing={8}
+        spacing={18}
         direction="column"
         bg="gray.700"
         p={8}
@@ -114,9 +113,9 @@ const Settings = () => {
             borderRadius={20}
           />
         </Box>
-        <Flex flexDirection={"column"} alignItems="start">
+        <Flex flexDirection={"column"} alignItems="start" gap={8}>
           <Heading>Account Settings</Heading>
-          <Flex flexDirection={"column"} alignItems="start">
+          <Flex flexDirection={"column"} alignItems="start" gap={2}>
             <FormControl display={"flex"} alignItems={"center"}>
               <FormLabel htmlFor="'2fa" mb={"0"}>
                 Turn on 2 steps authentication
@@ -140,7 +139,7 @@ const Settings = () => {
                 }}
               />
             </FormControl>
-            <VStack spacing={6} w={"full"}>
+            <VStack spacing={4} w={"full"}>
               <FormControl isInvalid={!!errors.username} mt={6} isRequired>
                 <FormLabel htmlFor="username" fontSize="lg">
                   Username
@@ -188,18 +187,21 @@ const Settings = () => {
                   {errors.avatar && errors?.avatar.message}
                 </FormErrorMessage>
               </FormControl>
+            </VStack>
+            <Flex w={"full"} justify={"flex-end"} align={"center"} mt={8}>
               <Button
                 colorScheme="orange"
                 mr={3}
+                px={8}
                 // isLoading={isLoading}
                 // isLoading={isFetching}
                 // isDisabled={isSubmitting}
                 cursor="pointer"
                 onClick={handleSubmit(onSubmit)}
               >
-                Continue
+                Save
               </Button>
-            </VStack>
+            </Flex>
           </Flex>
         </Flex>
       </VStack>

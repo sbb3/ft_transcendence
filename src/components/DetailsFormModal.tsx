@@ -31,11 +31,6 @@ interface FormData {
   avatar: FileList;
 }
 
-// const validationSchema = yup.object().shape({
-//   username: yup.string().required("Username is required").min(3).max(20).trim(),
-//   avatar: yup.mixed().required("Avatar is required").
-// });
-
 const validationSchema = yup.object().shape({
   username: yup
     .string()
