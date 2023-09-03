@@ -3,30 +3,31 @@ import DashboardLayout from "./layouts/DashboardLayout.tsx";
 import AuthVerification from "./features/auth/AuthVerification";
 import StayLoggedIn from "./features/auth/StayLoggedIn.tsx";
 import {
-  Overview,
-  Settings,
-  Game,
-  Chat,
-  Watch,
-  Support,
-  Login,
-  NotFoundPage,
+	Overview,
+	Settings,
+	Game,
+	Chat,
+	Watch,
+	Support,
+	Login,
+	NotFoundPage,
 } from "./pages";
 import Background from "./Background.tsx";
 import Layout from "./layouts/Layout.tsx";
+import { Box } from "@chakra-ui/react";
 
 function App() {
-  return (
-	<>
-      <Routes>
-		<Route path="/" element={<Layout />} >
+	return (
 
-        {/* <Route path="/bg" element={<Background />} /> */}
-        {/* {/* <Route path="/login" element={<StayLoggedIn />} > */}
+		<Routes>
+			<Route path="/" element={<Layout />} >
+
+				{/* <Route path="/bg" element={<Background />} /> */}
+				{/* {/* <Route path="/login" element={<StayLoggedIn />} > */}
 				{/* <Route index element={<Login />} /> */}
 				{/* <Route path="/login" element={<Login />} /> */}
-			{/* </Route> */}
-			{/* <Route element={<AuthVerification />} > */}
+				{/* </Route> */}
+				{/* <Route element={<AuthVerification />} > */}
 				<Route path="/" element={<DashboardLayout />} >
 					<Route index element={<Overview />} />
 					<Route path="settings" element={<Settings />} />
@@ -35,17 +36,17 @@ function App() {
 					<Route path="watch" element={<Watch />} />
 					<Route path="support" element={<Support />} />
 				</Route>
-			{/* </Route> */}
-			
-		
-		</Route>
-	    {/* <Route path="*" element={<NotFoundPage />} /> */}
-      </Routes>
-	</>
-  );
+				{/* </Route> */}
+
+
+			</Route>
+			{/* <Route path="*" element={<NotFoundPage />} /> */}
+		</Routes>
+
+	);
 }
 {
-  /* <Route element={<PrefetchUsers />} > */
+	/* <Route element={<PrefetchUsers />} > */
 }
 
 export default App;

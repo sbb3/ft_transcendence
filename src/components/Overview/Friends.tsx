@@ -1,9 +1,10 @@
+import { Flex } from "@chakra-ui/react";
 
 const Friends = () => {
     return (
-        <div>
+        <Flex flex={0.5} h='full' bg="green">
             Friends
-        </div>
+        </Flex>
     );
 };
 

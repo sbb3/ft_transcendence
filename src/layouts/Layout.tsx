@@ -8,14 +8,18 @@ const Layout = () => (
     pos="relative"
     justify="center"
     align="center"
-    minW="100vw"
-    minH="100vh" // !! set it to fixed
     boxSizing="border-box"
     m={0}
-    bg="black"
+    bg="teal.400"
+    color={"whiteAlpha.900"}
+    w="100%"
+    h="100vh"
+    wrap={"wrap"}
+
   >
     <Outlet />
   </Flex>
+
 );
 
 export default Layout;

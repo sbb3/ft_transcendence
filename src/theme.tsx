@@ -47,32 +47,32 @@ const Button = defineStyleConfig({
 })
 
 const theme = extendTheme({
-    colors: {
-      pong_bg_primary: "#333333",
-      pong_bg_secondary: "#454545",
-      pong_bg_third: "#535353",
-      pong_bg_fourth: "#5A5A5A",
-      pong_bg: {
-        100: "#333333",
-        200: "#454545",
-        300: "#535353",
-        400: "#5A5A5A",
-        500: "#676767",
-        600: "#808080",
-        700: "#939393",
-        800: "#E0E0E0",
-      },
-      pong_cl_primary: "#FF8707",
-      pong_cl: {
-        100: "#FB6613",
-        200: "#FF6D00",
-        300: "#FF7900",
-        400: "#FF7F00",
-        500: "#FF8707",
-        600: "#FF9100",
-        700: "#FFA000",
-      },
+  colors: {
+    pong_bg_primary: "#333333",
+    pong_bg_secondary: "#454545",
+    pong_bg_third: "#535353",
+    pong_bg_fourth: "#5A5A5A",
+    pong_bg: {
+      100: "#333333",
+      200: "#454545",
+      300: "#535353",
+      400: "#5A5A5A",
+      500: "#676767",
+      600: "#808080",
+      700: "#939393",
+      800: "#E0E0E0",
     },
+    pong_cl_primary: "#FF8707",
+    pong_cl: {
+      100: "#FB6613",
+      200: "#FF6D00",
+      300: "#FF7900",
+      400: "#FF7F00",
+      500: "#FF8707",
+      600: "#FF9100",
+      700: "#FFA000",
+    },
+  },
   components: {
     Link: {
       variants: {
@@ -93,13 +93,17 @@ const theme = extendTheme({
   styles: {
     global: {
       html: {
+        height: "100%",
+        m: 0,
+        p: 0,
         fontFamily: `'Montserrat', "Poppins", sans-serif`,
       },
       body: {
-        bg: "blackAlpha.700",
-        fontFamily: `'Montserrat', "Poppins", sans-serif`,
+        height: "100%",
         m: 0,
         p: 0,
+        bg: "blackAlpha.700",
+        fontFamily: `'Montserrat', "Poppins", sans-serif`,
         boxSizing: "border-box",
         textDecoration: "none",
       },

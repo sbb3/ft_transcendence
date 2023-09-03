@@ -15,21 +15,25 @@ const DashboardLayout = () => {
   return (
     <Flex // inner-container - inner box
       pos="relative"
-      // justify="center"
-      // align="center"
       w={{ base: "full", md: 748, lg: 972, xl: 1260 }} // full of its parent Box, sm of its parent width, md of 708px, lg of 964px and so
-      h={{ base: "full", md: 650, lg: 750, xl: 1000 }}
-      bg="red"
-      color={"whiteAlpha.900"}
+      h={{ base: "full", md: 650, lg: 750, xl: 900 }}
+      bg="orange.400"
+      wrap={"wrap"}
+      overflow="auto"
     >
-      <Flex w="60px" bg="orange">
+      <Flex w="140px" direction="column" bg="purple.400">
         <Sidebar />
       </Flex>
-      <Flex flex={1} direction={"column"}>
+      <Flex direction={"column"}
+        overflow="auto"
+        flex={1}
+      >
         <Header />
-        <Flex flex={1} bg="green" justify="center" align="center">
+        <Flex bg="pink.400" justify="center" align="center"
+          flex={1}
+        >
           {shouldOpenDetailsModal ? (
-            // <DetailsFormModal closeModal={setShouldOpenDetailsModal} />
+            // <DetailsFormModal closeModal={setShouldOpenDetailsModa l} />
             // <TwoFactorActivation closeModal={setShouldOpenDetailsModal} />
             <TwoFactorAccessBlocker />
           ) : (
