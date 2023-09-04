@@ -26,7 +26,7 @@ function Overview() {
     >
       {/* <Friends /> */}
       <Leaderboard />
-      <Profile />
+      {/* <Profile /> */}
       {/* <RecentGames />
       <RecentGames /> */}
       {/* <Flex direction="row" gap={2}>
