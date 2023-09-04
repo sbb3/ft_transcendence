@@ -4,7 +4,7 @@ import Header from "./Header";
 import Sidebar from "src/components/Sidebar";
 
 const Layout = () => (
-  <Flex // outter-container - outter box
+  <Flex // !! outter-container - outter box
     pos="relative"
     justify="center"
     align="center"
@@ -13,7 +13,7 @@ const Layout = () => (
     bg="teal.400"
     color={"whiteAlpha.900"}
     w="100%"
-    h="100vh"
+    // h="100vh"
     wrap={"wrap"}
 
   >

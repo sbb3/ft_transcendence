@@ -20,6 +20,7 @@ const Profile = () => {
             p={2}
             gap='12px'
             wrap='wrap'
+            outline="2px solid yellow"
         >
             <Stack p={2}
                 direction={{ base: "column" }}

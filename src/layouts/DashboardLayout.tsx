@@ -13,25 +13,30 @@ const DashboardLayout = () => {
   const [shouldOpenDetailsModal, setShouldOpenDetailsModal] = useState(false);
 
   return (
-    <Flex // inner-container - inner box
+    <Flex // !! inner-container - inner box
       pos="relative"
       w={{ base: "full", md: 748, lg: 972, xl: 1290 }} // full of its parent Box, sm of its parent width, md of 708px, lg of 964px and so
-      h={{ base: "full", md: 650, lg: 750, xl: 750 }}
+      // h={{ base: "full", md: 650, lg: 750, xl: 750 }}
+      // overflow="auto"
       wrap={"wrap"}
-      overflow="auto"
     >
-      <Flex w="140px" direction="column" bg="purple.400">
+      <Flex w="140px" direction="column" bg="purple.400"
+        display={{ base: "none", lg: "flex" }}
+      >
         <Sidebar />
       </Flex>
       <Flex direction={"column"}
-        overflow="auto"
+        // overflow="auto"
         flex={1}
+        wrap={"wrap"}
       // TODO: add circle bg here  
       >
         <Header />
         <Flex
+          direction={{ base: "column", lg: "row" }}
           justify="center" align="center"
-          flex={1}
+
+        // flex={1}
         >
           {shouldOpenDetailsModal ? (
             // <DetailsFormModal closeModal={setShouldOpenDetailsModa l} />

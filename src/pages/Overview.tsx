@@ -6,6 +6,8 @@ import Profile from "src/components/Overview/Profile";
 import RecentGames from "src/components/Overview/RecentGames";
 import useTitle from "src/hooks/useTitle";
 
+
+
 function Overview() {
   useTitle("Ping Pong");
   const navigate = useNavigate();
@@ -16,19 +18,22 @@ function Overview() {
       bg="teal.900" // TODO: change bg color
       direction={{ base: "column", lg: "row" }}
       // align="center"
-      justify="flex-start"
+      justify={{ base: "center", lg: "space-evenly" }} // !!!!
       p={2}
       gap={4}
+      wrap={"wrap"}
+      outline="2px solid yellow"
     >
-      <Flex direction="row" gap={2}>
-        {/* <Profile /> */}
+      {/* <Friends /> */}
+      <Leaderboard />
+      <Profile />
+      {/* <RecentGames />
+      <RecentGames /> */}
+      {/* <Flex direction="row" gap={2}>
         <Flex direction={{ base: "column" }} gap={2}>
-          {/* <Friends /> */}
-          <RecentGames />
         </Flex>
-      </Flex>
+      </Flex> */}
       {/* <Flex bg="green">
-        <Leaderboard />
       </Flex> */}
     </Flex>
   );
