@@ -14,7 +14,8 @@ const Header = () => {
       //   justifyContent={"space-between"}
       p={4}
     >
-      <Search />
+      {/* <Search /> */}
+      Search
       {/* <Notificblockmangation /> */}
     </Flex>
   );

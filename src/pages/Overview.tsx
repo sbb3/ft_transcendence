@@ -10,28 +10,27 @@ function Overview() {
   useTitle("Ping Pong");
   const navigate = useNavigate();
   return (
-    <Box w="full" h="full" bg="teal.300">
-      <Flex
-        direction={{ base: "column", md: "row" }}
-        // align="center"
-        justify="flex-start"
-        h="full"
-        w="full"
-        p={2}
-        gap={4}
-      >
-        <Flex direction="column" flex={1} gap={2}>
-          <Profile />
-          <Flex direction={{ base: 'column', md: 'row' }} w="full" h="full" gap={2}>
-            <Friends />
-            <RecentGames />
-          </Flex>
-        </Flex>
-        <Flex flex={0.5} h='full' bg="green">
-          <Leaderboard />
+    <Flex
+      w="full"
+      h="full"
+      bg="teal.900" // TODO: change bg color
+      direction={{ base: "column", lg: "row" }}
+      // align="center"
+      justify="flex-start"
+      p={2}
+      gap={4}
+    >
+      <Flex direction="row" gap={2}>
+        {/* <Profile /> */}
+        <Flex direction={{ base: "column" }} gap={2}>
+          {/* <Friends /> */}
+          <RecentGames />
         </Flex>
       </Flex>
-    </Box >
+      {/* <Flex bg="green">
+        <Leaderboard />
+      </Flex> */}
+    </Flex>
   );
 }
 export default Overview;
