@@ -26,7 +26,7 @@ const Header = () => {
     >
       <IconButton
         onClick={onOpen}
-        // ref={btnRef}
+        ref={btnRef}
         size='xs' fontSize="md" bg={'pong_cl_primary'} color={'white'} borderRadius={8} aria-label='Send game request' icon={<HamburgerIcon />}
       />
       {
@@ -37,11 +37,10 @@ const Header = () => {
         >
           <Drawer
             size="menu"
-            // variant="secondary"
             isOpen={isOpen}
             placement="left"
             onClose={onClose}
-          // finalFocusRef={btnRef}
+            finalFocusRef={btnRef}
           >
             <DrawerOverlay>
               <DrawerContent
@@ -56,10 +55,19 @@ const Header = () => {
                 bgRepeat="no-repeat"
               >
                 <DrawerCloseButton />
-                <DrawerHeader>Menu</DrawerHeader>
-
                 <DrawerBody>
-                  <Sidebar />
+                  <Box
+                    w="150px"
+                    minH={"full"}
+                    bg="pong_bg_secondary"
+                    // mt={2}
+                    // mb={2}
+                    borderRadius={40}
+                  // outline="2px solid yellow"
+
+                  >
+                    <Sidebar />
+                  </Box>
                 </DrawerBody>
               </DrawerContent>
             </DrawerOverlay>

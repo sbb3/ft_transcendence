@@ -50,7 +50,7 @@ const Button = defineStyleConfig({
 const Drawer = {
   sizes: {
     menu: {
-      dialog: { maxWidth: "10px" }
+      dialog: { maxWidth: "150px" }
     }
   }
 };
@@ -82,21 +82,24 @@ const theme = extendTheme({
       700: "#FFA000",
     },
   },
+  // components: {
+  //   Link: {
+  //     variants: {
+  //       custom: {
+  //         textDecoration: "none !important",
+  //       },
+  //     },
+  //     baseStyle: {
+  //       textDecoration: "none !important",
+  //     },
+  //   },
+  //   Drawer: {
+  //     Drawer
+  //   },
+  //   // Button,
+  // },
   components: {
-    Link: {
-      variants: {
-        custom: {
-          textDecoration: "none !important",
-        },
-      },
-      baseStyle: {
-        textDecoration: "none !important",
-      },
-    },
-    Drawer: {
-      Drawer,
-    },
-    // Button,
+    Drawer
   },
   fonts: {
     heading: `'Montserrat', "Poppins", sans-serif`,
