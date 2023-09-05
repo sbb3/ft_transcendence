@@ -16,7 +16,7 @@ function Overview() {
       w="full"
       h="full"
       direction={{ base: "column", md: "row" }}
-      justify={{ base: "center", md: "center" }}
+      justify={{ base: "center", md: "start" }}
       align={{ base: "center", md: "start" }}
       p={2}
       borderRadius={40}
@@ -27,7 +27,7 @@ function Overview() {
       <Profile />
       <Leaderboard />
       <RecentGames />
-      <Friends />
+      {/* <Friends /> */}
       {/* <Flex direction="row" gap={2}>
         <Flex direction={{ base: "column" }} gap={2}>
         </Flex>

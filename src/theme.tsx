@@ -46,6 +46,15 @@ const Button = defineStyleConfig({
   },
 })
 
+
+const Drawer = {
+  sizes: {
+    menu: {
+      dialog: { maxWidth: "10px" }
+    }
+  }
+};
+
 const theme = extendTheme({
   colors: {
     pong_bg_primary: "#333333",
@@ -84,6 +93,9 @@ const theme = extendTheme({
         textDecoration: "none !important",
       },
     },
+    Drawer: {
+      Drawer,
+    },
     // Button,
   },
   fonts: {
@@ -94,6 +106,7 @@ const theme = extendTheme({
     global: {
       html: {
         height: "100%",
+        width: "100%",
         m: 0,
         p: 0,
         fontFamily: `'Montserrat', "Poppins", sans-serif`,
@@ -102,10 +115,10 @@ const theme = extendTheme({
         display: "flex",
         direction: "row",
         justifyContent: "center",
-        alignItems: "center",
-        overflow: "0 auto",
-        // height: "100vh",
-        // width: "100vw",
+        alignItems: "start",
+        // overflow: "0 auto",
+        // minHeight: "100vh",
+        // minWidth: "100vw",
         position: "relative",
         margin: 0,
         paddng: 0,

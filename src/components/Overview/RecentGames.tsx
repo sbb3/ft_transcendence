@@ -193,6 +193,8 @@ const RecentGames = () => {
             bgImage={`url('src/assets/img/BlackNoise.png')`}
             bgSize="cover"
             bgRepeat="no-repeat"
+
+
         >
             <Flex direction="row" align="center" justify="center" gap={1.5}>
                 <Icon boxSize="22px" as={GiGamepadCross} color="white" />

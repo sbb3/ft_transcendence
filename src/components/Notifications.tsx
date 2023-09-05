@@ -20,12 +20,10 @@ function Notification({ count }: { count: number }) {
 				color={'white'} borderRadius={'50%'}
 				icon={<>
 					<FaBell color={'gray.750'} />
-					<Box as={'span'} color={'white'} position={'absolute'} top={'3px'} right={'6px'} fontSize={'0.7rem'}
+					{/* TODO: animate the bell, when new notification is in */}
+					<Box as={'span'} color={'pong_bg_third'} position={'absolute'} top={'3px'} right={'6px'} fontSize={'0.7rem'}
 						zIndex={9999} p={'1px'}
-						_hover={{
-							bg: "white",
-							color: "pong_cl_primary",
-						}}
+
 					>
 						{count}
 					</Box>
@@ -36,8 +34,10 @@ function Notification({ count }: { count: number }) {
 				}}
 
 			/>
-			<MenuList bg={'teal.200'} color={'#312244'} fontSize={'sm'} >
-				<MenuItem minH='48px' color={'#312244'} fontWeight={'bold'} fontSize={'sm'}>
+			<MenuList color={'#312244'} fontSize={'sm'}
+				zIndex={1}
+			>
+				<MenuItem bg={'red'} minH='48px' color={'#312244'} fontWeight={'bold'} fontSize={'sm'}>
 					<Image
 						boxSize='2rem'
 						borderRadius='full'
@@ -47,7 +47,7 @@ function Notification({ count }: { count: number }) {
 					/>
 					<span>Fluffybuns the Destroyer</span>
 				</MenuItem>
-				<MenuItem minH='40px'>
+				<MenuItem minH='40px' bg={'yellow'}>
 					<Image
 						boxSize='2rem'
 						borderRadius='full'

@@ -67,6 +67,7 @@ function App() {
 
 export default App;
 
+// TODO: hamburger menu on mobile, clean code, set back routes, then settings, then chat , then game and watch, then ts support
 // TODO: set layout, bg, login
 // TODO: set the Button component customizations in theme.ts
 // TODO: set up theme

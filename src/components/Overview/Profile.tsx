@@ -42,10 +42,12 @@ const Profile = () => {
                             </Text>
                         </Flex>
                         <Flex direction='row' gap='14px'>
-                            <IconButton size='sm' fontSize="lg" bg={'pong_cl_primary'} color={'white'} borderRadius={8} aria-label='Send a message' icon={<FiMessageSquare />} />
-                            <IconButton size='sm' fontSize="lg" bg={'pong_cl_primary'} color={'white'} borderRadius={8} aria-label='Send friend request' icon={<AiOutlineUserAdd />} />
-                            <IconButton size='sm' fontSize="lg" bg={'pong_cl_primary'} color={'white'} borderRadius={8} aria-label='Send game request' icon={<IoGameControllerOutline />} />
-                            <IconButton size='sm' fontSize="lg" bg={'pong_cl_primary'} color={'white'} borderRadius={8} aria-label='Spectacle' icon={<GoEye />} />
+                            <IconButton size='sm' fontSize="lg" bg={'pong_cl_primary'} color={'white'} borderRadius={8} aria-label='Send a message' icon={<FiMessageSquare />}
+                                _hover={{ bg: 'white', color: 'pong_cl_primary' }}
+                            />
+                            <IconButton size='sm' fontSize="lg" bg={'pong_cl_primary'} color={'white'} borderRadius={8} aria-label='Send friend request' icon={<AiOutlineUserAdd />} _hover={{ bg: 'white', color: 'pong_cl_primary' }} />
+                            <IconButton size='sm' fontSize="lg" bg={'pong_cl_primary'} color={'white'} borderRadius={8} aria-label='Send game request' icon={<IoGameControllerOutline />} _hover={{ bg: 'white', color: 'pong_cl_primary' }} />
+                            <IconButton size='sm' fontSize="lg" bg={'pong_cl_primary'} color={'white'} borderRadius={8} aria-label='Spectacle' icon={<GoEye />} _hover={{ bg: 'white', color: 'pong_cl_primary' }} />
                         </Flex>
                     </Flex>
                 </Flex>
