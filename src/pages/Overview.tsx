@@ -16,19 +16,18 @@ function Overview() {
       w="full"
       h="full"
       bg="teal.900" // TODO: change bg color
-      direction={{ base: "column", lg: "row" }}
-      // align="center"
-      justify={{ base: "center", lg: "space-evenly" }} // !!!!
+      direction={{ base: "column", md: "row" }}
+      justify={{ base: "center", md: "center" }}
+      align={{ base: "center", md: "start" }}
       p={2}
       gap={4}
+      // outline="2px solid yellow"
       wrap={"wrap"}
-      outline="2px solid yellow"
     >
-      {/* <Friends /> */}
+      {/* <Profile />
       <Leaderboard />
-      {/* <Profile /> */}
-      {/* <RecentGames />
       <RecentGames /> */}
+      {/* <Friends /> */}
       {/* <Flex direction="row" gap={2}>
         <Flex direction={{ base: "column" }} gap={2}>
         </Flex>

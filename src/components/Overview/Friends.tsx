@@ -65,7 +65,15 @@ const Friends = () => {
 
     }, []);
     return (
-        <Stack p={2} direction={{ base: "column" }} spacing="12px">
+        <Stack p={2} direction={{ base: "column" }} spacing="12px"
+            w={{ base: "350px", md: "300px", lg: "350px" }}
+            h={{ base: "600px" }}
+            borderRadius={24}
+
+            outline="2px solid yellow"
+        // borderRadius={24}
+
+        >
             <Flex direction="row" align="center" justify='center' gap={1.5}>
                 <Icon boxSize="22px" as={GiThreeFriends} color="white" />
                 <Text fontSize="20px" fontWeight="semibold" color="whiteAlpha.900" letterSpacing={1}>
@@ -73,7 +81,7 @@ const Friends = () => {
                 </Text>
             </Flex>
             {/* TODO: scroll area on y-axis */}
-            <Flex direction="column" w="100%" h="100%" gap={2} align="start">
+            <Flex direction="column" w="full" gap={2} align="start">
                 <Flex direction="row" align="center" gap={2}>
                     <Text fontSize='14px' fontWeight='regular' color='whiteAlpha.900' letterSpacing={1}>
                         Friends
@@ -88,7 +96,10 @@ const Friends = () => {
                 </Flex>
             </Flex>
 
-            <Stack direction={"column"} >
+            <Stack direction={"column"}
+
+            // outline="2px solid red"
+            >
                 <AutoComplete rollNavigation
                     isLoading={isLoading}
                     openOnFocus
@@ -126,7 +137,6 @@ const Friends = () => {
                         />
 
                     </InputGroup>
-                    {/* TODO: add auto scroll y here ,  */}
 
                     <AutoCompleteList
                         // style={{ backgroundImage: "url('src/assets/img/BlackNoise.png')" }}
@@ -141,6 +151,7 @@ const Friends = () => {
 
                         closeOnSelect={false}
                         p={1}
+                        mr={2}
 
                     >
                         <ScrollArea.Root className="ScrollAreaRoot">

@@ -5,12 +5,16 @@ import { IoGameControllerOutline } from "react-icons/io5";
 import { GoEye } from "react-icons/go";
 import { HiOutlineMail } from "react-icons/hi";
 import { GiAchievement } from "react-icons/gi";
+
 const Profile = () => {
     return (
         <Flex
+            w={{ sm: "350px", }}
+            h={{ base: "600px" }}
+
             direction={{ base: "column" }}
             // bg="orange.900"
-            borderRadius={{ base: "15px", sm: "25px", md: "40px" }}
+            borderRadius={24}
             border="1px solid rgba(251, 102, 19, 0.69)"
             boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.25)"
             backdropFilter={"blur(20px)"}
@@ -20,9 +24,9 @@ const Profile = () => {
             p={2}
             gap='12px'
             wrap='wrap'
-            outline="2px solid yellow"
+            outline="2px solid orange"
         >
-            <Stack p={2}
+            <Stack p={1}
                 direction={{ base: "column" }}
                 spacing='12px'
             >
