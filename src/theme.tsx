@@ -109,7 +109,7 @@ const theme = extendTheme({
         margin: 0,
         paddng: 0,
         boxSizing: "border-box",
-        bg: "teal.400",
+        bg: "pong_bg_primary",
         color: "whiteAlpha.900",
         fontFamily: `'Montserrat', "Poppins", sans-serif`,
         textDecoration: "none",

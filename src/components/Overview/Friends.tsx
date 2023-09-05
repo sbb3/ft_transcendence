@@ -66,11 +66,16 @@ const Friends = () => {
     }, []);
     return (
         <Stack p={2} direction={{ base: "column" }} spacing="12px"
-            w={{ base: "350px", md: "300px", lg: "350px" }}
+            w={{ base: "350px", lg: "350px" }}
             h={{ base: "600px" }}
             borderRadius={24}
-
-            outline="2px solid yellow"
+            border="1px solid rgba(251, 102, 19, 0.69)"
+            boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.25)"
+            backdropFilter={"blur(20px)"}
+            bgImage={`url('src/assets/img/BlackNoise.png')`}
+            bgSize="cover"
+            bgRepeat="no-repeat"
+        // outline="2px solid yellow"
         // borderRadius={24}
 
         >

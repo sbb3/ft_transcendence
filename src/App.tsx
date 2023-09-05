@@ -18,38 +18,47 @@ import Sidebar from "./components/Sidebar.tsx";
 
 function App() {
 	return (
-		<Flex pos="relative" justify="center" align="center" boxSizing="border-box" m={0} bg="teal.700" color={"whiteAlpha.900"} w="100%">
+		// <Flex
+		// 	pos="relative"
+		// 	justify="center"
+		// 	align="center"
+		// 	boxSizing="border-box"
+		// 	m={0}
+		// 	bg="teal.700"
+		// 	color={"whiteAlpha.900"}
+		// 	w="100%"
+		// >
+		// 	<Box
+		// 		w="150px"
+		// 		h={"full"}
+		// 		bg="pong_bg_secondary"
+		// 		// display={{ base: "none", lg: "flex" }}
+		// 		mt={2}
+		// 		mb={2}
+		// 		borderRadius={40}
+		// 	>
+		// 		<Sidebar />
+		// 	</Box>
+		// </Flex>
+		<Routes>
+			{/* <Route path="/bg" element={<Background />} /> */}
+			{/* {/* <Route path="/login" element={<StayLoggedIn />} > */}
+			{/* <Route index element={<Login />} /> */}
+			{/* <Route path="/login" element={<Login />} /> */}
+			{/* </Route> */}
+			{/* <Route element={<AuthVerification />} > */}
+			<Route path="/" element={<Layout />} >
+				<Route index element={<Overview />} />
+				<Route path="settings" element={<Settings />} />
+				<Route path="play" element={<Game />} />
+				<Route path="chat" element={<Chat />} />
+				<Route path="watch" element={<Watch />} />
+				<Route path="support" element={<Support />} />
+			</Route>
+			{/* </Route> */}
 
-			<Box w="150px" h={'900px'} bg="purple.400"
-				display={{ base: "none", lg: "flex" }}
-				mt={2}
-				mb={2}
-
-			>
-				<Sidebar />
-			</Box>
-		</Flex>
-		// <Routes>
-		// 	{/* <Route path="/bg" element={<Background />} /> */}
-		// 	{/* {/* <Route path="/login" element={<StayLoggedIn />} > */}
-		// 	{/* <Route index element={<Login />} /> */}
-		// 	{/* <Route path="/login" element={<Login />} /> */}
-		// 	{/* </Route> */}
-		// 	{/* <Route element={<AuthVerification />} > */}
-		// 	<Route path="/" element={<Layout />} >
-		// 		<Route index element={<Overview />} />
-		// 		<Route path="settings" element={<Settings />} />
-		// 		<Route path="play" element={<Game />} />
-		// 		<Route path="chat" element={<Chat />} />
-		// 		<Route path="watch" element={<Watch />} />
-		// 		<Route path="support" element={<Support />} />
-		// 	</Route>
-		// 	{/* </Route> */}
-
-
-		// 	{/* <Route path="*" element={<NotFoundPage />} /> */}
-		// </Routes>
-
+			{/* <Route path="*" element={<NotFoundPage />} /> */}
+		</Routes>
 	);
 }
 {
@@ -81,3 +90,10 @@ export default App;
 // TODO: Solution2: fetch on scroll down,
 // TODO: Solution3: refetchOnMountOrArgChange and refetchOnFocus
 // TODO: color spinner
+/*
+TODO:
+BeatLoader from 'react-spinners/BeatLoader'
+<Button isLoading
+					spinner={<BeatLoader color='white' />}
+				>
+*/

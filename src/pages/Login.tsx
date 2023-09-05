@@ -52,14 +52,15 @@ const Login = () => {
   if (isSuccess) return <Navigate to="/" replace={true} />;
 
   return (
+    // TODO: !!! modfiy the width and height of the container
     <Flex
       pos="relative"
       justify="center"
       align="center"
       w={{ base: "full", md: 750, lg: 972, xl: 1260 }}
       minH={{ base: 750 }}
-      bg="#222222"
-      // color={"whiteAlpha.900"}
+      bg="pong_bg_primary"
+    // color={"whiteAlpha.900"}
     >
       <MotionBox
         pos="absolute"

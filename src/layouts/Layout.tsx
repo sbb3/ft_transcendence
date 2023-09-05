@@ -6,6 +6,9 @@ import { useEffect, useState } from "react";
 import DetailsFormModal from "src/components/DetailsFormModal";
 import TwoFactorActivation from "src/components/Modals/TwoFactorActivation";
 import TwoFactorAccessBlocker from "src/components/Modals/TwoFactorAccessBlocker";
+import { motion } from "framer-motion";
+
+const MotionBox = motion(Box);
 
 const Layout = () => {
   // const { alreadyUser } = useSelector((state: any) => state.user);
@@ -19,7 +22,7 @@ const Layout = () => {
       align="center"
       boxSizing="border-box"
       m={0}
-      bg="teal.700"
+      // bg="teal.700"
       color={"whiteAlpha.900"}
       w="100%"
 
@@ -28,33 +31,57 @@ const Layout = () => {
       <Flex // !! inner-container - inner box
         pos="relative"
         w={{ base: "full", sm: "460px", md: "720px", lg: 880, xl: 1250, }}
+        gap={1}
       // h={{ base: "full", md: 650, lg: 750, xl: 850 }}
       // h={{ base: "full", }}
       // overflow="auto"
       // wrap={"wrap"}
       // outline="2px solid red"
       >
-        <Box w="150px" h={'900px'} bg="purple.400"
-          display={{ base: "none", lg: "flex" }}
-          outline="2px solid yellow"
-          mt={2}
-          mb={2}
+        <Box
+          w="150px"
+          minH={"full"}
+          bg="pong_bg_secondary"
+          display={{ base: "none", md: "flex" }}
+          // mt={2}
+          // mb={2}
+          borderRadius={40}
+        // outline="2px solid yellow"
 
         >
           <Sidebar />
         </Box>
-        <Flex direction={"column"}
+        <Flex
+          pos="relative"
+          direction={"column"}
           w='full'
           // overflow="auto"
           // flex={1}
           wrap={"wrap"}
-        // TODO: add circle bg here  
-        // width={{ base: "full", sm: 380, md: 748, lg: 972, xl: 1290 }}
-        // outline="2px solid green"
-        // p={2}
+          // TODO: add circle bg here  
+          // width={{ base: "full", sm: 380, md: 748, lg: 972, xl: 1290 }}
+          // outline="2px solid green"
+          // p={2}
+          borderRadius={40}
+
+          justify="center"
+          align="center"
 
         >
-          {/* <Header /> */}
+          <MotionBox
+            pos="absolute"
+            w={{ base: "300px", sm: "400px", md: "550px" }}
+            h={{ base: "300px", sm: "400px", md: "550px" }}
+            bgImage="url('src/assets/img/cropped_circle_pong.png')"
+            bgPosition="center"
+            bgSize="contain"
+            bgRepeat="no-repeat"
+            bgBlendMode="lighten"
+            // animate={{ rotate: 360 }}
+            // transition={{ ease: "linear", duration: 5, repeat: Infinity }}
+            opacity={0.9}
+          />
+          <Header />
           <Flex
             // direction={{ base: "column", md: "row" }}
             w='full'

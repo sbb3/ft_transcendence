@@ -15,19 +15,19 @@ function Overview() {
     <Flex
       w="full"
       h="full"
-      bg="teal.900" // TODO: change bg color
       direction={{ base: "column", md: "row" }}
       justify={{ base: "center", md: "center" }}
       align={{ base: "center", md: "start" }}
       p={2}
+      borderRadius={40}
       gap={4}
       // outline="2px solid yellow"
       wrap={"wrap"}
     >
-      {/* <Profile />
+      <Profile />
       <Leaderboard />
-      <RecentGames /> */}
-      {/* <Friends /> */}
+      <RecentGames />
+      <Friends />
       {/* <Flex direction="row" gap={2}>
         <Flex direction={{ base: "column" }} gap={2}>
         </Flex>

@@ -1,7 +1,24 @@
-import { Box, Divider, Flex, Icon, IconButton, Stack, Text, createIcon } from "@chakra-ui/react";
+import {
+	Box,
+	Button,
+	Divider,
+	Flex,
+	Icon,
+	IconButton,
+	Stack,
+	Text,
+	Tooltip,
+	createIcon,
+} from "@chakra-ui/react";
 import { css } from "@emotion/react";
-import { HiOutlineStatusOnline } from "react-icons/hi";
-import useTitle from "src/hooks/useTitle";
+import { GoPlay } from "react-icons/go";
+import { HiOutlineStatusOnline, HiUsers } from "react-icons/hi";
+import { IoChatbubbleEllipsesSharp, IoSettingsOutline } from "react-icons/io5";
+import { MdSpaceDashboard } from "react-icons/md";
+import { BsBinocularsFill } from "react-icons/bs";
+import { BiSolidLogOutCircle } from "react-icons/bi";
+import { BeatLoader } from "react-spinners";
+import { motion } from "framer-motion";
 
 export const BrandIcon = createIcon({
 	displayName: "BrandIcon",
@@ -15,40 +32,234 @@ export const BrandIcon = createIcon({
 });
 
 
+const MotionBrandIcon = motion(Box);
+
+
+const NavigationPanelIcons = [
+	{
+		name: "Overview",
+		icon: MdSpaceDashboard,
+	},
+	{
+		name: "Settings",
+		icon: IoSettingsOutline,
+	},
+	{
+		name: "Play",
+		icon: GoPlay,
+	},
+	{
+		name: "Chat",
+		icon: IoChatbubbleEllipsesSharp,
+	},
+	{
+		name: "Watch",
+		icon: BsBinocularsFill,
+	},
+	{
+		name: "Support",
+		icon: HiUsers,
+	},
+];
+
 const Sidebar = () => {
 	const players_online = 10;
 	const player_lvl = 2;
 
 	return (
-		<Stack spacing={4} align="center" p={2}
-			outline="2px solid yellow"
+		<Stack
+			spacing={8}
+			justify="start"
+			pt={4}
+			pb={6}
+			// outline="2px solid blue"
 			w="full"
+			h="full"
+			borderRadius={24}
+			border="1px solid rgba(251, 102, 19, 0.69)"
+			boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.25)"
+			backdropFilter={"blur(20px)"}
+			bgImage={`url('src/assets/img/BlackNoise.png')`}
+			bgSize="cover"
+			bgRepeat="no-repeat"
 		>
-			<BrandIcon boxSize={'40px'} borderRadius={'50%'} bg={'white'} border="1px solid " borderColor={'#FF8707'} onClick={() => console.log('clicked')} />
-
-			<Box as='span' w="full" h="2px" background="linear-gradient(270deg, rgba(255, 255, 255, 0.00) 0%, #FFF 55.73%, rgba(255, 255, 255, 0.00) 100%)" />
-
-			<Text fontSize='18px' fontStyle={'normal'} fontWeight='semibold' color='whiteAlpha.900' lineHeight={'28px'} letterSpacing={1} >
-				Anas Douib
-			</Text>
-
-			<Text fontSize='10px' fontStyle={'normal'} fontWeight='medium' color='pong_cl_primary' >
-				Level {'   '} {player_lvl}
-			</Text>
-			<Flex w="full" justify="center" align="center" gap={1}
+			<Stack spacing={5} align="center"
+				w="full"
+				pos="relative"
+			// outline="2px solid red"
 			>
-				<Icon as={HiOutlineStatusOnline} boxSize={'15px'} borderRadius={'50%'} color={'green.400'} />
-				<Text fontSize='10px' fontWeight='light' color='whiteAlpha.900' >
-					{players_online} {'   '} players online
-				</Text>
-			</Flex>
 
-			<Box as='span' w="full" h="2px" background="linear-gradient(270deg, rgba(255, 255, 255, 0.00) 0%, #FFF 55.73%, rgba(255, 255, 255, 0.00) 100%)" />
-			{/* tooltip */}
-			<Flex direction={'column'} w="full" justify="center" align="center" gap={1} >
+				{/* <BrandIcon
+					boxSize={"40px"}
+					borderRadius={"50%"}
+					bg={"white"}
+					border="1px solid "
+					borderColor={"#FF8707"}
+					onClick={() => console.log("clicked")}
+	/> */}
+				<MotionBrandIcon
+					// pos="absolute"
+					w={{ base: "40px", }}
+					h={{ base: "40px", }}
+					bgImage="url('src/assets/svgs/brand_icon.svg')"
+					bgPosition="center"
+					bgSize="contain"
+					bgRepeat="no-repeat"
+					bgBlendMode="lighten"
+					// animate={{ rotate: 360 }}
+					// transition={{ ease: "linear", duration: 5, repeat: Infinity }}
+					opacity={0.9}
+				/>
 
-			</Flex>
+				<Box
+					as="span"
+					w="full"
+					h="2px"
+					background="linear-gradient(270deg, rgba(255, 255, 255, 0.00) 0%, #FFF 55.73%, rgba(255, 255, 255, 0.00) 100%)"
+				/>
+				<Stack spacing={2} align="center">
+					<Text
+						fontSize="18px"
+						fontStyle={"normal"}
+						fontWeight="semibold"
+						color="whiteAlpha.900"
+						lineHeight={"28px"}
+						letterSpacing={1}
+					>
+						Anas Douib
+					</Text>
 
+					<Text
+						fontSize="10px"
+						fontStyle={"normal"}
+						fontWeight="medium"
+						color="pong_cl_primary"
+					>
+						Level {"   "} {player_lvl}
+					</Text>
+					<Flex w="full" justify="center" align="center" gap={1}>
+						<Icon
+							as={HiOutlineStatusOnline}
+							boxSize={"20px"}
+							borderRadius={"50%"}
+							color={"green.400"}
+						/>
+						<Text fontSize="10px" fontWeight="light" color="whiteAlpha.900">
+							{players_online} {"   "} players online
+						</Text>
+					</Flex>
+				</Stack>
+
+				<Box
+					as="span"
+					w="full"
+					h="2px"
+					background="linear-gradient(270deg, rgba(255, 255, 255, 0.00) 0%, #FFF 55.73%, rgba(255, 255, 255, 0.00) 100%)"
+				/>
+				<Stack
+					spacing={0}
+					align="end"
+					w="full"
+				>
+					<Flex
+						direction={"column"}
+						justify="center"
+						align="center"
+						gap={5}
+					>
+						{NavigationPanelIcons.map((nav, index) => (
+							<Tooltip
+								label={nav.name}
+								aria-label={nav.name}
+								placement="right"
+								key={index}
+								closeOnClick
+								hasArrow
+								bg={"#FB6613"}
+							>
+								<Button
+									key={index}
+									w="120px"
+									size="lg"
+									color={"white"}
+									bg={"none"}
+									pr={{ base: 0, md: '10px', lg: '20px' }}
+									alignItems={"center"}
+									alignSelf={"stretch"}
+									borderRight="7px solid rgba(253, 127, 44, 0)"
+									leftIcon={
+										<Icon as={nav.icon} boxSize={"22px"} borderRadius={"50%"} />
+									}
+									_hover={{
+										background:
+											"linear-gradient(270deg, rgba(118, 56, 20, 0.60) 3.89%, rgba(253, 127, 44, 0.12) 47.44%, rgba(253, 127, 44, 0.15) 80.48%)",
+										borderRight: "7px solid #FB6613",
+										borderRadius: "6px 0px 0px 6px",
+										color: "pong_cl_primary",
+									}}
+									onClick={() => console.log("clicked on dashboard")}
+								/>
+							</Tooltip>
+						))}
+					</Flex>
+				</Stack>
+				<Box
+					as="span"
+					w="full"
+					h="2px"
+					background="linear-gradient(270deg, rgba(255, 255, 255, 0.00) 0%, #FFF 55.73%, rgba(255, 255, 255, 0.00) 100%)"
+				/>
+			</Stack>
+			<Stack
+				spacing={0}
+				align="end"
+				// p={2}
+				// outline="1px solid yellow"
+				w="full"
+			>
+				<Flex
+					direction={"column"}
+					justify="center"
+					align="center"
+					gap={5}
+				// outline="1px solid red"
+				>
+					<Tooltip
+						label={"Logout"}
+						aria-label={"Logout"}
+						placement="right"
+						closeOnClick
+						hasArrow
+						bg={"red.500"}
+					>
+						<Button
+							w="120px"
+							size="lg"
+							color={"white"}
+							bg={"none"}
+							pr={{ base: 0, md: '10px', lg: '20px' }}
+							alignItems={"center"}
+							alignSelf={"stretch"}
+							borderRight="7px solid rgba(255, 255, 255, 0)"
+							leftIcon={
+								<Icon
+									as={BiSolidLogOutCircle}
+									boxSize={"22px"}
+									borderRadius={"50%"}
+								/>
+							}
+							_hover={{
+								background:
+									"linear-gradient(90deg, rgba(229,62,62,0.2) 3.89%, rgba(253,127,44,0.12) 47.44%, rgba(133,30,30,0.5) 80.48%)",
+								borderRight: "7px solid #E53E3E",
+								borderRadius: "6px 0px 6px 6px",
+								color: "#E53E3E",
+							}}
+							onClick={() => console.log("clicked on dashboard")}
+						/>
+					</Tooltip>
+				</Flex>
+			</Stack>
 		</Stack>
 	);
 };

@@ -24,7 +24,7 @@ const Profile = () => {
             p={2}
             gap='12px'
             wrap='wrap'
-            outline="2px solid orange"
+        // outline="2px solid orange"
         >
             <Stack p={1}
                 direction={{ base: "column" }}
