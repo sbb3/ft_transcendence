@@ -18,13 +18,11 @@ const Layout = () => {
   return (
     <Flex
       pos="relative"
-      justify="center"
-      align="center"
-      boxSizing="border-box"
-      m={0}
-      // bg="teal.700"
+      // justify="center"
+      // align="center"
+      bg="teal.700"
       color={"whiteAlpha.900"}
-      w="100%"
+    // w="100%"
 
     // h="100vh"
     >
@@ -32,6 +30,12 @@ const Layout = () => {
         pos="relative"
         w={{ base: "full", sm: "460px", md: "720px", lg: 880, xl: 1250, }}
         gap={1}
+        borderRadius={24}
+        border="1px solid rgba(251, 102, 19, 0.69)"
+        boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.25)"
+        backdropFilter={"blur(20px)"}
+        color={"whiteAlpha.900"}
+
       // h={{ base: "full", md: 650, lg: 750, xl: 850 }}
       // h={{ base: "full", }}
       // overflow="auto"
@@ -83,12 +87,13 @@ const Layout = () => {
           />
           <Header />
           <Flex
-            // direction={{ base: "column", md: "row" }}
-            w='full'
+            direction={{ base: "column", md: "row" }}
+            // w='full'
+            // h='full'
 
             // justify="center" align="center"
-            // outline="2px solid white"
-            p={2}
+            outline="2px solid white"
+          // p={2}
           // flex={1}
           // wrap={"wrap"}
 

@@ -6,7 +6,8 @@ const Header = () => {
   return (
     <Flex
       direction='row' justify='space-between' align='center' w='full'
-      p={4}
+      p={2}
+      ml={1}
       // bg="pong_bg_secondary"
       // outline="2px solid yellow"
       bg="pong_bg_secondary"

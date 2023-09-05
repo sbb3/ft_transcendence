@@ -16,17 +16,17 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
   <Provider store={store}>
     <Router>
       <ChakraProvider theme={theme} resetCSS>
-        <Box style={{
+        {/* <Box style={{
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
           height: '100vh',
-        }} >
+        }} > */}
 
-          <Suspense fallback={<BeatLoader color="#FF8707" />}>
-            <App />
-          </Suspense>
-        </Box>
+        <Suspense fallback={<BeatLoader color="#FF8707" />}>
+          <App />
+        </Suspense>
+        {/* </Box> */}
       </ChakraProvider>
     </Router>
   </Provider>
