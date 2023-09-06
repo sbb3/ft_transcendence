@@ -1,11 +1,11 @@
 import { Controller, Get, UseGuards, Req, UnauthorizedException, Res,
 	Post, Body, BadRequestException, Delete, NotFoundException, Put } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { FtGuard } from './guards/jwt.guard';
+import { FtGuard } from './guards/ft.guard';
 import { Request, Response } from 'express';
 import { jwtConstants } from './auth.constants';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { JwtGuard } from './guards/ft.guard';
+import { JwtGuard } from './guards/jwt.guard';
 import { GoogleGuard } from './guards/google.guard';
 
 @Controller('auth')

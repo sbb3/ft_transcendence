@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import getData from "../utils/getData";
 import logout from "../utils/logout";
+import updateProfilePic from "../utils/updateProfilePic";
 import updateTwoFactorAuth from "../utils/updateTwoFactorAuth";
 
 interface UserProfile {
@@ -10,8 +11,15 @@ interface UserProfile {
 }
 
 function Profile() {
-
 	const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+	const [file, setFile] = useState<any>(null)
+
+	const uploadFile = () => {
+		if (!file) // Check if the type of the image is valid (or in input accept)
+			console.log("Please select a file");
+		else
+			updateProfilePic('http://localhost:3000/user/upload', file);
+	}
 
 	useEffect(() => {
 		getData(setUserProfile, "http://localhost:3000/user/profile");
@@ -32,10 +40,13 @@ function Profile() {
 			<button style={{marginTop : '10px'}} onClick={() => {
 				updateTwoFactorAuth(false);
 			}}>Deactivate 2fa</button>
+
+			{/* Profile Picture Upload */}
+			<input style={{marginTop: '20px'}} type="file" id="image-upload" onChange={(e : any) => setFile(e.target.files[0])} />
+			<button style={{marginTop: '20px'}} onClick={uploadFile}>Upload file</button>
 		</div>
 		: <h1>Still waiting for data</h1>
 	);
-
 }
 
 export default Profile;
