@@ -15,7 +15,7 @@ const App = lazy(() => import("./App"));
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <Provider store={store}>
     <Router>
-      <ChakraProvider theme={theme} resetCSS>
+      <ChakraProvider theme={theme}>
         {/* <Flex style={{
           justifyContent: 'center',
           alignItems: 'start',

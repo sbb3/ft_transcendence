@@ -1,18 +1,18 @@
-@import '@radix-ui/colors/black-alpha.css';
-@import '@radix-ui/colors/mauve.css';
-@import '@radix-ui/colors/violet.css';
+@import "@radix-ui/colors/black-alpha.css";
+@import "@radix-ui/colors/mauve.css";
+@import "@radix-ui/colors/violet.css";
 
 .ScrollAreaRoot {
-  width: inherit - 1;
-  height: 450px;
+  width: inherit -1 !important;
+  height: 400px !important;
   overflow: hidden;
-  border-radius: '24px';
-    box-shadow: "0px 4px 24px -1px rgba(0, 0, 0, 0.25)";
-    backdrop-filter: "blur(20px)";
-    background-image: "url('src/assets/img/BlackNoise.png')";
-    background-size: "cover";
-    background-repeat: "no-repeat";
-    background-color: "#5A5A5A";
+  border-radius: "24px";
+  box-shadow: "0px 4px 24px -1px rgba(0, 0, 0, 0.25)";
+  backdrop-filter: "blur(20px)";
+  background-image: "url('src/assets/img/BlackNoise.png')";
+  background-size: "cover";
+  background-repeat: "no-repeat";
+  background-color: "#5A5A5A";
   --scrollbar-size: 10px;
 }
 
@@ -35,10 +35,10 @@
 .ScrollAreaScrollbar:hover {
   background: var(--black-a8);
 }
-.ScrollAreaScrollbar[data-orientation='vertical'] {
+.ScrollAreaScrollbar[data-orientation="vertical"] {
   width: var(--scrollbar-size);
 }
-.ScrollAreaScrollbar[data-orientation='horizontal'] {
+.ScrollAreaScrollbar[data-orientation="horizontal"] {
   flex-direction: column;
   height: var(--scrollbar-size);
 }
@@ -51,7 +51,7 @@
 }
 /* increase target size for touch devices https://www.w3.org/WAI/WCAG21/Understanding/target-size.html */
 .ScrollAreaThumb::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 50%;
   left: 50%;

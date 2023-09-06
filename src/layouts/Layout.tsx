@@ -1,5 +1,15 @@
 import { Outlet } from "react-router-dom";
-import { Box, Drawer, DrawerBody, DrawerCloseButton, DrawerContent, DrawerHeader, DrawerOverlay, Flex, useDisclosure } from "@chakra-ui/react";
+import {
+  Box,
+  Drawer,
+  DrawerBody,
+  DrawerCloseButton,
+  DrawerContent,
+  DrawerHeader,
+  DrawerOverlay,
+  Flex,
+  useDisclosure,
+} from "@chakra-ui/react";
 import Header from "./Header";
 import Sidebar from "src/components/Sidebar";
 import { useEffect, useState } from "react";
@@ -29,7 +39,7 @@ const Layout = () => {
     // // h="100vh"
     // >
     <Flex // !! inner-container - inner box
-      w={{ base: "full", sm: "460px", md: "740px", lg: 880, xl: 1250, }}
+      w={{ base: "full", sm: "460px", md: "740px", lg: 880, xl: 1250 }}
       // w={{ base: "full", sm: "460px", md: "70%", lg: 880, xl: 1250, }}
       gap={1}
       borderRadius={24}
@@ -38,46 +48,49 @@ const Layout = () => {
       backdropFilter={"blur(20px)"}
       color={"whiteAlpha.900"}
       justify="center"
-
+      align="start"
       // h={{ base: "full", md: 650, lg: 750, xl: 850 }}
       // h={{ base: "full", }}
       // overflow="auto"
       // wrap={"wrap"}
       // bg="orange"
       mb={2}
+      h="full"
     >
       <Box
         w="150px"
         minH={"full"}
         bg="pong_bg_secondary"
-        display={{ base: "none", md: "flex" }}
+        display={{ base: "none", lg: "flex" }}
         // mt={2}
         // mb={2}
         borderRadius={40}
-      // outline="2px solid yellow"
-
+        // outline="2px solid yellow"
       >
         <Sidebar />
       </Box>
       <Flex
+        id="flex1"
         pos="relative"
         direction={"column"}
-        w='full'
+        w="full"
+        h="full"
         // overflow="auto"
         // flex={1}
         wrap={"wrap"}
-        // TODO: add circle bg here  
+        // TODO: add circle bg here
         // width={{ base: "full", sm: 380, md: 748, lg: 972, xl: 1290 }}
         // outline="2px solid green"
         // p={2}
         borderRadius={40}
-
+        // justify="space-evenly"
         justify="center"
         align="center"
+        mt={2}
         zIndex={-3}
-
+        // outline="2px solid green"
       >
-        <MotionBox
+        {/* <MotionBox
           pos="absolute"
           w={{ base: "300px", sm: "400px", md: "550px" }}
           h={{ base: "300px", sm: "400px", md: "550px" }}
@@ -90,19 +103,18 @@ const Layout = () => {
           // transition={{ ease: "linear", duration: 5, repeat: Infinity }}
           opacity={0.9}
           zIndex={-2}
-
-        />
+        /> */}
         <Header />
         <Flex
+          id="flex2"
           direction={{ base: "row" }}
-          // w='full'
-          // h='full'
-
-          // justify="center" align="center"
+          minW="full"
+          minH="full"
+          justify="center"
+          align="center"
+          borderRadius={40}
           // outline="2px solid white"
           // p={2}
-          // flex={1}
-          // wrap={"wrap"}
           zIndex={-1}
         >
           {shouldOpenDetailsModal ? (
@@ -116,7 +128,6 @@ const Layout = () => {
       </Flex>
     </Flex>
     // </Flex >
-
   );
 };
 

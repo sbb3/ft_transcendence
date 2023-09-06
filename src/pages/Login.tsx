@@ -6,27 +6,33 @@ import {
   Link,
   Text,
   VStack,
+  useDisclosure,
   useToast,
 } from "@chakra-ui/react";
 import { useEffect } from "react";
 import useAuth from "src/hooks/useAuth";
 import { useNavigate, Navigate } from "react-router-dom";
 import { useSendLogInMutation } from "src/features/auth/authApi";
-import { useDispatch } from "react-redux";
-import { setAccessToken } from "src/features/auth/authSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { setLogin } from "src/features/auth/authSlice";
 import { motion } from "framer-motion";
 import { css } from "@emotion/react";
 import "/src/styles/loginButton.css";
 import Loader from "src/components/Utils/Loader";
+import TwoFactorAccessBlocker from "src/components/Modals/TwoFactorAccessBlocker";
 
 const MotionBox = motion(Box);
 
 const Login = () => {
+  const dispatch = useDispatch();
+  const is2FAEnabled = true;
+  const { isOpen, onOpen, onClose } = useDisclosure({ defaultIsOpen: true });
+  // const is2FAEnabled = useSelector((state: any) => state.auth.user.is2FAEnabled);
   const isAuthenticated = useAuth();
   const navigate = useNavigate();
   const toast = useToast();
 
-  const [sendLogIn, { isLoading, isSuccess, isError }] = useSendLogInMutation();
+  // const [sendLogIn, { isLoading, isSuccess, isError }] = useSendLogInMutation();
 
   useEffect(() => {
     if (isAuthenticated) navigate("/", { replace: true });
@@ -34,8 +40,16 @@ const Login = () => {
 
   const handleClick = async () => {
     try {
-      await sendLogIn({}).unwrap();
-      navigate("/", { replace: true });
+      // await sendLogIn({}).unwrap();
+      dispatch(setLogin({ accessToken: "randomValue", user: "anas" })); // !! just for testing
+
+      if (is2FAEnabled) {
+        onOpen();
+        console.log("is2FAEnabled: ", is2FAEnabled);
+        console.log("isOpen: ", isOpen);
+      } else {
+        // navigate("/", { replace: true });
+      }
     } catch (err: any) {
       toast({
         title: "Error Login",
@@ -47,9 +61,9 @@ const Login = () => {
     }
   };
 
-  if (isLoading) return <Loader />;
+  // if (isLoading) return <Loader />;
 
-  if (isSuccess) return <Navigate to="/" replace={true} />;
+  // if (isSuccess) return <Navigate to="/" replace={true} />;
 
   return (
     // TODO: !!! modfiy the width and height of the container
@@ -60,8 +74,15 @@ const Login = () => {
       w={{ base: "full", md: 750, lg: 972, xl: 1260 }}
       minH={{ base: 750 }}
       bg="pong_bg_primary"
-    // color={"whiteAlpha.900"}
+      // color={"whiteAlpha.900"}
     >
+      {isOpen && (
+        <TwoFactorAccessBlocker
+          isOpen={true}
+          onClose={onClose}
+          onOpen={onOpen}
+        />
+      )}
       <MotionBox
         pos="absolute"
         w={{ base: "300px", sm: "400px", md: "550px" }}

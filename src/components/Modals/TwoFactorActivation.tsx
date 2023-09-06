@@ -6,6 +6,7 @@ import {
   FormErrorMessage,
   FormLabel,
   HStack,
+  Heading,
   Image,
   Input,
   Modal,
@@ -17,6 +18,7 @@ import {
   ModalOverlay,
   PinInput,
   PinInputField,
+  Stack,
   Text,
   VStack,
   useDisclosure,
@@ -85,95 +87,150 @@ const TwoFactorActivation = ({ closeModal, otpauth_url }) => {
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      closeOnEsc={false}
+      closeOnOverlayClick={false}
+    >
       <ModalOverlay />{" "}
       <ModalContent
-      // bg="green"
+        // bg="green"
+        borderRadius={40}
+        // maxH="350px"
+        maxW="400px"
+        mt={4}
+        border="1px solid rgba(251, 102, 19, 0.3)"
+        boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.25)"
+        backdropFilter={"blur(20px)"}
+        bgImage={`url('src/assets/img/BlackNoise.png')`}
+        bgSize="cover"
+        bgRepeat="no-repeat"
+        bg="transparent"
       >
-        <ModalHeader>Two Factor Authentication Activation</ModalHeader>
-        <ModalCloseButton />
-        <ModalBody>
-          <VStack
+        <ModalBody p={2} borderRadius={40}>
+          <Stack
             mt={0}
             spacing={4}
             //  w={{ base: "full", sm: "full", md: 620 }}
+            align="center"
+            borderRadius={40}
+            pl={3}
+            pr={2}
           >
-            <Box>
+            <Flex justify="center" align="center" w="full">
               <Image
                 src="src/assets/svgs/2fa_activation.svg"
                 alt="Two Factor Authentication Activation"
                 borderRadius={20}
-                w="350px"
-                h="350px"
+                w="320px"
+                h="300px"
               />
-            </Box>
+            </Flex>
 
-            <VStack spacing={3} w={"full"} align={"center"}>
-              <Text fontSize="md" fontWeight="semibold">
-                Scan QR Code with your 2-factor auth App to verify this device
+            <Stack spacing={3} align={"center"}>
+              <Heading fontSize="lg" fontWeight="semibold">
+                Two Factor Authentication Activation
+              </Heading>
+              <Text fontSize="sm" fontWeight="medium" color={"whiteAlpha.700"}>
+                Scan QR Code using Google App to verify this device qwqw qwqw
               </Text>
-              {/* white background */}
-              <Flex justify="center" align="center" w="full">
-                <Image
-                  src={qrCodeUrl}
-                  alt="qr code"
-                  w="240px"
-                  h="240px"
-                  // border="1px solid #ccc"
-                  border="1px solid"
-                  borderColor="pong_cl_primary"
-                  borderRadius={20}
-                  objectFit={"contain"}
-                />
-              </Flex>
-            </VStack>
+            </Stack>
+            <Flex justify="center" align="center" w="full">
+              <Image
+                src={qrCodeUrl}
+                alt="qr code"
+                w="240px"
+                h="240px"
+                // border="1px solid #ccc"
+                border="1px solid"
+                borderColor="pong_cl_primary"
+                borderRadius={20}
+                objectFit={"contain"}
+              />
+            </Flex>
             <Box w={"full"}>
               <FormControl isInvalid={!!errors.pin} mt={0} isRequired>
-                <FormLabel htmlFor="pin" fontSize="lg">
-                  Verification Code
-                </FormLabel>
-                <Controller
-                  name="pin"
-                  control={control}
-                  defaultValue=""
-                  render={({ field: { ref, ...restField } }) => (
-                    <PinInput
-                      size="lg"
-                      {...restField}
-                      errorBorderColor="red.300"
-                      focusBorderColor="orange.300"
-                      onComplete={(value) => {
-                        // TODO: send the pin to the server for verification
-                        console.log(value);
-                      }}
-                      isInvalid={!!errors.pin}
-                    >
-                      <PinInputField ref={ref} />
-                      <PinInputField />
-                      <PinInputField />
-                      <PinInputField />
-                      <PinInputField />
-                      <PinInputField />
-                    </PinInput>
+                <Flex
+                  direction={"column"}
+                  justify="center"
+                  align="start"
+                  w="full"
+                  // outline="1px solid yellow"
+                >
+                  <FormLabel
+                    htmlFor="pin"
+                    fontSize="md"
+                    color={"whiteAlpha.700"}
+                  >
+                    Verification Code
+                  </FormLabel>
+                  <Controller
+                    name="pin"
+                    control={control}
+                    defaultValue=""
+                    render={({ field: { ref, ...restField } }) => (
+                      <Flex justify="center" align="center" flex={1} w={"full"}>
+                        <PinInput
+                          size="lg"
+                          {...restField}
+                          errorBorderColor="red.300"
+                          focusBorderColor="orange.300"
+                          onComplete={(value) => {
+                            // TODO: send the pin to the server for verification
+                            console.log(value);
+                          }}
+                          isInvalid={!!errors.pin}
+                        >
+                          <PinInputField ref={ref} />
+                          <PinInputField />
+                          <PinInputField />
+                          <PinInputField />
+                          <PinInputField />
+                          <PinInputField />
+                        </PinInput>
+                      </Flex>
+                    )}
+                  />
+                  {errors?.pin && (
+                    <FormErrorMessage>{errors?.pin?.message}</FormErrorMessage>
                   )}
-                />
-                {errors?.pin && (
-                  <FormErrorMessage>{errors?.pin?.message}</FormErrorMessage>
-                )}
+                </Flex>
               </FormControl>
             </Box>
-          </VStack>
+          </Stack>
         </ModalBody>
 
-        <ModalFooter>
+        <ModalFooter p={3}>
           <Button
-            colorScheme="orange"
+            bg={"white"}
+            color={"orange.500"}
+            letterSpacing={1}
             mr={3}
+            onClick={onClose}
+          >
+            Close
+          </Button>
+          <Button
+            bg={"orange.500"}
+            color={"white"}
+            mr={3}
+            letterSpacing={1}
             // isLoading={isLoading}
             // isLoading={isFetching}
             // isDisabled={isSubmitting}
             cursor="pointer"
             onClick={handleSubmit(onSubmit)}
+            _hover={{
+              bg: "orange.400",
+            }}
+            _active={{
+              bg: "orange.400",
+            }}
+            _focus={{
+              bg: "orange.400",
+              boxShadow: "none",
+            }}
           >
             Activate
           </Button>
