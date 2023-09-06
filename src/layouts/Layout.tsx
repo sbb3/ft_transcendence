@@ -65,7 +65,7 @@ const Layout = () => {
         // mt={2}
         // mb={2}
         borderRadius={40}
-        // outline="2px solid yellow"
+      // outline="2px solid yellow"
       >
         <Sidebar />
       </Box>
@@ -88,9 +88,9 @@ const Layout = () => {
         align="center"
         mt={2}
         zIndex={-3}
-        // outline="2px solid green"
+      // outline="2px solid green"
       >
-        {/* <MotionBox
+        <MotionBox
           pos="absolute"
           w={{ base: "300px", sm: "400px", md: "550px" }}
           h={{ base: "300px", sm: "400px", md: "550px" }}
@@ -99,11 +99,11 @@ const Layout = () => {
           bgSize="contain"
           bgRepeat="no-repeat"
           bgBlendMode="lighten"
-          // animate={{ rotate: 360 }}
-          // transition={{ ease: "linear", duration: 5, repeat: Infinity }}
+          animate={{ rotate: 360 }}
+          transition={{ ease: "linear", duration: 5, repeat: Infinity }}
           opacity={0.9}
           zIndex={-2}
-        /> */}
+        />
         <Header />
         <Flex
           id="flex2"

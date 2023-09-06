@@ -2,46 +2,46 @@ import { Routes, Route } from "react-router-dom";
 import AuthVerification from "./features/auth/AuthVerification";
 import StayLoggedIn from "./features/auth/StayLoggedIn.tsx";
 import {
-  Overview,
-  Settings,
-  Game,
-  Chat,
-  Watch,
-  Support,
-  Login,
-  NotFoundPage,
+	Overview,
+	Settings,
+	Game,
+	Chat,
+	Watch,
+	Support,
+	Login,
+	NotFoundPage,
 } from "./pages";
 import Layout from "./layouts/Layout.tsx";
 
 function App() {
-  return (
-    <Routes>
-      <Route path="/login" element={<StayLoggedIn />}>
+	return (
+		<Routes>
+			{/* <Route path="/login" element={<StayLoggedIn />}>
         <Route index element={<Login />} />
-      </Route>
-      <Route element={<AuthVerification />}>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<Overview />} />
-          <Route path="settings" element={<Settings />} />
-          <Route path="play" element={<Game />} />
-          <Route path="chat" element={<Chat />} />
-          <Route path="watch" element={<Watch />} />
-          <Route path="support" element={<Support />} />
-        </Route>
-      </Route>
+      </Route> */}
+			{/* <Route element={<AuthVerification />}> */}
+			<Route path="/" element={<Layout />}>
+				<Route index element={<Overview />} />
+				<Route path="settings" element={<Settings />} />
+				<Route path="play" element={<Game />} />
+				<Route path="chat" element={<Chat />} />
+				<Route path="watch" element={<Watch />} />
+				<Route path="support" element={<Support />} />
+			</Route>
+			{/* </Route> */}
 
-      <Route path="*" element={<NotFoundPage />} />
-    </Routes>
-  );
+			<Route path="*" element={<NotFoundPage />} />
+		</Routes>
+	);
 }
 {
-  /* <Route element={<PrefetchUsers />} > */
+	/* <Route element={<PrefetchUsers />} > */
 }
 
 export default App;
 
 // TODO: hamburger menu on mobile, clean code, set back routes, then settings, then chat , then game and watch, then ts support, reduce border gradient
-// TODO: set layout, bg, login
+// TODO: fix layout, bg, login
 // TODO: set the Button component customizations in theme.ts
 // TODO: set up theme
 // TODO: set up global styles
@@ -70,25 +70,25 @@ TODO:
 
 /*
   // <Flex
-    // 	pos="relative"
-    // 	justify="center"
-    // 	align="center"
-    // 	boxSizing="border-box"
-    // 	m={0}
-    // 	bg="teal.700"
-    // 	color={"whiteAlpha.900"}
-    // 	w="100%"
-    // >
-    // 	<Box
-    // 		w="150px"
-    // 		h={"full"}
-    // 		bg="pong_bg_secondary"
-    // 		// display={{ base: "none", lg: "flex" }}
-    // 		mt={2}
-    // 		mb={2}
-    // 		borderRadius={40}
-    // 	>
-    // 		<Sidebar />
-    // 	</Box>
-    // </Flex>
+	// 	pos="relative"
+	// 	justify="center"
+	// 	align="center"
+	// 	boxSizing="border-box"
+	// 	m={0}
+	// 	bg="teal.700"
+	// 	color={"whiteAlpha.900"}
+	// 	w="100%"
+	// >
+	// 	<Box
+	// 		w="150px"
+	// 		h={"full"}
+	// 		bg="pong_bg_secondary"
+	// 		// display={{ base: "none", lg: "flex" }}
+	// 		mt={2}
+	// 		mb={2}
+	// 		borderRadius={40}
+	// 	>
+	// 		<Sidebar />
+	// 	</Box>
+	// </Flex>
 */

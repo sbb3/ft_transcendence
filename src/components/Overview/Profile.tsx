@@ -51,7 +51,7 @@ const Profile = () => {
                         </Flex>
                     </Flex>
                 </Flex>
-                <Stack direction='column' spacing={1} align='start' w='full' >w={'full'}
+                <Stack direction='column' spacing={1} align='start' w='full' >
                     <Text fontSize='lg' fontWeight='medium' >
                         About me
                     </Text>

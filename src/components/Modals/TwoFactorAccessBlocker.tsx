@@ -52,7 +52,7 @@ const options = {
   autoplay: true,
   animationData,
 };
-
+// TODO: View does not get rendered on the first time, it gets rendered on the second time
 const TwoFactorAccessBlocker = ({ isOpen, onClose, onOpen }) => {
   const accessToken = useSelector((state: any) => state.auth.accessToken);
   const dispatch = useDispatch();
@@ -103,7 +103,7 @@ const TwoFactorAccessBlocker = ({ isOpen, onClose, onOpen }) => {
       closeOnEsc={false}
       closeOnOverlayClick={false}
       isCentered={true}
-      // size="xl"
+    // size="xl"
     >
       <ModalOverlay />{" "}
       <ModalContent
@@ -129,7 +129,9 @@ const TwoFactorAccessBlocker = ({ isOpen, onClose, onOpen }) => {
             pr={2}
           >
             <Flex justifyContent="center" alignItems="center">
-              {View}
+              <Box display='block'>
+                {View}
+              </Box>
             </Flex>
 
             <Stack spacing={3} w={"full"} align={"center"}>
@@ -147,7 +149,7 @@ const TwoFactorAccessBlocker = ({ isOpen, onClose, onOpen }) => {
                   justify="center"
                   align="start"
                   w="full"
-                  // outline="1px solid yellow"
+                // outline="1px solid yellow"
                 >
                   <FormLabel
                     htmlFor="pin"
@@ -203,7 +205,7 @@ const TwoFactorAccessBlocker = ({ isOpen, onClose, onOpen }) => {
               console.log("accessToken343434: ", accessToken); // null, dispatch(setLogin) dispatch still did not got out of the event handleClick scope in Login.tsx
               console.log("logout");
               dispatch(setLogout());
-              navigate("/login", { replace: true });
+              // navigate("/login", { replace: true });
               onClose();
             }}
             _hover={{

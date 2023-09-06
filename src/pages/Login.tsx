@@ -41,7 +41,7 @@ const Login = () => {
   const handleClick = async () => {
     try {
       // await sendLogIn({}).unwrap();
-      dispatch(setLogin({ accessToken: "randomValue", user: "anas" })); // !! just for testing
+      // dispatch(setLogin({ accessToken: "randomValue", user: "anas" })); // !! just for testing
 
       if (is2FAEnabled) {
         onOpen();
@@ -74,7 +74,7 @@ const Login = () => {
       w={{ base: "full", md: 750, lg: 972, xl: 1260 }}
       minH={{ base: 750 }}
       bg="pong_bg_primary"
-      // color={"whiteAlpha.900"}
+    // color={"whiteAlpha.900"}
     >
       {isOpen && (
         <TwoFactorAccessBlocker
