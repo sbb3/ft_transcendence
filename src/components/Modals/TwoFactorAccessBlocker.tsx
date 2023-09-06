@@ -31,7 +31,7 @@ import { ReactNode, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLottie } from "lottie-react";
 import animationData from "src/assets/animations/animation_fingerprint.json";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setLogout } from "src/features/auth/authSlice";
 
 const pinSchema = yup.object().shape({
@@ -54,6 +54,7 @@ const options = {
 };
 
 const TwoFactorAccessBlocker = ({ isOpen, onClose, onOpen }) => {
+  const accessToken = useSelector((state: any) => state.auth.accessToken);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { View } = useLottie(options, style);
@@ -199,6 +200,7 @@ const TwoFactorAccessBlocker = ({ isOpen, onClose, onOpen }) => {
             mr={3}
             onClick={() => {
               // TODO: destroy session and redirect to login
+              console.log("accessToken343434: ", accessToken); // null, dispatch(setLogin) dispatch still did not got out of the event handleClick scope in Login.tsx
               console.log("logout");
               dispatch(setLogout());
               navigate("/login", { replace: true });
