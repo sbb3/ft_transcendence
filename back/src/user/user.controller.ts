@@ -1,6 +1,10 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { diskStorage } from 'multer';
+import * as path from 'path';
+import { request } from 'http';
 
 @Controller('user')
 export class UserController {
@@ -21,10 +25,21 @@ export class UserController {
 		});
 	}
 
-	@UseGuards(JwtGuard)
+	// @UseGuards(JwtGuard)
 	@Post('upload')
-	uploadProfileImage(@Req() request : Request, @Body() body : any) {
-		console.log(request.headers['content-length']);
+	@UseInterceptors(FileInterceptor('file', {
+		storage : diskStorage({
+			destination : './uploads',
+			filename : (req, file, cb) => {
+				const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+				const extension = path.extname(file.originalname);
+				cb(null, `${uniqueSuffix}${extension}`);
+			}
+		})
+	}))
+	uploadProfileImage(@UploadedFile() file: Express.Multer.File, @Req() request : Request) {
+		console.log(file)
+		return file;
 	}
 
 }

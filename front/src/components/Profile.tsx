@@ -42,7 +42,7 @@ function Profile() {
 			}}>Deactivate 2fa</button>
 
 			{/* Profile Picture Upload */}
-			<input style={{marginTop: '20px'}} type="file" id="image-upload" onChange={(e : any) => setFile(e.target.files[0])} />
+			<input style={{marginTop: '20px'}} name="file" type="file" id="image-upload" onChange={(e : any) => setFile(e.target.files[0])} />
 			<button style={{marginTop: '20px'}} onClick={uploadFile}>Upload file</button>
 		</div>
 		: <h1>Still waiting for data</h1>

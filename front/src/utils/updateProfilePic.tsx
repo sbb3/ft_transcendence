@@ -34,13 +34,12 @@ function updateProfilePic(fetchUrl : string, file : any) {
 function postProfilePic(fetchUrl : string, file : any, token : string | null) {
 	const formData = new FormData();
 
-	formData.append('profileImage', file);
+	formData.append('file', file);
 	const data = fetch(fetchUrl, {
 		method : 'POST',
 		credentials: 'include',
 		headers : {
 			'Authorization' : 'Bearer ' + (token ? token : getAccessToken()),
-			'Content-Type' : 'multipart/form-data',
 		},
 		body : formData,
 	});
