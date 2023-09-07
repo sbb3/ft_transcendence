@@ -1,10 +1,10 @@
-import { Controller, Get, Post, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, NotFoundException, Param, Post, Req, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { diskStorage } from 'multer';
 import * as path from 'path';
-import { request } from 'http';
+import * as fs from 'fs';
 
 @Controller('user')
 export class UserController {
@@ -25,7 +25,7 @@ export class UserController {
 		});
 	}
 
-	// @UseGuards(JwtGuard)
+	@UseGuards(JwtGuard)
 	@Post('upload')
 	@UseInterceptors(FileInterceptor('file', {
 		storage : diskStorage({
@@ -37,9 +37,23 @@ export class UserController {
 			}
 		})
 	}))
-	uploadProfileImage(@UploadedFile() file: Express.Multer.File, @Req() request : Request) {
-		console.log(file)
-		return file;
+	async uploadProfileImage(@UploadedFile() file: Express.Multer.File, @Req() request : Request) {
+		const {name, username} = request['user'];
+		const imageUrl = 'http://localhost:3000/user/image/' + file.filename;
+
+		const user = await this.prismaService.updateUserData({name, username}, {profileImage : imageUrl});
+		if (!user)
+			throw new NotFoundException();
+		return ;
+	}
+
+	@Get('image/:imageName')
+	giveImage(@Param('imageName') imageName : string, @Res() response : any) {
+		const path = './uploads/' + imageName;
+
+		if (!fs.existsSync(path))
+			throw new NotFoundException();
+		return response.sendFile('./uploads/' + imageName, {root : './'});
 	}
 
 }
