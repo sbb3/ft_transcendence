@@ -13,6 +13,7 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
+  Stack,
   VStack,
   useDisclosure,
 } from "@chakra-ui/react";
@@ -57,9 +58,8 @@ const validationSchema = yup.object().shape({
     }),
 });
 
-const DetailsFormModal = ({ closeModal }) => {
+const DetailsFormModal = ({ isOpen, onClose, onOpen }: any) => {
   const navigate = useNavigate();
-  const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
   const {
     register,
@@ -87,10 +87,9 @@ const DetailsFormModal = ({ closeModal }) => {
       username: "",
       avatar: undefined,
     });
-    closeModal(false);
     // TODO: set user profile_complete to true
     onClose();
-    navigate("/play");
+    navigate("/");
   };
 
   // TODO: add validation with yup
@@ -109,79 +108,105 @@ const DetailsFormModal = ({ closeModal }) => {
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />{" "}
       <ModalContent
-      // bg="green"
+        // mt={4}
+        border="1px solid rgba(251, 102, 19, 0.3)"
+        boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.25)"
+        backdropFilter={"blur(20px)"}
+        bgImage={`url('src/assets/img/BlackNoise.png')`}
+        bgSize="cover"
+        bgRepeat="no-repeat"
+        bg="transparent"
+        minW={{ base: "350px", sm: "450px", md: "700px" }}
       >
         <ModalHeader>Complete your profile</ModalHeader>
-        <ModalCloseButton />
-        <ModalBody>
-          <VStack
-            mt={8}
-            spacing={10}
-            //  w={{ base: "full", sm: "full", md: 620 }}
+        <ModalCloseButton color="pong_cl_primary" bg={"white"} />
+        <ModalBody
+          // p={2}
+          borderRadius={40}
+          // maxH="350px"
+          // maxW="400px"
+        >
+          <Stack
+            direction={{ base: "column-reverse", md: "row" }}
+            align={{ base: "center", md: "flex-start" }}
+            justify="center"
+            mt={4}
+            spacing={{ base: 4, md: 8 }}
           >
+            <Stack
+              mt={{ base: 0, md: 4 }}
+              spacing={8}
+              w={{ base: "full", md: "350px" }}
+              align="center"
+              justify="center"
+            >
+              <Stack
+                spacing={4}
+                w="full"
+                h="full"
+                align="start"
+                justify="start"
+              >
+                <FormControl isInvalid={!!errors.username} mt={6} isRequired>
+                  <FormLabel htmlFor="username" fontSize="lg">
+                    Username
+                  </FormLabel>
+                  <Input
+                    id="username"
+                    type="text"
+                    placeholder="username"
+                    {...register("username")}
+                  />
+                  <FormErrorMessage>
+                    {errors.username && errors.username.message}
+                  </FormErrorMessage>
+                </FormControl>
+                <FormControl isInvalid={!!errors.avatar} isRequired>
+                  <FormLabel htmlFor="avatar" fontSize="lg">
+                    Avatar
+                  </FormLabel>
+                  <InputGroup onClick={() => inputRef.current?.click()}>
+                    <Input
+                      id="avatar"
+                      type="file"
+                      hidden
+                      accept="image/*"
+                      {...rest}
+                      ref={(e) => {
+                        ref(e);
+                        inputRef.current = e;
+                      }}
+                    />
+                    <Button leftIcon={<Icon as={FiFile} />}>Upload</Button>
+                  </InputGroup>
+
+                  <FormErrorMessage>
+                    {errors.avatar && errors?.avatar.message}
+                  </FormErrorMessage>
+                </FormControl>
+              </Stack>
+              <Button
+                colorScheme="orange"
+                mr={3}
+                // isLoading={isLoading}
+                // isLoading={isFetching}
+                // isDisabled={isSubmitting}
+                cursor="pointer"
+                onClick={handleSubmit(onSubmit)}
+              >
+                Continue
+              </Button>
+            </Stack>
             <Box>
               <Image
+                boxSize={{ base: "300px", md: "350px" }}
                 src="src/assets/svgs/complete_profile.svg"
                 alt="profile illustration"
                 borderRadius={20}
               />
             </Box>
-
-            <VStack spacing={6} w={"full"}>
-              <FormControl isInvalid={!!errors.username} mt={6} isRequired>
-                <FormLabel htmlFor="username" fontSize="lg">
-                  Username
-                </FormLabel>
-                <Input
-                  id="username"
-                  type="text"
-                  placeholder="username"
-                  {...register("username")}
-                />
-                <FormErrorMessage>
-                  {errors.username && errors.username.message}
-                </FormErrorMessage>
-              </FormControl>
-              <FormControl isInvalid={!!errors.avatar} isRequired>
-                <FormLabel htmlFor="avatar" fontSize="lg">
-                  Avatar
-                </FormLabel>
-                <InputGroup onClick={() => inputRef.current?.click()}>
-                  <Input
-                    id="avatar"
-                    type="file"
-                    hidden
-                    accept="image/*"
-                    {...rest}
-                    ref={(e) => {
-                      ref(e);
-                      inputRef.current = e;
-                    }}
-                  />
-                  <Button leftIcon={<Icon as={FiFile} />}>Upload</Button>
-                </InputGroup>
-
-                <FormErrorMessage>
-                  {errors.avatar && errors?.avatar.message}
-                </FormErrorMessage>
-              </FormControl>
-            </VStack>
-          </VStack>
+          </Stack>
         </ModalBody>
-
-        <ModalFooter>
-          <Button
-            colorScheme="orange"
-            mr={3}
-            // isLoading={isLoading}
-            // isLoading={isFetching}
-            // isDisabled={isSubmitting}
-            cursor="pointer"
-            onClick={handleSubmit(onSubmit)}
-          >
-            Continue
-          </Button>
-        </ModalFooter>
       </ModalContent>
     </Modal>
   );

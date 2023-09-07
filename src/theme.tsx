@@ -4,25 +4,24 @@ import Color from "color";
 // const lighten = (clr, value) => Color(clr).lighten(value).hex().toString();
 // const darken = (clr, value) => Color(clr).darken(value).hex().toString();
 
-
 const Button = defineStyleConfig({
   // The styles all button have in common
   baseStyle: {
-    color: 'blackAlpha.900',
-    bg: '#FF9100',
-    fontWeight: 'bold',
-    textTransform: 'uppercase',
-    borderRadius: 'base', // <-- border radius is same for all variants and sizes
+    color: "blackAlpha.900",
+    bg: "#FF9100",
+    fontWeight: "bold",
+    textTransform: "uppercase",
+    borderRadius: "base", // <-- border radius is same for all variants and sizes
   },
   // Two sizes: sm and md
   sizes: {
     sm: {
-      fontSize: 'sm',
+      fontSize: "sm",
       px: 4, // <-- px is short for paddingLeft and paddingRight
       py: 3, // <-- py is short for paddingTop and paddingBottom
     },
     md: {
-      fontSize: 'md',
+      fontSize: "md",
       px: 6, // <-- these values are tokens from the design system
       py: 4, // <-- these values are tokens from the design system
     },
@@ -30,29 +29,28 @@ const Button = defineStyleConfig({
   // Two variants: outline and solid
   variants: {
     outline: {
-      border: '2px solid',
-      borderColor: 'purple.500',
-      color: 'purple.500',
+      border: "2px solid",
+      borderColor: "purple.500",
+      color: "purple.500",
     },
     solid: {
-      bg: 'purple.500',
-      color: 'white',
+      bg: "purple.500",
+      color: "white",
     },
   },
   // The default size and variant values
   defaultProps: {
-    size: 'md',
-    variant: 'outline',
+    size: "md",
+    variant: "outline",
   },
-})
-
+});
 
 const Drawer = {
   sizes: {
     menu: {
-      dialog: { maxWidth: "150px" }
-    }
-  }
+      dialog: { maxWidth: "150px" },
+    },
+  },
 };
 
 const theme = extendTheme({
@@ -99,7 +97,7 @@ const theme = extendTheme({
   //   // Button,
   // },
   components: {
-    Drawer
+    Drawer,
   },
   fonts: {
     heading: `'Montserrat', "Poppins", sans-serif`,
@@ -119,8 +117,9 @@ const theme = extendTheme({
         direction: "row",
         justifyContent: "center",
         alignItems: "start",
-        // overflow: "0 auto",
-        // minHeight: "100vh",
+        // overflow: "auto",
+        // height: "100vh",
+        // width: "100vw",
         // minWidth: "100vw",
         position: "relative",
         margin: 0,

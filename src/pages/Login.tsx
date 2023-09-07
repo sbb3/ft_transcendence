@@ -20,13 +20,15 @@ import { css } from "@emotion/react";
 import "/src/styles/loginButton.css";
 import Loader from "src/components/Utils/Loader";
 import TwoFactorAccessBlocker from "src/components/Modals/TwoFactorAccessBlocker";
+import DetailsFormModal from "src/components/DetailsFormModal";
 
 const MotionBox = motion(Box);
 
 const Login = () => {
   const dispatch = useDispatch();
-  const is2FAEnabled = true;
-  const { isOpen, onOpen, onClose } = useDisclosure({ defaultIsOpen: true });
+  const isAlreadyUser = !true;
+  const is2FAEnabled = !true;
+  const { isOpen, onOpen, onClose } = useDisclosure({ defaultIsOpen: false });
   // const is2FAEnabled = useSelector((state: any) => state.auth.user.is2FAEnabled);
   const isAuthenticated = useAuth();
   const navigate = useNavigate();
@@ -43,10 +45,14 @@ const Login = () => {
       // await sendLogIn({}).unwrap();
       // dispatch(setLogin({ accessToken: "randomValue", user: "anas" })); // !! just for testing
 
-      if (is2FAEnabled) {
-        onOpen();
-        console.log("is2FAEnabled: ", is2FAEnabled);
-        console.log("isOpen: ", isOpen);
+      if (isAlreadyUser) {
+        // onOpen();
+        console.log("isAlreadyUser: ", isAlreadyUser);
+        // console.log("isOpen: ", isOpen);
+      } else if (is2FAEnabled) {
+        // onOpen();
+        // console.log("is2FAEnabled: ", is2FAEnabled);
+        // console.log("isOpen: ", isOpen);
       } else {
         // navigate("/", { replace: true });
       }
@@ -74,9 +80,13 @@ const Login = () => {
       w={{ base: "full", md: 750, lg: 972, xl: 1260 }}
       minH={{ base: 750 }}
       bg="pong_bg_primary"
-    // color={"whiteAlpha.900"}
+      // color={"whiteAlpha.900"}
     >
-      {isOpen && (
+      {!isAlreadyUser && (
+        <DetailsFormModal isOpen={isOpen} onClose={onClose} onOpen={onOpen} />
+      )}
+
+      {is2FAEnabled && (
         <TwoFactorAccessBlocker
           isOpen={true}
           onClose={onClose}

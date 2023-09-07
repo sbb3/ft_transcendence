@@ -2,40 +2,40 @@ import { Routes, Route } from "react-router-dom";
 import AuthVerification from "./features/auth/AuthVerification";
 import StayLoggedIn from "./features/auth/StayLoggedIn.tsx";
 import {
-	Overview,
-	Settings,
-	Game,
-	Chat,
-	Watch,
-	Support,
-	Login,
-	NotFoundPage,
+  Overview,
+  Settings,
+  Game,
+  Chat,
+  Watch,
+  Support,
+  Login,
+  NotFoundPage,
 } from "./pages";
 import Layout from "./layouts/Layout.tsx";
 
 function App() {
-	return (
-		<Routes>
-			{/* <Route path="/login" element={<StayLoggedIn />}>
+  return (
+    <Routes>
+      <Route path="/login" element={<StayLoggedIn />}>
         <Route index element={<Login />} />
-      </Route> */}
-			{/* <Route element={<AuthVerification />}> */}
-			<Route path="/" element={<Layout />}>
-				<Route index element={<Overview />} />
-				<Route path="settings" element={<Settings />} />
-				<Route path="play" element={<Game />} />
-				<Route path="chat" element={<Chat />} />
-				<Route path="watch" element={<Watch />} />
-				<Route path="support" element={<Support />} />
-			</Route>
-			{/* </Route> */}
+      </Route>
+      {/* <Route element={<AuthVerification />}> */}
+      <Route path="/" element={<Layout />}>
+        <Route index element={<Overview />} />
+        <Route path="settings" element={<Settings />} />
+        <Route path="play" element={<Game />} />
+        <Route path="chat" element={<Chat />} />
+        <Route path="watch" element={<Watch />} />
+        <Route path="support" element={<Support />} />
+      </Route>
+      {/* </Route> */}
 
-			<Route path="*" element={<NotFoundPage />} />
-		</Routes>
-	);
+      <Route path="*" element={<NotFoundPage />} />
+    </Routes>
+  );
 }
 {
-	/* <Route element={<PrefetchUsers />} > */
+  /* <Route element={<PrefetchUsers />} > */
 }
 
 export default App;

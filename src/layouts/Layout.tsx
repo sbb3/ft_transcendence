@@ -38,9 +38,17 @@ const Layout = () => {
 
     // // h="100vh"
     // >
+    // <Box
+    //   w={{ base: "full", sm: "460px", md: "740px", lg: 880, xl: 1150 }}
+    //   minH={{ base: "full", md: 650, lg: 750, xl: 950 }}
+    // >
     <Flex // !! inner-container - inner box
-      w={{ base: "full", sm: "460px", md: "740px", lg: 880, xl: 1250 }}
-      // w={{ base: "full", sm: "460px", md: "70%", lg: 880, xl: 1250, }}
+      w={{ base: "full", sm: "460px", md: "740px", lg: 880, xl: 1150 }}
+      // minH={{ base: "full", md: 650, lg: 750, xl: 950 }}
+      // h={{ base: 800 }}
+      // h="100vh"
+      h="full"
+      // w="full"
       gap={1}
       borderRadius={24}
       border="1px solid rgba(251, 102, 19, 0.69)"
@@ -54,27 +62,14 @@ const Layout = () => {
       // overflow="auto"
       // wrap={"wrap"}
       // bg="orange"
-      mb={2}
-      h="full"
+      // mb={2}
+      p={2}
+      alignItems={"stretch"}
     >
-      <Box
-        w="150px"
-        minH={"full"}
-        bg="pong_bg_secondary"
-        display={{ base: "none", lg: "flex" }}
-        // mt={2}
-        // mb={2}
-        borderRadius={40}
-      // outline="2px solid yellow"
-      >
-        <Sidebar />
-      </Box>
+      <Sidebar />
       <Flex
-        id="flex1"
-        pos="relative"
         direction={"column"}
         w="full"
-        h="full"
         // overflow="auto"
         // flex={1}
         wrap={"wrap"}
@@ -84,13 +79,16 @@ const Layout = () => {
         // p={2}
         borderRadius={40}
         // justify="space-evenly"
-        justify="center"
+        justify="start"
         align="center"
-        mt={2}
-        zIndex={-3}
-      // outline="2px solid green"
+        // mt={1}
+        // zIndex={-3}
+        // outline="2px solid green"
+        // bg="green"
+        gap={2}
+        p={2}
       >
-        <MotionBox
+        {/* <MotionBox
           pos="absolute"
           w={{ base: "300px", sm: "400px", md: "550px" }}
           h={{ base: "300px", sm: "400px", md: "550px" }}
@@ -99,23 +97,27 @@ const Layout = () => {
           bgSize="contain"
           bgRepeat="no-repeat"
           bgBlendMode="lighten"
-          animate={{ rotate: 360 }}
-          transition={{ ease: "linear", duration: 5, repeat: Infinity }}
+          // animate={{ rotate: 360 }}
+          // transition={{ ease: "linear", duration: 5, repeat: Infinity }}
           opacity={0.9}
           zIndex={-2}
-        />
+        /> */}
         <Header />
         <Flex
-          id="flex2"
+          pos="relative"
           direction={{ base: "row" }}
-          minW="full"
-          minH="full"
+          w="full"
+          flex={1}
           justify="center"
           align="center"
-          borderRadius={40}
+          borderRadius={26}
+          // alignItems={"stretch"}
+          // justifyItems={"stretch"}
           // outline="2px solid white"
-          // p={2}
-          zIndex={-1}
+          p={2}
+          // zIndex={-1}
+          bg="yellow"
+          // overflow={"auto"}
         >
           {shouldOpenDetailsModal ? (
             // <DetailsFormModal closeModal={setShouldOpenDetailsModa l} />
@@ -127,6 +129,7 @@ const Layout = () => {
         </Flex>
       </Flex>
     </Flex>
+    // </Box>
     // </Flex >
   );
 };

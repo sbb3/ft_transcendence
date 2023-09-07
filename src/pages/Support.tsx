@@ -78,75 +78,87 @@ function Support() {
 
   //   style={{ border: "2px solid", borderColor: "green" }}
   return (
-    <VStack mt={8} spacing={8} w={{ base: "full", sm: "full", md: 620 }}>
-      <VStack>
-        <Text
-          fontSize="3xl"
-          style={{
-            // color: "white",
-            color: "purple",
-            fontWeight: "bold",
-            letterSpacing: 1,
-            textTransform: "uppercase",
-          }}
-        >
-          get in touch
-        </Text>
-        <Text mt={4} fontSize="lg" color="#95A1B2">
-          Having an problem or just want to say Hi ? Send us a message
-        </Text>
-      </VStack>
+    <Flex
+      pos="relative"
+      w={"full"}
+      h={"full"}
+      direction="row"
+      justify="center"
+      align="center"
+      bg="pink.500"
+      p={2}
+      borderRadius={26}
+    >
+      <VStack mt={8} spacing={8} w={{ base: "full", sm: "full", md: 620 }}>
+        <VStack>
+          <Text
+            fontSize="3xl"
+            style={{
+              // color: "white",
+              color: "purple",
+              fontWeight: "bold",
+              letterSpacing: 1,
+              textTransform: "uppercase",
+            }}
+          >
+            get in touch
+          </Text>
+          <Text mt={4} fontSize="lg" color="#95A1B2">
+            Having an problem or just want to say Hi ? Send us a message
+          </Text>
+        </VStack>
 
-      <Box w={"full"}>
-        <FormControl isInvalid={!!errors.email} mt={6}>
-          <FormLabel htmlFor="email" fontSize="lg">
-            Email
-          </FormLabel>
-          <Input
-            type="email"
-            id="email"
-            placeholder="your@email.com"
-            {...register("email", {
-              required: "This is required",
-              pattern: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+.[A-Z]{2,}$/i,
-            })}
-          />
-          <FormErrorMessage>
-            {errors.email && typeof errors.email === "string" && null}
-          </FormErrorMessage>
-        </FormControl>
-        <FormControl isInvalid={!!errors.msg} mt={6}>
-          <FormLabel htmlFor="msg" fontSize="lg">
-            Message
-          </FormLabel>
-          <Textarea
-            id="msg"
-            rows={5}
-            placeholder="What you would like to say"
+        <Box w={"full"}>
+          <FormControl isInvalid={!!errors.email} mt={6}>
+            <FormLabel htmlFor="email" fontSize="lg">
+              Email
+            </FormLabel>
+            <Input
+              type="email"
+              id="email"
+              placeholder="your@email.com"
+              {...register("email", {
+                required: "This is required",
+                pattern: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+.[A-Z]{2,}$/i,
+              })}
+            />
+            <FormErrorMessage>
+              {errors.email && typeof errors.email === "string" && null}
+            </FormErrorMessage>
+          </FormControl>
+          <FormControl isInvalid={!!errors.msg} mt={6}>
+            <FormLabel htmlFor="msg" fontSize="lg">
+              Message
+            </FormLabel>
+            <Textarea
+              id="msg"
+              rows={5}
+              placeholder="What you would like to say"
+              w="full"
+              {...register("msg", {
+                required: "This field is required",
+              })}
+            />
+            <FormErrorMessage>
+              {errors.msg && typeof errors.msg === "string" ? errors.msg : null}
+            </FormErrorMessage>
+          </FormControl>
+
+          <Flex
+            mt={8}
+            justify="center"
             w="full"
-            {...register("msg", {
-              required: "This field is required",
-            })}
-          />
-          <FormErrorMessage>
-            {errors.msg && typeof errors.msg === "string" ? errors.msg : null}
-          </FormErrorMessage>
-        </FormControl>
-
-        <Flex
-          mt={8}
-          justify="center"
-          w="full"
-          h="full"
-          cursor="pointer"
-          overflow="hidden"
-        >
-          <Link as={RouterLink} onClick={handleSubmit(onSubmit)}>
-            {View}
-          </Link>
-        </Flex>
-      </Box>
-    </VStack>
+            h="full"
+            cursor="pointer"
+            overflow="hidden"
+          >
+            <Link as={RouterLink} onClick={handleSubmit(onSubmit)}>
+              {View}
+            </Link>
+          </Flex>
+        </Box>
+      </VStack>
+    </Flex>
   );
 }
 

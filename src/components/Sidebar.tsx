@@ -19,6 +19,7 @@ import { BsBinocularsFill } from "react-icons/bs";
 import { BiSolidLogOutCircle } from "react-icons/bi";
 import { BeatLoader } from "react-spinners";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 export const BrandIcon = createIcon({
   displayName: "BrandIcon",
@@ -33,46 +34,57 @@ export const BrandIcon = createIcon({
 
 const MotionBrandIcon = motion(Box);
 
-const NavigationPanelIcons = [
+const NavigationPanel = [
   {
     name: "Overview",
     icon: MdSpaceDashboard,
+    path: "/",
   },
   {
     name: "Settings",
     icon: IoSettingsOutline,
+    path: "/settings",
   },
   {
     name: "Play",
     icon: GoPlay,
+    path: "/play",
   },
   {
     name: "Chat",
     icon: IoChatbubbleEllipsesSharp,
+    path: "/chat",
   },
   {
     name: "Watch",
     icon: BsBinocularsFill,
+    path: "/watch",
   },
   {
     name: "Support",
     icon: HiUsers,
+    path: "/support",
+  },
+  {
+    name: "Logout",
+    icon: BiSolidLogOutCircle,
+    path: "/login",
   },
 ];
 
 const Sidebar = () => {
+  const navigate = useNavigate();
   const players_online = 10;
   const player_lvl = 2;
 
   return (
     <Stack
-      spacing={8}
+      w="150px"
+      display={{ base: "none", lg: "flex" }}
       justify="start"
+      spacing={8}
       pt={4}
       pb={6}
-      //   outline="2px solid blue"
-      w="full"
-      minH="full"
       borderRadius={24}
       border="1px solid rgba(251, 102, 19, 0.69)"
       boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.25)"
@@ -80,12 +92,14 @@ const Sidebar = () => {
       bgImage={`url('src/assets/img/BlackNoise.png')`}
       bgSize="cover"
       bgRepeat="no-repeat"
+      bg="pong_bg_secondary"
+      // m={2}
     >
       <Stack
         spacing={5}
         align="center"
         w="full"
-        h="full"
+        // h="full"
         pos="relative"
         // outline="2px solid red"
       >
@@ -158,7 +172,7 @@ const Sidebar = () => {
         />
         <Stack spacing={0} align="end" w="full">
           <Flex direction={"column"} justify="center" align="center" gap={5}>
-            {NavigationPanelIcons.map((nav, index) => (
+            {NavigationPanel.map((nav, index) => (
               <Tooltip
                 label={nav.name}
                 aria-label={nav.name}
@@ -183,12 +197,21 @@ const Sidebar = () => {
                   }
                   _hover={{
                     background:
-                      "linear-gradient(270deg, rgba(118, 56, 20, 0.60) 3.89%, rgba(253, 127, 44, 0.12) 47.44%, rgba(253, 127, 44, 0.15) 80.48%)",
-                    borderRight: "7px solid #FB6613",
-                    borderRadius: "6px 0px 0px 6px",
-                    color: "pong_cl_primary",
+                      nav.name === "Logout"
+                        ? "linear-gradient(90deg, rgba(229,62,62,0.2) 3.89%, rgba(253,127,44,0.12) 47.44%, rgba(133,30,30,0.5) 80.48%)"
+                        : "linear-gradient(270deg, rgba(118, 56, 20, 0.60) 3.89%, rgba(253, 127, 44, 0.12) 47.44%, rgba(253, 127, 44, 0.15) 80.48%)",
+                    borderRight:
+                      nav.name === "Logout"
+                        ? "7px solid #E53E3E"
+                        : "7px solid #FB6613",
+                    borderRadius:
+                      nav.name === "Logout"
+                        ? "6px 0px 6px 6px"
+                        : "6px 0px 0px 6px",
+                    color:
+                      nav.name === "Logout" ? "#E53E3E" : "pong_cl_primary",
                   }}
-                  onClick={() => console.log("clicked on dashboard")}
+                  onClick={() => navigate(nav.path)}
                 />
               </Tooltip>
             ))}
@@ -207,8 +230,9 @@ const Sidebar = () => {
         // p={2}
         // outline="1px solid yellow"
         w="full"
+        // h="full"
       >
-        <Flex
+        {/* <Flex
           direction={"column"}
           justify="center"
           align="center"
@@ -249,7 +273,7 @@ const Sidebar = () => {
               onClick={() => console.log("clicked on dashboard")}
             />
           </Tooltip>
-        </Flex>
+        </Flex> */}
       </Stack>
     </Stack>
   );

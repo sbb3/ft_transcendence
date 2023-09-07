@@ -14,18 +14,24 @@ function Overview() {
       w="full"
       h="full"
       direction={{ base: "column", md: "row" }}
-      justify={{ base: "center", md: "start" }}
+      justify={{ base: "start", md: "space-evenly" }}
       align={{ base: "center", md: "start" }}
-      p={2}
+      // p={2}
       borderRadius={40}
       gap={4}
       // outline="2px solid yellow"
-      wrap={"wrap"}
+      // wrap={"wrap"}
+      bg="teal.400"
+      p={4}
     >
-      <Profile />
-      <Friends />
-      <Leaderboard />
-      <RecentGames />
+      <Flex direction={{ base: "column", xl: "column" }} gap={4}>
+        <Profile />
+        <Leaderboard />
+      </Flex>
+      <Flex direction={{ base: "column", xl: "column" }} gap={4}>
+        <Friends />
+        <RecentGames />
+      </Flex>
     </Flex>
   );
 }

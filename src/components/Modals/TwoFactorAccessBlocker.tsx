@@ -103,7 +103,7 @@ const TwoFactorAccessBlocker = ({ isOpen, onClose, onOpen }) => {
       closeOnEsc={false}
       closeOnOverlayClick={false}
       isCentered={true}
-    // size="xl"
+      // size="xl"
     >
       <ModalOverlay />{" "}
       <ModalContent
@@ -129,9 +129,7 @@ const TwoFactorAccessBlocker = ({ isOpen, onClose, onOpen }) => {
             pr={2}
           >
             <Flex justifyContent="center" alignItems="center">
-              <Box display='block'>
-                {View}
-              </Box>
+              <Box display="block">{View}</Box>
             </Flex>
 
             <Stack spacing={3} w={"full"} align={"center"}>
@@ -149,7 +147,7 @@ const TwoFactorAccessBlocker = ({ isOpen, onClose, onOpen }) => {
                   justify="center"
                   align="start"
                   w="full"
-                // outline="1px solid yellow"
+                  // outline="1px solid yellow"
                 >
                   <FormLabel
                     htmlFor="pin"
