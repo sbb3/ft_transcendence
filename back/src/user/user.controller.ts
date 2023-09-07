@@ -31,9 +31,8 @@ export class UserController {
 		storage : diskStorage({
 			destination : './uploads',
 			filename : (req, file, cb) => {
-				const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-				const extension = path.extname(file.originalname);
-				cb(null, `${uniqueSuffix}${extension}`);
+				const fileName = Date.now() + '-' + Math.round(Math.random() * 1E9) + path.extname(file.originalname);
+				cb(null, fileName);
 			}
 		})
 	}))
@@ -41,9 +40,16 @@ export class UserController {
 		const {name, username} = request['user'];
 		const imageUrl = 'http://localhost:3000/user/image/' + file.filename;
 
-		const user = await this.prismaService.updateUserData({name, username}, {profileImage : imageUrl});
-		if (!user)
+		const userWithOldImage = await this.prismaService.findUser({name, username});
+		if (!userWithOldImage)
 			throw new NotFoundException();
+
+		const oldImagePath = './uploads/' + userWithOldImage.profileImage.replace('http://localhost:3000/user/image/', '');
+		
+		if (fs.existsSync(oldImagePath))
+			fs.unlinkSync(oldImagePath);
+
+		await this.prismaService.updateUserData({name, username}, {profileImage : imageUrl});
 		return ;
 	}
 
