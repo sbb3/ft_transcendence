@@ -266,8 +266,9 @@ const Card = ({ person }) => {
       borderRadius="22px"
       align="center"
       gap={2}
-      pl={2}
-      pr={2}
+      // pl={2}
+      // pr={2}
+      px={2}
       w="220px"
       h="40px"
       bgColor={
