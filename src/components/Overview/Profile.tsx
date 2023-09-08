@@ -41,7 +41,7 @@ const Profile = () => {
                                 adouib
                             </Text>
                         </Flex>
-                        <Flex direction='row' gap='14px'>
+                        <Flex direction='row' gap='14px' align='center'>
                             <IconButton size='sm' fontSize="lg" bg={'pong_cl_primary'} color={'white'} borderRadius={8} aria-label='Send a message' icon={<FiMessageSquare />}
                                 _hover={{ bg: 'white', color: 'pong_cl_primary' }}
                             />

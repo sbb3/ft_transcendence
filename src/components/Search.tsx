@@ -79,14 +79,15 @@ const Search = () => {
       direction="row"
       align="center"
       justify="center"
-      // gap={2}
-      // outline="2px solid yellow"
+    // gap={2}
+    // outline="2px solid yellow"
     >
       <AutoComplete
         // isLoading={isLoading}
         openOnFocus
         listAllValuesOnFocus
         closeOnSelect={true}
+        flip={false}
       >
         <InputGroup mr={4}>
           <InputLeftElement
@@ -115,11 +116,11 @@ const Search = () => {
             color="white"
             placeholder="username or email address"
             _placeholder={{
-              fontSize: 14,
+              fontSize: 12,
               letterSpacing: 0.5,
               fontWeight: "light",
               opacity: 0.7,
-              color: "gray.500",
+              color: "gray.400",
             }}
             loadingIcon={<BeatLoader size={8} color="#FF8707" />}
           />
@@ -174,7 +175,7 @@ const Search = () => {
                     justify="space-between"
                     align="center"
                     w="full"
-                    // key={option.id}
+                  // key={option.id}
                   >
                     <Flex
                       direction="row"

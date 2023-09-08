@@ -77,8 +77,8 @@ const Friends = () => {
       bgImage={`url('src/assets/img/BlackNoise.png')`}
       bgSize="cover"
       bgRepeat="no-repeat"
-      // outline="2px solid yellow"
-      // borderRadius={24}
+    // outline="2px solid yellow"
+    // borderRadius={24}
     >
       <Flex direction="row" align="center" justify="center" gap={1.5}>
         <Icon boxSize="22px" as={GiThreeFriends} color="white" />
@@ -120,7 +120,7 @@ const Friends = () => {
       <Stack
         direction={"column"}
 
-        // outline="2px solid red"
+      // outline="2px solid red"
       >
         <AutoComplete
           rollNavigation
@@ -129,6 +129,7 @@ const Friends = () => {
           defaultIsOpen={true}
           listAllValuesOnFocus
           closeOnSelect={false}
+        // flip={false}
         >
           <InputGroup mr={4}>
             <InputLeftElement

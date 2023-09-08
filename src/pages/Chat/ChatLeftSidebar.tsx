@@ -1,0 +1,379 @@
+import {
+    Avatar,
+    AvatarBadge,
+    Box,
+    Button,
+    CloseButton,
+    Flex,
+    IconButton,
+    Menu,
+    MenuButton,
+    MenuDivider,
+    MenuItem,
+    MenuList,
+    Stack,
+    Text,
+} from "@chakra-ui/react";
+import React from "react";
+import SearchDMsChannels from "./SearchDMsChannels";
+import Divider from "src/components/Divider";
+import {
+    ChevronDownIcon,
+    ChevronLeftIcon,
+    ChevronRightIcon,
+    ChevronUpIcon,
+} from "@chakra-ui/icons";
+import { FiHash, FiInfo, FiPlus, FiSearch } from "react-icons/fi";
+import { BsPersonPlus } from "react-icons/bs";
+import channels from "src/config/data/channels";
+import conversations from "src/config/data/conversations";
+
+
+// TODO: useRef to focus on chat input when opening chat or clicking on a user
+const ChatLeftSidebar = () => {
+    return (
+        <Stack w="300px" h="full" bg="gray" borderRadius={26} p={2}>
+            <Text m={"0 auto"} color="whiteAlpha.900" fontSize="xl" fontWeight="bold">
+                Chat
+            </Text>
+            <Divider color="orange" />
+            <SearchDMsChannels />
+            <Divider color="orange" />
+            <Stack justify="start" align="start" w="full" gap="0px">
+                <Flex direction="row" justify="space-between" align="center" w="full">
+                    <Flex justify="start" align="center" direction="row" gap="2px">
+                        <Menu
+                            gutter={14}
+                            computePositionOnMount={true}
+                            defaultIsOpen
+                            preventOverflow={true}
+                            boundary="scrollParent"
+                            closeOnBlur={false}
+                            strategy="absolute"
+                            closeOnSelect={false}
+                            flip={false}
+                        >
+                            {({ isOpen }) => (
+                                <>
+                                    <MenuButton
+                                        isActive={isOpen}
+                                        as={Button}
+                                        leftIcon={
+                                            isOpen ? <ChevronDownIcon /> : <ChevronRightIcon />
+                                        }
+                                        sx={{
+                                            "&:hover": {
+                                                background: "none",
+                                                boxShadow: "none",
+                                                border: "none",
+                                            },
+                                            "&:active": {
+                                                background: "none",
+                                                boxShadow: "none",
+                                                border: "none",
+                                            },
+                                            "&:focus": {
+                                                background: "none",
+                                                boxShadow: "none",
+                                                border: "none",
+                                            },
+                                            "&:selected": {
+                                                background: "none",
+                                                boxShadow: "none",
+                                                border: "none",
+                                            },
+                                            fontSize: "14px",
+                                            fontWeight: "semibold",
+                                            color: "white",
+                                            padding: "0px",
+                                            height: "auto",
+                                            background: "none",
+                                            boxShadow: "none",
+                                            border: "none",
+                                        }}
+                                        _active={{
+                                            background: "none",
+                                            boxShadow: "none",
+                                            border: "none",
+                                        }}
+                                        _focus={{
+                                            background: "none",
+                                            boxShadow: "none",
+                                            border: "none",
+                                        }}
+                                        _hover={{
+                                            background: "none",
+                                            boxShadow: "none",
+                                            border: "none",
+                                        }}
+                                        _selected={{
+                                            background: "none",
+                                            boxShadow: "none",
+                                            border: "none",
+                                        }}
+                                    >
+                                        Channels
+                                    </MenuButton>
+                                    <MenuList
+                                        p={0}
+                                        bg={"red"}
+                                        w={"280px"}
+                                        height="240px"
+                                        overflowY="scroll"
+                                    >
+                                        {channels.map((channel, index) => (
+                                            <>
+                                                <MenuItem
+                                                    key={index}
+                                                    bg={"pong_bg.300"}
+                                                    icon={<FiHash />}>
+                                                    {channel.name}
+                                                </MenuItem>
+                                                <MenuDivider m={0} />
+                                            </>
+                                        ))}
+                                    </MenuList>
+                                </>
+                            )}
+                        </Menu>
+                    </Flex>
+                    <Flex direction="row" gap="2px" align={"center"} justify="center">
+                        <IconButton
+                            size="xs"
+                            fontSize="lg"
+                            bg={"pong_bg_secondary"}
+                            color={"white"}
+                            borderRadius={8}
+                            aria-label="Search for a channel"
+                            icon={<FiSearch />}
+                            _hover={{ bg: "white", color: "pong_bg_secondary" }}
+                        />
+                        <IconButton
+                            size="xs"
+                            fontSize="lg"
+                            bg={"pong_bg_secondary"}
+                            color={"white"}
+                            borderRadius={8}
+                            aria-label="Channel info"
+                            icon={<FiInfo />}
+                            _hover={{ bg: "white", color: "pong_bg_secondary" }}
+                        />
+                        <IconButton
+                            size="xs"
+                            fontSize="lg"
+                            bg={"pong_bg_secondary"}
+                            color={"white"}
+                            borderRadius={8}
+                            aria-label="Add a channel"
+                            icon={<FiPlus />}
+                            _hover={{ bg: "white", color: "pong_bg_secondary" }}
+                        />
+                    </Flex>
+                </Flex>
+                <Box mt={2} w="full" height="245px" bg={"yellow"}></Box>
+            </Stack>
+            <Divider color="orange" />
+            <Flex direction="row" justify="space-between" align="center">
+                <Flex justify="start" align="center" direction="row" gap="2px">
+                    <Menu
+                        gutter={14}
+                        computePositionOnMount={true}
+                        defaultIsOpen
+                        preventOverflow={true}
+                        boundary="scrollParent"
+                        closeOnBlur={false}
+                        strategy="absolute"
+                        closeOnSelect={false}
+                        flip={false}
+                    >
+                        {({ isOpen }) => (
+                            <>
+                                <MenuButton
+                                    isActive={isOpen}
+                                    as={Button}
+                                    leftIcon={isOpen ? <ChevronDownIcon /> : <ChevronRightIcon />}
+                                    sx={{
+                                        "&:hover": {
+                                            background: "none",
+                                            boxShadow: "none",
+                                            border: "none",
+                                        },
+                                        "&:active": {
+                                            background: "none",
+                                            boxShadow: "none",
+                                            border: "none",
+                                        },
+                                        "&:focus": {
+                                            background: "none",
+                                            boxShadow: "none",
+                                            border: "none",
+                                        },
+                                        "&:selected": {
+                                            background: "none",
+                                            boxShadow: "none",
+                                            border: "none",
+                                        },
+                                        fontSize: "14px",
+                                        fontWeight: "semibold",
+                                        color: "white",
+                                        padding: "0px",
+                                        height: "auto",
+                                        background: "none",
+                                        boxShadow: "none",
+                                        border: "none",
+                                    }}
+                                    _active={{
+                                        background: "none",
+                                        boxShadow: "none",
+                                        border: "none",
+                                    }}
+                                    _focus={{
+                                        background: "none",
+                                        boxShadow: "none",
+                                        border: "none",
+                                    }}
+                                    _hover={{
+                                        background: "none",
+                                        boxShadow: "none",
+                                        border: "none",
+                                    }}
+                                    _selected={{
+                                        background: "none",
+                                        boxShadow: "none",
+                                        border: "none",
+                                    }}
+                                >
+                                    Direct Messages
+                                </MenuButton>
+                                <MenuList
+                                    as={Stack}
+                                    p={0}
+                                    w={"280px"}
+                                    height="245px"
+                                    overflowY="scroll"
+                                    spacing={0}
+                                    bg={"pong_bg.400"}
+                                >
+                                    {
+                                        conversations.map((conversation, index) => (
+                                            <>
+                                                <MenuItem bg={"pong_bg.600"} pt={0} pb={0}
+                                                    // borderRadius={"16px"}
+                                                    key={index}
+                                                >
+                                                    <Flex
+                                                        direction="row"
+                                                        // gap="10px"
+                                                        align="center"
+                                                        justify="space-between"
+                                                        w={"full"}
+                                                    >
+                                                        <Flex
+                                                            direction="row"
+                                                            gap="10px"
+                                                            align="center"
+                                                            justify="end"
+                                                            _hover={{ bg: "pong_bg.300" }}
+                                                            _focus={{ bg: "pong_bg.300" }}
+                                                            _selected={{ bg: "pong_bg.300" }}
+                                                        >
+                                                            <Avatar
+                                                                size="md"
+                                                                name="Anas Douib"
+                                                                src={conversation.avatar}
+                                                                borderColor="green.400"
+                                                                borderWidth="3px"
+                                                            >
+                                                                <AvatarBadge
+                                                                    boxSize="1em"
+                                                                    border="2px solid white"
+                                                                    bg={"green.400"}
+                                                                    position="absolute"
+                                                                    bottom={"-15%"}
+                                                                    right={"0%"}
+                                                                    translateY={"50%"}
+                                                                >
+                                                                    <Text
+                                                                        fontSize="8px"
+                                                                        fontWeight="bold"
+                                                                        color="white"
+                                                                    >
+                                                                        {conversation.unreadMessages}
+                                                                    </Text>
+                                                                </AvatarBadge>
+                                                            </Avatar>
+                                                            <Stack
+                                                                direction="column"
+                                                                spacing={0}
+                                                                justify="start"
+                                                                align='start'
+                                                                w="full"
+                                                            >
+                                                                <Text
+                                                                    fontSize="16px"
+                                                                    fontWeight="semibold"
+                                                                    alignSelf={"stretch"}
+                                                                    color={"whiteAlpha.900"}
+                                                                    letterSpacing={0}
+                                                                    lineHeight={"auto"}
+                                                                    overflow={"hidden"}
+                                                                    whiteSpace={"nowrap"}
+                                                                    textOverflow={"ellipsis"}
+                                                                >
+                                                                    {conversation.name}
+                                                                </Text>
+                                                                <Text
+                                                                    overflow={"hidden"}
+                                                                    fontSize="12px"
+                                                                    fontWeight="regular"
+                                                                    color="whiteAlpha.600"
+                                                                    alignSelf={"stretch"}
+                                                                    whiteSpace={"nowrap"}
+                                                                    textOverflow="ellipsis"
+                                                                >
+                                                                    {conversation.lastMessage}
+                                                                </Text>
+                                                                <Text
+                                                                    overflow={"hidden"}
+                                                                    fontSize="12px"
+                                                                    fontWeight="regular"
+                                                                    color="whiteAlpha.600"
+                                                                    alignSelf={"stretch"}
+                                                                    whiteSpace={"nowrap"}
+                                                                    textOverflow="ellipsis"
+                                                                >
+                                                                    {conversation.lastMessageDate}
+                                                                </Text>
+                                                            </Stack>
+                                                        </Flex>
+                                                        <CloseButton size="sm" color="white" />
+                                                    </Flex>
+                                                </MenuItem>
+                                                <MenuDivider m={0} />
+                                            </>
+                                        ))
+                                    }
+                                </MenuList>
+                            </>
+                        )}
+                    </Menu>
+                </Flex>
+                <Flex direction="row" gap="2px" align={"center"} justify="center">
+                    <IconButton
+                        size="xs"
+                        fontSize="lg"
+                        bg={"pong_bg_secondary"}
+                        color={"white"}
+                        borderRadius={8}
+                        aria-label="Search for a conversation"
+                        icon={<BsPersonPlus />}
+                        _hover={{ bg: "white", color: "pong_bg_secondary" }}
+                    />
+                </Flex>
+            </Flex>
+            <Box w="full" height="250px" bg={"red"}></Box>
+        </Stack>
+    );
+};
+
+export default ChatLeftSidebar;

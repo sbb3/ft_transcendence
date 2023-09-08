@@ -93,7 +93,7 @@ const Sidebar = () => {
       bgSize="cover"
       bgRepeat="no-repeat"
       bg="pong_bg_secondary"
-      // m={2}
+    // m={2}
     >
       <Stack
         spacing={5}
@@ -101,7 +101,7 @@ const Sidebar = () => {
         w="full"
         // h="full"
         pos="relative"
-        // outline="2px solid red"
+      // outline="2px solid red"
       >
         {/* <BrandIcon
 					boxSize={"40px"}
@@ -180,7 +180,7 @@ const Sidebar = () => {
                 key={index}
                 closeOnClick
                 hasArrow
-                bg={"#FB6613"}
+                bg={nav.name === "Logout" ? "#E53E3E" : "#FB6613"}
               >
                 <Button
                   key={index}
@@ -209,7 +209,7 @@ const Sidebar = () => {
                         ? "6px 0px 6px 6px"
                         : "6px 0px 0px 6px",
                     color:
-                      nav.name === "Logout" ? "#E53E3E" : "pong_cl_primary",
+                      nav.name === "Logout" ? "#E53E3E" : "#FB6613",
                   }}
                   onClick={() => navigate(nav.path)}
                 />
@@ -230,7 +230,7 @@ const Sidebar = () => {
         // p={2}
         // outline="1px solid yellow"
         w="full"
-        // h="full"
+      // h="full"
       >
         {/* <Flex
           direction={"column"}

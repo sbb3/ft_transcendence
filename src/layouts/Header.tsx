@@ -39,7 +39,7 @@ const Header = () => {
       bgRepeat="no-repeat"
     >
       <Search />
-      <Flex direction="row" gap={3}>
+      <Flex direction="row" gap={3} ml={10}>
         <IconButton
           display={{ base: "1", lg: "none" }}
           onClick={onOpen}
