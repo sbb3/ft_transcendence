@@ -34,9 +34,9 @@ function App() {
     </Routes>
   );
 }
-{
-  /* <Route element={<PrefetchUsers />} > */
-}
+// {
+//   /* <Route element={<PrefetchUsers />} > */
+// }
 
 export default App;
 // TODO: search and notification z-index, chat sidebar functionalities, responsive, padding and margins
@@ -64,4 +64,3 @@ export default App;
 // TODO: Solution2: fetch on scroll down,
 // TODO: Solution3: refetchOnMountOrArgChange and refetchOnFocus
 // TODO: color spinner
-/*

@@ -51,18 +51,16 @@ const ChatLeftSidebar = ({ toggleDrawer, toggleContent }) => {
       bgSize="cover"
       bgRepeat="no-repeat"
     >
-
       <button onClick={toggleContent}>Toggle Content</button>
       <button onClick={toggleDrawer}>Show Drawer</button>
-      {
-        isCreateChannelOpen && (
-          <CreateChannel
-            isOpen={isCreateChannelOpen}
-            onOpen={onOpen}
-            onClose={onClose}
-          />
-        )
-      }
+      {isCreateChannelOpen && (
+        <CreateChannel
+          isOpen={isOpen}
+          onOpen={onOpen}
+          onClose={onClose}
+          setIsCreateChannelOpen={setIsCreateChannelOpen}
+        />
+      )}
 
       <Text m={"0 auto"} color="whiteAlpha.900" fontSize="xl" fontWeight="bold">
         Chat
@@ -152,7 +150,6 @@ const ChatLeftSidebar = ({ toggleDrawer, toggleContent }) => {
                     height="250px"
                     borderRadius={"16px"}
                     border={"none"}
-
                   >
                     <ScrollArea.Root className="ScrollAreaRoot">
                       <ScrollArea.Viewport className="ScrollAreaViewport">
@@ -233,7 +230,7 @@ const ChatLeftSidebar = ({ toggleDrawer, toggleContent }) => {
             />
           </Flex>
         </Flex>
-        <Box mt={3} w="full" height="255px" ></Box>
+        <Box mt={3} w="full" height="255px"></Box>
       </Stack>
       <Divider mt={4} color="orange" />
       <Flex direction="row" justify="space-between" align="center">
@@ -467,7 +464,7 @@ const ChatLeftSidebar = ({ toggleDrawer, toggleContent }) => {
       <Box
         w="full"
         height="360px"
-      //    bg={"red"}
+        //    bg={"red"}
       ></Box>
     </Flex>
   );
