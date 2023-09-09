@@ -85,17 +85,16 @@ function Support() {
       direction="row"
       justify="center"
       align="center"
-      bg="pink.500"
       p={2}
       borderRadius={26}
     >
-      <VStack mt={8} spacing={8} w={{ base: "full", sm: "full", md: 620 }}>
+      <VStack mt={8} spacing={8} w={{ base: "full", sm: "380px", md: 520 }}>
         <VStack>
           <Text
             fontSize="3xl"
             style={{
               // color: "white",
-              color: "purple",
+              color: "white",
               fontWeight: "bold",
               letterSpacing: 1,
               textTransform: "uppercase",

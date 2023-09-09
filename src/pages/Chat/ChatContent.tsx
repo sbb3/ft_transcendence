@@ -22,41 +22,25 @@ import ChatContentHeader from "./ChatContentHeader";
 import ChatContentBody from "./ChatContentBody";
 import { useImmer } from "use-immer";
 
+import msgs from "src/config/data/messages.js";
+import { faker } from "@faker-js/faker";
+
+
+// const msgs = [...Array(30)].map(() => ({
+//   id: faker.string.uuid(),
+//   sender: "other" || "me",
+//   content: faker.lorem.sentence(),
+//   avatar: "https://64.media.tumblr.com/a566eec40d22d9989a6fd1e819b347ee/37a863925050913a-a5/s1280x1920/1360367c6057b4cd40ea8105d74580fbcc177fc8.jpg",
+// }));
+
 const ChatContent = ({ toggleContent, isContentOpen }) => {
   const toast = useToast();
-  const [messages, setMessages] = useImmer([
-    {
-      id: 1,
-      sender: "me",
-      content: "Hello there!",
-      avatar: "https://anasdouib.me/images/picture.webp",
-    },
-    {
-      id: 2,
-      sender: "other",
-      content: "Hi, how are you?",
-      avatar:
-        "https://64.media.tumblr.com/a566eec40d22d9989a6fd1e819b347ee/37a863925050913a-a5/s1280x1920/1360367c6057b4cd40ea8105d74580fbcc177fc8.jpg",
-    },
-    {
-      id: 3,
-      sender: "me",
-      content: "I'm fine, thanks!",
-      avatar: "https://anasdouib.me/images/picture.webp",
-    },
-    {
-      id: 4,
-      sender: "other",
-      content: "Good to hear that!",
-      avatar:
-        "https://64.media.tumblr.com/a566eec40d22d9989a6fd1e819b347ee/37a863925050913a-a5/s1280x1920/1360367c6057b4cd40ea8105d74580fbcc177fc8.jpg",
-    },
-  ]);
+  const [messages, setMessages] = useImmer(msgs);
 
   let content;
 
   const onSubmit = (message: any) => {
-    console.log("message: ", message);
+    // console.log("message: ", message);
     setMessages((draft) => {
       draft.push({
         id: draft.length + 1,
@@ -78,7 +62,7 @@ const ChatContent = ({ toggleContent, isContentOpen }) => {
     content = (
       <Stack
         // ml={2}
-        bg={"gray.400"}
+        // bg={"gray.400"}
         justify="center"
         align="center"
         w={"full"}
@@ -93,8 +77,8 @@ const ChatContent = ({ toggleContent, isContentOpen }) => {
             src="src/assets/svgs/messaging_girl.svg"
             alt="Messaging girl"
             borderRadius={20}
-            // w="320px"
-            // h="300px"
+          // w="320px"
+          // h="300px"
           />
         </Flex>
         <Stack spacing={2} align={"start"} justify={"center"}>
@@ -167,6 +151,7 @@ const ChatContent = ({ toggleContent, isContentOpen }) => {
         justify="start"
         align="center"
         w={"full"}
+        // h={"1000px"}
         h={"full"}
         borderRightRadius={26}
         spacing={1}
@@ -181,15 +166,21 @@ const ChatContent = ({ toggleContent, isContentOpen }) => {
   return (
     <Flex
       //   direction="row"
-      bg={"pong_bg_secondary"}
+      // bg={"pong_bg_secondary"}
       pos="relative"
       alignSelf={"stretch"}
       justify="center"
       // align="center"
       p={0}
-      borderRightRadius={26}
+      borderRightRadius={6}
       flex={1}
-      //   gap={6}
+      border="1px solid rgba(251, 102, 19, 0.69)"
+      boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.25)"
+      backdropFilter={"blur(20px)"}
+      bgImage={`url('src/assets/img/BlackNoise.png')`}
+      bgSize="cover"
+      bgRepeat="no-repeat"
+    //   gap={6}
     >
       {content}
     </Flex>

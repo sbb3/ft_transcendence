@@ -66,13 +66,14 @@ const ChatRightModal = ({ isOpen, toggleDrawer }) => {
         marginRight: "1px",
         borderTopRightRadius: "26px",
         borderBottomRightRadius: "26px",
+        backgroundColor: "rgba(51, 51, 51, 0.9)",
         // padding: "4px",
       }}
     >
       <Stack
         w="full"
         h="full"
-        bg="pong_bg_primary"
+        // bg="pong_bg_primary"
         p={2}
         spacing={4}
         borderTopRightRadius="26px"
@@ -159,7 +160,8 @@ const ChatRightModal = ({ isOpen, toggleDrawer }) => {
           // bgGradient="linear(to-r, pong_bg_secondary, pong_bg_primary)"
           justify="center"
           align="center"
-          // wrap={"wrap"}
+          borderRadius={8}
+        // wrap={"wrap"}
         >
           {iconButtonStyles.map(({ icon, label }) => (
             <IconButton

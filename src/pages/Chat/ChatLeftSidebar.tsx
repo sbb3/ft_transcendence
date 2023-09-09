@@ -13,6 +13,7 @@ import {
   MenuList,
   Stack,
   Text,
+  useDisclosure,
 } from "@chakra-ui/react";
 import * as ScrollArea from "@radix-ui/react-scroll-area";
 import "./scrollbar.css";
@@ -23,23 +24,46 @@ import { FiHash, FiInfo, FiPlus, FiSearch } from "react-icons/fi";
 import { BsPersonPlus } from "react-icons/bs";
 import channels from "src/config/data/channels";
 import conversations from "src/config/data/conversations";
+import CreateChannel from "src/components/Chat/CreateChannel";
+import { useState } from "react";
 
 // TODO: useRef to focus on chat input when opening chat or clicking on a user
 const ChatLeftSidebar = ({ toggleDrawer, toggleContent }) => {
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
+  const [isCreateChannelOpen, setIsCreateChannelOpen] = useState(false);
   return (
     <Flex
       direction={"column"}
       w={{ base: "full", md: "330px" }}
       h="full"
-      bg="pong_bg_primary"
+      // bg="pong_bg_primary"
       borderLeftRadius={26}
       borderRightRadius={{ base: 26, md: 0 }}
       p={{ base: 4, md: 6 }}
       // flex={{ base: "1", md: "0" }}
       gap={{ base: 2, sm: 3, md: 4 }}
+      // borderRadius={24}
+      border="1px solid rgba(251, 102, 19, 0.69)"
+      boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.25)"
+      backdropFilter={"blur(20px)"}
+      bgImage={`url('src/assets/img/BlackNoise.png')`}
+      bgSize="cover"
+      bgRepeat="no-repeat"
     >
+
       <button onClick={toggleContent}>Toggle Content</button>
       <button onClick={toggleDrawer}>Show Drawer</button>
+      {
+        isCreateChannelOpen && (
+          <CreateChannel
+            isOpen={isCreateChannelOpen}
+            onOpen={onOpen}
+            onClose={onClose}
+          />
+        )
+      }
+
       <Text m={"0 auto"} color="whiteAlpha.900" fontSize="xl" fontWeight="bold">
         Chat
       </Text>
@@ -123,11 +147,12 @@ const ChatLeftSidebar = ({ toggleDrawer, toggleContent }) => {
                   </MenuButton>
                   <MenuList
                     p={0}
-                    // bg={"red"}
+                    bg={"trasparent"}
                     w={{ base: "250px", sm: "360px", md: "284px" }}
                     height="250px"
                     borderRadius={"16px"}
                     border={"none"}
+
                   >
                     <ScrollArea.Root className="ScrollAreaRoot">
                       <ScrollArea.Viewport className="ScrollAreaViewport">
@@ -135,9 +160,12 @@ const ChatLeftSidebar = ({ toggleDrawer, toggleContent }) => {
                           <>
                             <MenuItem
                               key={index}
-                              bg={"pong_bg.200"}
+                              bg={"trasparent"}
+                              borderRadius={"6px"}
                               icon={<FiHash />}
-                              _focus={{ bg: "pong_bg.400" }}
+                              _focus={{ bg: "pong_bg.200" }}
+                              _hover={{ bg: "pong_bg.200" }}
+                              _selected={{ bg: "pong_bg.200" }}
                               fontSize={{
                                 base: "13px",
                                 sm: "14px",
@@ -199,10 +227,13 @@ const ChatLeftSidebar = ({ toggleDrawer, toggleContent }) => {
               aria-label="Add a channel"
               icon={<FiPlus />}
               _hover={{ bg: "white", color: "pong_bg_secondary" }}
+              onClick={() => {
+                setIsCreateChannelOpen(true);
+              }}
             />
           </Flex>
         </Flex>
-        <Box mt={3} w="full" height="255px" bg={"yellow"}></Box>
+        <Box mt={3} w="full" height="255px" ></Box>
       </Stack>
       <Divider mt={4} color="orange" />
       <Flex direction="row" justify="space-between" align="center">
@@ -280,25 +311,24 @@ const ChatLeftSidebar = ({ toggleDrawer, toggleContent }) => {
                 <MenuList
                   as={Stack}
                   p={0}
-                  // bg={"red"}
+                  bg={"trasparent"}
                   w={{ base: "250px", sm: "360px", md: "284px" }}
                   height="350px"
                   borderRadius={"16px"}
                   spacing={0}
-                  border={"0px solid white"}
-                  //   bg={"none"}
+                  border={"none"}
                 >
                   <ScrollArea.Root className="ScrollAreaRoot">
                     <ScrollArea.Viewport className="ScrollAreaViewport">
                       {conversations.map((conversation, index) => (
                         <>
                           <MenuItem
-                            bg={"pong_bg.200"}
-                            // pt={0}
-                            // pb={0}
-                            // borderRadius={"16px"}
                             key={index}
-                            // borderRadius={"10px"}
+                            bg={"trasparent"}
+                            borderRadius={"6px"}
+                            _focus={{ bg: "pong_bg.200" }}
+                            _hover={{ bg: "pong_bg.200" }}
+                            _selected={{ bg: "pong_bg.200" }}
                           >
                             <Flex
                               direction="row"
@@ -313,9 +343,6 @@ const ChatLeftSidebar = ({ toggleDrawer, toggleContent }) => {
                                 align="center"
                                 justify={"start"}
                                 w={"full"}
-                                _hover={{ bg: "pong_bg.300" }}
-                                _focus={{ bg: "red" }}
-                                _selected={{ bg: "pong_bg.300" }}
                               >
                                 <Avatar
                                   size="md"
@@ -440,7 +467,7 @@ const ChatLeftSidebar = ({ toggleDrawer, toggleContent }) => {
       <Box
         w="full"
         height="360px"
-        //    bg={"red"}
+      //    bg={"red"}
       ></Box>
     </Flex>
   );

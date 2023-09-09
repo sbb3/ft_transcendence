@@ -39,7 +39,7 @@ function App() {
 }
 
 export default App;
-
+// TODO: search and notification z-index, chat sidebar functionalities, responsive, padding and margins
 // TODO: hamburger menu on mobile, clean code, set back routes, then settings, then chat , then game and watch, then ts support, reduce border gradient
 // TODO: fix layout, bg, login
 // TODO: set the Button component customizations in theme.ts
@@ -65,30 +65,3 @@ export default App;
 // TODO: Solution3: refetchOnMountOrArgChange and refetchOnFocus
 // TODO: color spinner
 /*
-TODO:
-
-
-/*
-  // <Flex
-	// 	pos="relative"
-	// 	justify="center"
-	// 	align="center"
-	// 	boxSizing="border-box"
-	// 	m={0}
-	// 	bg="teal.700"
-	// 	color={"whiteAlpha.900"}
-	// 	w="100%"
-	// >
-	// 	<Box
-	// 		w="150px"
-	// 		h={"full"}
-	// 		bg="pong_bg_secondary"
-	// 		// display={{ base: "none", lg: "flex" }}
-	// 		mt={2}
-	// 		mb={2}
-	// 		borderRadius={40}
-	// 	>
-	// 		<Sidebar />
-	// 	</Box>
-	// </Flex>
-*/

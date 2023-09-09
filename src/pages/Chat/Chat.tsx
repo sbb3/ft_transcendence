@@ -6,9 +6,6 @@ import ChatRightModal from "./ChatRightModal";
 import ChatLeftSidebar from "./ChatLeftSidebar";
 import ChatContent from "./ChatContent";
 
-// TODO: scroll to bottom when message is opened
-// TODO: fix chat body height
-
 const Chat = () => {
   useTitle("Chat");
   const [isContentOpen, setIsContentOpen] = useState(false);
@@ -26,7 +23,7 @@ const Chat = () => {
       // bg="orange.700"
       // p={2}
       borderRadius={26}
-      // gap={2}
+    // gap={2}
     >
       <ChatLeftSidebar
         toggleContent={toggleContent}

@@ -21,7 +21,6 @@ function Overview() {
       gap={4}
       // outline="2px solid yellow"
       // wrap={"wrap"}
-      bg="teal.400"
       p={4}
     >
       <Flex direction={{ base: "column", xl: "column" }} gap={4}>

@@ -79,7 +79,7 @@ const Layout = () => {
         // p={2}
         borderRadius={40}
         // justify="space-evenly"
-        justify="start"
+        justify="center"
         align="center"
         // mt={1}
         // zIndex={-3}
@@ -115,9 +115,9 @@ const Layout = () => {
           // justifyItems={"stretch"}
           // outline="2px solid white"
           p={2}
-          // zIndex={-1}
-          bg="yellow"
-          // overflow={"auto"}
+        // zIndex={-1}
+        // bg="yellow"
+        // overflow={"auto"}
         >
           {shouldOpenDetailsModal ? (
             // <DetailsFormModal closeModal={setShouldOpenDetailsModa l} />
