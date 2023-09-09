@@ -26,12 +26,18 @@ import channels from "src/config/data/channels";
 import conversations from "src/config/data/conversations";
 import CreateChannel from "src/components/Chat/CreateChannel";
 import { useState } from "react";
+import ChannelInfoAbout from "src/components/Chat/ChannelInfoAbout";
+import AddDirectMessage from "src/components/Chat/AddDirectMessage";
+import SearchForChannel from "src/components/Chat/SearchForChannel";
 
 // TODO: useRef to focus on chat input when opening chat or clicking on a user
 const ChatLeftSidebar = ({ toggleDrawer, toggleContent }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const [isCreateChannelOpen, setIsCreateChannelOpen] = useState(false);
+  const [isChannelInfoOpen, setIsChannelInfoOpen] = useState(false);
+  const [isAddDirectMessageOpen, setIsAddDirectMessageOpen] = useState(false);
+  const [isSearchForChannelOpen, setIsSearchForChannelOpen] = useState(false);
   return (
     <Flex
       direction={"column"}
@@ -59,6 +65,33 @@ const ChatLeftSidebar = ({ toggleDrawer, toggleContent }) => {
           onOpen={onOpen}
           onClose={onClose}
           setIsCreateChannelOpen={setIsCreateChannelOpen}
+        />
+      )}
+
+      {isChannelInfoOpen && (
+        <ChannelInfoAbout
+          isOpen={isOpen}
+          onOpen={onOpen}
+          onClose={onClose}
+          setIsChannelInfoOpen={setIsChannelInfoOpen}
+        />
+      )}
+
+      {isAddDirectMessageOpen && (
+        <AddDirectMessage
+          isOpen={isOpen}
+          onOpen={onOpen}
+          onClose={onClose}
+          setIsAddDirectMessageOpen={setIsAddDirectMessageOpen}
+        />
+      )}
+
+      {isSearchForChannelOpen && (
+        <SearchForChannel
+          isOpen={isOpen}
+          onOpen={onOpen}
+          onClose={onClose}
+          setIsSearchForChannelOpen={setIsSearchForChannelOpen}
         />
       )}
 
@@ -204,6 +237,9 @@ const ChatLeftSidebar = ({ toggleDrawer, toggleContent }) => {
               aria-label="Search for a channel"
               icon={<FiSearch />}
               _hover={{ bg: "white", color: "pong_bg_secondary" }}
+              onClick={() => {
+                setIsSearchForChannelOpen(true);
+              }}
             />
             <IconButton
               size="xs"
@@ -214,6 +250,9 @@ const ChatLeftSidebar = ({ toggleDrawer, toggleContent }) => {
               aria-label="Channel info"
               icon={<FiInfo />}
               _hover={{ bg: "white", color: "pong_bg_secondary" }}
+              onClick={() => {
+                setIsChannelInfoOpen(true);
+              }}
             />
             <IconButton
               size="xs"
@@ -458,6 +497,9 @@ const ChatLeftSidebar = ({ toggleDrawer, toggleContent }) => {
             aria-label="Search for a conversation"
             icon={<BsPersonPlus />}
             _hover={{ bg: "white", color: "pong_bg_secondary" }}
+            onClick={() => {
+              setIsAddDirectMessageOpen(true);
+            }}
           />
         </Flex>
       </Flex>

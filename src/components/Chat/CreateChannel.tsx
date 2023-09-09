@@ -49,11 +49,11 @@ const validationSchema = yup.object().shape({
   password: yup.string().when("privacy", {
     is: "private",
     then(schema) {
-        return schema
-            .required("Password is required")
-            .min(6, "Minimum length should be 6")
-            .max(20, "Maximum length should be 20")
-            .trim();
+      return schema
+        .required("Password is required")
+        .min(6, "Minimum length should be 6")
+        .max(20, "Maximum length should be 20")
+        .trim();
     },
   }),
 });
@@ -100,7 +100,7 @@ const CreateChannel = ({ isOpen, onOpen, onClose, setIsCreateChannelOpen }) => {
       closeOnEsc={false}
       closeOnOverlayClick={false}
     >
-      <ModalOverlay />{" "}
+      <ModalOverlay />
       <ModalContent
         // bg="green"
         borderRadius={40}
