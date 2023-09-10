@@ -43,7 +43,7 @@ import { MdBlockFlipped, MdGroupAdd } from "react-icons/md";
 import { IoGameControllerOutline } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 import * as ScrollArea from "@radix-ui/react-scroll-area";
-import "src/pages/Chat/scrollbar.css";
+import "src/styles/scrollbar.css";
 import { faker } from "@faker-js/faker";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -92,7 +92,7 @@ const SearchForChannel = ({
         maxW={{ base: "350px", lg: "450px" }}
         mt={4}
         border="1px solid rgba(251, 102, 19, 0.3)"
-        boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.25)"
+        boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.35)"
         backdropFilter={"blur(20px)"}
         bgImage={`url('src/assets/img/BlackNoise.png')`}
         bgSize="cover"
@@ -168,7 +168,7 @@ const SearchForChannel = ({
                 <AutoCompleteList
                   style={{
                     borderRadius: "24px",
-                    border: "1px solid rgba(251, 102, 19, 0.69)",
+                    border: "1px solid rgba(251, 102, 19, 0.39)",
                     boxShadow: "0px 4px 24px -1px rgba(0, 0, 0, 0.25)",
                     backdropFilter: "blur(20px)",
                     backgroundImage: "url('src/assets/img/BlackNoise.png')",
@@ -193,7 +193,7 @@ const SearchForChannel = ({
                           value={channel.name}
                           textTransform="capitalize"
                           // bg="pong_bg.300"
-                          boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.25)"
+                          boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.35)"
                           backdropFilter={"blur(20px)"}
                           bgImage={`url('src/assets/img/BlackNoise.png')`}
                           bgSize="cover"
@@ -240,14 +240,14 @@ const SearchForChannel = ({
                                 size="xs"
                                 fontSize="md"
                                 bg={"white"}
-                                color={"red.500"}
+                                color={"pong_cl_primary"}
                                 borderColor="red.500"
                                 borderWidth="1px"
                                 borderRadius={8}
                                 aria-label="Join channel"
                                 icon={<MdGroupAdd />}
                                 _hover={{
-                                  bg: "red.500",
+                                  bg: "pong_cl_primary",
                                   color: "white",
                                 }}
                                 onClick={() => {

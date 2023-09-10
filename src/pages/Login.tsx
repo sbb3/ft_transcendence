@@ -113,8 +113,8 @@ const Login = () => {
         // w={{ base: "200px", sm: "300px", md: "400px" }}
         // h={{ base: "90px", sm: "120px", md: "168px" }}
         borderRadius={{ base: "15px", sm: "25px", md: "40px" }}
-        border="1px solid rgba(251, 102, 19, 0.69)"
-        boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.25)"
+        border="1px solid rgba(251, 102, 19, 0.1)"
+        boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.35)"
         backdropFilter={"blur(20px)"}
         bgImage={`url('src/assets/img/BlackNoise.png')`}
         bgSize="cover"

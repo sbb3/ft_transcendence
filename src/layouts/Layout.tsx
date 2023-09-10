@@ -51,8 +51,8 @@ const Layout = () => {
       // w="full"
       gap={1}
       borderRadius={24}
-      border="1px solid rgba(251, 102, 19, 0.69)"
-      boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.25)"
+      border="1px solid rgba(251, 102, 19, 0.1)"
+      boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.35)"
       backdropFilter={"blur(20px)"}
       color={"whiteAlpha.900"}
       justify="center"
@@ -115,9 +115,9 @@ const Layout = () => {
           // justifyItems={"stretch"}
           // outline="2px solid white"
           p={2}
-        // zIndex={-1}
-        // bg="yellow"
-        // overflow={"auto"}
+          // zIndex={-1}
+          // bg="yellow"
+          // overflow={"auto"}
         >
           {shouldOpenDetailsModal ? (
             // <DetailsFormModal closeModal={setShouldOpenDetailsModa l} />

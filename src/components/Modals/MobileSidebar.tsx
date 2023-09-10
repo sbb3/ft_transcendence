@@ -29,7 +29,7 @@ const MobileSidebar = ({ isOpen, onClose }) => {
           <DrawerContent
             bg="pong_bg_primary"
             borderRadius={40}
-            border="1px solid rgba(251, 102, 19, 0.69)"
+            border="1px solid rgba(251, 102, 19, 0.1)"
           >
             {/* <DrawerCloseButton /> */}
 

@@ -31,14 +31,10 @@ import { MdBlockFlipped } from "react-icons/md";
 import { IoGameControllerOutline } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 import * as ScrollArea from "@radix-ui/react-scroll-area";
-import "src/components/Overview/friendsStyles.css";
+import "src/styles/scrollbar.css";
 import { BeatLoader } from "react-spinners";
 import { HamburgerIcon, CloseIcon } from "@chakra-ui/icons";
 import { faker } from "@faker-js/faker";
-
-{
-  /* rollNavigation: when you reach the end of the list, it will roll back to the top */
-}
 
 const users = [...Array(30)].map(() => ({
   id: faker.string.uuid(),
@@ -47,40 +43,20 @@ const users = [...Array(30)].map(() => ({
 }));
 
 const Search = () => {
-  const [options, setOptions] = useState<
-    { idt: string; name: string; image: string }[]
-  >([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [query, setQuery] = useState<string>("");
   const navigate = useNavigate();
   const toast = useToast();
 
-  const fetchOptions = async () => {
-    try {
-      setIsLoading(true);
-      const response = await fetch("http://localhost:5001/people");
-      const data = await response.json();
-      console.log("data :", data);
-      setOptions(data);
-      setIsLoading(false);
-    } catch (error) {
-      console.log("error :", error);
-    }
-  };
-
-  useEffect(() => {
-    // fetchOptions();
-  }, []);
-
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  useEffect(() => {}, []);
 
   return (
     <Flex
       direction="row"
       align="center"
       justify="center"
-    // gap={2}
-    // outline="2px solid yellow"
+      // gap={2}
+      // outline="2px solid yellow"
     >
       <AutoComplete
         // isLoading={isLoading}
@@ -114,7 +90,7 @@ const Search = () => {
             bg="pong_bg.400"
             type="text"
             color="white"
-            placeholder="username or email address"
+            placeholder="Search for a player"
             _placeholder={{
               fontSize: 12,
               letterSpacing: 0.5,
@@ -130,33 +106,38 @@ const Search = () => {
           loadingState={<BeatLoader color="#FF8707" />}
           // style={{ backgroundImage: "url('src/assets/img/BlackNoise.png')" }}
           style={{
-            borderRadius: "24px",
+            borderRadius: "8px",
             border: "1px solid rgba(251, 102, 19, 0.69)",
             boxShadow: "0px 4px 24px -1px rgba(0, 0, 0, 0.25)",
             backdropFilter: "blur(20px)",
             backgroundImage: "url('src/assets/img/BlackNoise.png')",
             bgSize: "cover",
             bgRepeat: "no-repeat",
-            backgroundColor: "transparent",
+            backgroundColor: "#333333",
+            // minHeight: "440px",
+            display: "block",
+            marginTop: "4px",
+            padding: "0px",
           }}
           closeOnSelect={false}
           p={1}
           mr={2}
         >
-          <ScrollArea.Root className="ScrollAreaRoot">
+          <ScrollArea.Root
+            style={{
+              width: "100%",
+              height: "100px",
+            }}
+            className="ScrollAreaRoot"
+          >
             <ScrollArea.Viewport className="ScrollAreaViewport">
-              {users.map((option, i) => (
+              {users.map((user, i) => (
                 <AutoCompleteItem
                   key={i}
-                  value={option}
+                  value={user.name}
                   textTransform="capitalize"
                   bg="pong_bg.300"
-                  // boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.25)"
-                  // backdropFilter={"blur(20px)"}
-                  // bgImage={`url('src/assets/img/BlackNoise.png')`}
-                  // bgSize="cover"
-                  // bgRepeat="no-repeat"
-                  borderRadius={50}
+                  borderRadius={8}
                   my={1}
                   _hover={{
                     bg: "pong_bg.500",
@@ -175,19 +156,19 @@ const Search = () => {
                     justify="space-between"
                     align="center"
                     w="full"
-                  // key={option.id}
+                    // key={user.id}
                   >
                     <Flex
                       direction="row"
                       gap="3px"
                       align="center"
                       w={"full"}
-                      onClick={() => navigate(`/profile/${option.name}`)}
+                      onClick={() => navigate(`/profile/${user.name}`)}
                     >
                       <Avatar
                         size="sm"
-                        name={option.name}
-                        src={option.image}
+                        name={user.name}
+                        src={user.avatar}
                         borderColor={"green.400"}
                         borderWidth="2px"
                       >
@@ -204,60 +185,9 @@ const Search = () => {
                         ml={2}
                         flex={1}
                       >
-                        {option.name}
+                        {user.name}
                       </Text>
                     </Flex>
-                    {/* <Flex direction='row' gap='6px' mr={}>
-										<IconButton size='xs' fontSize="md" bg={'white'} color={'red.500'} borderColor='red.500' borderWidth='1px' borderRadius={8} aria-label='Block friend' icon={<MdBlockFlipped />}
-											_hover={{
-												bg: "red.500",
-												color: "white",
-											}}
-											onClick={() => {
-												console.log('block friend');
-												toast({
-													title: "Friend blocked.",
-													description: "We've blocked your friend.",
-													status: "success",
-													duration: 2000,
-													isClosable: true,
-												});
-											}}
-										/>
-										<IconButton size='xs' fontSize="md" bg={'pong_cl_primary'} color={'white'} borderRadius={8} aria-label='Remove friend' icon={<HiUserRemove />}
-											_hover={{
-												bg: "white",
-												color: "pong_cl_primary",
-											}}
-											onClick={() => {
-												console.log('remove friend');
-												toast({
-													title: "Friend removed.",
-													description: "We've removed your friend.",
-													status: "success",
-													duration: 2000,
-													isClosable: true,
-												});
-											}}
-										/>
-										<IconButton size='xs' fontSize="md" bg={'pong_cl_primary'} color={'white'} borderRadius={8} aria-label='Send game request' icon={<IoGameControllerOutline />}
-											_hover={{
-												bg: "white",
-												color: "pong_cl_primary",
-											}}
-											onClick={() => {
-												console.log('send game request');
-												toast({
-													title: "Game request sent.",
-													description: "We've sent a game request to your friend.",
-													status: "success",
-													duration: 2000,
-													isClosable: true,
-												});
-											}}
-										/>
-
-									</Flex> */}
                   </Flex>
                 </AutoCompleteItem>
               ))}

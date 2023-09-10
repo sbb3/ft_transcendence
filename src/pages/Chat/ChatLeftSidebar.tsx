@@ -16,7 +16,7 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import * as ScrollArea from "@radix-ui/react-scroll-area";
-import "./scrollbar.css";
+import "src/styles/scrollbar.css";
 import SearchDMsChannels from "./SearchDMsChannels";
 import Divider from "src/components/Divider";
 import { ChevronDownIcon, ChevronRightIcon } from "@chakra-ui/icons";
@@ -31,7 +31,12 @@ import AddDirectMessage from "src/components/Chat/AddDirectMessage";
 import SearchForChannel from "src/components/Chat/SearchForChannel";
 
 // TODO: useRef to focus on chat input when opening chat or clicking on a user
-const ChatLeftSidebar = ({ toggleDrawer, toggleContent }) => {
+const ChatLeftSidebar = ({
+  setType,
+  setConversation,
+  setChannelData,
+  toggleContent,
+}) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const [isCreateChannelOpen, setIsCreateChannelOpen] = useState(false);
@@ -50,15 +55,13 @@ const ChatLeftSidebar = ({ toggleDrawer, toggleContent }) => {
       // flex={{ base: "1", md: "0" }}
       gap={{ base: 2, sm: 3, md: 4 }}
       // borderRadius={24}
-      border="1px solid rgba(251, 102, 19, 0.69)"
-      boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.25)"
+      border="1px solid rgba(251, 102, 19, 0.1)"
+      boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.35)"
       backdropFilter={"blur(20px)"}
       bgImage={`url('src/assets/img/BlackNoise.png')`}
       bgSize="cover"
       bgRepeat="no-repeat"
     >
-      <button onClick={toggleContent}>Toggle Content</button>
-      <button onClick={toggleDrawer}>Show Drawer</button>
       {isCreateChannelOpen && (
         <CreateChannel
           isOpen={isOpen}
@@ -180,9 +183,11 @@ const ChatLeftSidebar = ({ toggleDrawer, toggleContent }) => {
                     p={0}
                     bg={"trasparent"}
                     w={{ base: "250px", sm: "360px", md: "284px" }}
-                    height="250px"
+                    h="250px"
                     borderRadius={"16px"}
                     border={"none"}
+                    // bg={"red"}
+                    // overflowY={"hidden"}
                   >
                     <ScrollArea.Root className="ScrollAreaRoot">
                       <ScrollArea.Viewport className="ScrollAreaViewport">
@@ -200,6 +205,12 @@ const ChatLeftSidebar = ({ toggleDrawer, toggleContent }) => {
                                 base: "13px",
                                 sm: "14px",
                                 md: "15px",
+                              }}
+                              onClick={() => {
+                                // TODO: dispatch to close drawer when changing between dm and channels
+                                toggleContent(true);
+                                setType("channel");
+                                setChannelData(channel);
                               }}
                             >
                               {channel.name}
@@ -365,6 +376,11 @@ const ChatLeftSidebar = ({ toggleDrawer, toggleContent }) => {
                             _focus={{ bg: "pong_bg.200" }}
                             _hover={{ bg: "pong_bg.200" }}
                             _selected={{ bg: "pong_bg.200" }}
+                            onClick={() => {
+                              toggleContent(true);
+                              setConversation(conversation);
+                              setType("DM");
+                            }}
                           >
                             <Flex
                               direction="row"

@@ -112,7 +112,7 @@ const TwoFactorAccessBlocker = ({ isOpen, onClose, onOpen }) => {
         maxW="400px"
         mt={4}
         border="1px solid rgba(251, 102, 19, 0.3)"
-        boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.25)"
+        boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.35)"
         backdropFilter={"blur(20px)"}
         bgImage={`url('src/assets/img/BlackNoise.png')`}
         bgSize="cover"

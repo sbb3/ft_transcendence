@@ -1,14 +1,14 @@
 import { Avatar, Box, Flex, Stack, Text } from "@chakra-ui/react";
 import * as ScrollArea from "@radix-ui/react-scroll-area";
-import "./scrollbar.css";
+import "src/styles/scrollbar.css";
 import { useEffect, useRef } from "react";
 
-const ChatContentBody = ({ messages }) => {
+const ChatContentBody = ({ messages, toggleDrawer }) => {
   const messagesRef = useRef(null);
 
   const scrollToBottom = () => {
-    messagesRef?.current?.scrollIntoView({ behavior: "smooth" })
-  }
+    messagesRef?.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   useEffect(() => {
     // console.log("messagesRef.current", messagesRef.current);
@@ -17,7 +17,7 @@ const ChatContentBody = ({ messages }) => {
     }
     return () => {
       scrollToBottom();
-    }
+    };
   }, [messages]);
 
   return (
@@ -28,8 +28,8 @@ const ChatContentBody = ({ messages }) => {
       borderRadius={6}
       p={2}
       spacing={4}
-      border="1px solid rgba(251, 102, 19, 0.69)"
-      boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.25)"
+      border="1px solid rgba(251, 102, 19, 0.1)"
+      boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.35)"
       backdropFilter={"blur(20px)"}
       bgImage={`url('src/assets/img/BlackNoise.png')`}
       bgSize="cover"
@@ -37,9 +37,7 @@ const ChatContentBody = ({ messages }) => {
     >
       {/* scroll to the end */}
       <ScrollArea.Root className="ScrollAreaRoot">
-        <ScrollArea.Viewport className="ScrollAreaViewport"
-        >
-
+        <ScrollArea.Viewport className="ScrollAreaViewport">
           {messages.map((message) => (
             <Flex
               key={message.id}
@@ -61,6 +59,7 @@ const ChatContentBody = ({ messages }) => {
                   src={message.avatar}
                   borderColor="green.400"
                   borderWidth="3px"
+                  onClick={toggleDrawer} // TODO: send the user data to the drawer
                 />
               ) : null}
 

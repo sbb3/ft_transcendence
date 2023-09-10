@@ -12,9 +12,9 @@ import {
 } from "@chakra-ui/react";
 import { css } from "@emotion/react";
 import { GoPlay } from "react-icons/go";
-import { HiOutlineStatusOnline, HiUsers } from "react-icons/hi";
+import { HiOutlineStatusOnline } from "react-icons/hi";
 import { IoChatbubbleEllipsesSharp, IoSettingsOutline } from "react-icons/io5";
-import { MdSpaceDashboard } from "react-icons/md";
+import { MdSpaceDashboard, MdContactSupport } from "react-icons/md";
 import { BsBinocularsFill } from "react-icons/bs";
 import { BiSolidLogOutCircle } from "react-icons/bi";
 import { BeatLoader } from "react-spinners";
@@ -51,18 +51,18 @@ const NavigationPanel = [
     path: "/play",
   },
   {
-    name: "Chat",
-    icon: IoChatbubbleEllipsesSharp,
-    path: "/chat",
-  },
-  {
     name: "Watch",
     icon: BsBinocularsFill,
     path: "/watch",
   },
   {
+    name: "Chat",
+    icon: IoChatbubbleEllipsesSharp,
+    path: "/chat",
+  },
+  {
     name: "Support",
-    icon: HiUsers,
+    icon: MdContactSupport,
     path: "/support",
   },
   {
@@ -79,21 +79,21 @@ const Sidebar = () => {
 
   return (
     <Stack
-      w="150px"
+      w="160px"
       display={{ base: "none", lg: "flex" }}
       justify="start"
       spacing={8}
       pt={4}
       pb={6}
       borderRadius={24}
-      border="1px solid rgba(251, 102, 19, 0.69)"
-      boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.25)"
+      bg="pong_bg_secondary"
+      border="1px solid rgba(251, 102, 19, 0.1)"
+      boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.35)"
       backdropFilter={"blur(20px)"}
       bgImage={`url('src/assets/img/BlackNoise.png')`}
       bgSize="cover"
       bgRepeat="no-repeat"
-      bg="pong_bg_secondary"
-    // m={2}
+      // m={2}
     >
       <Stack
         spacing={5}
@@ -101,7 +101,7 @@ const Sidebar = () => {
         w="full"
         // h="full"
         pos="relative"
-      // outline="2px solid red"
+        // outline="2px solid red"
       >
         {/* <BrandIcon
 					boxSize={"40px"}
@@ -131,14 +131,15 @@ const Sidebar = () => {
           h="2px"
           background="linear-gradient(270deg, rgba(255, 255, 255, 0.00) 0%, #FFF 55.73%, rgba(255, 255, 255, 0.00) 100%)"
         />
-        <Stack spacing={2} align="center">
+        <Stack spacing={2} align="center" justify="center">
           <Text
-            fontSize="18px"
+            fontSize="16px"
             fontStyle={"normal"}
             fontWeight="semibold"
             color="whiteAlpha.900"
             lineHeight={"28px"}
             letterSpacing={1}
+            textAlign={"center"}
           >
             Anas Douib
           </Text>
@@ -208,8 +209,7 @@ const Sidebar = () => {
                       nav.name === "Logout"
                         ? "6px 0px 6px 6px"
                         : "6px 0px 0px 6px",
-                    color:
-                      nav.name === "Logout" ? "#E53E3E" : "#FB6613",
+                    color: nav.name === "Logout" ? "#E53E3E" : "#FB6613",
                   }}
                   onClick={() => navigate(nav.path)}
                 />
@@ -230,7 +230,7 @@ const Sidebar = () => {
         // p={2}
         // outline="1px solid yellow"
         w="full"
-      // h="full"
+        // h="full"
       >
         {/* <Flex
           direction={"column"}

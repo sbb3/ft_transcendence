@@ -9,9 +9,11 @@ import ChatContent from "./ChatContent";
 const Chat = () => {
   useTitle("Chat");
   const [isContentOpen, setIsContentOpen] = useState(false);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const toggleDrawer = () => setIsDrawerOpen((prevState) => !prevState);
-  const toggleContent = () => setIsContentOpen(!isContentOpen);
+  const [conversation, setConversation] = useState({});
+  const [channelData, setChannelData] = useState({});
+  const [type, setType] = useState("");
+
+  const toggleContent = (state) => setIsContentOpen(state);
   return (
     <Flex
       pos="relative"
@@ -23,17 +25,20 @@ const Chat = () => {
       // bg="orange.700"
       // p={2}
       borderRadius={26}
-    // gap={2}
+      // gap={2}
     >
       <ChatLeftSidebar
+        setType={setType}
+        setConversation={setConversation}
+        setChannelData={setChannelData}
         toggleContent={toggleContent}
-        toggleDrawer={toggleDrawer}
       />
       <ChatContent
-        toggleContent={toggleContent}
+        type={type}
+        conversation={conversation}
+        channelData={channelData}
         isContentOpen={isContentOpen}
       />
-      <ChatRightModal isOpen={isDrawerOpen} toggleDrawer={toggleDrawer} />
     </Flex>
   );
 };
