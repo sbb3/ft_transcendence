@@ -1,0 +1,30 @@
+version  : "3"
+
+services :
+
+  db:
+    image : postgres
+    container_name: db
+    env_file : .env
+    restart : always
+    ports:
+      - "5432:5432"
+
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - "8080:8080"
+
+
+  backend:
+    build:
+      dockerfile: backend/Dockerfile
+    env_file : .env
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - db
