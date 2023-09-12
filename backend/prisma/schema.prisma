@@ -12,6 +12,7 @@ datasource db {
 
 model user {
   id Int    @id @default(autoincrement())
+  createdAt   DateTime  @default(now())
   player_name String @unique
   status String
   max_score Int
@@ -19,35 +20,86 @@ model user {
   otp_enavled Boolean @default(false)
   otp_secrect_tocken String
   is_profile_has_been_set Boolean @default(false)
-  // fr_user friend_user[] 
-}
-
-model friend_user {
-  id Int    @id @default(autoincrement())
-}
-
-model blocked_user {
-  id Int    @id @default(autoincrement())
+  fr_user friend_user[]
+  bq_user blocked_user[]
+  not_req request[] @relation(name: "user")
+  send_req request[] @relation(name: "user_send")
+  not_info notification[] @relation(name: "user")
+  send_info notification[] @relation(name: "user_send")
+  email String  @unique
+  login String  @unique
+  campus String  @unique
+  avatar String
+  achievements achievement[] @relation("achievement")
+  achievement achievement? @relation("user", fields: [achievement_id], references: [id])
+  achievement_id Int
+  // send_req request[]
 }
 
 model achievement {
   id Int    @id @default(autoincrement())
+  notification_send notification[]
+  level_for_get_it Int
+  title String
+  achevement_image String
+  users user[] @relation("user")
+  user user? @relation("achievement", fields: [user_id], references: [id])
+  user_id Int
 }
 
-model user_achievements {
+model friend_user {
   id Int    @id @default(autoincrement())
+  user       user     @relation(fields: [userId], references: [id])
+  userId     Int
+  is_mute    Boolean @default(false)
+  unfriend   Boolean @default(false)
 }
 
-model norification {
+model blocked_user {
   id Int    @id @default(autoincrement())
+  user       user     @relation(fields: [userId], references: [id])
+  userId     Int
+  unblock    Boolean @default(false)
+}
+
+// model user_achievements {
+//   id Int    @id @default(autoincrement())
+// }
+
+model notification {
+  id Int    @id @default(autoincrement())
+  user       user     @relation(fields: [userId], references: [id], name: "user")
+  userId     Int
+  is_req_fr_acc Boolean @default(false)
+  id_user_send user   @relation(fields:  [user_snd], references: [id], name: "user_send")
+  user_snd Int
+  type String
+  content String
+  is_seen Boolean @default(false)
+  is_delete Boolean @default(false)
+  id_achevement achievement @relation(fields: [achievement_get], references: [id])
+  achievement_get Int
 }
 
 model request {
   id Int    @id @default(autoincrement())
+  user       user     @relation(fields: [userId], references: [id], name: "user")
+  userId     Int
+  is_req_fr_acc Boolean @default(false)
+  id_user_send user   @relation(fields:  [user_snd], references: [id], name: "user_send")
+  user_snd Int
+  id_game_send game   @relation(fields: [id_game], references: [id])
+  id_game Int
+  time_exper   DateTime @default(dbgenerated("NOW() + interval '1 year'"))
+  is_exper  Boolean @default(false)
+  is_seen  Boolean @default(false)
+  is_delete  Boolean @default(false)
 }
+
 
 model game {
   id Int    @id @default(autoincrement())
+  send_as_request request[]
 }
 
 model channel {
