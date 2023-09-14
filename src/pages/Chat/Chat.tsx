@@ -5,6 +5,9 @@ import useTitle from "src/hooks/useTitle";
 import ChatRightModal from "./ChatRightModal";
 import ChatLeftSidebar from "./ChatLeftSidebar";
 import ChatContent from "./ChatContent";
+import ChatNoContent from "./ChatSplashScreen";
+import ChatSplashScreen from "./ChatSplashScreen";
+import { Outlet } from "react-router-dom";
 
 const Chat = () => {
   useTitle("Chat");
@@ -33,12 +36,7 @@ const Chat = () => {
         setChannelData={setChannelData}
         toggleContent={toggleContent}
       />
-      <ChatContent
-        type={type}
-        conversation={conversation}
-        channelData={channelData}
-        isContentOpen={isContentOpen}
-      />
+      <Outlet />
     </Flex>
   );
 };

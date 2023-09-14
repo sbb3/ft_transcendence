@@ -195,6 +195,7 @@ const Settings = () => {
                     accept="image/*"
                     {...rest}
                     ref={(e) => {
+                      // console.log("e: ", e);
                       ref(e);
                       inputRef.current = e;
                     }}

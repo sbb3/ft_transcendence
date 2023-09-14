@@ -13,9 +13,10 @@ import * as ScrollArea from "@radix-ui/react-scroll-area";
 import "src/styles/scrollbar.css";
 import { leaderboardData } from "src/config/data/data";
 import { CrownIcon, RankIcon } from "src/assets/icons/icons";
+import { Navigate, useNavigate } from "react-router-dom";
 const Card = ({ person }) => {
   const { rank, name, image } = person;
-
+  const navigate = useNavigate();
   return (
     <Flex
       direction="row"
@@ -37,6 +38,7 @@ const Card = ({ person }) => {
           ? "#FF8228"
           : "rgba(255, 255, 255, 0.2)"
       }
+      onClick={() => navigate("/profile/username")} // TODO: navigate to the user profile
     >
       <Flex direction="row" gap={3} align="center" pl={2} pr={2}>
         <Text fontSize="12px" fontWeight="bold" color="#312244">

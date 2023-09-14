@@ -1,15 +1,20 @@
 import { Box, Icon, IconButton, Input, InputGroup } from "@chakra-ui/react";
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { MdSend } from "react-icons/md";
 
-const ChatContentFooter = ({ onSubmit, setMessages }) => {
+const ChatContentFooter = ({ onSubmit }) => {
   const {
     register,
     handleSubmit,
     formState: { isSubmitting },
     reset,
   } = useForm({});
+
+  useEffect(() => {
+    const message = document.getElementById("message");
+    message?.focus();
+  }, []);
   return (
     <Box
       w={"full"}
@@ -31,11 +36,14 @@ const ChatContentFooter = ({ onSubmit, setMessages }) => {
         alignItems="center"
       >
         <Input
+          id="message"
           type="text"
           variant="filled"
-          bg="#F9F9F9"
+          // bg="#F9F9F9"
+          bg="pong_bg_secondary"
           w={"full"}
           placeholder="Type a message"
+          autoFocus
           {...register("message", {
             required: "This is required",
           })}

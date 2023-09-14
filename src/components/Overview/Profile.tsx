@@ -23,7 +23,21 @@ import * as ScrollArea from "@radix-ui/react-scroll-area";
 import "src/styles/scrollbar.css";
 import { badges } from "src/config/data/data";
 
-const Profile = () => {
+const Profile = ({ user }) => {
+  const {
+    username,
+    name,
+    status,
+    email,
+    campus,
+    rank,
+    avatar,
+    gameWin,
+    gameLoss,
+    level,
+  } = user;
+  const gameWonRate =
+    (parseInt(gameWin) / (parseInt(gameWin) + parseInt(gameLoss))) * 100;
   return (
     <Flex
       w={{ sm: "380px" }}
@@ -46,28 +60,41 @@ const Profile = () => {
         <Flex direction="row" gap="28px" align="center">
           <Avatar
             size="xl"
-            name="Anas Douib"
-            src="https://anasdouib.me/images/picture.webp"
-            borderColor="green.400"
+            name={name}
+            src={avatar}
+            borderColor={
+              status === "online"
+                ? "green.400"
+                : status === "offline"
+                ? "gray.300"
+                : "red.400"
+            }
             borderWidth="3px"
           >
             <AvatarBadge
               boxSize="0.6em"
               border="3px solid white"
-              bg={"green.400"}
+              bg={
+                status === "online"
+                  ? "green.400"
+                  : status === "offline"
+                  ? "gray.400"
+                  : "red.400"
+              }
             />
           </Avatar>
           <Flex direction="column" gap="10px" justify="center">
             <Flex direction="row" gap="7px" align="center">
               <Image
-                src="src/assets/svgs/username_pre_svg.svg"
+                src="/src/assets/svgs/username_pre_svg.svg"
                 alt="username pre svg"
                 boxSize={5}
               />
               <Text fontSize="lg" fontWeight="medium">
-                adouib
+                {username}
               </Text>
             </Flex>
+            {/* TODO: hide these buttons when visiting my own profile, do conditional rendering of the username or id of the passed user with the store */}
             <Flex direction="row" gap="14px" align="center">
               <IconButton
                 size="sm"
@@ -128,7 +155,7 @@ const Profile = () => {
                 Email
               </Text>
               <Text fontSize="12px" fontWeight="light" color="pong_cl_primary">
-                adouib@student.1337.ma
+                {email}
               </Text>
             </Stack>
           </Flex>
@@ -138,7 +165,7 @@ const Profile = () => {
                 Login 42
               </Text>
               <Text fontSize="12px" fontWeight="medium" color="whiteAlpha.400">
-                adouib
+                {campus}
               </Text>
             </Flex>
             <Flex direction={"column"} gap={1}>
@@ -146,7 +173,7 @@ const Profile = () => {
                 Campus
               </Text>
               <Text fontSize="12px" fontWeight="medium" color="whiteAlpha.400">
-                1337 BenGuerir
+                {campus}
               </Text>
             </Flex>
           </Flex>
@@ -174,7 +201,12 @@ const Profile = () => {
                 // overflowX="hidden"
               >
                 {badges.map((badge, index) => (
-                  <Image src={badge.link} alt={badge.alt} boxSize={10} />
+                  <Image
+                    key={index}
+                    src={`/${badge.link}`}
+                    alt={badge.alt}
+                    boxSize={10}
+                  />
                 ))}
               </Flex>
             </ScrollArea.Viewport>
@@ -221,26 +253,22 @@ const Profile = () => {
           >
             <Flex direction="row" gap={3} align="center">
               <Text fontSize="13px" fontWeight="regular" color="whiteAlpha.900">
-                1
+                {rank}
               </Text>
-              <Avatar
-                size="sm"
-                name="Anas DOuib"
-                src="https://anasdouib.me/images/picture.webp"
-              />
+              <Avatar size="sm" name={name} src={avatar} />
               <Text fontSize="13px" fontWeight="regular" color="whiteAlpha.900">
-                Anas
+                {name}
               </Text>
             </Flex>
             <Text fontSize="13px" fontWeight="semibold" color="pong_cl_primary">
-              103
+              {level}
             </Text>
           </Flex>
         </Flex>
         <Flex direction="row" w="100%" h="100%" gap={4} justify="center">
           <Box>
             <CircularProgress
-              value={50}
+              value={parseInt(gameWonRate.toFixed(0))}
               color="orange.400"
               size="130px"
               thickness="10px"
@@ -260,14 +288,14 @@ const Profile = () => {
                     fontWeight="semibold"
                     color="whiteAlpha.900"
                   >
-                    50%
+                    {gameWonRate.toFixed(0)}%
                   </Text>
                   <Text
                     fontSize="10px"
                     fontWeight="regular"
                     color="whiteAlpha.600"
                   >
-                    141 W 141 L
+                    {user.gameWin} W {user.gameLoss} L
                   </Text>
                 </Stack>
               </CircularProgressLabel>
@@ -275,7 +303,10 @@ const Profile = () => {
           </Box>
           <Box>
             <CircularProgress
-              value={50}
+              // isIndeterminate
+              max={10} //TODO: 10 games, dynamic value, MaxGames per level to get to the next level and new rank and achievements
+              value={5} // 5 games played
+              aria-valuenow={50}
               color="orange.400"
               size="130px"
               thickness="10px"
@@ -295,7 +326,7 @@ const Profile = () => {
                     fontWeight="semibold"
                     color="whiteAlpha.900"
                   >
-                    282
+                    {parseInt(gameWin) + parseInt(gameLoss)}
                   </Text>
                   <Text
                     fontSize="10px"

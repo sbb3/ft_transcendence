@@ -38,8 +38,16 @@ import { faker } from "@faker-js/faker";
 
 const users = [...Array(30)].map(() => ({
   id: faker.string.uuid(),
-  name: faker.internet.userName(),
+  name: faker.person.firstName() + " " + faker.person.lastName(),
+  username: faker.internet.userName(),
+  status: faker.helpers.arrayElement(["online", "offline", "in-game"]),
   avatar: faker.image.avatar(),
+  email: faker.internet.email(),
+  campus: faker.location.city(),
+  gameWin: faker.number.int(50),
+  gameLoss: faker.number.int(40),
+  rank: faker.number.int(100),
+  level: faker.number.int(50),
 }));
 
 const Search = () => {
@@ -163,7 +171,11 @@ const Search = () => {
                       gap="3px"
                       align="center"
                       w={"full"}
-                      onClick={() => navigate(`/profile/${user.name}`)}
+                      onClick={() =>
+                        navigate(`/profile/${user.name}`, {
+                          state: { user },
+                        })
+                      }
                     >
                       <Avatar
                         size="sm"

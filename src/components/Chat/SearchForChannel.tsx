@@ -100,7 +100,7 @@ const SearchForChannel = ({
         bg="transparent"
         //   w={{ base: "full", sm: "full", md: 820 }}
       >
-        <ModalHeader>#general</ModalHeader>
+        <ModalHeader>Search for a channel</ModalHeader>
         <ModalCloseButton />
         <ModalBody p={2} borderRadius={40}>
           <Stack

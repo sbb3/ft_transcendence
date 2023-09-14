@@ -24,9 +24,17 @@ import * as yup from "yup";
 import { useForm } from "react-hook-form";
 import { MdSend } from "react-icons/md";
 import { Search2Icon, SearchIcon } from "@chakra-ui/icons";
+// import { useAddMessageMutation } from "src/features/messages/messagesApi";
+import { useCreateConversationMutation } from "src/features/conversations/conversationsApi";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { apiSlice } from "src/app/api/apiSlice";
+import store from "src/app/store";
+import { v4 as uuidv4 } from "uuid";
+import usersApi from "src/features/users/usersApi";
 
 const validationSchema = yup.object().shape({
-  username: yup.string().required("Username is required").trim(),
+  email: yup.string().required("email is required").trim(),
   message: yup.string().required("Message is required").trim(),
 });
 
@@ -36,6 +44,9 @@ const AddDirectMessage = ({
   onClose,
   setIsAddDirectMessageOpen,
 }) => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const currentUser = useSelector((state) => state.auth.user);
   const toast = useToast();
 
   const {
@@ -47,19 +58,71 @@ const AddDirectMessage = ({
     resolver: yupResolver(validationSchema),
   });
 
-  const onSubmit = (data: any) => {
-    console.log("data: ", data);
-    toast({
-      title: "Message sent.",
-      description: "We've sent your message to the user.",
-      status: "success",
-      duration: 2000,
-      isClosable: true,
-    });
-    reset({
-      username: "",
-      message: "",
-    });
+  // const [addMessage, { isLoading, error }] = useAddMessageMutation();
+  const [createConversation, { isLoading: isCreating, error: error2 }] =
+    useCreateConversationMutation();
+  const onSubmit = async (data: any) => {
+    // console.log("data: ", data);
+    const { message, email: receiverEmail } = data;
+
+    try {
+      const resultUser = await usersApi.endpoints.getUserByEmail.initiate(
+        receiverEmail
+      );
+      console.log("resultUser: ", resultUser);
+      const receiver = resultUser?.data[0];
+      // createMessage({
+      //   // id: 1,
+      //   sender: {
+      //     email: currentUser.email,
+      //   },
+      //   receiver: {
+      //     email: receiverEmail,
+      //   },
+      //   content: message,
+      //   createdAt: new Date().toISOString(),
+      // }).unwrap();
+      const data = {
+        conversation: {
+          id: uuidv4(),
+          title: receiverEmail,
+          members: [currentUser.email, receiverEmail],
+          content: message,
+        },
+        receiver,
+      };
+      await createConversation(data).unwrap();
+
+      // console.log("result: ", result);
+      toast({
+        title: "Message sent.",
+        description: "We've sent your message to the user.",
+        status: "success",
+        duration: 2000,
+        isClosable: true,
+      });
+      onClose();
+      setIsAddDirectMessageOpen(false);
+      // const conversationId = result?.data?.id;
+      // console.log("conversationId: ", conversationId);
+      navigate(`/chat/conversation/${data?.conversation.id}`, {
+        state: data?.conversation,
+      });
+    } catch (error) {
+      console.log("error: ", error);
+      toast({
+        title: "Message didn't send.",
+        description: "We couldn't send your message to the user.",
+        status: "error",
+        duration: 2000,
+        isClosable: true,
+      });
+    }
+
+    // reset({
+    //   email: "",
+    //   message: "",
+    // });
   };
 
   useEffect(() => {
@@ -106,8 +169,8 @@ const AddDirectMessage = ({
               borderRadius={40}
               p={6}
             >
-              <FormControl isInvalid={!!errors.username} mt={0}>
-                <FormLabel htmlFor="username" fontSize="lg">
+              <FormControl isInvalid={!!errors.email} mt={0}>
+                <FormLabel htmlFor="email" fontSize="lg">
                   Send DM
                 </FormLabel>
                 <InputGroup>
@@ -125,14 +188,14 @@ const AddDirectMessage = ({
                     cursor="pointer"
                   />
                   <Input
-                    {...register("username")}
+                    {...register("email")}
                     mr={2}
                     flex={1}
                     variant="filled"
                     bg="pong_bg.400"
                     type="text"
                     color="white"
-                    placeholder="Username to send message to"
+                    placeholder="email to send message to"
                     //   _placeholder={{
                     //     fontSize: 14,
                     //     letterSpacing: 0.5,
@@ -143,7 +206,7 @@ const AddDirectMessage = ({
                   />
                 </InputGroup>
                 <FormErrorMessage>
-                  {errors.username && errors.username.message}
+                  {errors.email && errors.email.message}
                 </FormErrorMessage>
               </FormControl>
 

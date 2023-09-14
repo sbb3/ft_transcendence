@@ -10,25 +10,52 @@ import {
   Support,
   Login,
   NotFoundPage,
+  PlayerProfile,
 } from "./pages";
 import Layout from "./layouts/Layout.tsx";
+import ChatContent from "./pages/Chat/ChatContent.tsx";
+import ChatSplashScreen from "./pages/Chat/ChatSplashScreen.tsx";
+import Signin from "./pages/Signin.tsx";
+import Public from "./pages/Public.tsx";
+import Register from "./pages/Register.tsx";
 
 function App() {
   return (
     <Routes>
-      <Route path="/login" element={<StayLoggedIn />}>
+      {/* <Route path="/login" element={<StayLoggedIn />}>
         <Route index element={<Login />} />
+      </Route> */}
+      <Route
+        path="/"
+        element={
+          <Public>
+            <Signin />
+          </Public>
+        }
+      />
+      <Route
+        path="/register"
+        element={
+          <Public>
+            <Register />
+          </Public>
+        }
+      />
+
+      <Route element={<AuthVerification />}>
+        <Route path="/" element={<Layout />}>
+          {/* <Route index element={<Overview />} /> */}
+          {/* <Route path="profile/:username" element={<PlayerProfile />} /> */}
+          {/* <Route path="settings" element={<Settings />} /> */}
+          <Route path="play" element={<Game />} />
+          <Route path="chat" element={<Chat />}>
+            <Route index element={<ChatSplashScreen />} />
+            <Route path="conversation/:id" element={<ChatContent />} />
+          </Route>
+          {/* <Route path="watch" element={<Watch />} /> */}
+          {/* <Route path="support" element={<Support />} /> */}
+        </Route>
       </Route>
-      {/* <Route element={<AuthVerification />}> */}
-      <Route path="/" element={<Layout />}>
-        <Route index element={<Overview />} />
-        <Route path="settings" element={<Settings />} />
-        <Route path="play" element={<Game />} />
-        <Route path="chat" element={<Chat />} />
-        <Route path="watch" element={<Watch />} />
-        <Route path="support" element={<Support />} />
-      </Route>
-      {/* </Route> */}
 
       <Route path="*" element={<NotFoundPage />} />
     </Routes>

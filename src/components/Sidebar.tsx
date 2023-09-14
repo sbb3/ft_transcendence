@@ -20,6 +20,8 @@ import { BiSolidLogOutCircle } from "react-icons/bi";
 import { BeatLoader } from "react-spinners";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { userLoggedOut } from "src/features/auth/authSlice";
+import { useDispatch, useSelector } from "react-redux";
 
 export const BrandIcon = createIcon({
   displayName: "BrandIcon",
@@ -65,6 +67,11 @@ const NavigationPanel = [
     icon: MdContactSupport,
     path: "/support",
   },
+  // {
+  //   name: "Logout",
+  //   icon: BiSolidLogOutCircle,
+  //   path: "/login",
+  // },
   {
     name: "Logout",
     icon: BiSolidLogOutCircle,
@@ -73,6 +80,8 @@ const NavigationPanel = [
 ];
 
 const Sidebar = () => {
+  const user = useSelector((state: any) => state.auth.user);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const players_online = 10;
   const player_lvl = 2;
@@ -123,6 +132,8 @@ const Sidebar = () => {
           // animate={{ rotate: 360 }}
           // transition={{ ease: "linear", duration: 5, repeat: Infinity }}
           opacity={0.9}
+          onClick={() => navigate("/")}
+          cursor="pointer"
         />
 
         <Box
@@ -141,7 +152,7 @@ const Sidebar = () => {
             letterSpacing={1}
             textAlign={"center"}
           >
-            Anas Douib
+            {user?.name}
           </Text>
 
           <Text
@@ -211,7 +222,14 @@ const Sidebar = () => {
                         : "6px 0px 0px 6px",
                     color: nav.name === "Logout" ? "#E53E3E" : "#FB6613",
                   }}
-                  onClick={() => navigate(nav.path)}
+                  onClick={() => {
+                    if (nav.name === "Logout") {
+                      dispatch(userLoggedOut());
+                      localStorage.clear();
+                    } else {
+                      navigate(nav.path);
+                    }
+                  }}
                 />
               </Tooltip>
             ))}

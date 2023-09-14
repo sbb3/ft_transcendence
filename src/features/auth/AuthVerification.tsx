@@ -4,7 +4,7 @@ import { Outlet, Navigate } from "react-router-dom";
 const AuthVerification = () => {
   const isAuthenticated = useAuth();
   console.log(`isAuthenticated: ${isAuthenticated}`);
-  return !isAuthenticated ? <Navigate to="/login" replace /> : <Outlet />;
+  return !isAuthenticated ? <Navigate to="/" replace /> : <Outlet />;
 };
 
 export default AuthVerification;

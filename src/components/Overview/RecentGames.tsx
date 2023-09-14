@@ -2,6 +2,9 @@ import { Avatar, Box, Flex, Icon, Stack, Text } from "@chakra-ui/react";
 import { GiGamepadCross } from "react-icons/gi";
 import * as ScrollArea from "@radix-ui/react-scroll-area";
 import "src/styles/scrollbar.css";
+import { useNavigate } from "react-router-dom";
+
+// TODO: fetch leaderboard data using the username as as slug
 
 const personData = [
   {
@@ -117,6 +120,8 @@ const Card = ({ person }) => {
     status,
     winStatus,
   } = person;
+
+  const navigate = useNavigate();
   return (
     <Flex
       direction="row"
@@ -159,7 +164,12 @@ const Card = ({ person }) => {
           {status}
         </Text>
       </Stack>
-      <Stack direction="column" spacing={2} align="center">
+      <Stack
+        direction="column"
+        spacing={2}
+        align="center"
+        onClick={() => navigate("/profile/username")} // TODO: navigate to the user profile
+      >
         <Avatar
           size="lg"
           name={opponent}

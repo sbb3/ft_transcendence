@@ -4,9 +4,9 @@ import { FaHashtag } from "react-icons/fa";
 
 const ChatContentHeader = ({
   channelData: channel,
-  conversation,
   toggleDrawer,
   type,
+  receiverName,
 }) => {
   return (
     <Flex
@@ -51,18 +51,18 @@ const ChatContentHeader = ({
           </Avatar>
           <Stack direction="column" spacing={1} align="start">
             <Text fontSize="18px" fontWeight="semibold" color="whiteAlpha.900">
-              {conversation.name}
+              {receiverName}
             </Text>
-            <Text fontSize="14px" fontWeight="medium" color="green.300">
-              {conversation.status}
-            </Text>
+            {/* <Text fontSize="14px" fontWeight="medium" color="green.300">
+              {conversation?.status}
+            </Text> */}
           </Stack>
         </Flex>
       ) : (
         <Stack direction="row" spacing={1} align="center" justify={"center"}>
           <Icon as={FaHashtag} boxSize="20px" color="whiteAlpha.900" />
           <Text fontSize="18px" fontWeight="semibold" color="whiteAlpha.900">
-            {channel.name}
+            {channel?.name}
           </Text>
         </Stack>
       )}
