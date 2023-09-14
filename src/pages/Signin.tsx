@@ -5,27 +5,19 @@ import { useLoginMutation } from "src/features/auth/authApi";
 export default function Signin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
 
-  const [login, { data, isLoading, error: responseError }] = useLoginMutation();
+  const [login, { data, isLoading, error }] = useLoginMutation();
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (responseError?.data) {
-      setError(responseError.data);
-    }
     if (data?.accessToken && data?.user) {
-      navigate("/inbox");
+      navigate("/chat");
     }
-  }, [data, responseError, navigate]);
+  }, [data, navigate]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(`email: ${email}`);
-    console.log(`pass: ${password}`);
-
-    setError("");
 
     login({
       email,
@@ -40,12 +32,20 @@ export default function Signin() {
       });
   };
 
+  if (error) {
+    console.log(`error: `, error);
+  }
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
   return (
-    <div className="grid place-items-center h-screen bg-[#F9FAFB">
-      <div className="min-h-full flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md w-full space-y-8">
-          <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-            <div className="rounded-md shadow-sm -space-y-px">
+    <div >
+      <div >
+        <div >
+          <form onSubmit={handleSubmit}>
+            <div >
               <div>
                 <input
                   id="email-address"
@@ -53,6 +53,7 @@ export default function Signin() {
                   type="email"
                   placeholder="Email address"
                   value={email}
+                  style={{ marginTop: "1rem", backgroundColor: "red" }}
                   onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
@@ -72,14 +73,11 @@ export default function Signin() {
             <div>
               <button
                 type="submit"
-                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-violet-600 hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500"
-                disabled={isLoading}
               >
                 Sign in
               </button>
             </div>
 
-            {error !== "" && <div>{error}</div>}
           </form>
         </div>
       </div>

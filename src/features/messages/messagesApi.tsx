@@ -10,22 +10,30 @@ const messagesApi = apiSlice.injectEndpoints({
         arg,
         { updateCachedData, cacheDataLoaded, cacheEntryRemoved }
       ) {
-        const socket = useSocket();
+        // const socket = useSocket();
+        const socket = io(import.meta.env.VITE_API_URL as string, {
+          reconnectionDelay: 1000,
+          reconnection: true,
+          transports: ["websocket"],
+          upgrade: false,
+          rejectUnauthorized: false,
+        });
         try {
           await cacheDataLoaded;
           socket.on("message", (data) => {
+            console.log("data: ", data);
             updateCachedData((draft) => {
-              console.log("before updateCachedData draft: ", draft);
+              // console.log("before updateCachedData draft: ", draft);
               const message = draft?.find((m) => m.id === data?.data?.id);
               if (message?.id) {
-                console.log("do nothing, ", message);
+                // console.log("do nothing, ", message);
                 console.log("message already exist in the cache: ", message);
               } else {
-                console.log("message not in the cache, inserting it ", message);
+                // console.log("message not in the cache, inserting it ", message);
                 draft?.push(data?.data);
               }
-              console.log("socket data: ", data?.data);
-              console.log("after updateCachedData draft?.data: ", draft);
+              // console.log("socket data: ", data?.data);
+              // console.log("after updateCachedData draft?.data: ", draft);
             });
           });
         } catch (error) {
@@ -36,26 +44,31 @@ const messagesApi = apiSlice.injectEndpoints({
       },
     }),
     addMessage: builder.mutation({
-      query: (msgData) => ({
+      query: (body) => ({
         url: `/messages`,
         method: "POST",
-        body: msgData,
+        body
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        // console.log("body: ", arg);
         // for optimistic updates, for me
         const messageData = arg;
         const { conversationId } = messageData;
+        // console.log('messageData: ', messageData);
+        // console.log("conversationId: ", conversationId);
         const patchResult = dispatch(
           messagesApi?.util?.updateQueryData(
             "getMessagesByConversationId",
             conversationId,
             (draft) => {
+              console.log("updateQueryData: ", draft);
               draft?.push(messageData);
             }
           )
         );
         try {
-          await queryFulfilled;
+          const result = await queryFulfilled;
+          console.log("result: ", result);
           // const conversationId = arg?.conversationId;
           // dispatch(
           //   messagesApi.endpoints.getMessagesByConversationId.initiate(
@@ -69,7 +82,7 @@ const messagesApi = apiSlice.injectEndpoints({
           //   )
           // );
         } catch (error) {
-          console.log("error: ", error);
+          console.log("error : ", error);
           patchResult.undo();
         }
       },

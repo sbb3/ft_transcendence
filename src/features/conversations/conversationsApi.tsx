@@ -28,16 +28,16 @@ const conversationApi = apiSlice.injectEndpoints({
           await cacheDataLoaded;
           socket.on("conversation", (data) => {
             updateCachedData((draft) => {
-              console.log("before updateCachedData draft: ", draft);
+              // console.log("before updateCachedData draft: ", draft);
               const conversation = draft?.find((c) => c.id === data?.data?.id);
               if (conversation?.id) {
-                console.log("conversation: ", conversation);
+                // console.log("conversation: ", conversation);
               } else {
-                console.log("do nothing conversation ", conversation);
+                // console.log("do nothing conversation ", conversation);
                 draft?.unshift(data?.data);
               }
-              console.log("socket data: ", data?.data);
-              console.log("after updateCachedData draft?.data: ", draft);
+              // console.log("socket data: ", data?.data);
+              // console.log("after updateCachedData draft?.data: ", draft);
             });
           });
         } catch (error) {
@@ -59,6 +59,7 @@ const conversationApi = apiSlice.injectEndpoints({
       async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
         // optimistic update, update the cache before the request is finished, so the user will see the result immediately9
         const conversation = arg.conversation;
+        // console.log("conversation: ", conversation);
         const receiver = arg.receiver;
         const currentUserEmail = conversation.members[0];
         const patchResult = dispatch(
@@ -66,8 +67,8 @@ const conversationApi = apiSlice.injectEndpoints({
             "getConversations",
             currentUserEmail,
             (draft) => {
-              draft?.unshift(conversation);
               console.log("updateQueryData: ", draft);
+              draft?.unshift(conversation);
             }
           )
         );
@@ -80,27 +81,30 @@ const conversationApi = apiSlice.injectEndpoints({
           //     forceRefetch: true,
           //   })
           // );
-
-          // const conversationId = arg?.conversationId;
+          const _id = uuidv4();
+          const messageData = {
+            id: _id,
+            conversationId: conversation.id,
+            sender: {
+              id: receiver.id,
+              email: receiver.email,
+              name: receiver.name,
+            },
+            receiver: {
+              id: receiver.id,
+              email: receiver.email,
+              name: receiver.name,
+            },
+            content: conversation.content,
+          };
+          console.log("messageData: ", messageData);
           dispatch(
-            messagesApi.endpoints.addMessage.initiate({
-              id: uuidv4(),
-              conversationId: arg?.conversation?.id,
-              sender: {
-                id: getState()?.auth?.user?.id,
-                email: getState()?.auth?.user?.email,
-                name: getState()?.auth?.user?.name,
-              },
-              receiver: {
-                id: receiver?.id,
-                email: receiver?.email,
-                name: receiver?.name,
-              },
-              content: arg?.content,
+            messagesApi.endpoints.addMessage.initiate(messageData, {
+              forceRefetch: true,
             })
           );
         } catch (error) {
-          console.log("error: ", error);
+          console.log("error happended here: ", error);
           patchResult.undo();
         }
       },

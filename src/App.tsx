@@ -39,7 +39,8 @@ function App() {
           <Public>
             <Register />
           </Public>
-        }
+        } style={{}}
+
       />
 
       <Route element={<AuthVerification />}>
@@ -52,7 +53,7 @@ function App() {
             <Route index element={<ChatSplashScreen />} />
             <Route path="conversation/:id" element={<ChatContent />} />
           </Route>
-          {/* <Route path="watch" element={<Watch />} /> */}
+          <Route path="watch" element={<Watch />} />
           {/* <Route path="support" element={<Support />} /> */}
         </Route>
       </Route>

@@ -32,6 +32,8 @@ import { apiSlice } from "src/app/api/apiSlice";
 import store from "src/app/store";
 import { v4 as uuidv4 } from "uuid";
 import usersApi from "src/features/users/usersApi";
+import { useGetUserByEmailQuery } from "src/features/users/usersApi";
+import messagesApi from "src/features/messages/messagesApi";
 
 const validationSchema = yup.object().shape({
   email: yup.string().required("email is required").trim(),
@@ -46,7 +48,7 @@ const AddDirectMessage = ({
 }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const currentUser = useSelector((state) => state.auth.user);
+  const currentUser = useSelector((state: any) => state.auth.user);
   const toast = useToast();
 
   const {
@@ -57,6 +59,7 @@ const AddDirectMessage = ({
   } = useForm({
     resolver: yupResolver(validationSchema),
   });
+  const [trigger, { data: receiver, isLoading, error }] = usersApi.endpoints.getUserByEmail.useLazyQuery();
 
   // const [addMessage, { isLoading, error }] = useAddMessageMutation();
   const [createConversation, { isLoading: isCreating, error: error2 }] =
@@ -66,34 +69,21 @@ const AddDirectMessage = ({
     const { message, email: receiverEmail } = data;
 
     try {
-      const resultUser = await usersApi.endpoints.getUserByEmail.initiate(
-        receiverEmail
-      );
-      console.log("resultUser: ", resultUser);
-      const receiver = resultUser?.data[0];
-      // createMessage({
-      //   // id: 1,
-      //   sender: {
-      //     email: currentUser.email,
-      //   },
-      //   receiver: {
-      //     email: receiverEmail,
-      //   },
-      //   content: message,
-      //   createdAt: new Date().toISOString(),
-      // }).unwrap();
+      const receiverUser = await trigger(receiverEmail).unwrap();
+      const to = receiverUser[0];
+      // console.log("to: ", to);
+
       const data = {
         conversation: {
           id: uuidv4(),
-          title: receiverEmail,
+          title: to?.name,
           members: [currentUser.email, receiverEmail],
           content: message,
         },
-        receiver,
+        receiver: to,
       };
       await createConversation(data).unwrap();
 
-      // console.log("result: ", result);
       toast({
         title: "Message sent.",
         description: "We've sent your message to the user.",
@@ -101,15 +91,16 @@ const AddDirectMessage = ({
         duration: 2000,
         isClosable: true,
       });
+      // console.log("result: ", result);
       onClose();
       setIsAddDirectMessageOpen(false);
       // const conversationId = result?.data?.id;
       // console.log("conversationId: ", conversationId);
-      navigate(`/chat/conversation/${data?.conversation.id}`, {
-        state: data?.conversation,
-      });
+      // navigate(`/chat/conversation/${data?.conversation.id}`, {
+      //   state: data?.conversation,
+      // });
     } catch (error) {
-      console.log("error: ", error);
+      console.log("error232323: ", error);
       toast({
         title: "Message didn't send.",
         description: "We couldn't send your message to the user.",
@@ -155,7 +146,7 @@ const AddDirectMessage = ({
           bgSize="cover"
           bgRepeat="no-repeat"
           bg="transparent"
-          //   w={{ base: "full", sm: "full", md: 820 }}
+        //   w={{ base: "full", sm: "full", md: 820 }}
         >
           <ModalHeader>Direct messages</ModalHeader>
           <ModalCloseButton />
@@ -196,13 +187,16 @@ const AddDirectMessage = ({
                     type="text"
                     color="white"
                     placeholder="email to send message to"
-                    //   _placeholder={{
-                    //     fontSize: 14,
-                    //     letterSpacing: 0.5,
-                    //     fontWeight: "light",
-                    //     opacity: 0.7,
-                    //     color: "gray.500",
-                    //   }}
+                  // onChange={(e) => {
+
+                  // }}
+                  //   _placeholder={{
+                  //     fontSize: 14,
+                  //     letterSpacing: 0.5,
+                  //     fontWeight: "light",
+                  //     opacity: 0.7,
+                  //     color: "gray.500",
+                  //   }}
                   />
                 </InputGroup>
                 <FormErrorMessage>
@@ -215,7 +209,7 @@ const AddDirectMessage = ({
                 // bg={"gray.400"}
                 borderRadius={6}
                 mb={2}
-                // px={2}
+              // px={2}
               >
                 <InputGroup
                   w={"full"}

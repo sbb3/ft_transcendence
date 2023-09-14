@@ -1,31 +1,25 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useRegisterMutation } from "../features/auth/authApi";
 
 export default function Register() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
 
-  const [register, { data, isLoading, error: responseError }] =
+  const [register, { data, isLoading, error }] =
     useRegisterMutation();
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (responseError?.data) {
-      setError(responseError.data);
-    }
     if (data?.accessToken && data?.user) {
       navigate("/chat");
     }
-  }, [data, responseError, navigate]);
+  }, [data, navigate]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    setError("");
 
     register({
       name,
@@ -34,51 +28,60 @@ export default function Register() {
     });
   };
 
+  if (error) {
+    console.log(`error: `, error);
+  }
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
   return (
-    <div className="grid place-items-center h-screen bg-[#F9FAFB">
-      <div className="min-h-full flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md w-full space-y-8">
-          <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-            <div className="rounded-md shadow-sm -space-y-px">
+    <div
+    >
+      <div
+      >
+        <div
+        >
+          <form
+            onSubmit={handleSubmit}>
+            <div
+            >
               <div>
                 <input
-                  style={{ color: "black" }}
                   id="name"
                   name="Name"
                   type="Name"
-                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-violet-500 focus:border-violet-500 focus:z-10 sm:text-sm"
                   placeholder="full name"
                   value={name}
+                  style={{ marginTop: "1rem", backgroundColor: "red", color: "black" }}
                   onChange={(e) => setName(e.target.value)}
                 />
               </div>
 
               <div>
                 <input
-                  style={{ color: "black" }}
                   id="email-address"
                   name="email"
                   type="email"
                   autoComplete="email"
                   required
-                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-violet-500 focus:border-violet-500 focus:z-10 sm:text-sm"
                   placeholder="Email address"
                   value={email}
+                  style={{ marginTop: "1rem", backgroundColor: "red", color: "black" }}
                   onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
 
               <div>
                 <input
-                  style={{ color: "black" }}
                   id="password"
                   name="password"
                   type="password"
                   autoComplete="current-password"
                   required
-                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-violet-500 focus:border-violet-500 focus:z-10 sm:text-sm"
                   placeholder="Password"
                   value={password}
+                  style={{ marginTop: "1rem", backgroundColor: "red", color: "black" }}
                   onChange={(e) => setPassword(e.target.value)}
                 />
               </div>
@@ -94,7 +97,6 @@ export default function Register() {
               </button>
             </div>
 
-            {error !== "" && <div>{error}</div>}
           </form>
         </div>
       </div>
