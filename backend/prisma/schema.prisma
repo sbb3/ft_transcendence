@@ -26,13 +26,17 @@ model user {
   send_req request[] @relation(name: "user_send")
   not_info notification[] @relation(name: "user")
   send_info notification[] @relation(name: "user_send")
+  player_one game[] @relation(name: "player_one")
+  player_two game[] @relation(name: "player_two")
   email String  @unique
   login String  @unique
   campus String  @unique
   avatar String
-  achievements achievement[] @relation("achievement")
-  achievement achievement? @relation("user", fields: [achievement_id], references: [id])
+  achievements achievement[] 
+  // achievement achievement? @relation("user", fields: [achievement_id], references: [id])
   achievement_id Int
+  msg_send message[]
+  member membership[]
   // send_req request[]
 }
 
@@ -42,8 +46,8 @@ model achievement {
   level_for_get_it Int
   title String
   achevement_image String
-  users user[] @relation("user")
-  user user? @relation("achievement", fields: [user_id], references: [id])
+  users user[]
+  // user user? @relation("achievement", fields: [user_id], references: [id])
   user_id Int
 }
 
@@ -53,6 +57,7 @@ model friend_user {
   userId     Int
   is_mute    Boolean @default(false)
   unfriend   Boolean @default(false)
+  message_reseve message[]
 }
 
 model blocked_user {
@@ -96,20 +101,54 @@ model request {
   is_delete  Boolean @default(false)
 }
 
-
 model game {
   id Int    @id @default(autoincrement())
   send_as_request request[]
+  player_one       user     @relation(fields: [player_one_id], references: [id], name: "player_one")
+  player_one_id     Int
+  player_two user   @relation(fields:  [player_two_id], references: [id], name: "player_two")
+  player_two_id Int
+  id_winer Int
+  theme String
+  player_one_score Int
+  player_two_score Int
+  status String
+  createdAt   DateTime  @default(now())
 }
 
 model channel {
   id Int    @id @default(autoincrement())
+  title String
+  is_private Boolean
+  password String
+  channel_owner Int
+  msg message[]
+  createdAt   DateTime  @default(now())
+  member membership[]
 }
 
 model message {
-  id Int    @id @default(autoincrement())
+  createdAt   DateTime  @default(now())
+  id_send user @relation(fields: [user_id], references: [id])
+  user_id Int
+  id_channel channel @relation(fields: [channel_id], references: [id])
+  channel_id Int
+  id_friend friend_user @relation(fields: [reseve_id], references: [id])
+  reseve_id Int
+  cont String
+  @@id([user_id, channel_id, reseve_id])
 }
 
 model membership {
-  id Int    @id @default(autoincrement())
+  // id Int    @id @default(autoincrement())
+  id_send user @relation(fields: [user_id], references: [id])
+  user_id Int
+  id_channel channel @relation(fields: [channel_id], references: [id])
+  channel_id Int
+  is_admine Boolean @default(false)
+  is_muted Boolean @default(false)
+  is_banned Boolean @default(false)
+
+  @@id([user_id, channel_id])
+
 }
