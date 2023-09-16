@@ -25,7 +25,9 @@ import { useForm } from "react-hook-form";
 import { MdSend } from "react-icons/md";
 import { Search2Icon, SearchIcon } from "@chakra-ui/icons";
 // import { useAddMessageMutation } from "src/features/messages/messagesApi";
-import { useCreateConversationMutation } from "src/features/conversations/conversationsApi";
+import conversationApi, {
+  useCreateConversationMutation,
+} from "src/features/conversations/conversationsApi";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { apiSlice } from "src/app/api/apiSlice";
@@ -34,6 +36,8 @@ import { v4 as uuidv4 } from "uuid";
 import usersApi from "src/features/users/usersApi";
 import { useGetUserByEmailQuery } from "src/features/users/usersApi";
 import messagesApi from "src/features/messages/messagesApi";
+import { useGetConversationByMembersEmailsQuery } from "src/features/conversations/conversationsApi";
+import Loader from "../Utils/Loader";
 
 const validationSchema = yup.object().shape({
   email: yup.string().required("email is required").trim(),
@@ -59,7 +63,13 @@ const AddDirectMessage = ({
   } = useForm({
     resolver: yupResolver(validationSchema),
   });
-  const [trigger, { data: receiver, isLoading, error }] = usersApi.endpoints.getUserByEmail.useLazyQuery();
+  const [trigger, { isLoading }] =
+    usersApi.endpoints.getUserByEmail.useLazyQuery();
+
+  const [
+    triggerGetConversationByMembersEmails,
+    { isLoading: isLoadingGetConversationByMembersEmails },
+  ] = conversationApi.endpoints.getConversationByMembersEmails.useLazyQuery();
 
   // const [addMessage, { isLoading, error }] = useAddMessageMutation();
   const [createConversation, { isLoading: isCreating, error: error2 }] =
@@ -69,56 +79,118 @@ const AddDirectMessage = ({
     const { message, email: receiverEmail } = data;
 
     try {
-      const receiverUser = await trigger(receiverEmail).unwrap();
-      const to = receiverUser[0];
-      // console.log("to: ", to);
+      if (receiverEmail === currentUser.email) {
+        throw new Error("You can't send message to yourself");
+      }
+      const users = await trigger(receiverEmail).unwrap();
+      if (users?.length === 0) {
+        throw new Error("user not found");
+      }
+      const to = users[0];
 
-      const data = {
-        conversation: {
+      const conversations = await triggerGetConversationByMembersEmails([
+        currentUser.email,
+        receiverEmail,
+      ]).unwrap();
+
+      // conversation already exist
+      if (conversations?.length > 0) {
+        const conversation = conversations[0];
+        const newMessageData = {
           id: uuidv4(),
-          title: to?.name,
-          members: [currentUser.email, receiverEmail],
+          conversationId: conversation.id,
+          sender: {
+            id: currentUser.id,
+            email: currentUser.email,
+            name: currentUser.name,
+          },
+          receiver: {
+            id: to.id,
+            email: to.email,
+            name: to.name,
+          },
           content: message,
-        },
-        receiver: to,
-      };
-      await createConversation(data).unwrap();
+        };
+        store.dispatch(
+          messagesApi.endpoints.addMessage.initiate(newMessageData, {
+            forceRefetch: true,
+          })
+        );
 
-      toast({
-        title: "Message sent.",
-        description: "We've sent your message to the user.",
-        status: "success",
-        duration: 2000,
-        isClosable: true,
-      });
-      // console.log("result: ", result);
-      onClose();
-      setIsAddDirectMessageOpen(false);
-      // const conversationId = result?.data?.id;
-      // console.log("conversationId: ", conversationId);
-      // navigate(`/chat/conversation/${data?.conversation.id}`, {
-      //   state: data?.conversation,
-      // });
+        console.log("conversation already exist: ", conversations);
+        reset({
+          email: "",
+          message: "",
+        });
+        onClose();
+        setIsAddDirectMessageOpen(false);
+        navigate(`/chat/conversation/${conversation.id}`);
+      } else {
+        // create conversation
+        console.log("create new conversation: ");
+
+        const newConversationData = {
+          conversation: {
+            id: uuidv4(),
+            title: to?.name,
+            avatar: to?.avatar,
+            members: [currentUser.email, receiverEmail],
+            lastMessageContent: message,
+          },
+          receiver: to,
+        };
+        await createConversation(newConversationData).unwrap();
+
+        reset({
+          email: "",
+          message: "",
+        });
+        onClose();
+        setIsAddDirectMessageOpen(false);
+        navigate(`/chat/conversation/${newConversationData?.conversation.id}`, {
+          state: newConversationData?.conversation,
+        });
+      }
     } catch (error) {
-      console.log("error232323: ", error);
-      toast({
-        title: "Message didn't send.",
-        description: "We couldn't send your message to the user.",
-        status: "error",
-        duration: 2000,
-        isClosable: true,
+      console.log("error: ", error);
+      if (error?.message === "user not found") {
+        toast({
+          title: "User not found.",
+          description:
+            "We couldn't find the user you're trying to send message to.",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+      } else if (error?.message === "You can't send message to yourself") {
+        toast({
+          title: "Nope",
+          description: "You can't send message to yourself.",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+      } else {
+        toast({
+          title: "Message not sent.",
+          description: "We've not sent your message to the recipient.",
+          status: "success",
+          duration: 2000,
+          isClosable: true,
+        });
+      }
+      reset({
+        email: "",
+        message: "",
       });
     }
-
-    // reset({
-    //   email: "",
-    //   message: "",
-    // });
   };
 
   useEffect(() => {
     onOpen();
   }, [onOpen]);
+
+  if (isLoading) return <Loader />;
 
   return (
     <>
@@ -128,8 +200,8 @@ const AddDirectMessage = ({
           onClose();
           setIsAddDirectMessageOpen(false);
         }}
-        closeOnEsc={false}
-        closeOnOverlayClick={false}
+        closeOnEsc={true}
+        closeOnOverlayClick={true}
       >
         <ModalOverlay />
         <ModalContent
@@ -146,7 +218,7 @@ const AddDirectMessage = ({
           bgSize="cover"
           bgRepeat="no-repeat"
           bg="transparent"
-        //   w={{ base: "full", sm: "full", md: 820 }}
+          //   w={{ base: "full", sm: "full", md: 820 }}
         >
           <ModalHeader>Direct messages</ModalHeader>
           <ModalCloseButton />
@@ -183,20 +255,20 @@ const AddDirectMessage = ({
                     mr={2}
                     flex={1}
                     variant="filled"
-                    bg="pong_bg.400"
+                    bg="pong_bg_secondary"
                     type="text"
                     color="white"
                     placeholder="email to send message to"
-                  // onChange={(e) => {
+                    // onChange={(e) => {
 
-                  // }}
-                  //   _placeholder={{
-                  //     fontSize: 14,
-                  //     letterSpacing: 0.5,
-                  //     fontWeight: "light",
-                  //     opacity: 0.7,
-                  //     color: "gray.500",
-                  //   }}
+                    // }}
+                    //   _placeholder={{
+                    //     fontSize: 14,
+                    //     letterSpacing: 0.5,
+                    //     fontWeight: "light",
+                    //     opacity: 0.7,
+                    //     color: "gray.500",
+                    //   }}
                   />
                 </InputGroup>
                 <FormErrorMessage>
@@ -209,7 +281,7 @@ const AddDirectMessage = ({
                 // bg={"gray.400"}
                 borderRadius={6}
                 mb={2}
-              // px={2}
+                // px={2}
               >
                 <InputGroup
                   w={"full"}
@@ -220,7 +292,7 @@ const AddDirectMessage = ({
                   <Input
                     type="text"
                     variant="filled"
-                    bg="#F9F9F9"
+                    bg="pong_bg_secondary"
                     w={"full"}
                     placeholder="Say Hi!"
                     {...register("message")}

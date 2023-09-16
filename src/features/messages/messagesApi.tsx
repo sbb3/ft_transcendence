@@ -1,6 +1,7 @@
 import { apiSlice } from "src/app/api/apiSlice";
 import io from "socket.io-client";
 import useSocket from "src/hooks/useSocket";
+import conversationApi from "../conversations/conversationsApi";
 
 const messagesApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
@@ -21,13 +22,13 @@ const messagesApi = apiSlice.injectEndpoints({
         try {
           await cacheDataLoaded;
           socket.on("message", (data) => {
-            console.log("data: ", data);
+            // console.log("data: ", data);
             updateCachedData((draft) => {
               // console.log("before updateCachedData draft: ", draft);
               const message = draft?.find((m) => m.id === data?.data?.id);
               if (message?.id) {
                 // console.log("do nothing, ", message);
-                console.log("message already exist in the cache: ", message);
+                // console.log("message already exist in the cache: ", message);
               } else {
                 // console.log("message not in the cache, inserting it ", message);
                 draft?.push(data?.data);
@@ -44,31 +45,49 @@ const messagesApi = apiSlice.injectEndpoints({
       },
     }),
     addMessage: builder.mutation({
-      query: (body) => ({
+      query: ({ msgData, conversationData }) => ({
         url: `/messages`,
         method: "POST",
-        body
+        body: { ...msgData },
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
         // console.log("body: ", arg);
         // for optimistic updates, for me
-        const messageData = arg;
-        const { conversationId } = messageData;
+        const messageData = arg?.msgData;
+        const { conversationId, content } = messageData;
         // console.log('messageData: ', messageData);
         // console.log("conversationId: ", conversationId);
-        const patchResult = dispatch(
+        const patchResultMsg = dispatch(
           messagesApi?.util?.updateQueryData(
             "getMessagesByConversationId",
             conversationId,
             (draft) => {
-              console.log("updateQueryData: ", draft);
+              // console.log("updateQueryData: ", draft);
               draft?.push(messageData);
+            }
+          )
+        );
+        const patchResultCOnv = dispatch(
+          conversationApi?.util?.updateQueryData(
+            "getConversations",
+            getState().auth.user?.email,
+            (draft) => {
+              console.log("conver draft", draft);
+              // draft?.push(messageData);
+              const conversation = draft?.find((c) => c.id === conversationId);
+              if (conversation?.id) {
+                conversation.lastMessageContent = content;
+                draft = { ...draft, ...conversation };
+              } else {
+                // push to first conversation
+                // draft?.unshift(con
+              }
             }
           )
         );
         try {
           const result = await queryFulfilled;
-          console.log("result: ", result);
+          // console.log("result addMessage: ", result);
           // const conversationId = arg?.conversationId;
           // dispatch(
           //   messagesApi.endpoints.getMessagesByConversationId.initiate(
@@ -81,9 +100,18 @@ const messagesApi = apiSlice.injectEndpoints({
           //     }
           //   )
           // );
+          dispatch(
+            conversationApi.endpoints.updateConversation.initiate({
+              id: conversationId,
+              data: {
+                lastMessageContent: content,
+              },
+            })
+          );
         } catch (error) {
           console.log("error : ", error);
-          patchResult.undo();
+          patchResultMsg.undo();
+          patchResultCOnv.undo();
         }
       },
     }),

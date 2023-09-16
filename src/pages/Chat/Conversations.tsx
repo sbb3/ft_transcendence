@@ -1,4 +1,6 @@
 import {
+  Avatar,
+  AvatarBadge,
   Box,
   Button,
   Flex,
@@ -43,7 +45,6 @@ const Conversations = ({
     //   refetchOnMountOrArgChange: true,
     // }
   );
-  // console.log("conversations out: ", conversations);
 
   return (
     <>
@@ -160,31 +161,31 @@ const Conversations = ({
                               justify={"start"}
                               w={"full"}
                             >
-                              {/* <Avatar
-                                  size="md"
-                                  name={conversation.name}
-                                  src={conversation.avatar}
-                                  borderColor="green.400"
-                                  borderWidth="3px"
+                              <Avatar
+                                size="md"
+                                name={conversation.title}
+                                src={conversation.avatar}
+                                borderColor="green.400"
+                                borderWidth="3px"
+                              >
+                                <AvatarBadge
+                                  boxSize="0.7em"
+                                  border="2px solid white"
+                                  bg={"green.400"}
+                                  position="absolute"
+                                  bottom={"-15%"}
+                                  right={"0%"}
+                                  translateY={"50%"}
                                 >
-                                  <AvatarBadge
-                                    boxSize="1em"
-                                    border="2px solid white"
-                                    bg={"green.400"}
-                                    position="absolute"
-                                    bottom={"-15%"}
-                                    right={"0%"}
-                                    translateY={"50%"}
-                                  >
-                                    <Text
+                                  {/* <Text
                                       fontSize="8px"
                                       fontWeight="bold"
                                       color="white"
                                     >
                                       {conversation.unreadMessages}
-                                    </Text>
-                                  </AvatarBadge>
-                                </Avatar> */}
+                                    </Text> */}
+                                </AvatarBadge>
+                              </Avatar>
                               <Stack
                                 direction="column"
                                 spacing={0}
@@ -209,22 +210,22 @@ const Conversations = ({
                                 >
                                   {conversation.title}
                                 </Text>
+                                <Text
+                                  overflow={"hidden"}
+                                  fontSize={{
+                                    base: "9px",
+                                    sm: "10px",
+                                    md: "11px",
+                                  }}
+                                  fontWeight="regular"
+                                  color="whiteAlpha.600"
+                                  alignSelf={"stretch"}
+                                  whiteSpace={"nowrap"}
+                                  textOverflow="ellipsis"
+                                >
+                                  {conversation.lastMessageContent}
+                                </Text>
                                 {/* <Text
-                                    overflow={"hidden"}
-                                    fontSize={{
-                                      base: "9px",
-                                      sm: "10px",
-                                      md: "11px",
-                                    }}
-                                    fontWeight="regular"
-                                    color="whiteAlpha.600"
-                                    alignSelf={"stretch"}
-                                    whiteSpace={"nowrap"}
-                                    textOverflow="ellipsis"
-                                  >
-                                    {conversation.lastMessage}
-                                  </Text>
-                                  <Text
                                     overflow={"hidden"}
                                     fontSize={{
                                       base: "8px",

@@ -102,13 +102,13 @@ const ChatContent = () => {
   // TODO: loadings and errors
 
   const onSubmit = async (data: any) => {
-    // console.log("data: ", data);
+    console.log("conversations: ", conversations);
     const { message } = data;
     const receiver = receiversData[0] as IChatReceiver;
     // console.log("receiver: ", receiver);
     // fetch receiver user to get its info
     try {
-      await addMessage({
+      const msgData = {
         id: uuidv4(),
         conversationId: id,
         sender: {
@@ -122,6 +122,12 @@ const ChatContent = () => {
           name: receiver.name,
         },
         content: message,
+      };
+      const conversationData = conversations[0];
+
+      await addMessage({
+        msgData,
+        conversationData,
       }).unwrap();
     } catch (error) {
       console.log("error: ", error);

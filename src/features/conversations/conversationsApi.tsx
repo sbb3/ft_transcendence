@@ -31,6 +31,7 @@ const conversationApi = apiSlice.injectEndpoints({
               // console.log("before updateCachedData draft: ", draft);
               const conversation = draft?.find((c) => c.id === data?.data?.id);
               if (conversation?.id) {
+                // TODO: update the conversation content
                 // console.log("conversation: ", conversation);
               } else {
                 // console.log("do nothing conversation ", conversation);
@@ -50,6 +51,10 @@ const conversationApi = apiSlice.injectEndpoints({
     getConversation: builder.query({
       query: (conversationId) => `/conversations?id=${conversationId}`,
     }),
+    getConversationByMembersEmails: builder.query({
+      query: (membersEmails: string[]) =>
+        `/conversations?members_like=${membersEmails[0]},${membersEmails[1]}&members_like=${membersEmails[1]},${membersEmails[0]}`,
+    }),
     createConversation: builder.mutation({
       query: ({ conversation, receiver }) => ({
         url: `/conversations`,
@@ -67,7 +72,7 @@ const conversationApi = apiSlice.injectEndpoints({
             "getConversations",
             currentUserEmail,
             (draft) => {
-              console.log("updateQueryData: ", draft);
+              // console.log("updateQueryData: ", draft);
               draft?.unshift(conversation);
             }
           )
@@ -86,9 +91,9 @@ const conversationApi = apiSlice.injectEndpoints({
             id: _id,
             conversationId: conversation.id,
             sender: {
-              id: receiver.id,
-              email: receiver.email,
-              name: receiver.name,
+              id: getState().auth.user?.id,
+              email: getState().auth.user?.email,
+              name: getState().auth.user?.name,
             },
             receiver: {
               id: receiver.id,
@@ -97,7 +102,8 @@ const conversationApi = apiSlice.injectEndpoints({
             },
             content: conversation.content,
           };
-          console.log("messageData: ", messageData);
+          // console.log("messageData: ", messageData);
+          // !!! change addMessage to createMessage
           dispatch(
             messagesApi.endpoints.addMessage.initiate(messageData, {
               forceRefetch: true,
@@ -109,6 +115,35 @@ const conversationApi = apiSlice.injectEndpoints({
         }
       },
     }),
+    updateConversation: builder.mutation({
+      query: ({ id, data }: { id: number; data: any }) => ({
+        url: `conversations/${id}`,
+        method: "PATCH",
+        body: { ...data },
+      }),
+      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
+        // optimistic update
+        // const patchResult = dispatch(
+        //   conversationApi?.util?.updateQueryData(
+        //     "getConversations",
+        //     getState().auth.user?.email,
+        //     (draft) => {
+        //       console.log("arg: ", arg);
+        //       console.log("updateQueryData arg: ", draft);
+        //       // draft = { ...draft, ...arg.data };
+        //     }
+        //   )
+        // );
+        // console.log("arg2: ", arg);
+
+        try {
+          await queryFulfilled;
+        } catch (error) {
+          console.log("error: ", error);
+          // patchResult.undo();
+        }
+      },
+    }),
   }),
 });
 
@@ -116,6 +151,8 @@ export const {
   useGetConversationsQuery,
   useGetConversationQuery,
   useCreateConversationMutation,
+  useGetConversationByMembersEmailsQuery,
+  useUpdateConversationMutation,
 } = conversationApi;
 
 export default conversationApi;

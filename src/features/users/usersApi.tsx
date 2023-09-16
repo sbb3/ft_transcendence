@@ -13,6 +13,17 @@ const usersApi = apiSlice.injectEndpoints({
     }),
     getUserByEmail: builder.query({
       query: (email: string) => `users?email=${email}`,
+      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
+        try {
+          const result = await queryFulfilled;
+          const users = result?.data;
+          // if (users?.length === 0) {
+          //   throw new Error("user not found");
+          // }
+        } catch (error) {
+          console.log("error: ", error);
+        }
+      },
     }),
     updateUser: builder.mutation({
       query: ({ id, data }: { id: number; data: any }) => ({
