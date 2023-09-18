@@ -10,6 +10,8 @@ import {
 } from "@chakra-ui/react";
 import {
   AutoComplete,
+  AutoCompleteGroup,
+  AutoCompleteGroupTitle,
   AutoCompleteInput,
   AutoCompleteItem,
   AutoCompleteList,
@@ -21,6 +23,9 @@ import "src/styles/scrollbar.css";
 import { BeatLoader } from "react-spinners";
 import { faker } from "@faker-js/faker";
 import { BiSearchAlt } from "react-icons/bi";
+import { useGetChannelsByIdQuery } from "src/features/channels/channelsApi";
+import { useGetConversationsQuery } from "src/features/conversations/conversationsApi";
+import { useSelector } from "react-redux";
 
 const users = [...Array(30)].map(() => ({
   id: faker.string.uuid(),
@@ -29,11 +34,23 @@ const users = [...Array(30)].map(() => ({
 }));
 
 const SearchDMsChannels = () => {
+  const currentUser = useSelector((state: any) => state.auth.user);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [query, setQuery] = useState<string>("");
   const navigate = useNavigate();
 
-  useEffect(() => {}, []);
+  const {
+    data: channels,
+    isLoading: isLoadingChannels,
+    error: errorChannels,
+  } = useGetChannelsByIdQuery(currentUser.id, {
+    refetchOnMountOrArgChange: true,
+  });
+
+  const { data: conversations, isLoading: isLoadingConversations } =
+    useGetConversationsQuery(currentUser?.email, {
+      refetchOnMountOrArgChange: true,
+    });
 
   return (
     <Flex direction="row" align="center" justify="center">
@@ -96,52 +113,73 @@ const SearchDMsChannels = () => {
           closeOnSelect={false}
           p={1}
           mr={2}
+          w="full"
         >
           <ScrollArea.Root className="ScrollAreaRoot">
             <ScrollArea.Viewport className="ScrollAreaViewport">
-              {users.map((user, i) => (
-                <AutoCompleteItem
-                  key={i}
-                  value={user.name}
-                  textTransform="capitalize"
-                  bg="pong_bg.300"
-                  // boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.35)"
-                  // backdropFilter={"blur(20px)"}
-                  // bgImage={`url('src/assets/img/BlackNoise.png')`}
-                  // bgSize="cover"
-                  // bgRepeat="no-repeat"
-                  borderRadius={50}
-                  my={1}
-                  _hover={{
-                    bg: "pong_bg.500",
-                  }}
-                  _focus={{
-                    // bg: "pong_bg.300",
-                    backgroundColor: "transparent",
-                  }}
-                  _selected={{
-                    // bg: "pong_bg.300",
-                    backgroundColor: "transparent",
-                  }}
-                >
-                  <Flex
-                    direction="row"
-                    justify="space-between"
-                    align="center"
-                    w="full"
-                    key={user.id}
+              {Object.entries({ channels, conversations })?.map(([c, v], i) => (
+                <AutoCompleteGroup key={i} showDivider>
+                  <AutoCompleteGroupTitle
+                    textTransform="capitalize"
+                    color="white"
+                    fontSize="15px"
+                    fontWeight="semibold"
                   >
-                    <Flex
-                      direction="row"
-                      gap="3px"
-                      align="center"
-                      w={"full"}
-                      onClick={() => navigate(`/profile/${user.name}`)}
+                    {c === "channels" ? "Channels" : "Direct Messages"}
+                  </AutoCompleteGroupTitle>
+                  {v?.map((data, i) => (
+                    <AutoCompleteItem
+                      key={i}
+                      value={
+                        c === "channels"
+                          ? data.name
+                          : data?.name.filter(
+                              (name) => name != currentUser?.name
+                            )[0]
+                      }
+                      textTransform="capitalize"
+                      bg="transparent"
+                      // boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.35)"
+                      // backdropFilter={"blur(20px)"}
+                      // bgImage={`url('src/assets/img/BlackNoise.png')`}
+                      // bgSize="cover"
+                      // bgRepeat="no-repeat"
+                      borderRadius={5}
+                      my={1}
+                      _hover={{
+                        bg: "pong_bg.500",
+                      }}
+                      _focus={{
+                        // bg: "pong_bg.300",
+                        backgroundColor: "transparent",
+                      }}
+                      _selected={{
+                        // bg: "pong_bg.300",
+                        backgroundColor: "transparent",
+                      }}
                     >
-                      <Avatar
+                      <Flex
+                        direction="row"
+                        justify="space-between"
+                        align="center"
+                        w="full"
+                        key={data.id}
+                      >
+                        <Flex
+                          direction="row"
+                          gap="3px"
+                          align="center"
+                          w={"full"}
+                          onClick={() => {
+                            c === "channels"
+                              ? navigate(`/chat/channel/${data.name}`)
+                              : navigate(`/chat/conversation/${data.id}`);
+                          }}
+                        >
+                          {/* <Avatar
                         size="sm"
-                        name={user.name}
-                        src={user.avatar}
+                        name={data.name}
+                        src={data.avatar}
                         borderColor={"green.400"}
                         borderWidth="2px"
                       >
@@ -150,19 +188,25 @@ const SearchDMsChannels = () => {
                           border="1px solid white"
                           bg={"green.400"}
                         />
-                      </Avatar>
-                      <Text
-                        color="white"
-                        fontSize="14px"
-                        fontWeight="medium"
-                        ml={2}
-                        flex={1}
-                      >
-                        {user.name}
-                      </Text>
-                    </Flex>
-                  </Flex>
-                </AutoCompleteItem>
+                      </Avatar> */}
+                          <Text
+                            color="whiteAlpha.800"
+                            fontSize="14px"
+                            fontWeight="medium"
+                            ml={2}
+                            flex={1}
+                          >
+                            {c === "channels"
+                              ? data.name
+                              : data?.name.filter(
+                                  (name) => name != currentUser?.name
+                                )[0]}
+                          </Text>
+                        </Flex>
+                      </Flex>
+                    </AutoCompleteItem>
+                  ))}
+                </AutoCompleteGroup>
               ))}
             </ScrollArea.Viewport>
             <ScrollArea.Scrollbar

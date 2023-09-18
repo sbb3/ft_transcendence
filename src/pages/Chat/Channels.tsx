@@ -8,21 +8,49 @@ import {
   MenuItem,
   MenuList,
   Stack,
+  Text,
+  useDisclosure,
 } from "@chakra-ui/react";
 import * as ScrollArea from "@radix-ui/react-scroll-area";
 import "src/styles/scrollbar.css";
 import { ChevronDownIcon, ChevronRightIcon } from "@chakra-ui/icons";
 import { FiHash, FiInfo, FiPlus, FiSearch } from "react-icons/fi";
 import channels from "src/config/data/channels";
+import ChannelInfoAbout from "src/components/Chat/ChannelInfoAbout";
+import SearchForChannel from "src/components/Chat/SearchForChannel";
+import CreateChannel from "src/components/Chat/CreateChannel";
+import { useGetChannelsByIdQuery } from "src/features/channels/channelsApi";
+import Loader from "src/components/Utils/Loader";
+import { useSelector } from "react-redux";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-const Channels = ({
-  toggleContent,
-  setType,
-  setChannelData,
-  setIsSearchForChannelOpen,
-  setIsChannelInfoOpen,
-  setIsCreateChannelOpen,
-}) => {
+const menuBtnStyle = {
+  background: "none",
+  boxShadow: "none",
+  border: "none",
+};
+
+const Channels = ({}) => {
+  const currentUser = useSelector((state: any) => state.auth.user);
+  const navigate = useNavigate();
+  const { isOpen: isOpenCreateChannel, onToggle: onToggleCreateChannel } =
+    useDisclosure();
+  // const { isOpen: isOpenChannelInfo, onToggle: onToggleChannelInfo } =
+  //   useDisclosure();
+  const { isOpen: isOpenSearchChannel, onToggle: onToggleSearchChannel } =
+    useDisclosure();
+
+  const {
+    data: channels,
+    isLoading: isLoadingChannels,
+    error: errorChannels,
+  } = useGetChannelsByIdQuery(currentUser.id, {
+    refetchOnMountOrArgChange: true,
+  });
+
+  if (isLoadingChannels) return <Loader size="md" />;
+
   return (
     <Stack justify="start" align="start" w="full" gap="0px">
       <Flex direction="row" justify="space-between" align="center" w="full">
@@ -45,26 +73,6 @@ const Channels = ({
                   as={Button}
                   leftIcon={isOpen ? <ChevronDownIcon /> : <ChevronRightIcon />}
                   sx={{
-                    "&:hover": {
-                      background: "none",
-                      boxShadow: "none",
-                      border: "none",
-                    },
-                    "&:active": {
-                      background: "none",
-                      boxShadow: "none",
-                      border: "none",
-                    },
-                    "&:focus": {
-                      background: "none",
-                      boxShadow: "none",
-                      border: "none",
-                    },
-                    "&:selected": {
-                      background: "none",
-                      boxShadow: "none",
-                      border: "none",
-                    },
                     fontSize: "14px",
                     fontWeight: "semibold",
                     color: "white",
@@ -73,27 +81,15 @@ const Channels = ({
                     background: "none",
                     boxShadow: "none",
                     border: "none",
+                    "&:hover": menuBtnStyle,
+                    "&:active": menuBtnStyle,
+                    "&:focus": menuBtnStyle,
+                    "&:selected": menuBtnStyle,
                   }}
-                  _active={{
-                    background: "none",
-                    boxShadow: "none",
-                    border: "none",
-                  }}
-                  _focus={{
-                    background: "none",
-                    boxShadow: "none",
-                    border: "none",
-                  }}
-                  _hover={{
-                    background: "none",
-                    boxShadow: "none",
-                    border: "none",
-                  }}
-                  _selected={{
-                    background: "none",
-                    boxShadow: "none",
-                    border: "none",
-                  }}
+                  _active={menuBtnStyle}
+                  _focus={menuBtnStyle}
+                  _hover={menuBtnStyle}
+                  _selected={menuBtnStyle}
                 >
                   Channels
                 </MenuButton>
@@ -109,10 +105,10 @@ const Channels = ({
                 >
                   <ScrollArea.Root className="ScrollAreaRoot">
                     <ScrollArea.Viewport className="ScrollAreaViewport">
-                      {channels.map((channel, index) => (
-                        <>
+                      {channels.length > 0 ? (
+                        channels?.map((channel, index) => (
                           <MenuItem
-                            key={index}
+                            key={channel.id}
                             bg={"trasparent"}
                             borderRadius={"6px"}
                             icon={<FiHash />}
@@ -125,16 +121,31 @@ const Channels = ({
                               md: "15px",
                             }}
                             onClick={() => {
-                              // TODO: dispatch to close drawer when changing between dm and channels
-                              toggleContent(true);
-                              setType("channel");
-                              setChannelData(channel);
+                              navigate(`/chat/channel/${channel.name}`);
                             }}
                           >
                             {channel.name}
                           </MenuItem>
-                        </>
-                      ))}
+                        ))
+                      ) : (
+                        <Flex
+                          justify="start"
+                          align="center"
+                          h="100%"
+                          w="100%"
+                          color="white"
+                          fontSize="xl"
+                          fontWeight="semibold"
+                        >
+                          <Text
+                            fontSize="md"
+                            fontWeight="normal"
+                            color="whiteAlpha.500"
+                          >
+                            No channels yet !
+                          </Text>
+                        </Flex>
+                      )}
                     </ScrollArea.Viewport>
                     <ScrollArea.Scrollbar
                       className="ScrollAreaScrollbar"
@@ -165,23 +176,9 @@ const Channels = ({
             aria-label="Search for a channel"
             icon={<FiSearch />}
             _hover={{ bg: "white", color: "pong_bg_secondary" }}
-            onClick={() => {
-              setIsSearchForChannelOpen(true);
-            }}
+            onClick={onToggleSearchChannel}
           />
-          <IconButton
-            size="xs"
-            fontSize="lg"
-            bg={"pong_bg_secondary"}
-            color={"white"}
-            borderRadius={8}
-            aria-label="Channel info"
-            icon={<FiInfo />}
-            _hover={{ bg: "white", color: "pong_bg_secondary" }}
-            onClick={() => {
-              setIsChannelInfoOpen(true);
-            }}
-          />
+
           <IconButton
             size="xs"
             fontSize="lg"
@@ -191,13 +188,33 @@ const Channels = ({
             aria-label="Add a channel"
             icon={<FiPlus />}
             _hover={{ bg: "white", color: "pong_bg_secondary" }}
-            onClick={() => {
-              setIsCreateChannelOpen(true);
-            }}
+            onClick={onToggleCreateChannel}
           />
         </Flex>
       </Flex>
       <Box mt={3} w="full" height="255px"></Box>
+
+      {isOpenSearchChannel && (
+        <SearchForChannel
+          isOpenSearchChannel={isOpenSearchChannel}
+          onToggleSearchChannel={onToggleSearchChannel}
+        />
+      )}
+      {/* 
+      {isOpenChannelInfo && (
+        <ChannelInfoAbout
+          isOpenChannelInfo={isOpenChannelInfo}
+          onToggleChannelInfo={onToggleChannelInfo}
+          // currentChannel={currentChannel}
+        />
+      )} */}
+
+      {isOpenCreateChannel && (
+        <CreateChannel
+          isOpenCreateChannel={isOpenCreateChannel}
+          onToggleCreateChannel={onToggleCreateChannel}
+        />
+      )}
     </Stack>
   );
 };

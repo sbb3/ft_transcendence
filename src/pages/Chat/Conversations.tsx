@@ -3,6 +3,7 @@ import {
   AvatarBadge,
   Box,
   Button,
+  CloseButton,
   Flex,
   IconButton,
   Menu,
@@ -11,6 +12,7 @@ import {
   MenuList,
   Stack,
   Text,
+  useDisclosure,
 } from "@chakra-ui/react";
 import * as ScrollArea from "@radix-ui/react-scroll-area";
 import "src/styles/scrollbar.css";
@@ -19,32 +21,32 @@ import { FiPlus } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { useGetConversationsQuery } from "src/features/conversations/conversationsApi";
 import { useSelector } from "react-redux";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import LastMessageDate from "./LastMessageDate";
+import { useRef, useState } from "react";
+import DeleteConversationAlert from "./DeleteConversationAlert";
+import AddDirectMessage from "src/components/Chat/AddDirectMessage";
+import Loader from "src/components/Utils/Loader";
+dayjs.extend(relativeTime);
 
-// id: 1,
-//     name: "Brad Pitt",
-//     avatar:
-//     lastMessage: "Hey, how are you?",
-//     lastMessageDate: "11:11",
-//     unreadMessages: 2,
-//     status: "online",
+const Conversations = ({}) => {
+  const { isOpen: isOpenDM, onToggle: onToggleDM } = useDisclosure();
+  const {
+    isOpen: isAlertDialogOpen,
+    onOpen: onOpenAlertDialog,
+    onClose: onCloseAlertDialog,
+  } = useDisclosure();
+  const cancelRef = useRef();
 
-const Conversations = ({
-  setType,
-  setConversation,
-  toggleContent,
-  setIsAddDirectMessageOpen,
-}) => {
-  const { email: currentUserEmail } = useSelector(
-    (state: any) => state?.auth?.user
-  );
-  // console.log("currentUserEmail: ", currentUserEmail);
+  const currentUser = useSelector((state: any) => state?.auth?.user);
   const navigate = useNavigate();
-  const { data: conversations, isLoading } = useGetConversationsQuery(
-    currentUserEmail
-    // {
-    //   refetchOnMountOrArgChange: true,
-    // }
-  );
+  const { data: conversations, isLoading: isLoadingConversations } =
+    useGetConversationsQuery(currentUser?.email, {
+      refetchOnMountOrArgChange: true,
+    });
+
+  if (isLoadingConversations) return <Loader size="md" />;
 
   return (
     <>
@@ -132,120 +134,150 @@ const Conversations = ({
                 >
                   <ScrollArea.Root className="ScrollAreaRoot">
                     <ScrollArea.Viewport className="ScrollAreaViewport">
-                      {conversations?.map((conversation, index) => (
-                        <MenuItem
-                          key={index}
-                          bg={"trasparent"}
-                          borderRadius={"6px"}
-                          _focus={{ bg: "pong_bg.200" }}
-                          _hover={{ bg: "pong_bg.200" }}
-                          _selected={{ bg: "pong_bg.200" }}
-                          onClick={() => {
-                            toggleContent(true);
-                            // setConversation(conversation);
-                            // setType("DM");
-                            navigate(`/chat/conversation/${conversation.id}`);
-                          }}
-                        >
-                          <Flex
-                            direction="row"
-                            gap="6px"
-                            align="center"
-                            justify="space-between"
-                            w={"full"}
-                          >
-                            <Flex
-                              direction="row"
-                              gap="10px"
-                              align="center"
-                              justify={"start"}
-                              w={"full"}
+                      {conversations.length > 0 ? (
+                        conversations
+                          ?.slice() // array copy
+                          .sort(
+                            (c1, c2) =>
+                              c1.lastMessageCreatedAt < c2.lastMessageCreatedAt // descending order
+                          )
+                          .map((conversation, index) => (
+                            <MenuItem
+                              key={index}
+                              bg={"trasparent"}
+                              borderRadius={"6px"}
+                              _focus={{ bg: "pong_bg.200" }}
+                              _hover={{ bg: "pong_bg.200" }}
+                              _selected={{ bg: "pong_bg.200" }}
                             >
-                              <Avatar
-                                size="md"
-                                name={conversation.title}
-                                src={conversation.avatar}
-                                borderColor="green.400"
-                                borderWidth="3px"
+                              <Flex
+                                direction="row"
+                                gap="6px"
+                                align="center"
+                                justify="space-between"
+                                w={"full"}
                               >
-                                <AvatarBadge
-                                  boxSize="0.7em"
-                                  border="2px solid white"
-                                  bg={"green.400"}
-                                  position="absolute"
-                                  bottom={"-15%"}
-                                  right={"0%"}
-                                  translateY={"50%"}
-                                >
-                                  {/* <Text
-                                      fontSize="8px"
-                                      fontWeight="bold"
-                                      color="white"
-                                    >
-                                      {conversation.unreadMessages}
-                                    </Text> */}
-                                </AvatarBadge>
-                              </Avatar>
-                              <Stack
-                                direction="column"
-                                spacing={0}
-                                justify="start"
-                                //   alignContent="stretch"
-                                w="full"
-                              >
-                                <Text
-                                  fontSize={{
-                                    base: "12px",
-                                    sm: "14px",
-                                    md: "15px",
+                                <Flex
+                                  direction="row"
+                                  gap="10px"
+                                  align="center"
+                                  justify={"start"}
+                                  w={"full"}
+                                  onClick={() => {
+                                    navigate(
+                                      `/chat/conversation/${conversation.id}`
+                                    );
                                   }}
-                                  fontWeight="normal"
-                                  alignSelf={"stretch"}
-                                  color={"whiteAlpha.900"}
-                                  letterSpacing={0}
-                                  lineHeight={"auto"}
-                                  overflow={"hidden"}
-                                  whiteSpace={"nowrap"}
-                                  textOverflow={"ellipsis"}
                                 >
-                                  {conversation.title}
-                                </Text>
-                                <Text
-                                  overflow={"hidden"}
-                                  fontSize={{
-                                    base: "9px",
-                                    sm: "10px",
-                                    md: "11px",
-                                  }}
-                                  fontWeight="regular"
-                                  color="whiteAlpha.600"
-                                  alignSelf={"stretch"}
-                                  whiteSpace={"nowrap"}
-                                  textOverflow="ellipsis"
-                                >
-                                  {conversation.lastMessageContent}
-                                </Text>
-                                {/* <Text
-                                    overflow={"hidden"}
-                                    fontSize={{
-                                      base: "8px",
-                                      sm: "9px",
-                                      md: "9px",
-                                    }}
-                                    fontWeight="regular"
-                                    color="whiteAlpha.600"
-                                    alignSelf={"stretch"}
-                                    whiteSpace={"nowrap"}
-                                    textOverflow="ellipsis"
+                                  <Avatar
+                                    size="md"
+                                    name={
+                                      conversation.name.filter(
+                                        (name) => name != currentUser?.name
+                                      )[0]
+                                    }
+                                    src={conversation.avatar}
+                                    borderColor="green.400"
+                                    borderWidth="3px"
                                   >
-                                    {conversation.lastMessageDate}
-                                  </Text> */}
-                              </Stack>
-                            </Flex>
-                            {/* <CloseButton size="sm" color="white" /> */}
-                          </Flex>
-                        </MenuItem>
-                      ))}
+                                    <AvatarBadge
+                                      boxSize="0.7em"
+                                      border="2px solid white"
+                                      bg={"green.400"}
+                                      position="absolute"
+                                      bottom={"-15%"}
+                                      right={"0%"}
+                                      translateY={"50%"}
+                                    ></AvatarBadge>
+                                  </Avatar>
+                                  <Stack
+                                    direction="column"
+                                    spacing={0}
+                                    justify="start"
+                                    //   alignContent="stretch"
+                                    w="full"
+                                  >
+                                    <Text
+                                      fontSize={{
+                                        base: "12px",
+                                        sm: "14px",
+                                        md: "15px",
+                                      }}
+                                      fontWeight="normal"
+                                      alignSelf={"stretch"}
+                                      color={"whiteAlpha.900"}
+                                      letterSpacing={0}
+                                      lineHeight={"auto"}
+                                      overflow={"hidden"}
+                                      whiteSpace={"nowrap"}
+                                      textOverflow={"ellipsis"}
+                                      w={"160px"}
+                                    >
+                                      {
+                                        conversation.name.filter(
+                                          (name) => name != currentUser?.name
+                                        )[0]
+                                      }
+                                    </Text>
+                                    <Text
+                                      overflow={"hidden"}
+                                      fontSize={{
+                                        base: "9px",
+                                        sm: "10px",
+                                        md: "11px",
+                                      }}
+                                      fontWeight="regular"
+                                      color="whiteAlpha.600"
+                                      alignSelf={"stretch"}
+                                      whiteSpace={"nowrap"}
+                                      textOverflow="ellipsis"
+                                      w={"160px"}
+                                    >
+                                      {conversation.lastMessageContent}
+                                    </Text>
+                                    <LastMessageDate
+                                      lastMessageCreatedAt={
+                                        conversation.lastMessageCreatedAt
+                                      }
+                                    />
+                                  </Stack>
+                                </Flex>
+                                <CloseButton
+                                  onClick={onOpenAlertDialog}
+                                  size="sm"
+                                  color="white"
+                                />
+                                {isAlertDialogOpen && (
+                                  <DeleteConversationAlert
+                                    conversationId={conversation.id}
+                                    isOpen={isAlertDialogOpen}
+                                    onOpen={onOpenAlertDialog}
+                                    onClose={onCloseAlertDialog}
+                                    cancelRef={cancelRef}
+                                  />
+                                )}
+                              </Flex>
+                            </MenuItem>
+                          ))
+                      ) : (
+                        <Flex
+                          justify="start"
+                          align="center"
+                          h="100%"
+                          w="100%"
+                          color="white"
+                          fontSize="xl"
+                          fontWeight="semibold"
+                        >
+                          <Text
+                            fontSize="md"
+                            fontWeight="normal"
+                            color="whiteAlpha.500"
+                          >
+                            No conversations yet !
+                          </Text>
+                        </Flex>
+                      )}
                     </ScrollArea.Viewport>
                     <ScrollArea.Scrollbar
                       className="ScrollAreaScrollbar"
@@ -276,9 +308,7 @@ const Conversations = ({
             aria-label="Search for a conversation"
             icon={<FiPlus />}
             _hover={{ bg: "white", color: "pong_bg_secondary" }}
-            onClick={() => {
-              setIsAddDirectMessageOpen(true);
-            }}
+            onClick={onToggleDM}
           />
         </Flex>
       </Flex>
@@ -287,6 +317,10 @@ const Conversations = ({
         height="360px"
         //    bg={"red"}
       ></Box>
+
+      {isOpenDM && (
+        <AddDirectMessage isOpenDM={isOpenDM} onToggleDM={onToggleDM} />
+      )}
     </>
   );
 };

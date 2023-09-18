@@ -20,26 +20,61 @@ const conversationApi = apiSlice.injectEndpoints({
         `/conversations?members_like=${currentUserEmail}`,
       async onCacheEntryAdded(
         arg,
-        { updateCachedData, cacheDataLoaded, cacheEntryRemoved }
+        { dispatch, updateCachedData, cacheDataLoaded, cacheEntryRemoved }
       ) {
         const socket = useSocket();
 
         try {
           await cacheDataLoaded;
           socket.on("conversation", (data) => {
-            updateCachedData((draft) => {
-              // console.log("before updateCachedData draft: ", draft);
-              const conversation = draft?.find((c) => c.id === data?.data?.id);
-              if (conversation?.id) {
-                // TODO: update the conversation content
-                // console.log("conversation: ", conversation);
-              } else {
-                // console.log("do nothing conversation ", conversation);
-                draft?.unshift(data?.data);
+            console.log("data2: ", data);
+            // TODO: this delete functionality will be removed later, replace it with another socket event for deleting the conversation
+            if (data.data?.type === "delete") {
+              updateCachedData((draft) => {
+                const conversation = draft?.find(
+                  (c) => c.id === data?.data?.id
+                );
+                if (conversation?.id) {
+                  const index = draft?.findIndex(
+                    (c) => c.id === data?.data?.id
+                  );
+                  if (index !== -1) {
+                    draft?.splice(index, 1);
+                    console.log("index222: ", index);
+                    console.log("conversation deleted222");
+                  }
+                  // TODO: later, delete the messages of the conversation also
+                  dispatch(
+                    conversationApi.endpoints.getConversation.initiate(
+                      conversation.id
+                    )
+                  );
+                }
+              });
+            } else {
+              const isDataBelongToThisUser = data.data.members.find(
+                (email) => email === arg
+              );
+              if (isDataBelongToThisUser) {
+                updateCachedData((draft) => {
+                  const conversation = draft?.find(
+                    (c) => c.id === data?.data?.id
+                  );
+                  if (conversation?.id) {
+                    // TODO: update the conversation content
+
+                    conversation.lastMessageContent =
+                      data?.data?.lastMessageContent;
+                    conversation.lastMessageCreatedAt =
+                      data?.data?.lastMessageCreatedAt;
+                    draft = { ...draft, ...conversation };
+                  } else {
+                    console.log("herer3");
+                    draft?.unshift(data?.data);
+                  }
+                });
               }
-              // console.log("socket data: ", data?.data);
-              // console.log("after updateCachedData draft?.data: ", draft);
-            });
+            }
           });
         } catch (error) {
           console.log("error: ", error);
@@ -80,15 +115,8 @@ const conversationApi = apiSlice.injectEndpoints({
         try {
           const result = await queryFulfilled;
 
-          // const sender = arg.members[0];
-          // dispatch(
-          //   conversationApi?.endpoints?.getConversations.initiate(sender, {
-          //     forceRefetch: true,
-          //   })
-          // );
-          const _id = uuidv4();
           const messageData = {
-            id: _id,
+            id: uuidv4(),
             conversationId: conversation.id,
             sender: {
               id: getState().auth.user?.id,
@@ -100,15 +128,12 @@ const conversationApi = apiSlice.injectEndpoints({
               email: receiver.email,
               name: receiver.name,
             },
-            content: conversation.content,
+            content: conversation.lastMessageContent,
+            lastMessageCreatedAt: conversation.lastMessageCreatedAt,
           };
           // console.log("messageData: ", messageData);
           // !!! change addMessage to createMessage
-          dispatch(
-            messagesApi.endpoints.addMessage.initiate(messageData, {
-              forceRefetch: true,
-            })
-          );
+          dispatch(messagesApi.endpoints.createMessage.initiate(messageData));
         } catch (error) {
           console.log("error happended here: ", error);
           patchResult.undo();
@@ -144,6 +169,40 @@ const conversationApi = apiSlice.injectEndpoints({
         }
       },
     }),
+    deleteConversation: builder.mutation({
+      query: (id: number) => ({
+        url: `conversations/${id}`,
+        method: "DELETE",
+      }),
+      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
+        // optimistic update
+        const patchResult = dispatch(
+          conversationApi?.util?.updateQueryData(
+            "getConversations",
+            getState().auth.user?.email,
+            (draft) => {
+              // indexOf or findIndex
+              const index = draft?.findIndex((c) => c.id === arg.toString());
+              console.log("arg: ", arg);
+              console.log("index: ", index);
+              if (index !== -1) {
+                draft?.splice(index, 1);
+                console.log("index: ", index);
+                console.log("conversation deleted");
+              }
+            }
+          )
+        );
+        try {
+          await queryFulfilled;
+          console.log("deleted");
+          // conversationApi.endpoints.getConversations.initiate(
+        } catch (error) {
+          console.log("error: ", error);
+          patchResult.undo();
+        }
+      },
+    }),
   }),
 });
 
@@ -153,6 +212,7 @@ export const {
   useCreateConversationMutation,
   useGetConversationByMembersEmailsQuery,
   useUpdateConversationMutation,
+  useDeleteConversationMutation,
 } = conversationApi;
 
 export default conversationApi;

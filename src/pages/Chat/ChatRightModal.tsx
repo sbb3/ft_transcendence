@@ -51,7 +51,7 @@ const iconButtonStyles = [
   },
 ];
 
-const ChatRightModal = ({ conversation, isOpen, toggleDrawer }) => {
+const ChatRightModal = ({ receiverUser, isOpen, toggleDrawer }) => {
   return (
     <Drawer
       open={isOpen}
@@ -109,7 +109,7 @@ const ChatRightModal = ({ conversation, isOpen, toggleDrawer }) => {
             lineHeight={"28px"}
             letterSpacing={1}
           >
-            {conversation.name}
+            {receiverUser?.name}
           </Text>
           <Flex justify="center" align="center" gap={1}>
             <Icon
@@ -119,7 +119,8 @@ const ChatRightModal = ({ conversation, isOpen, toggleDrawer }) => {
               color={"green.400"}
             />
             <Text fontSize="12px" fontWeight="light" color="whiteAlpha.900">
-              {conversation.status}
+              {/* {receiverUser?.status} */}
+              online
             </Text>
           </Flex>
         </Flex>

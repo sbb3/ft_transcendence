@@ -31,6 +31,13 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useToast } from "@chakra-ui/react";
 import { ReactNode, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useCreateChannelMutation } from "src/features/channels/channelsApi";
+import { v4 as uuidv4 } from "uuid";
+import { tr } from "@faker-js/faker";
+import { useSelector } from "react-redux";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+dayjs.extend(relativeTime);
 
 const validationSchema = yup.object().shape({
   name: yup
@@ -51,14 +58,21 @@ const validationSchema = yup.object().shape({
     then(schema) {
       return schema
         .required("Password is required")
-        .min(6, "Minimum length should be 6")
+        .min(5, "Minimum length should be 5")
         .max(20, "Maximum length should be 20")
         .trim();
     },
   }),
 });
 
-const CreateChannel = ({ isOpen, onOpen, onClose, setIsCreateChannelOpen }) => {
+const CreateChannel = ({
+  isOpenCreateChannel,
+  onToggleCreateChannel,
+}: {
+  isOpenCreateChannel: boolean;
+  onToggleCreateChannel: () => void;
+}) => {
+  const currentUser = useSelector((state: any) => state.auth.user);
   const [isPrivate, setIsPrivate] = useState(false);
   const passRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
@@ -72,31 +86,56 @@ const CreateChannel = ({ isOpen, onOpen, onClose, setIsCreateChannelOpen }) => {
   } = useForm({
     resolver: yupResolver(validationSchema),
   });
+  const [createChannel, { isLoading: isLoadingCreatingChannel }] =
+    useCreateChannelMutation();
 
-  useEffect(() => {
-    onOpen();
-  }, [onOpen]);
-
-  const onSubmit = (data: any) => {
-    console.log("data: ", data);
-    reset({
-      name: "",
-      description: "",
-      password: "",
-      privacy: "public",
-    });
-    if (isPrivate) setIsPrivate(false);
-    onClose();
-    setIsCreateChannelOpen(false);
+  // TODO: check if channel name already exists, if so, show error message
+  // TODO: validations like channel name should be unique
+  const onSubmit = async (data: any) => {
+    try {
+      await createChannel({
+        id: uuidv4(),
+        ...data,
+        members: [currentUser.id],
+        admins: [currentUser.id],
+        owner: {
+          id: currentUser.id,
+          name: currentUser.name,
+        },
+        createdAt: dayjs().valueOf(),
+      }).unwrap();
+      reset({
+        name: "",
+        description: "",
+        privacy: "public",
+        password: "",
+      });
+      if (isPrivate) setIsPrivate(false);
+      onToggleCreateChannel();
+      // navigate(`/chat/channels/${data.name}`);
+      toast({
+        title: "Channel created.",
+        description: "Channel has been created successfully.",
+        status: "success",
+        duration: 2000,
+        isClosable: true,
+      });
+    } catch (error) {
+      console.log("error: ", error);
+      toast({
+        title: "Channel not created.",
+        description: "Channel has not been created.",
+        status: "error",
+        duration: 2000,
+        isClosable: true,
+      });
+    }
   };
 
   return (
     <Modal
-      isOpen={isOpen}
-      onClose={() => {
-        onClose();
-        setIsCreateChannelOpen(false);
-      }}
+      isOpen={isOpenCreateChannel}
+      onClose={onToggleCreateChannel}
       closeOnEsc={false}
       closeOnOverlayClick={false}
     >
@@ -116,7 +155,7 @@ const CreateChannel = ({ isOpen, onOpen, onClose, setIsCreateChannelOpen }) => {
         bg="transparent"
       >
         <ModalHeader>Create a New Channel</ModalHeader>
-        <ModalCloseButton />
+        <ModalCloseButton onClick={onToggleCreateChannel} />
         <ModalBody p={2} borderRadius={40}>
           <Stack
             mt={0}
@@ -135,6 +174,7 @@ const CreateChannel = ({ isOpen, onOpen, onClose, setIsCreateChannelOpen }) => {
                 id="name"
                 type="text"
                 placeholder="Channel name"
+                autoComplete="off"
                 {...register("name")}
               />
               {/* {errors?.name && (
@@ -204,6 +244,7 @@ const CreateChannel = ({ isOpen, onOpen, onClose, setIsCreateChannelOpen }) => {
               <Input
                 type="password"
                 placeholder="Channel password"
+                autoComplete="off"
                 {...register("password")}
               />
               <FormErrorMessage>
@@ -219,10 +260,7 @@ const CreateChannel = ({ isOpen, onOpen, onClose, setIsCreateChannelOpen }) => {
             color={"orange.500"}
             letterSpacing={1}
             mr={3}
-            onClick={() => {
-              onClose();
-              setIsCreateChannelOpen(false);
-            }}
+            onClick={onToggleCreateChannel}
           >
             Close
           </Button>
@@ -231,9 +269,9 @@ const CreateChannel = ({ isOpen, onOpen, onClose, setIsCreateChannelOpen }) => {
             color={"white"}
             mr={3}
             letterSpacing={1}
-            // isLoading={isLoading}
+            isLoading={isLoadingCreatingChannel}
             // isLoading={isFetching}
-            // isDisabled={isSubmitting}
+            isDisabled={isLoadingCreatingChannel}
             cursor="pointer"
             onClick={handleSubmit(onSubmit)}
             _hover={{

@@ -1,16 +1,30 @@
-import { Avatar, AvatarBadge, Flex, Icon, Stack, Text } from "@chakra-ui/react";
+import {
+  Avatar,
+  AvatarBadge,
+  Flex,
+  Icon,
+  IconButton,
+  Stack,
+  Text,
+  useDisclosure,
+} from "@chakra-ui/react";
 import React from "react";
 import { FaHashtag } from "react-icons/fa";
+import { FiInfo } from "react-icons/fi";
+import ChannelInfoAbout from "src/components/Chat/ChannelInfoAbout";
 
 const ChatContentHeader = ({
-  channelData: channel,
   toggleDrawer,
   type,
-  receiverName,
+  receiverUser = null,
+  channel = null,
 }) => {
+  const { isOpen: isOpenChannelInfo, onToggle: onToggleChannelInfo } =
+    useDisclosure();
   return (
     <Flex
       w={"full"}
+      height={"full"}
       justify="start"
       align="center"
       // bg={"red.400"}
@@ -25,7 +39,8 @@ const ChatContentHeader = ({
       bgImage={`url('src/assets/img/BlackNoise.png')`}
       bgSize="cover"
       bgRepeat="no-repeat"
-      bg={"rgba(51, 51, 51, 0.9)"}
+      bg="pong_bg_first"
+      // bg="pong_bg_secondary"
     >
       {type === "DM" ? (
         <Flex
@@ -35,11 +50,12 @@ const ChatContentHeader = ({
           justify={"start"}
           w="full"
           onClick={toggleDrawer}
+          cursor="pointer"
         >
           <Avatar
             size="lg"
-            name="Brad Pitt"
-            src="https://64.media.tumblr.com/a566eec40d22d9989a6fd1e819b347ee/37a863925050913a-a5/s1280x1920/1360367c6057b4cd40ea8105d74580fbcc177fc8.jpg"
+            name={receiverUser?.name}
+            src={receiverUser?.avatar}
             borderColor="green.400"
             borderWidth="3px"
           >
@@ -51,7 +67,7 @@ const ChatContentHeader = ({
           </Avatar>
           <Stack direction="column" spacing={1} align="start">
             <Text fontSize="18px" fontWeight="semibold" color="whiteAlpha.900">
-              {receiverName}
+              {receiverUser?.name}
             </Text>
             {/* <Text fontSize="14px" fontWeight="medium" color="green.300">
               {conversation?.status}
@@ -59,11 +75,62 @@ const ChatContentHeader = ({
           </Stack>
         </Flex>
       ) : (
-        <Stack direction="row" spacing={1} align="center" justify={"center"}>
-          <Icon as={FaHashtag} boxSize="20px" color="whiteAlpha.900" />
-          <Text fontSize="18px" fontWeight="semibold" color="whiteAlpha.900">
-            {channel?.name}
-          </Text>
+        <Stack
+          w="full"
+          h="full"
+          direction="row"
+          spacing={1}
+          align="center"
+          justify={"start"}
+          // bg={"rgba(51, 51, 51, 0.9)"}
+          // bg="red.400"
+        >
+          <Flex
+            w="full"
+            direction="row"
+            align="center"
+            justify={"space-between"}
+            // ml={4}
+          >
+            <Flex
+              w="full"
+              direction="row"
+              align="center"
+              justify={"start"}
+              gap={3}
+              // bg="green.400"
+            >
+              <Icon as={FaHashtag} boxSize="20px" color="whiteAlpha.900" />
+              <Text
+                fontSize="18px"
+                fontWeight="semibold"
+                color="whiteAlpha.900"
+              >
+                {channel?.name}
+              </Text>
+            </Flex>
+            <Flex direction="row" align="center" justify={"start"} ml={4}>
+              <IconButton
+                size="sm"
+                fontSize="lg"
+                bg={"pong_bg_secondary"}
+                color={"white"}
+                borderRadius={8}
+                aria-label="Channel info"
+                icon={<FiInfo />}
+                _hover={{ bg: "white", color: "pong_bg_secondary" }}
+                onClick={onToggleChannelInfo}
+              />
+            </Flex>
+          </Flex>
+
+          {isOpenChannelInfo && (
+            <ChannelInfoAbout
+              isOpenChannelInfo={isOpenChannelInfo}
+              onToggleChannelInfo={onToggleChannelInfo}
+              channel={channel}
+            />
+          )}
         </Stack>
       )}
     </Flex>

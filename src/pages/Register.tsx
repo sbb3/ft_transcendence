@@ -6,9 +6,11 @@ export default function Register() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [avatar, setAvatar] = useState(
+    "https://media.istockphoto.com/id/477333976/photo/female-portrait-icon-as-avatar-or-profile-picture.jpg?s=1024x1024&w=is&k=20&c=0g3XdKRmdQI7EtmhUkGDvj4_WGzwcMm_N91f-sXcIQw="
+  );
 
-  const [register, { data, isLoading, error }] =
-    useRegisterMutation();
+  const [register, { data, isLoading, error }] = useRegisterMutation();
 
   const navigate = useNavigate();
 
@@ -25,6 +27,7 @@ export default function Register() {
       name,
       email,
       password,
+      avatar,
     });
   };
 
@@ -36,16 +39,11 @@ export default function Register() {
     return <div>Loading...</div>;
   }
   return (
-    <div
-    >
-      <div
-      >
-        <div
-        >
-          <form
-            onSubmit={handleSubmit}>
-            <div
-            >
+    <div>
+      <div>
+        <div>
+          <form onSubmit={handleSubmit}>
+            <div>
               <div>
                 <input
                   id="name"
@@ -53,7 +51,11 @@ export default function Register() {
                   type="Name"
                   placeholder="full name"
                   value={name}
-                  style={{ marginTop: "1rem", backgroundColor: "red", color: "black" }}
+                  style={{
+                    marginTop: "1rem",
+                    backgroundColor: "red",
+                    color: "black",
+                  }}
                   onChange={(e) => setName(e.target.value)}
                 />
               </div>
@@ -67,7 +69,11 @@ export default function Register() {
                   required
                   placeholder="Email address"
                   value={email}
-                  style={{ marginTop: "1rem", backgroundColor: "red", color: "black" }}
+                  style={{
+                    marginTop: "1rem",
+                    backgroundColor: "red",
+                    color: "black",
+                  }}
                   onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
@@ -81,7 +87,11 @@ export default function Register() {
                   required
                   placeholder="Password"
                   value={password}
-                  style={{ marginTop: "1rem", backgroundColor: "red", color: "black" }}
+                  style={{
+                    marginTop: "1rem",
+                    backgroundColor: "red",
+                    color: "black",
+                  }}
                   onChange={(e) => setPassword(e.target.value)}
                 />
               </div>
@@ -96,7 +106,6 @@ export default function Register() {
                 Sign up
               </button>
             </div>
-
           </form>
         </div>
       </div>

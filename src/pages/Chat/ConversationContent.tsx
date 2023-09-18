@@ -12,6 +12,7 @@ import {
   Text,
   Textarea,
   Toast,
+  useDisclosure,
   useToast,
 } from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
@@ -26,19 +27,16 @@ import msgs from "src/config/data/messages.js";
 import { faker } from "@faker-js/faker";
 import ChatRightModal from "./ChatRightModal";
 import { useGetMessagesByConversationIdQuery } from "src/features/messages/messagesApi";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import Loader from "src/components/Utils/Loader";
 import { useAddMessageMutation } from "src/features/messages/messagesApi";
 import { useGetConversationQuery } from "src/features/conversations/conversationsApi";
 import { useGetUserByEmailQuery } from "src/features/users/usersApi";
 import { useSelector } from "react-redux";
 import { v4 as uuidv4 } from "uuid";
-// const msgs = [...Array(30)].map(() => ({
-//   id: faker.string.uuid(),
-//   sender: "other" || "me",
-//   content: faker.lorem.sentence(),
-//   avatar: "https://64.media.tumblr.com/a566eec40d22d9989a6fd1e819b347ee/37a863925050913a-a5/s1280x1920/1360367c6057b4cd40ea8105d74580fbcc177fc8.jpg",
-// }));
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+dayjs.extend(relativeTime);
 
 interface IChatReceiver {
   id: number;
@@ -47,13 +45,13 @@ interface IChatReceiver {
   password: string;
 }
 
-const ChatContent = () => {
-  const [receiverName, setReceiverName] = useState("");
+const ConversationContent = () => {
+  const [receiverUser, setReceiverUser] = useState(null);
   const [receiverEmail, setReceiverEmail] = useState("");
   const [skip, setSkip] = useState(true);
   const currentUser = useSelector((state: any) => state.auth.user);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const toggleDrawer = () => setIsDrawerOpen((prevState) => !prevState);
+  const navigate = useNavigate();
+  const { isOpen: isDrawerOpen, onToggle: toggleDrawer } = useDisclosure();
   const toast = useToast();
   let { id } = useParams();
   const {
@@ -76,14 +74,35 @@ const ChatContent = () => {
       const receiverEmail = conversations[0].members.filter(
         (m) => m !== currentUser.email
       )[0];
-      setReceiverEmail(receiverEmail);
-      setSkip(false);
+      const senderEmail = conversations[0].members.filter(
+        (m) => m === currentUser.email
+      )[0];
+      if (
+        currentUser.email === senderEmail ||
+        currentUser.email === receiverEmail
+      ) {
+        console.log("allowed");
+        setReceiverEmail(receiverEmail);
+        setSkip(false);
+      } else {
+        console.log("not allowed");
+        toast({
+          title: "Conversation not found.",
+          description: "We couldn't find the conversation.",
+          status: "error",
+          duration: 2000,
+          isClosable: true,
+        });
+        navigate("/chat");
+      }
+    } else if (conversations?.length === 0) {
+      navigate("/chat", { replace: true });
     }
   }, [conversations]);
 
   useEffect(() => {
     if (receiversData?.length > 0) {
-      setReceiverName(receiversData[0].name);
+      setReceiverUser(receiversData[0]);
     }
   }, [receiversData]);
 
@@ -97,16 +116,11 @@ const ChatContent = () => {
     error: errorGettingMessages,
   } = useGetMessagesByConversationIdQuery(id);
 
-  // const receiver = users?.find((u) => u.id === receiverId);
-
   // TODO: loadings and errors
-
   const onSubmit = async (data: any) => {
-    console.log("conversations: ", conversations);
     const { message } = data;
     const receiver = receiversData[0] as IChatReceiver;
-    // console.log("receiver: ", receiver);
-    // fetch receiver user to get its info
+
     try {
       const msgData = {
         id: uuidv4(),
@@ -122,13 +136,16 @@ const ChatContent = () => {
           name: receiver.name,
         },
         content: message,
+        lastMessageCreatedAt: dayjs().valueOf(),
       };
       const conversationData = conversations[0];
-
-      await addMessage({
-        msgData,
-        conversationData,
-      }).unwrap();
+      if (conversationData.id) {
+        // console.log("ghalatasaray");
+        await addMessage(msgData).unwrap();
+      } else {
+        // console.log("looooooooooopez");
+        navigate("/chat", { replace: true });
+      }
     } catch (error) {
       console.log("error: ", error);
       toast({
@@ -141,8 +158,8 @@ const ChatContent = () => {
     }
   };
 
-  if (isLoadingMessages || isLoadingConversation || isLoadinGetUserByEmail)
-    return <Loader />;
+  // if (isLoadingMessages || isLoadingConversation || isLoadinGetUserByEmail)
+  //   return <Loader />;
 
   if (errorGettingConversation) {
     toast({
@@ -175,6 +192,7 @@ const ChatContent = () => {
       //   gap={6}
     >
       <Stack
+        // pos="relative"
         // ml={2}
         // bg={"gray"}
         justify="start"
@@ -186,26 +204,54 @@ const ChatContent = () => {
         spacing={1}
         pl={{ base: 1 }}
       >
-        <ChatContentHeader
-          toggleDrawer={toggleDrawer}
-          // type={type}
-          type={"DM"}
-          receiverName={receiverName}
-        />
-        <ChatContentBody
-          messages={messages}
-          toggleDrawer={toggleDrawer}
-          error={errorGettingMessages}
-        />
-        <ChatContentFooter onSubmit={onSubmit} />
+        {isLoadingMessages ||
+        isLoadingConversation ||
+        isLoadinGetUserByEmail ? (
+          <Flex
+            justify="center"
+            align="center"
+            h="100%"
+            w="100%"
+            color="white"
+            fontSize="xl"
+            fontWeight="semibold"
+          >
+            <Loader />
+          </Flex>
+        ) : conversations?.length > 0 ? (
+          <>
+            <ChatContentHeader
+              toggleDrawer={toggleDrawer}
+              type={"DM"}
+              receiverUser={receiverUser}
+            />
+            <ChatContentBody
+              messages={messages}
+              toggleDrawer={toggleDrawer}
+              error={errorGettingMessages}
+              isDrawerOpen={isDrawerOpen}
+              receiverUser={receiverUser}
+            />
+            <ChatContentFooter onSubmit={onSubmit} isLoading={isAdding} />
+          </>
+        ) : (
+          <Flex
+            justify="center"
+            align="center"
+            h="100%"
+            w="100%"
+            color="white"
+            fontSize="xl"
+            fontWeight="semibold"
+          >
+            <Text fontSize="xl" fontWeight="normal" color="white">
+              No conversation messages yet.
+            </Text>
+          </Flex>
+        )}
       </Stack>
-      {/* <ChatRightModal
-        conversation={conversation}
-        isOpen={isDrawerOpen}
-        toggleDrawer={toggleDrawer}
-      /> */}
     </Flex>
   );
 };
 
-export default ChatContent;
+export default ConversationContent;

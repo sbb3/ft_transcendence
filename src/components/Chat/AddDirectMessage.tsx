@@ -17,6 +17,7 @@ import {
   InputGroup,
   InputLeftElement,
   InputRightElement,
+  useDisclosure,
 } from "@chakra-ui/react";
 import React, { useEffect } from "react";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -38,18 +39,17 @@ import { useGetUserByEmailQuery } from "src/features/users/usersApi";
 import messagesApi from "src/features/messages/messagesApi";
 import { useGetConversationByMembersEmailsQuery } from "src/features/conversations/conversationsApi";
 import Loader from "../Utils/Loader";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+dayjs.extend(relativeTime);
 
 const validationSchema = yup.object().shape({
   email: yup.string().required("email is required").trim(),
   message: yup.string().required("Message is required").trim(),
 });
 
-const AddDirectMessage = ({
-  isOpen,
-  onOpen,
-  onClose,
-  setIsAddDirectMessageOpen,
-}) => {
+const AddDirectMessage = ({ isOpenDM, onToggleDM }) => {
+  // const { isOpen, onOpen, onClose } = useDisclosure();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const currentUser = useSelector((state: any) => state.auth.user);
@@ -58,12 +58,13 @@ const AddDirectMessage = ({
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
     reset,
   } = useForm({
     resolver: yupResolver(validationSchema),
   });
-  const [trigger, { isLoading }] =
+
+  const [trigger, { isLoading: isLoadinGetUserByEmail }] =
     usersApi.endpoints.getUserByEmail.useLazyQuery();
 
   const [
@@ -71,21 +72,22 @@ const AddDirectMessage = ({
     { isLoading: isLoadingGetConversationByMembersEmails },
   ] = conversationApi.endpoints.getConversationByMembersEmails.useLazyQuery();
 
-  // const [addMessage, { isLoading, error }] = useAddMessageMutation();
-  const [createConversation, { isLoading: isCreating, error: error2 }] =
+  const [createConversation, { isLoading: isCreatingConversation }] =
     useCreateConversationMutation();
+
   const onSubmit = async (data: any) => {
-    // console.log("data: ", data);
+    console.log("data: ", data);
+    let conversationId;
     const { message, email: receiverEmail } = data;
 
     try {
-      if (receiverEmail === currentUser.email) {
+      if (receiverEmail === currentUser.email)
         throw new Error("You can't send message to yourself");
-      }
+
       const users = await trigger(receiverEmail).unwrap();
-      if (users?.length === 0) {
-        throw new Error("user not found");
-      }
+
+      if (users?.length === 0) throw new Error("user not found");
+
       const to = users[0];
 
       const conversations = await triggerGetConversationByMembersEmails([
@@ -93,10 +95,10 @@ const AddDirectMessage = ({
         receiverEmail,
       ]).unwrap();
 
-      // conversation already exist
       if (conversations?.length > 0) {
         const conversation = conversations[0];
-        const newMessageData = {
+        conversationId = conversation.id;
+        const msgData = {
           id: uuidv4(),
           conversationId: conversation.id,
           sender: {
@@ -110,47 +112,31 @@ const AddDirectMessage = ({
             name: to.name,
           },
           content: message,
+          lastMessageCreatedAt: dayjs().valueOf(),
         };
-        store.dispatch(
-          messagesApi.endpoints.addMessage.initiate(newMessageData, {
-            forceRefetch: true,
-          })
-        );
-
-        console.log("conversation already exist: ", conversations);
-        reset({
-          email: "",
-          message: "",
-        });
-        onClose();
-        setIsAddDirectMessageOpen(false);
-        navigate(`/chat/conversation/${conversation.id}`);
+        store.dispatch(messagesApi.endpoints.addMessage.initiate(msgData));
       } else {
-        // create conversation
-        console.log("create new conversation: ");
-
         const newConversationData = {
           conversation: {
             id: uuidv4(),
-            title: to?.name,
+            name: [currentUser.name, to?.name],
             avatar: to?.avatar,
             members: [currentUser.email, receiverEmail],
             lastMessageContent: message,
+            lastMessageCreatedAt: dayjs().valueOf(),
           },
           receiver: to,
         };
+        conversationId = newConversationData?.conversation.id;
         await createConversation(newConversationData).unwrap();
-
-        reset({
-          email: "",
-          message: "",
-        });
-        onClose();
-        setIsAddDirectMessageOpen(false);
-        navigate(`/chat/conversation/${newConversationData?.conversation.id}`, {
-          state: newConversationData?.conversation,
-        });
       }
+
+      reset({
+        email: "",
+        message: "",
+      });
+      onToggleDM();
+      navigate(`/chat/conversation/${conversationId}`);
     } catch (error) {
       console.log("error: ", error);
       if (error?.message === "user not found") {
@@ -179,27 +165,14 @@ const AddDirectMessage = ({
           isClosable: true,
         });
       }
-      reset({
-        email: "",
-        message: "",
-      });
     }
   };
-
-  useEffect(() => {
-    onOpen();
-  }, [onOpen]);
-
-  if (isLoading) return <Loader />;
 
   return (
     <>
       <Modal
-        isOpen={isOpen}
-        onClose={() => {
-          onClose();
-          setIsAddDirectMessageOpen(false);
-        }}
+        isOpen={isOpenDM}
+        onClose={onToggleDM}
         closeOnEsc={true}
         closeOnOverlayClick={true}
       >
@@ -221,7 +194,7 @@ const AddDirectMessage = ({
           //   w={{ base: "full", sm: "full", md: 820 }}
         >
           <ModalHeader>Direct messages</ModalHeader>
-          <ModalCloseButton />
+          <ModalCloseButton onClick={onToggleDM} />
           <ModalBody p={2} borderRadius={40}>
             <Stack
               mt={0}
@@ -269,6 +242,10 @@ const AddDirectMessage = ({
                     //     opacity: 0.7,
                     //     color: "gray.500",
                     //   }}
+                    _hover={{
+                      borderColor: "pong_cl_primary",
+                      background: "pong_bg_secondary",
+                    }}
                   />
                 </InputGroup>
                 <FormErrorMessage>
@@ -315,19 +292,22 @@ const AddDirectMessage = ({
                     bg={"pong_cl_primary"}
                     size={"md"}
                     isRound
-                    isLoading={isSubmitting}
-                    onClick={() => {
-                      handleSubmit(onSubmit)();
-                      reset({
-                        message: "",
-                      });
-                    }}
+                    isLoading={
+                      isLoadinGetUserByEmail ||
+                      isCreatingConversation ||
+                      isLoadingGetConversationByMembersEmails
+                    }
+                    onClick={handleSubmit(onSubmit)}
                     icon={<Icon as={MdSend} />}
                     _hover={{
                       bg: "white",
                       color: "pong_cl_primary",
                     }}
-                    isDisabled={isSubmitting}
+                    isDisabled={
+                      isLoadinGetUserByEmail ||
+                      isCreatingConversation ||
+                      isLoadingGetConversationByMembersEmails
+                    }
                   />
                 </InputGroup>
               </Box>

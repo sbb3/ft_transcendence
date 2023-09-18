@@ -3,7 +3,7 @@ import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { MdSend } from "react-icons/md";
 
-const ChatContentFooter = ({ onSubmit }) => {
+const ChatContentFooter = ({ onSubmit, isLoading }) => {
   const {
     register,
     handleSubmit,
@@ -66,7 +66,8 @@ const ChatContentFooter = ({ onSubmit }) => {
           bg={"pong_cl_primary"}
           size={"md"}
           isRound
-          isLoading={isSubmitting}
+          isLoading={isLoading}
+          isDisabled={isSubmitting}
           onClick={() => {
             handleSubmit(onSubmit)();
             reset({
@@ -78,7 +79,6 @@ const ChatContentFooter = ({ onSubmit }) => {
             bg: "white",
             color: "pong_cl_primary",
           }}
-          isDisabled={isSubmitting}
         />
       </InputGroup>
     </Box>

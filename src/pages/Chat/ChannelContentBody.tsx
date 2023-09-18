@@ -5,16 +5,14 @@ import { useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
 import ChatRightModal from "./ChatRightModal";
 
-const ChatContentBody = ({
+const ChannelContentBody = ({
   messages = [],
   toggleDrawer,
-  error,
   isDrawerOpen,
+  error,
   receiverUser = null,
 }) => {
-  const { email: currentUserEmail } = useSelector(
-    (state: any) => state.auth.user
-  );
+  const currentUser = useSelector((state: any) => state.auth.user);
   const messagesRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -36,7 +34,7 @@ const ChatContentBody = ({
   return (
     <Stack
       // position="relative"
-      id="ChatContentBodyStack"
+      id="ChannelContentBodyStack"
       // direction={"column-reverse"}
       justify={"start"}
       w={"full"}
@@ -70,7 +68,7 @@ const ChatContentBody = ({
           fontWeight="semibold"
         >
           <Text fontSize="xl" fontWeight="normal" color="white">
-            This conversation is empty 🤔 or does not exist 🤷‍♂️
+            This channel does not exist 🤷‍♂️
           </Text>
         </Flex>
       ) : (
@@ -90,16 +88,15 @@ const ChatContentBody = ({
                   gap={1}
                   align="center"
                   justify="start"
-                  // bg={"teal.300"}
                   borderRadius={6}
                   //   border="1px solid white"
                   p={1}
                 >
-                  {message?.sender.email !== currentUserEmail && (
+                  {message?.sender?.id !== currentUser?.id && (
                     <Avatar
                       // size="sm"
-                      name={receiverUser?.name}
-                      src={receiverUser?.avatar}
+                      name={message?.sender?.name}
+                      src={message?.sender?.avatar}
                       // borderColor="green.400"
                       // borderWidth="3px"
                       onClick={toggleDrawer} // TODO: show the user data in the drawer
@@ -107,15 +104,11 @@ const ChatContentBody = ({
                       cursor="pointer"
                     />
                   )}
-
-                  <Flex
-                    // bg={"green.400"}
+                  <Stack
                     w="full"
-                    align="center"
-                    justify={
-                      message?.sender.email === currentUserEmail
-                        ? "end"
-                        : "start"
+                    justify="center"
+                    align={
+                      message?.sender.id === currentUser.id ? "end" : "start"
                     }
                   >
                     <Text
@@ -123,7 +116,7 @@ const ChatContentBody = ({
                       fontWeight="medium"
                       color="whiteAlpha.900"
                       bg={
-                        message?.sender.email === currentUserEmail
+                        message?.sender.id === currentUser.id
                           ? "gray.600"
                           : "gray.700"
                       }
@@ -133,14 +126,12 @@ const ChatContentBody = ({
                       px={2}
                       mx={1}
                       textAlign={
-                        message?.sender.email === currentUserEmail
-                          ? "right"
-                          : "left"
+                        message?.sender.id === currentUser.id ? "right" : "left"
                       }
                     >
                       {message?.content}
                     </Text>
-                  </Flex>
+                  </Stack>
                 </Flex>
               ))
             ) : (
@@ -175,15 +166,15 @@ const ChatContentBody = ({
           <ScrollArea.Corner className="ScrollAreaCorner" />
         </ScrollArea.Root>
       )}
-      {isDrawerOpen && (
+      {/* {isDrawerOpen && (
         <ChatRightModal
           receiverUser={receiverUser}
           isOpen={isDrawerOpen}
           toggleDrawer={toggleDrawer}
         />
-      )}
+      )} */}
     </Stack>
   );
 };
 
-export default ChatContentBody;
+export default ChannelContentBody;

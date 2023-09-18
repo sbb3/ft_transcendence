@@ -9,8 +9,9 @@ const messagesApi = apiSlice.injectEndpoints({
       query: (conversationId) => `/messages?conversationId=${conversationId}`,
       async onCacheEntryAdded(
         arg,
-        { updateCachedData, cacheDataLoaded, cacheEntryRemoved }
+        { getState, updateCachedData, cacheDataLoaded, cacheEntryRemoved }
       ) {
+        const currentUser = getState()?.auth?.user?.email;
         // const socket = useSocket();
         const socket = io(import.meta.env.VITE_API_URL as string, {
           reconnectionDelay: 1000,
@@ -22,20 +23,22 @@ const messagesApi = apiSlice.injectEndpoints({
         try {
           await cacheDataLoaded;
           socket.on("message", (data) => {
-            // console.log("data: ", data);
-            updateCachedData((draft) => {
-              // console.log("before updateCachedData draft: ", draft);
-              const message = draft?.find((m) => m.id === data?.data?.id);
-              if (message?.id) {
-                // console.log("do nothing, ", message);
-                // console.log("message already exist in the cache: ", message);
-              } else {
-                // console.log("message not in the cache, inserting it ", message);
-                draft?.push(data?.data);
-              }
-              // console.log("socket data: ", data?.data);
-              // console.log("after updateCachedData draft?.data: ", draft);
-            });
+            const sender = data.data.sender.email;
+            const receiver = data.data.receiver.email;
+            if (currentUser === sender || currentUser === receiver) {
+              updateCachedData((draft) => {
+                const message = draft?.find((m) => m.id === data?.data?.id);
+                if (message?.id) {
+                  // console.log("do nothing, ", message);
+                  // console.log("message already exist in the cache: ", message);
+                } else {
+                  // console.log("message not in the cache, inserting it ", message);
+                  draft?.push(data?.data);
+                }
+                // console.log("socket data: ", data?.data);
+                // console.log("after updateCachedData draft?.data: ", draft);
+              });
+            }
           });
         } catch (error) {
           console.log("error: ", error);
@@ -45,7 +48,7 @@ const messagesApi = apiSlice.injectEndpoints({
       },
     }),
     addMessage: builder.mutation({
-      query: ({ msgData, conversationData }) => ({
+      query: (msgData) => ({
         url: `/messages`,
         method: "POST",
         body: { ...msgData },
@@ -53,8 +56,9 @@ const messagesApi = apiSlice.injectEndpoints({
       async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
         // console.log("body: ", arg);
         // for optimistic updates, for me
-        const messageData = arg?.msgData;
-        const { conversationId, content } = messageData;
+        const msgData = arg;
+        const messageData = msgData;
+        const { conversationId, content, lastMessageCreatedAt } = messageData;
         // console.log('messageData: ', messageData);
         // console.log("conversationId: ", conversationId);
         const patchResultMsg = dispatch(
@@ -72,39 +76,25 @@ const messagesApi = apiSlice.injectEndpoints({
             "getConversations",
             getState().auth.user?.email,
             (draft) => {
-              console.log("conver draft", draft);
+              // console.log("conver draft", draft);
               // draft?.push(messageData);
               const conversation = draft?.find((c) => c.id === conversationId);
               if (conversation?.id) {
                 conversation.lastMessageContent = content;
+                conversation.lastMessageCreatedAt = lastMessageCreatedAt;
                 draft = { ...draft, ...conversation };
-              } else {
-                // push to first conversation
-                // draft?.unshift(con
               }
             }
           )
         );
         try {
           const result = await queryFulfilled;
-          // console.log("result addMessage: ", result);
-          // const conversationId = arg?.conversationId;
-          // dispatch(
-          //   messagesApi.endpoints.getMessagesByConversationId.initiate(
-          //     conversationId,
-          //     {
-          //       // subscribe: (result) => {
-          //       //   console.log("result: ", result);
-          //       // },
-          //       forceRefetch: true,
-          //     }
-          //   )
-          // );
           dispatch(
             conversationApi.endpoints.updateConversation.initiate({
               id: conversationId,
               data: {
                 lastMessageContent: content,
+                lastMessageCreatedAt: lastMessageCreatedAt,
               },
             })
           );
@@ -115,10 +105,41 @@ const messagesApi = apiSlice.injectEndpoints({
         }
       },
     }),
+    createMessage: builder.mutation({
+      query: (msgData) => ({
+        url: `/messages`,
+        method: "POST",
+        body: { ...msgData },
+      }),
+      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
+        const messageData = arg;
+        const { conversationId } = messageData;
+        // optimistic update
+        const patchResultMsg = dispatch(
+          messagesApi?.util?.updateQueryData(
+            "getMessagesByConversationId",
+            conversationId,
+            (draft) => {
+              draft?.push(messageData);
+            }
+          )
+        );
+
+        try {
+          await queryFulfilled;
+        } catch (error) {
+          console.log("error : ", error);
+          patchResultMsg.undo();
+        }
+      },
+    }),
   }),
 });
 
-export const { useGetMessagesByConversationIdQuery, useAddMessageMutation } =
-  messagesApi;
+export const {
+  useGetMessagesByConversationIdQuery,
+  useAddMessageMutation,
+  useCreateMessageMutation,
+} = messagesApi;
 
 export default messagesApi;

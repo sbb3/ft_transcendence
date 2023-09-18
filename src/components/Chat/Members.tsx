@@ -142,7 +142,7 @@ const Members = () => {
       <Stack direction="column" justify="start" align="center" spacing={5}>
         <FormControl isInvalid={!!errors.username} mt={0}>
           <FormLabel htmlFor="username" fontSize="lg">
-            Add a member
+            Add or Modify Member
           </FormLabel>
           <Input
             id="username"
