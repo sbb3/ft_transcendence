@@ -15,7 +15,7 @@ const Watch = () => {
       p={2}
       borderRadius={26}
     >
-      <h1>Watch live games</h1>
+      <h1>Watchh live games</h1>
     </Flex>
   );
 };

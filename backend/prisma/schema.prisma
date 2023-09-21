@@ -30,7 +30,7 @@ model user {
   player_two game[] @relation(name: "player_two")
   email String  @unique
   login String  @unique
-  campus String  @unique
+  campus String  
   avatar String
   achievements achievement[] 
   // achievement achievement? @relation("user", fields: [achievement_id], references: [id])
@@ -118,10 +118,11 @@ model game {
 
 model channel {
   id Int    @id @default(autoincrement())
-  title String
+  name String @unique
   is_private Boolean
   password String
   channel_owner Int
+  description String
   msg message[]
   createdAt   DateTime  @default(now())
   member membership[]

@@ -1,11 +1,11 @@
 FROM node:18
 
-COPY frontend /app
+COPY frontend/ /app
 
 WORKDIR /app
 
 RUN npm install 
-COPY . .
+# COPY . .
 EXPOSE 3000
 # RUN sleep(5)
 # RUN npm run build
