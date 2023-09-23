@@ -12,9 +12,7 @@ const ChatContentBody = ({
   isDrawerOpen,
   receiverUser = null,
 }) => {
-  const { email: currentUserEmail } = useSelector(
-    (state: any) => state.auth.user
-  );
+  const currentUser = useSelector((state: any) => state.user.currentUser);
   const messagesRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -95,7 +93,7 @@ const ChatContentBody = ({
                   //   border="1px solid white"
                   p={1}
                 >
-                  {message?.sender.email !== currentUserEmail && (
+                  {message?.sender.email !== currentUser?.email && (
                     <Avatar
                       // size="sm"
                       name={receiverUser?.name}
@@ -113,7 +111,7 @@ const ChatContentBody = ({
                     w="full"
                     align="center"
                     justify={
-                      message?.sender.email === currentUserEmail
+                      message?.sender.email === currentUser?.email
                         ? "end"
                         : "start"
                     }
@@ -123,7 +121,7 @@ const ChatContentBody = ({
                       fontWeight="medium"
                       color="whiteAlpha.900"
                       bg={
-                        message?.sender.email === currentUserEmail
+                        message?.sender.email === currentUser?.email
                           ? "gray.600"
                           : "gray.700"
                       }
@@ -133,7 +131,7 @@ const ChatContentBody = ({
                       px={2}
                       mx={1}
                       textAlign={
-                        message?.sender.email === currentUserEmail
+                        message?.sender.email === currentUser?.email
                           ? "right"
                           : "left"
                       }
@@ -141,6 +139,18 @@ const ChatContentBody = ({
                       {message?.content}
                     </Text>
                   </Flex>
+                  {isDrawerOpen && message?.sender.id !== currentUser?.id && (
+                    <ChatRightModal
+                      currentUser={currentUser}
+                      participantUserId={
+                        message?.sender?.id !== currentUser?.id
+                          ? message?.sender?.id
+                          : message?.receiver?.id
+                      }
+                      isOpen={isDrawerOpen}
+                      toggleDrawer={toggleDrawer}
+                    />
+                  )}
                 </Flex>
               ))
             ) : (
@@ -174,13 +184,6 @@ const ChatContentBody = ({
           </ScrollArea.Scrollbar>
           <ScrollArea.Corner className="ScrollAreaCorner" />
         </ScrollArea.Root>
-      )}
-      {isDrawerOpen && (
-        <ChatRightModal
-          receiverUser={receiverUser}
-          isOpen={isDrawerOpen}
-          toggleDrawer={toggleDrawer}
-        />
       )}
     </Stack>
   );

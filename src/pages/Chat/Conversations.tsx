@@ -39,7 +39,7 @@ const Conversations = ({}) => {
   } = useDisclosure();
   const cancelRef = useRef();
 
-  const currentUser = useSelector((state: any) => state?.auth?.user);
+  const currentUser = useSelector((state: any) => state.user.currentUser);
   const navigate = useNavigate();
   const { data: conversations, isLoading: isLoadingConversations } =
     useGetConversationsQuery(currentUser?.email, {
@@ -139,7 +139,9 @@ const Conversations = ({}) => {
                           ?.slice() // array copy
                           .sort(
                             (c1, c2) =>
-                              c1.lastMessageCreatedAt < c2.lastMessageCreatedAt // descending order
+                              dayjs(c2?.lastMessageCreatedAt).diff(
+                                dayjs(c1?.lastMessageCreatedAt)
+                              ) // in descending order from the newest to the oldest
                           )
                           .map((conversation, index) => (
                             <MenuItem
@@ -176,7 +178,11 @@ const Conversations = ({}) => {
                                         (name) => name != currentUser?.name
                                       )[0]
                                     }
-                                    src={conversation.avatar}
+                                    src={
+                                      conversation.avatar.filter(
+                                        (user) => user.id !== currentUser?.id
+                                      )[0]?.avatar
+                                    }
                                     borderColor="green.400"
                                     borderWidth="3px"
                                   >
@@ -249,7 +255,7 @@ const Conversations = ({}) => {
                                 />
                                 {isAlertDialogOpen && (
                                   <DeleteConversationAlert
-                                    conversationId={conversation.id}
+                                    conversation={conversation}
                                     isOpen={isAlertDialogOpen}
                                     onOpen={onOpenAlertDialog}
                                     onClose={onCloseAlertDialog}

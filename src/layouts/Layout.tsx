@@ -21,8 +21,6 @@ import { motion } from "framer-motion";
 const MotionBox = motion(Box);
 
 const Layout = () => {
-  // const { alreadyUser } = useSelector((state: any) => state.user);
-
   const [shouldOpenDetailsModal, setShouldOpenDetailsModal] = useState(false);
 
   const { isOpen, onOpen, onClose } = useDisclosure();

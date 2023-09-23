@@ -36,8 +36,8 @@ const ChatLeftSidebar = ({}) => {
       <SearchDMsChannels />
       <Divider color="orange" />
       <Channels />
-      {/* <Divider mt={4} color="orange" />
-      <Conversations /> */}
+      <Divider mt={4} color="orange" />
+      <Conversations />
     </Flex>
   );
 };

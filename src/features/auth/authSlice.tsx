@@ -8,11 +8,11 @@ import { createSlice } from "@reduxjs/toolkit";
 const auth = localStorage?.getItem("auth");
 const authObj = JSON.parse(auth);
 const token = authObj?.accessToken;
-const user = authObj?.user;
+const userId = authObj?.userId;
 
 const initialState = {
   accessToken: token,
-  user: { ...user },
+  userId,
 };
 
 const authSlice = createSlice({
@@ -21,19 +21,19 @@ const authSlice = createSlice({
   reducers: {
     setLogin: (state, action) => {
       state.accessToken = action.payload.accessToken;
-      state.user = action.payload.user;
+      state.userId = action.payload.userId;
     },
     setLogout: (state) => {
       state.accessToken = null;
-      state.user = null;
+      state.userId = null;
     },
     userLoggedIn: (state, action) => {
       state.accessToken = action.payload.accessToken;
-      state.user = action.payload.user;
+      state.userId = action.payload.userId;
     },
     userLoggedOut: (state) => {
       state.accessToken = null;
-      state.user = null;
+      state.userId = null;
     },
   },
 });

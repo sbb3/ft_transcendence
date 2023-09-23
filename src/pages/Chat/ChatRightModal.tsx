@@ -8,6 +8,7 @@ import {
   Link,
   Stack,
   Text,
+  useToast,
 } from "@chakra-ui/react";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import Drawer from "react-modern-drawer";
@@ -23,15 +24,33 @@ import { IoGameControllerOutline } from "react-icons/io5";
 import { MdBlockFlipped } from "react-icons/md";
 import { GoEye } from "react-icons/go";
 import { ExternalLinkIcon } from "@chakra-ui/icons";
+import usersApi, { useGetUserByIdQuery } from "src/features/users/usersApi";
+import Loader from "src/components/Utils/Loader";
+import conversationApi from "src/features/conversations/conversationsApi";
+import { v4 as uuidv4 } from "uuid";
+import { useCreateConversationWithoutMessageMutation } from "src/features/conversations/conversationsApi";
+import { useSelector } from "react-redux";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import notificationsApi from "src/features/notifications/notificationsApi";
+import store from "src/app/store";
+import { setCurrentUser } from "src/features/users/usersSlice";
+import { useEffect, useReducer } from "react";
+import useSocket from "src/hooks/useSocket";
+// import
+
+dayjs.extend(relativeTime);
 
 const iconButtonStyles = [
   {
     label: "Send a message",
     icon: <FiMessageSquare />,
+    to: "/chat/conversation",
   },
   {
     label: "View profile",
     icon: <HiOutlineUserCircle />,
+    to: "/profile",
   },
   {
     label: "Send friend request",
@@ -51,7 +70,164 @@ const iconButtonStyles = [
   },
 ];
 
-const ChatRightModal = ({ receiverUser, isOpen, toggleDrawer }) => {
+const ChatRightModal = ({
+  currentUser,
+  participantUserId,
+  isOpen,
+  toggleDrawer,
+}) => {
+  const prefetchUser = usersApi.usePrefetch("getCurrentUser", {
+    force: true,
+  });
+  const [, forceUpdate] = useReducer((x) => x + 1, 0);
+  const navigate = useNavigate();
+  const toast = useToast();
+
+  const [triggerGetCurrentUser, { isLoading: isLoadingGetCurrentUser }] =
+    usersApi.useLazyGetCurrentUserQuery();
+
+  useEffect(() => {
+    const socket = useSocket();
+    socket.on("friend_accepted", async (data: any) => {
+      // console.log("incoming friend_accepted: ", data);
+      // store.dispatch(setCurrentUser(data?.data));
+      if (data?.data?.id === currentUser?.id) {
+        try {
+          // await prefetchUser(currentUser?.id).then((data) => {
+          //   store.dispatch(setCurrentUser(data?.data));
+          // });
+          await triggerGetCurrentUser(currentUser?.id).unwrap();
+        } catch (error) {
+          console.log("error: ", error);
+          toast({
+            title: "Error",
+            description: "Error happened while accepting friend request",
+            status: "error",
+            duration: 2000,
+            isClosable: true,
+          });
+        }
+      }
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
+
+  const { data: participantUser, isLoading: isLoadingParticipantUser } =
+    useGetUserByIdQuery(participantUserId, {
+      refetchOnMountOrArgChange: true,
+    });
+
+  const [
+    triggerGetConversationByMembersEmails,
+    { isLoading: isLoadingGetConversationByMembersEmails },
+  ] = conversationApi.endpoints.getConversationByMembersEmails.useLazyQuery();
+
+  const [
+    createConversationWithoutMessage,
+    { isLoading: isLoadingCreateConversationWithoutMessage },
+  ] = useCreateConversationWithoutMessageMutation();
+
+  if (isLoadingParticipantUser) return <Loader />;
+
+  // console.log("participantUser: ", participantUser);
+  // console.log("currentUser: ", currentUser);
+
+  const handleOpenConversation = async () => {
+    try {
+      const conversations = await triggerGetConversationByMembersEmails([
+        currentUser?.email,
+        participantUser?.email,
+      ]).unwrap();
+      let id;
+      if (conversations?.length > 0) {
+        const conversation = conversations[0];
+        id = conversation.id;
+        console.log("id->: ", id);
+      } else {
+        const conversation = {
+          id: uuidv4(),
+          name: [currentUser?.name, participantUser?.name],
+          avatar: [
+            { id: currentUser?.id, avatar: currentUser?.avatar },
+            { id: participantUser?.id, avatar: participantUser?.avatar },
+          ],
+          members: [currentUser?.email, participantUser?.email],
+          lastMessageContent: "",
+          lastMessageCreatedAt: dayjs().valueOf(),
+        };
+        await createConversationWithoutMessage(conversation).unwrap();
+        id = conversation.id;
+      }
+      toggleDrawer();
+      navigate(`/chat/conversation/${id}`);
+    } catch (error) {
+      console.log("error: ", error);
+      toast({
+        title: "Error",
+        description: "Error happened while opening the conversation",
+        status: "error",
+        duration: 2000,
+        isClosable: true,
+      });
+    }
+  };
+
+  const handleSendFriendNotification = async () => {
+    if (currentUser?.friends.includes(participantUser?.id)) {
+      toast({
+        title: "Info",
+        description: "He is already your friend",
+        status: "info",
+        duration: 3000,
+        isClosable: true,
+      });
+      // re-render the component
+      toggleDrawer();
+      return;
+    }
+    try {
+      const notification = {
+        id: uuidv4(),
+        type: "friendRequest",
+        sender: {
+          id: currentUser?.id,
+          email: currentUser?.email,
+          name: currentUser?.name,
+        },
+        receiver: {
+          id: participantUser?.id,
+          email: participantUser?.email,
+          name: participantUser?.name,
+        },
+        createdAt: dayjs().valueOf(),
+      };
+      store.dispatch(
+        await notificationsApi.endpoints.sendNotification.initiate(notification)
+      );
+      toast({
+        title: "Friend request sent",
+        description: "Friend request sent successfully",
+        status: "success",
+        duration: 2000,
+        isClosable: true,
+      });
+      // toggleDrawer();
+    } catch (error) {
+      console.log("error accepting friend request: ", error);
+      console.log("error: ", error);
+      toast({
+        title: "Error",
+        description: error?.data?.message || "Error happened",
+        status: "error",
+        duration: 2000,
+        isClosable: true,
+      });
+    }
+  };
+
   return (
     <Drawer
       open={isOpen}
@@ -109,7 +285,7 @@ const ChatRightModal = ({ receiverUser, isOpen, toggleDrawer }) => {
             lineHeight={"28px"}
             letterSpacing={1}
           >
-            {receiverUser?.name}
+            {participantUser?.name}
           </Text>
           <Flex justify="center" align="center" gap={1}>
             <Icon
@@ -119,7 +295,7 @@ const ChatRightModal = ({ receiverUser, isOpen, toggleDrawer }) => {
               color={"green.400"}
             />
             <Text fontSize="12px" fontWeight="light" color="whiteAlpha.900">
-              {/* {receiverUser?.status} */}
+              {/* {participantUser?.status} */}
               online
             </Text>
           </Flex>
@@ -145,7 +321,7 @@ const ChatRightModal = ({ receiverUser, isOpen, toggleDrawer }) => {
                 Email
               </Text>
               <Text fontSize="12px" fontWeight="light" color="pong_cl_primary">
-                adouib@student.1337.ma
+                {participantUser?.email}
               </Text>
             </Stack>
           </Flex>
@@ -164,19 +340,101 @@ const ChatRightModal = ({ receiverUser, isOpen, toggleDrawer }) => {
           borderRadius={8}
           // wrap={"wrap"}
         >
-          {iconButtonStyles.map(({ icon, label }) => (
+          {/* {iconButtonStyles.map(({ icon, label }) => ( */}
+          <IconButton
+            // key={label}
+            size="sm"
+            fontSize="lg"
+            bg={"pong_cl_primary"}
+            color={"white"}
+            borderRadius={8}
+            aria-label="Send a message"
+            // aria-label={label}
+            icon={<FiMessageSquare />}
+            // icon={icon}
+            _hover={{ bg: "white", color: "pong_cl_primary" }}
+            onClick={handleOpenConversation}
+            isLoading={
+              isLoadingGetConversationByMembersEmails ||
+              isLoadingCreateConversationWithoutMessage ||
+              isLoadingGetCurrentUser
+            }
+            _disabled={
+              isLoadingGetConversationByMembersEmails ||
+              isLoadingCreateConversationWithoutMessage ||
+              isLoadingGetCurrentUser
+            }
+          />
+          <IconButton
+            size="sm"
+            fontSize="lg"
+            bg={"pong_cl_primary"}
+            color={"white"}
+            borderRadius={8}
+            aria-label="View profile"
+            icon={<HiOutlineUserCircle />}
+            _hover={{ bg: "white", color: "pong_cl_primary" }}
+            onClick={() => {
+              toggleDrawer();
+              navigate(`/profile/${participantUser?.username}`); // TODO: change to id or username
+            }}
+          />
+          {!participantUser?.friends.includes(currentUser?.id) && (
             <IconButton
-              key={label}
               size="sm"
               fontSize="lg"
               bg={"pong_cl_primary"}
               color={"white"}
               borderRadius={8}
-              aria-label={label}
-              icon={icon}
+              aria-label="Send friend request"
+              icon={<AiOutlineUserAdd />}
               _hover={{ bg: "white", color: "pong_cl_primary" }}
+              onClick={handleSendFriendNotification}
             />
-          ))}
+          )}
+          <IconButton
+            size="sm"
+            fontSize="lg"
+            bg={"pong_cl_primary"}
+            color={"white"}
+            borderRadius={8}
+            aria-label="Send game request"
+            icon={<IoGameControllerOutline />}
+            _hover={{ bg: "white", color: "pong_cl_primary" }}
+            onClick={() => {
+              // TODO: send game request
+              toggleDrawer();
+            }}
+          />
+          <IconButton
+            size="sm"
+            fontSize="lg"
+            bg={"pong_cl_primary"}
+            color={"white"}
+            borderRadius={8}
+            aria-label="Spectacle"
+            icon={<GoEye />}
+            _hover={{ bg: "white", color: "pong_cl_primary" }}
+            onClick={() => {
+              // TODO: Spectacle
+              toggleDrawer();
+            }}
+          />
+          <IconButton
+            size="sm"
+            fontSize="lg"
+            bg={"pong_cl_primary"}
+            color={"white"}
+            borderRadius={8}
+            aria-label="Block"
+            icon={<MdBlockFlipped />}
+            _hover={{ bg: "white", color: "pong_cl_primary" }}
+            onClick={() => {
+              // TODO: block
+              toggleDrawer();
+            }}
+          />
+          {/* // ))} */}
         </Flex>
         <Stack direction="column" spacing={2} align="start" w="full">
           <Text fontSize="md" fontWeight="medium">

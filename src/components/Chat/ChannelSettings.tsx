@@ -46,7 +46,7 @@ const validationSchema = yup.object().shape({
 });
 
 const ChannelSettings = ({ channel, onToggleChannelInfo }) => {
-  const currentUser = useSelector((state: any) => state.auth.user);
+  const currentUser = useSelector((state: any) => state.user.currentUser);
   const [isPrivate, setIsPrivate] = useState(false);
   const passRef = useRef<HTMLInputElement>(null);
   const toast = useToast();
@@ -94,7 +94,7 @@ const ChannelSettings = ({ channel, onToggleChannelInfo }) => {
       privacy: "public",
     });
     if (isPrivate) setIsPrivate(false);
-    // onToggleChannelInfo();
+    onToggleChannelInfo();
   };
 
   return (

@@ -80,7 +80,7 @@ const NavigationPanel = [
 ];
 
 const Sidebar = () => {
-  const user = useSelector((state: any) => state.auth.user);
+  const currentUser = useSelector((state: any) => state.user.currentUser);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const players_online = 10;
@@ -142,17 +142,19 @@ const Sidebar = () => {
           h="2px"
           background="linear-gradient(270deg, rgba(255, 255, 255, 0.00) 0%, #FFF 55.73%, rgba(255, 255, 255, 0.00) 100%)"
         />
-        <Stack spacing={2} align="center" justify="center">
+        <Stack spacing={2} align="center" justify="center" w="full">
           <Text
-            fontSize="16px"
+            fontSize="15px"
             fontStyle={"normal"}
             fontWeight="semibold"
             color="whiteAlpha.900"
             lineHeight={"28px"}
             letterSpacing={1}
             textAlign={"center"}
+            maxW="120px"
+            overflow={"hidden"}
           >
-            {user?.name}
+            {currentUser?.name}
           </Text>
 
           <Text

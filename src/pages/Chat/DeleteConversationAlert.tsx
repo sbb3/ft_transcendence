@@ -12,7 +12,7 @@ import Loader from "src/components/Utils/Loader";
 import { useDeleteConversationMutation } from "src/features/conversations/conversationsApi";
 
 const DeleteConversationAlert = ({
-  conversationId,
+  conversation,
   isOpen,
   onOpen,
   onClose,
@@ -25,7 +25,11 @@ const DeleteConversationAlert = ({
   //   TODO: delete messages of the conversation also
   const handleDelete = async () => {
     try {
-      await deleteConversation(conversationId).unwrap();
+      await deleteConversation({
+        id: conversation?.id,
+        members: conversation?.members,
+      }).unwrap();
+      navigate("/chat", { replace: true });
       console.log("conversation deleted");
     } catch (error) {
       console.log("error: ", error);

@@ -32,7 +32,7 @@ import ChannelContentBody from "./ChannelContentBody";
 dayjs.extend(relativeTime);
 
 const ChannelContent = () => {
-  const currentUser = useSelector((state: any) => state.auth.user);
+  const currentUser = useSelector((state: any) => state.user.currentUser);
   const navigate = useNavigate();
   //   TODO: rename isDrawerOpen isProfileDrawerOpen
   const { isOpen: isDrawerOpen, onToggle: toggleDrawer } = useDisclosure();
@@ -54,18 +54,18 @@ const ChannelContent = () => {
     useCreateChannelMessageMutation();
 
   // TODO: loadings and errors
-  const onSubmit = async (data: any) => {
+  const onSendMessage = async (data: any) => {
     const { message } = data;
     const channel = channels[0];
     const msg = {
       id: uuidv4(),
       channelId: channel.id,
       channelName: channelname,
-      //   sender: { id: currentUser.id },
+      //   sender: { id: currentUser?.id },
       sender: {
-        id: currentUser.id,
-        name: currentUser.name,
-        avatar: currentUser.avatar,
+        id: currentUser?.id,
+        name: currentUser?.name,
+        avatar: currentUser?.avatar,
       },
       receivers: [...channel.members],
       content: message,
@@ -142,11 +142,9 @@ const ChannelContent = () => {
               messages={messages}
               toggleDrawer={toggleDrawer}
               isDrawerOpen={isDrawerOpen}
-              error={null}
-              receiverUser={null}
             />
             <ChatContentFooter
-              onSubmit={onSubmit}
+              onSendMessage={onSendMessage}
               isLoading={isCreatingChannelMsg}
             />
           </>
@@ -161,7 +159,7 @@ const ChannelContent = () => {
             fontWeight="semibold"
           >
             <Text fontSize="xl" fontWeight="normal" color="white">
-              No channel messages yet !
+              Channel not found.
             </Text>
           </Flex>
         )}

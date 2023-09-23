@@ -10,7 +10,7 @@ const channelMessagesApi = apiSlice.injectEndpoints({
     //     arg,
     //     { getState, updateCachedData, cacheDataLoaded, cacheEntryRemoved }
     //   ) {
-    //     const currentUser = getState()?.auth?.user?.email;
+    //     const currentUser = getState()?.user?.currentUser?.email;
     //     const socket = useSocket();
 
     //     try {
@@ -32,7 +32,7 @@ const channelMessagesApi = apiSlice.injectEndpoints({
         arg,
         { getState, updateCachedData, cacheDataLoaded, cacheEntryRemoved }
       ) {
-        const currentUser = getState()?.auth?.user;
+        const currentUser = getState()?.user?.currentUser;
         const socket = useSocket();
 
         try {

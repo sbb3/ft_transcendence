@@ -52,7 +52,8 @@ const AddDirectMessage = ({ isOpenDM, onToggleDM }) => {
   // const { isOpen, onOpen, onClose } = useDisclosure();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const currentUser = useSelector((state: any) => state.auth.user);
+  const currentUser = useSelector((state: any) => state.user.currentUser);
+
   const toast = useToast();
 
   const {
@@ -81,7 +82,7 @@ const AddDirectMessage = ({ isOpenDM, onToggleDM }) => {
     const { message, email: receiverEmail } = data;
 
     try {
-      if (receiverEmail === currentUser.email)
+      if (receiverEmail === currentUser?.email)
         throw new Error("You can't send message to yourself");
 
       const users = await trigger(receiverEmail).unwrap();
@@ -91,7 +92,7 @@ const AddDirectMessage = ({ isOpenDM, onToggleDM }) => {
       const to = users[0];
 
       const conversations = await triggerGetConversationByMembersEmails([
-        currentUser.email,
+        currentUser?.email,
         receiverEmail,
       ]).unwrap();
 
@@ -102,9 +103,9 @@ const AddDirectMessage = ({ isOpenDM, onToggleDM }) => {
           id: uuidv4(),
           conversationId: conversation.id,
           sender: {
-            id: currentUser.id,
-            email: currentUser.email,
-            name: currentUser.name,
+            id: currentUser?.id,
+            email: currentUser?.email,
+            name: currentUser?.name,
           },
           receiver: {
             id: to.id,
@@ -119,9 +120,18 @@ const AddDirectMessage = ({ isOpenDM, onToggleDM }) => {
         const newConversationData = {
           conversation: {
             id: uuidv4(),
-            name: [currentUser.name, to?.name],
-            avatar: to?.avatar,
-            members: [currentUser.email, receiverEmail],
+            name: [currentUser?.name, to?.name],
+            avatar: [
+              {
+                id: currentUser?.id,
+                avatar: currentUser?.avatar,
+              },
+              {
+                id: to.id,
+                avatar: to.avatar,
+              },
+            ],
+            members: [currentUser?.email, receiverEmail],
             lastMessageContent: message,
             lastMessageCreatedAt: dayjs().valueOf(),
           },
@@ -166,6 +176,10 @@ const AddDirectMessage = ({ isOpenDM, onToggleDM }) => {
         });
       }
     }
+    reset({
+      email: "",
+      message: "",
+    });
   };
 
   return (
@@ -276,9 +290,6 @@ const AddDirectMessage = ({ isOpenDM, onToggleDM }) => {
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
                         handleSubmit(onSubmit)();
-                        reset({
-                          message: "",
-                        });
                       }
                     }}
                     borderColor={"pong_cl_primary"}

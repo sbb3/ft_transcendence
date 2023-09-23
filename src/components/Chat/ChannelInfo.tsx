@@ -12,13 +12,34 @@ import { AiFillDelete } from "react-icons/ai";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { useDeleteChannelMutation } from "src/features/channels/channelsApi";
 dayjs.extend(relativeTime);
 
 const ChannelInfo = ({ channel }) => {
-  const currentUser = useSelector((state: any) => state.auth.user);
+  const currentUser = useSelector((state: any) => state.user.currentUser);
+
+  const navigate = useNavigate();
+  const [deleteChannel, { isLoading: isDeletingChannel }] =
+    useDeleteChannelMutation();
+
+  // TODO: leave channel, must be done in the backend, need the channel id and the current user id
+  // TODO: invalidate the cache
   const handleLeaveChannel = async () => {};
 
-  const handleDeleteChannel = async () => {};
+  // TODO: delete channel by the owner, done in the backend, need the channel id and the user id to remove it from the channel
+  // TODO: invalidate the cache
+  const handleDeleteChannel = async () => {
+    try {
+      // TODO: also delete the messages
+      await deleteChannel({ id: channel?.id, name: channel?.name });
+      navigate("/chat", { replace: true });
+      console.log("channel got deleted");
+    } catch (error) {
+      console.log("error: ", error);
+      console.log("did not delete channel");
+    }
+  };
 
   return (
     <Stack

@@ -3,7 +3,7 @@ import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { MdSend } from "react-icons/md";
 
-const ChatContentFooter = ({ onSubmit, isLoading }) => {
+const ChatContentFooter = ({ onSendMessage, isLoading }) => {
   const {
     register,
     handleSubmit,
@@ -49,7 +49,7 @@ const ChatContentFooter = ({ onSubmit, isLoading }) => {
           })}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
-              handleSubmit(onSubmit)();
+              handleSubmit(onSendMessage)();
               reset({
                 message: "",
               });
@@ -69,7 +69,7 @@ const ChatContentFooter = ({ onSubmit, isLoading }) => {
           isLoading={isLoading}
           isDisabled={isSubmitting}
           onClick={() => {
-            handleSubmit(onSubmit)();
+            handleSubmit(onSendMessage)();
             reset({
               message: "",
             });

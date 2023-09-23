@@ -48,6 +48,7 @@ const users = [...Array(30)].map(() => ({
 const Friends = () => {
   const navigate = useNavigate();
   const toast = useToast();
+  const [query, setQuery] = useState("");
 
   useEffect(() => {}, []);
   return (
@@ -127,6 +128,8 @@ const Friends = () => {
               cursor="pointer"
             />
             <AutoCompleteInput
+              onChange={(e) => setQuery(e.target.value)}
+              value={query}
               ml={2}
               flex={1}
               variant="filled"
@@ -186,7 +189,7 @@ const Friends = () => {
                       bgImage={`url('src/assets/img/BlackNoise.png')`}
                       bgSize="cover"
                       bgRepeat="no-repeat"
-                      borderRadius={50}
+                      borderRadius={5}
                       my={1}
                       _hover={{
                         bg: "pong_bg.500",
@@ -198,6 +201,14 @@ const Friends = () => {
                       _selected={{
                         // bg: "pong_bg.300",
                         backgroundColor: "transparent",
+                      }}
+                      onClick={() => {
+                        setQuery("");
+                        navigate(`/profile/${user?.username}`, {
+                          state: {
+                            user,
+                          },
+                        });
                       }}
                     >
                       <Flex
@@ -211,13 +222,13 @@ const Friends = () => {
                           gap="3px"
                           align="center"
                           w={"full"}
-                          onClick={() =>
-                            navigate(`/profile/${user.name}`, {
-                              state: {
-                                user,
-                              },
-                            })
-                          }
+                          // onClick={() =>
+                          //   navigate(`/profile/${user.name}`, {
+                          //     state: {
+                          //       user,
+                          //     },
+                          //   })
+                          // }
                         >
                           <Avatar
                             size="sm"
@@ -242,7 +253,7 @@ const Friends = () => {
                             {user.name}
                           </Text>
                         </Flex>
-                        <Flex direction="row" gap="6px" mr={0}>
+                        {/* <Flex direction="row" gap="6px" mr={0}>
                           <IconButton
                             size="xs"
                             fontSize="md"
@@ -315,7 +326,7 @@ const Friends = () => {
                               });
                             }}
                           />
-                        </Flex>
+                        </Flex> */}
                       </Flex>
                     </AutoCompleteItem>
                   ))}

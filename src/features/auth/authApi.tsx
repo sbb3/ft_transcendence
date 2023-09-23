@@ -1,4 +1,5 @@
 import { apiSlice } from "../../app/api/apiSlice";
+import { setCurrentUser } from "../users/usersSlice";
 import { setLogout, setLogin, userLoggedIn } from "./authSlice";
 
 const authApiEndpoints = apiSlice.injectEndpoints({
@@ -12,7 +13,8 @@ const authApiEndpoints = apiSlice.injectEndpoints({
       async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
           const { data: userInfo } = await queryFulfilled;
-          dispatch(setLogin(userInfo));
+          // TODO: dispatch action to update user state and access token state
+          // dispatch(setLogin(userInfo));
         } catch (err: any) {
           console.log(`err: `, err);
           return;
@@ -27,6 +29,8 @@ const authApiEndpoints = apiSlice.injectEndpoints({
       async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
           await queryFulfilled;
+          // TODO: dispatch action to update user state and access token state
+
           dispatch(setLogout());
         } catch (err: any) {
           console.log(`err: `, err);
@@ -62,21 +66,22 @@ const authApiEndpoints = apiSlice.injectEndpoints({
       async onQueryStarted(arg, { queryFulfilled, dispatch }) {
         try {
           const result = await queryFulfilled;
-
           localStorage.setItem(
             "auth",
             JSON.stringify({
               accessToken: result.data.accessToken,
-              user: result.data.user,
+              userId: result.data.user.id,
             })
           );
 
           dispatch(
             userLoggedIn({
               accessToken: result.data.accessToken,
-              user: result.data.user,
+              userId: result.data.user.id,
             })
           );
+
+          // dispatch(setCurrentUser(result.data.user));
         } catch (err) {
           // do nothing
         }
@@ -96,16 +101,18 @@ const authApiEndpoints = apiSlice.injectEndpoints({
             "auth",
             JSON.stringify({
               accessToken: result.data.accessToken,
-              user: result.data.user,
+              userId: result.data.user.id,
             })
           );
 
           dispatch(
             userLoggedIn({
               accessToken: result.data.accessToken,
-              user: result.data.user,
+              userId: result.data.user.id,
             })
           );
+
+          // dispatch(setCurrentUser(result.data.user));
         } catch (err) {
           // do nothing
         }

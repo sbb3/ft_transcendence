@@ -72,7 +72,7 @@ const CreateChannel = ({
   isOpenCreateChannel: boolean;
   onToggleCreateChannel: () => void;
 }) => {
-  const currentUser = useSelector((state: any) => state.auth.user);
+  const currentUser = useSelector((state: any) => state.user.currentUser);
   const [isPrivate, setIsPrivate] = useState(false);
   const passRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
@@ -96,11 +96,11 @@ const CreateChannel = ({
       await createChannel({
         id: uuidv4(),
         ...data,
-        members: [currentUser.id],
-        admins: [currentUser.id],
+        members: [currentUser?.id],
+        admins: [currentUser?.id],
         owner: {
-          id: currentUser.id,
-          name: currentUser.name,
+          id: currentUser?.id,
+          name: currentUser?.name,
         },
         createdAt: dayjs().valueOf(),
       }).unwrap();
@@ -112,7 +112,7 @@ const CreateChannel = ({
       });
       if (isPrivate) setIsPrivate(false);
       onToggleCreateChannel();
-      // navigate(`/chat/channels/${data.name}`);
+      navigate(`/chat/channel/${data.name}`);
       toast({
         title: "Channel created.",
         description: "Channel has been created successfully.",
@@ -130,6 +130,12 @@ const CreateChannel = ({
         isClosable: true,
       });
     }
+    reset({
+      name: "",
+      description: "",
+      privacy: "public",
+      password: "",
+    });
   };
 
   return (

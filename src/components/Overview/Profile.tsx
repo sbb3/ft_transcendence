@@ -14,7 +14,7 @@ import {
   Text,
 } from "@chakra-ui/react";
 import { FiMessageSquare } from "react-icons/fi";
-import { AiOutlineUserAdd } from "react-icons/ai";
+import { AiOutlineUserAdd, AiOutlineUserDelete } from "react-icons/ai";
 import { IoGameControllerOutline } from "react-icons/io5";
 import { GoEye } from "react-icons/go";
 import { HiOutlineMail } from "react-icons/hi";
@@ -22,19 +22,23 @@ import { GiAchievement } from "react-icons/gi";
 import * as ScrollArea from "@radix-ui/react-scroll-area";
 import "src/styles/scrollbar.css";
 import { badges } from "src/config/data/data";
+import { useSelector } from "react-redux";
 
-const Profile = ({ user }) => {
+const Profile = ({ user = {} }) => {
+  const currentUserId = useSelector(
+    (state: any) => state?.user?.currentUser?.id
+  );
   const {
-    username,
-    name,
-    status,
-    email,
-    campus,
-    rank,
-    avatar,
-    gameWin,
-    gameLoss,
-    level,
+    username = "username",
+    name = "name",
+    status = "in-game",
+    email = "email",
+    campus = "1337 Benguerir",
+    rank = "103",
+    avatar = "avatar",
+    gameWin = 12,
+    gameLoss = 2,
+    level = "10",
   } = user;
   const gameWonRate =
     (parseInt(gameWin) / (parseInt(gameWin) + parseInt(gameLoss))) * 100;
@@ -95,48 +99,66 @@ const Profile = ({ user }) => {
               </Text>
             </Flex>
             {/* TODO: hide these buttons when visiting my own profile, do conditional rendering of the username or id of the passed user with the store */}
-            <Flex direction="row" gap="14px" align="center">
-              <IconButton
-                size="sm"
-                fontSize="lg"
-                bg={"pong_cl_primary"}
-                color={"white"}
-                borderRadius={8}
-                aria-label="Send a message"
-                icon={<FiMessageSquare />}
-                _hover={{ bg: "white", color: "pong_cl_primary" }}
-              />
-              <IconButton
-                size="sm"
-                fontSize="lg"
-                bg={"pong_cl_primary"}
-                color={"white"}
-                borderRadius={8}
-                aria-label="Send friend request"
-                icon={<AiOutlineUserAdd />}
-                _hover={{ bg: "white", color: "pong_cl_primary" }}
-              />
-              <IconButton
-                size="sm"
-                fontSize="lg"
-                bg={"pong_cl_primary"}
-                color={"white"}
-                borderRadius={8}
-                aria-label="Send game request"
-                icon={<IoGameControllerOutline />}
-                _hover={{ bg: "white", color: "pong_cl_primary" }}
-              />
-              <IconButton
-                size="sm"
-                fontSize="lg"
-                bg={"pong_cl_primary"}
-                color={"white"}
-                borderRadius={8}
-                aria-label="Spectacle"
-                icon={<GoEye />}
-                _hover={{ bg: "white", color: "pong_cl_primary" }}
-              />
-            </Flex>
+            {currentUserId !== user?.id && (
+              <Flex direction="row" gap="14px" align="center">
+                <IconButton
+                  size="sm"
+                  fontSize="lg"
+                  bg={"pong_cl_primary"}
+                  color={"white"}
+                  borderRadius={8}
+                  aria-label="Send a message"
+                  icon={<FiMessageSquare />}
+                  _hover={{ bg: "white", color: "pong_cl_primary" }}
+                />
+                {!user?.friends?.includes(currentUserId) && (
+                  <IconButton
+                    size="sm"
+                    fontSize="lg"
+                    bg={"pong_cl_primary"}
+                    color={"white"}
+                    borderRadius={8}
+                    aria-label="Send friend request"
+                    icon={<AiOutlineUserAdd />}
+                    _hover={{ bg: "white", color: "pong_cl_primary" }}
+                  />
+                )}
+                {user?.friends?.includes(currentUserId) && (
+                  <>
+                    <IconButton
+                      size="sm"
+                      fontSize="lg"
+                      bg={"red.500"}
+                      color={"white"}
+                      borderRadius={8}
+                      aria-label="Send friend request"
+                      icon={<AiOutlineUserDelete />}
+                      _hover={{ bg: "white", color: "red.500" }}
+                    />
+                    <IconButton
+                      size="sm"
+                      fontSize="lg"
+                      bg={"pong_cl_primary"}
+                      color={"white"}
+                      borderRadius={8}
+                      aria-label="Send game request"
+                      icon={<IoGameControllerOutline />}
+                      _hover={{ bg: "white", color: "pong_cl_primary" }}
+                    />
+                    <IconButton
+                      size="sm"
+                      fontSize="lg"
+                      bg={"pong_cl_primary"}
+                      color={"white"}
+                      borderRadius={8}
+                      aria-label="Spectacle"
+                      icon={<GoEye />}
+                      _hover={{ bg: "white", color: "pong_cl_primary" }}
+                    />
+                  </>
+                )}
+              </Flex>
+            )}
           </Flex>
         </Flex>
         <Stack direction="column" spacing={1} align="start" w="full">
@@ -165,7 +187,7 @@ const Profile = ({ user }) => {
                 Login 42
               </Text>
               <Text fontSize="12px" fontWeight="medium" color="whiteAlpha.400">
-                {campus}
+                {username}
               </Text>
             </Flex>
             <Flex direction={"column"} gap={1}>

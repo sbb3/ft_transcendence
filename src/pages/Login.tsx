@@ -29,7 +29,7 @@ const Login = () => {
   const isAlreadyUser = !true;
   const is2FAEnabled = !true;
   const { isOpen, onOpen, onClose } = useDisclosure({ defaultIsOpen: false });
-  // const is2FAEnabled = useSelector((state: any) => state.auth.user.is2FAEnabled);
+  // const is2FAEnabled = useSelector((state: any) => state.user.currentUser?.is2FAEnabled);
   const isAuthenticated = useAuth();
   const navigate = useNavigate();
   const toast = useToast();

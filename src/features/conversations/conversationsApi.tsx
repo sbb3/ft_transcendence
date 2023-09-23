@@ -27,7 +27,6 @@ const conversationApi = apiSlice.injectEndpoints({
         try {
           await cacheDataLoaded;
           socket.on("conversation", (data) => {
-            console.log("data2: ", data);
             // TODO: this delete functionality will be removed later, replace it with another socket event for deleting the conversation
             if (data.data?.type === "delete") {
               updateCachedData((draft) => {
@@ -40,8 +39,6 @@ const conversationApi = apiSlice.injectEndpoints({
                   );
                   if (index !== -1) {
                     draft?.splice(index, 1);
-                    console.log("index222: ", index);
-                    console.log("conversation deleted222");
                   }
                   // TODO: later, delete the messages of the conversation also
                   dispatch(
@@ -69,7 +66,6 @@ const conversationApi = apiSlice.injectEndpoints({
                       data?.data?.lastMessageCreatedAt;
                     draft = { ...draft, ...conversation };
                   } else {
-                    console.log("herer3");
                     draft?.unshift(data?.data);
                   }
                 });
@@ -85,6 +81,27 @@ const conversationApi = apiSlice.injectEndpoints({
     }),
     getConversation: builder.query({
       query: (conversationId) => `/conversations?id=${conversationId}`,
+      async onCacheEntryAdded(
+        arg,
+        { dispatch, updateCachedData, cacheDataLoaded, cacheEntryRemoved }
+      ) {
+        const socket = useSocket();
+
+        try {
+          await cacheDataLoaded;
+          socket.on("conversation", (data) => {
+            dispatch(
+              conversationApi.util.prefetch("getConversation", data?.data?.id, {
+                force: true,
+              } as any)
+            );
+          });
+        } catch (error) {
+          console.log("error: ", error);
+          await cacheEntryRemoved;
+          socket.disconnect();
+        }
+      },
     }),
     getConversationByMembersEmails: builder.query({
       query: (membersEmails: string[]) =>
@@ -119,9 +136,9 @@ const conversationApi = apiSlice.injectEndpoints({
             id: uuidv4(),
             conversationId: conversation.id,
             sender: {
-              id: getState().auth.user?.id,
-              email: getState().auth.user?.email,
-              name: getState().auth.user?.name,
+              id: getState().user.currentUser?.id,
+              email: getState().user.currentUser?.email,
+              name: getState().user.currentUser?.name,
             },
             receiver: {
               id: receiver.id,
@@ -140,6 +157,31 @@ const conversationApi = apiSlice.injectEndpoints({
         }
       },
     }),
+    createConversationWithoutMessage: builder.mutation({
+      query: (conversation) => ({
+        url: `/conversations`,
+        method: "POST",
+        body: conversation,
+      }),
+      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
+        const conversation = arg;
+        const patchResult = dispatch(
+          conversationApi?.util?.updateQueryData(
+            "getConversations",
+            getState().user.currentUser?.email,
+            (draft) => {
+              draft?.unshift(conversation);
+            }
+          )
+        );
+        try {
+          await queryFulfilled;
+        } catch (error) {
+          console.log("error happended here: ", error);
+          patchResult.undo();
+        }
+      },
+    }),
     updateConversation: builder.mutation({
       query: ({ id, data }: { id: number; data: any }) => ({
         url: `conversations/${id}`,
@@ -151,7 +193,7 @@ const conversationApi = apiSlice.injectEndpoints({
         // const patchResult = dispatch(
         //   conversationApi?.util?.updateQueryData(
         //     "getConversations",
-        //     getState().auth.user?.email,
+        //     getState().user.currentUser?.email,
         //     (draft) => {
         //       console.log("arg: ", arg);
         //       console.log("updateQueryData arg: ", draft);
@@ -170,7 +212,7 @@ const conversationApi = apiSlice.injectEndpoints({
       },
     }),
     deleteConversation: builder.mutation({
-      query: (id: number) => ({
+      query: ({ id, members }) => ({
         url: `conversations/${id}`,
         method: "DELETE",
       }),
@@ -179,24 +221,31 @@ const conversationApi = apiSlice.injectEndpoints({
         const patchResult = dispatch(
           conversationApi?.util?.updateQueryData(
             "getConversations",
-            getState().auth.user?.email,
+            getState().user.currentUser?.email,
             (draft) => {
               // indexOf or findIndex
-              const index = draft?.findIndex((c) => c.id === arg.toString());
-              console.log("arg: ", arg);
-              console.log("index: ", index);
+              const index = draft?.findIndex((c) => c.id === arg.id.toString());
               if (index !== -1) {
                 draft?.splice(index, 1);
-                console.log("index: ", index);
-                console.log("conversation deleted");
               }
             }
           )
         );
+
+        // TODO: delete the messages of the conversation also and invalidates the messages cache
+        // TODO: initiate new request to get the conversations again
         try {
           await queryFulfilled;
           console.log("deleted");
-          // conversationApi.endpoints.getConversations.initiate(
+          conversationApi.endpoints.getConversations.initiate(
+            getState().user.currentUser?.email
+          );
+
+          conversationApi.endpoints.getConversationByMembersEmails.initiate(
+            arg.members
+          );
+
+          conversationApi.endpoints.getConversation.initiate(arg.id);
         } catch (error) {
           console.log("error: ", error);
           patchResult.undo();
@@ -213,8 +262,7 @@ export const {
   useGetConversationByMembersEmailsQuery,
   useUpdateConversationMutation,
   useDeleteConversationMutation,
+  useCreateConversationWithoutMessageMutation,
 } = conversationApi;
 
 export default conversationApi;
-
-// TODO:

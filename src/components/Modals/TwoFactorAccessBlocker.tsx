@@ -54,7 +54,7 @@ const options = {
 };
 // TODO: View does not get rendered on the first time, it gets rendered on the second time
 const TwoFactorAccessBlocker = ({ isOpen, onClose, onOpen }) => {
-  const accessToken = useSelector((state: any) => state.auth.accessToken);
+  // const accessToken = useSelector((state: any) => state.auth.accessToken);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { View } = useLottie(options, style);
@@ -200,7 +200,7 @@ const TwoFactorAccessBlocker = ({ isOpen, onClose, onOpen }) => {
             mr={3}
             onClick={() => {
               // TODO: destroy session and redirect to login
-              console.log("accessToken343434: ", accessToken); // null, dispatch(setLogin) dispatch still did not got out of the event handleClick scope in Login.tsx
+              // console.log("accessToken343434: ", accessToken); // null, dispatch(setLogin) dispatch still did not got out of the event handleClick scope in Login.tsx
               console.log("logout");
               dispatch(setLogout());
               // navigate("/login", { replace: true });

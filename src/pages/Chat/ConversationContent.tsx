@@ -32,8 +32,9 @@ import Loader from "src/components/Utils/Loader";
 import { useAddMessageMutation } from "src/features/messages/messagesApi";
 import { useGetConversationQuery } from "src/features/conversations/conversationsApi";
 import { useGetUserByEmailQuery } from "src/features/users/usersApi";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { v4 as uuidv4 } from "uuid";
+import { setCurrentConversationId } from "src/features/conversations/conversationsSlice";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 dayjs.extend(relativeTime);
@@ -46,20 +47,25 @@ interface IChatReceiver {
 }
 
 const ConversationContent = () => {
+  const dispatch = useDispatch();
   const [receiverUser, setReceiverUser] = useState(null);
   const [receiverEmail, setReceiverEmail] = useState("");
   const [skip, setSkip] = useState(true);
-  const currentUser = useSelector((state: any) => state.auth.user);
+  const currentUser = useSelector((state: any) => state.user.currentUser);
   const navigate = useNavigate();
   const { isOpen: isDrawerOpen, onToggle: toggleDrawer } = useDisclosure();
   const toast = useToast();
   let { id } = useParams();
+
   const {
     data: conversations,
     isLoading: isLoadingConversation,
     isError: isErrorGettingConversation,
     error: errorGettingConversation,
-  } = useGetConversationQuery(id);
+  } = useGetConversationQuery(id, {
+    refetchOnMountOrArgChange: true,
+    subscribe: true,
+  });
 
   const {
     data: receiversData,
@@ -69,17 +75,37 @@ const ConversationContent = () => {
     skip,
   });
 
+  const [addMessage, { isLoading: isAdding, error: error2 }] =
+    useAddMessageMutation();
+
+  const {
+    data: messages,
+    isLoading: isLoadingMessages,
+    isError: isErrorGettingMessages,
+    error: errorGettingMessages,
+  } = useGetMessagesByConversationIdQuery(id);
+
+  useEffect(() => {
+    if (conversations?.length > 0) {
+      dispatch(setCurrentConversationId(id));
+    }
+
+    return () => {
+      dispatch(setCurrentConversationId(""));
+    };
+  }, [conversations]);
+
   useEffect(() => {
     if (conversations?.length > 0) {
       const receiverEmail = conversations[0].members.filter(
-        (m) => m !== currentUser.email
+        (m) => m !== currentUser?.email
       )[0];
       const senderEmail = conversations[0].members.filter(
-        (m) => m === currentUser.email
+        (m) => m === currentUser?.email
       )[0];
       if (
-        currentUser.email === senderEmail ||
-        currentUser.email === receiverEmail
+        currentUser?.email === senderEmail ||
+        currentUser?.email === receiverEmail
       ) {
         console.log("allowed");
         setReceiverEmail(receiverEmail);
@@ -106,29 +132,19 @@ const ConversationContent = () => {
     }
   }, [receiversData]);
 
-  const [addMessage, { isLoading: isAdding, error: error2 }] =
-    useAddMessageMutation();
-
-  const {
-    data: messages,
-    isLoading: isLoadingMessages,
-    isError: isErrorGettingMessages,
-    error: errorGettingMessages,
-  } = useGetMessagesByConversationIdQuery(id);
-
   // TODO: loadings and errors
-  const onSubmit = async (data: any) => {
+  const onSendMessage = async (data: any) => {
     const { message } = data;
     const receiver = receiversData[0] as IChatReceiver;
-
+    // console.log("id: ", id);
     try {
       const msgData = {
         id: uuidv4(),
         conversationId: id,
         sender: {
-          id: currentUser.id,
-          email: currentUser.email,
-          name: currentUser.name,
+          id: currentUser?.id,
+          email: currentUser?.email,
+          name: currentUser?.name,
         },
         receiver: {
           id: receiver.id,
@@ -140,10 +156,8 @@ const ConversationContent = () => {
       };
       const conversationData = conversations[0];
       if (conversationData.id) {
-        // console.log("ghalatasaray");
         await addMessage(msgData).unwrap();
       } else {
-        // console.log("looooooooooopez");
         navigate("/chat", { replace: true });
       }
     } catch (error) {
@@ -232,7 +246,10 @@ const ConversationContent = () => {
               isDrawerOpen={isDrawerOpen}
               receiverUser={receiverUser}
             />
-            <ChatContentFooter onSubmit={onSubmit} isLoading={isAdding} />
+            <ChatContentFooter
+              onSendMessage={onSendMessage}
+              isLoading={isAdding}
+            />
           </>
         ) : (
           <Flex
@@ -245,7 +262,7 @@ const ConversationContent = () => {
             fontWeight="semibold"
           >
             <Text fontSize="xl" fontWeight="normal" color="white">
-              No conversation messages yet.
+              Conversation not found.
             </Text>
           </Flex>
         )}

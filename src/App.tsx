@@ -19,7 +19,7 @@ import ChatSplashScreen from "./pages/Chat/ChatSplashScreen.tsx";
 import Signin from "./pages/Signin.tsx";
 import Public from "./pages/Public.tsx";
 import Register from "./pages/Register.tsx";
-import Basic from "./Stepper.tsx";
+import PrefetchUsers from "./components/PrefetchUsers.tsx";
 
 function App() {
   return (
@@ -28,7 +28,7 @@ function App() {
         <Route index element={<Login />} />
       </Route> */}
       <Route
-        path="/"
+        path="/login"
         element={
           <Public>
             <Signin />
@@ -44,29 +44,31 @@ function App() {
         }
         // style={{}}
       />
-
       <Route element={<AuthVerification />}>
-        <Route path="/" element={<Layout />}>
-          {/* <Route index element={<Overview />} /> */}
-          {/* <Route path="profile/:username" element={<PlayerProfile />} /> */}
-          {/* <Route path="settings" element={<Settings />} /> */}
-          <Route path="play" element={<Game />} />
-          <Route path="chat" element={<Chat />}>
-            <Route index element={<ChatSplashScreen />} />
-            <Route path="conversation/:id" element={<ConversationContent />} />
-            <Route path="channel/:channelname" element={<ChannelContent />} />
+        <Route element={<PrefetchUsers />}>
+          <Route path="/" element={<Layout />}>
+            <Route index element={<Overview />} />
+            <Route path="profile/:username" element={<PlayerProfile />} />
+            <Route path="settings" element={<Settings />} />
+            <Route path="play" element={<Game />} />
+            <Route path="chat" element={<Chat />}>
+              <Route index element={<ChatSplashScreen />} />
+              <Route
+                path="conversation/:id"
+                element={<ConversationContent />}
+              />
+              <Route path="channel/:channelname" element={<ChannelContent />} />
+            </Route>
+            <Route path="watch" element={<Watch />} />
+            <Route path="support" element={<Support />} />
           </Route>
-          <Route path="watch" element={<Watch />} />
-          {/* <Route path="support" element={<Support />} /> */}
         </Route>
       </Route>
-
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
 }
 // {
-//   /* <Route element={<PrefetchUsers />} > */
 // }
 
 export default App;

@@ -16,7 +16,7 @@ export default function Register() {
 
   useEffect(() => {
     if (data?.accessToken && data?.user) {
-      navigate("/chat");
+      navigate("/");
     }
   }, [data, navigate]);
 

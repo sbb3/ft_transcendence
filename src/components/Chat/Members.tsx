@@ -20,6 +20,7 @@ import {
   FormErrorMessage,
   Button,
   Select,
+  background,
 } from "@chakra-ui/react";
 import {
   AutoComplete,
@@ -41,6 +42,9 @@ import { faker } from "@faker-js/faker";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import { useSelector } from "react-redux";
+import styled from "@emotion/styled";
+import usersApi from "src/features/users/usersApi";
 
 // TODO: add member to channel only if the user is an admin or owner
 const members = [...Array(30)].map(() => ({
@@ -49,12 +53,15 @@ const members = [...Array(30)].map(() => ({
   avatar: faker.image.avatar(),
 }));
 
+const ROLES = ["member", "admin", "owner"];
+
 const validationSchema = yup.object().shape({
   username: yup.string().required("Username is required").trim(),
   permissions: yup.string().required("Permissions is required").trim(),
 });
 
-const Members = () => {
+const Members = ({ channel }) => {
+  const currentUser = useSelector((state: any) => state.user.currentUser);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [query, setQuery] = useState<string>("");
   const navigate = useNavigate();
@@ -70,15 +77,53 @@ const Members = () => {
     resolver: yupResolver(validationSchema),
   });
 
-  const onSubmit = (data: any) => {
+  const [trigger, { isLoading: isLoadinGetUserByEmail }] =
+    usersApi.endpoints.getUserByEmail.useLazyQuery();
+
+  const onAddOrEditUser = async (data: any) => {
+    const { username, permissions } = data; // TODO: username or email address
     console.log("data: ", data);
-    toast({
-      title: "Member added.",
-      description: "We've added a new member to the channel.",
-      status: "success",
-      duration: 2000,
-      isClosable: true,
-    });
+    try {
+      if (username === currentUser?.email)
+        throw new Error("You can't add yourself to the channel.");
+
+      const users = await trigger(username).unwrap();
+      if (users.length === 0) throw new Error("User not found.");
+      const user = users[0];
+
+      const isUserAleadyExistInChannel = channel?.members?.includes(user?.id);
+      if (isUserAleadyExistInChannel) {
+        console.log("user already exist in channel");
+        // TODO: update user permissions, backend will handle it
+        // check its old permissions and new permissions, if they are the same, do nothing
+        //  else update the user permissions
+      } else {
+        console.log("user not exist in channel");
+        // TODO: add new user to channel based on permissions, backend will handle it
+        // if (permissions === "member") {
+
+        // } else if (permissions === "admin") {
+
+        // }
+      }
+
+      toast({
+        title: "Member added.",
+        description: "We've added a new member to the channel.",
+        status: "success",
+        duration: 2000,
+        isClosable: true,
+      });
+    } catch (error) {
+      console.log("error: ", error);
+      toast({
+        title: "Member not added.",
+        description: error.message,
+        status: "error",
+        duration: 2000,
+        isClosable: true,
+      });
+    }
     reset({
       username: "",
       permissions: "member",
@@ -142,12 +187,12 @@ const Members = () => {
       <Stack direction="column" justify="start" align="center" spacing={5}>
         <FormControl isInvalid={!!errors.username} mt={0}>
           <FormLabel htmlFor="username" fontSize="lg">
-            Add or Modify Member
+            Member
           </FormLabel>
           <Input
             id="username"
             type="text"
-            placeholder="username"
+            placeholder="username or email address"
             {...register("username")}
           />
           <FormErrorMessage>
@@ -169,12 +214,18 @@ const Members = () => {
                   //   console.log("e: ", inputValue);
                   //   console.log("field: ", field);
                   field.onChange(inputValue);
-                  // setIsPrivate(inputValue === "private");
                 }}
+                bg="pong_bg_secondary"
               >
-                <option value="member">Member</option>
-                <option value="admin">Admin</option>
-                <option value="owner">Owner</option>
+                <option style={{ background: "transparent" }} value="member">
+                  Member
+                </option>
+                <option style={{ background: "transparent" }} value="admin">
+                  Admin
+                </option>
+                {/* <option style={{ background: "transparent" }} value="owner">
+                  Owner
+                </option> */}
               </Select>
             )}
           />
@@ -186,13 +237,13 @@ const Members = () => {
           colorScheme="orange"
           mt={0}
           w="full"
-          // isLoading={isLoading}
+          isLoading={isLoadinGetUserByEmail}
           // isLoading={isFetching}
-          // isDisabled={isSubmitting}
+          isDisabled={isLoadinGetUserByEmail}
           cursor="pointer"
-          onClick={handleSubmit(onSubmit)}
+          onClick={handleSubmit(onAddOrEditUser)}
         >
-          Add
+          Add / Manage Member
         </Button>
       </Stack>
       <Stack direction={"column"}>
@@ -273,7 +324,7 @@ const Members = () => {
             >
               <ScrollArea.Root className="ScrollAreaRoot">
                 <ScrollArea.Viewport className="ScrollAreaViewport">
-                  {members.map((member, i) => (
+                  {channel?.members?.map((member, i) => (
                     <AutoCompleteItem
                       key={i}
                       value={member}
@@ -309,9 +360,9 @@ const Members = () => {
                           gap="3px"
                           align="center"
                           w={"full"}
-                          onClick={() => navigate(`/profile/${member.name}`)}
+                          // onClick={() => navigate(`/profile/${member.name}`)}
                         >
-                          <Avatar
+                          {/* <Avatar
                             size="sm"
                             name={member.name}
                             src={member.avatar}
@@ -323,7 +374,7 @@ const Members = () => {
                               border="1px solid white"
                               bg={"green.400"}
                             />
-                          </Avatar>
+                          </Avatar> */}
                           <Text
                             color="white"
                             fontSize="14px"
@@ -331,35 +382,38 @@ const Members = () => {
                             ml={2}
                             flex={1}
                           >
-                            {member.name}
+                            {/* {member.name} */}
+                            {member}
                           </Text>
                         </Flex>
                         <Flex direction="row" gap="6px" mr={0}>
-                          <IconButton
-                            size="xs"
-                            fontSize="md"
-                            bg={"white"}
-                            color={"red.500"}
-                            borderColor="red.500"
-                            borderWidth="1px"
-                            borderRadius={8}
-                            aria-label="Remove member"
-                            icon={<HiUserRemove />}
-                            _hover={{
-                              bg: "red.500",
-                              color: "white",
-                            }}
-                            onClick={() => {
-                              console.log("delete member");
-                              toast({
-                                title: "Member removed.",
-                                description: "Member removed from the group.",
-                                status: "success",
-                                duration: 2000,
-                                isClosable: true,
-                              });
-                            }}
-                          />
+                          {channel.owner.id === currentUser?.id && (
+                            <IconButton
+                              size="xs"
+                              fontSize="md"
+                              bg={"white"}
+                              color={"red.500"}
+                              borderColor="red.500"
+                              borderWidth="1px"
+                              borderRadius={8}
+                              aria-label="Remove member"
+                              icon={<HiUserRemove />}
+                              _hover={{
+                                bg: "red.500",
+                                color: "white",
+                              }}
+                              onClick={() => {
+                                console.log("delete member");
+                                toast({
+                                  title: "Member removed.",
+                                  description: "Member removed from the group.",
+                                  status: "success",
+                                  duration: 2000,
+                                  isClosable: true,
+                                });
+                              }}
+                            />
+                          )}
                         </Flex>
                       </Flex>
                     </AutoCompleteItem>

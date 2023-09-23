@@ -29,7 +29,7 @@ const channelsApi = apiSlice.injectEndpoints({
           socket.on("channel", (data) => {
             console.log("incoming channel: ", data);
             const isDataBelongToThisUser = data.data.members.find(
-              (id) => id === getState()?.auth?.user?.id
+              (id) => id === getState()?.user?.currentUser?.id
             );
             if (isDataBelongToThisUser) {
               console.log("in1111");
@@ -92,7 +92,7 @@ const channelsApi = apiSlice.injectEndpoints({
         const patchResult = dispatch(
           channelsApi.util.updateQueryData(
             "getChannelsById",
-            getState()?.auth.user?.id,
+            getState()?.user.currentUser?.id,
             (draft) => {
               console.log("draft: ", draft);
               const channel = draft?.find((c) => c.id === channelId);
@@ -120,23 +120,26 @@ const channelsApi = apiSlice.injectEndpoints({
         body: { ...data },
       }),
     }),
-    EditChannelInfo: builder.mutation({
+    editChannelInfo: builder.mutation({
       query: ({ id, data }: { id: number; data: any }) => ({
         url: `/channels/${id}`,
         method: "PATCH",
         body: { ...data },
       }),
       async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
-        // // optimistic update
-        console.log("arg: ", arg);
         const channelId = arg.id;
         const patchResult = dispatch(
           channelsApi.util.updateQueryData(
             "getSingleChannelByName",
             arg?.data?.name,
             (draft) => {
-              const channel = draft?.find((c) => c.id === channelId);
-              draft?.unshift(arg?.data); // arg = channel data
+              const index = draft?.findIndex((c) => c.id === channelId);
+              if (channelId && index !== -1) {
+                draft[index].name = arg?.data?.name;
+                draft[index].description = arg?.data?.description;
+                draft[index].privacy = arg?.data?.privacy;
+                draft[index].password = arg?.data?.password;
+              }
             }
           )
         );
@@ -144,10 +147,15 @@ const channelsApi = apiSlice.injectEndpoints({
         const patchResult2 = dispatch(
           channelsApi.util.updateQueryData(
             "getChannelsById",
-            getState()?.auth.user?.id,
+            getState()?.user.currentUser?.id,
             (draft) => {
-              const channel = draft?.find((c) => c.id === channelId);
-              draft?.unshift({ ...channel, ...arg?.data }); // arg = channel data
+              const index = draft?.findIndex((c) => c.id === channelId);
+              if (channelId && index !== -1) {
+                draft[index].name = arg?.data?.name;
+                draft[index].description = arg?.data?.description;
+                draft[index].privacy = arg?.data?.privacy;
+                draft[index].password = arg?.data?.password;
+              }
             }
           )
         );
@@ -170,6 +178,62 @@ const channelsApi = apiSlice.injectEndpoints({
         body: { password },
       }),
     }),
+    deleteChannel: builder.mutation({
+      query: ({ id, name }) => ({
+        url: `/channels/${id}`,
+        method: "DELETE",
+      }),
+      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
+        const channelId = arg.id;
+        const patchResult = dispatch(
+          channelsApi.util.updateQueryData(
+            "getChannelsById",
+            getState()?.user.currentUser?.id,
+            (draft) => {
+              const index = draft?.findIndex((c) => c.id === channelId);
+              if (channelId && index !== -1) {
+                draft?.splice(index, 1);
+              }
+            }
+          )
+        );
+
+        const patchResult2 = dispatch(
+          channelsApi.util.updateQueryData(
+            "getSingleChannelByName",
+            arg?.name,
+            (draft) => {
+              const index = draft?.findIndex((c) => c.id === channelId);
+              if (channelId && index !== -1) {
+                draft?.splice(index, 1);
+              }
+            }
+          )
+        );
+
+        // TODO: invalidates the messages cache and remove the messages from the channel also in the db
+
+        try {
+          await queryFulfilled;
+        } catch (error) {
+          console.log("error: ", error);
+          patchResult.undo();
+          patchResult2.undo();
+        }
+      },
+    }),
+    removeUserFromChannel: builder.mutation({
+      query: ({ id, userId }: { id: number; userId: number }) => ({
+        url: `/channels/${id}/members/${userId}`,
+        method: "DELETE",
+      }),
+    }),
+    LeaveChannel: builder.mutation({
+      query: ({ id, userId }: { id: number; userId: number }) => ({
+        url: `/channels/${id}/members/${userId}`,
+        method: "DELETE",
+      }),
+    }),
   }),
 });
 
@@ -181,6 +245,10 @@ export const {
   useCreateChannelMutation,
   useUpdateChannelMutation,
   useEditChannelInfoMutation,
+  useCheckChannelPasswordMutation,
+  useDeleteChannelMutation,
+  useRemoveUserFromChannelMutation,
+  useLeaveChannelMutation,
 } = channelsApi;
 
 export default channelsApi;

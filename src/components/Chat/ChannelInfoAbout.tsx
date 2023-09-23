@@ -60,7 +60,6 @@ const ChannelInfoAbout = ({
   onToggleChannelInfo: () => void;
   channel?: any;
 }) => {
-  const currentUser = useSelector((state: any) => state.auth.user);
   const navigate = useNavigate();
   const toast = useToast();
 

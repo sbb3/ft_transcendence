@@ -1,4 +1,5 @@
 import { Flex } from "@chakra-ui/react";
+import { useSelector } from "react-redux";
 import useTitle from "src/hooks/useTitle";
 
 const Game = () => {

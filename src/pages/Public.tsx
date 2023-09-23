@@ -4,5 +4,5 @@ import useAuth from "../hooks/useAuth";
 export default function Public({ children }) {
   const isLoggedIn = useAuth();
 
-  return !isLoggedIn ? children : <Navigate to="/chat" />;
+  return !isLoggedIn ? children : <Navigate to="/" />;
 }

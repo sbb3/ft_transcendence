@@ -1,13 +1,4 @@
-import { SearchIcon } from "@chakra-ui/icons";
-import {
-  Avatar,
-  AvatarBadge,
-  Flex,
-  InputGroup,
-  InputLeftElement,
-  InputRightElement,
-  Text,
-} from "@chakra-ui/react";
+import { Flex, InputGroup, InputRightElement, Text } from "@chakra-ui/react";
 import {
   AutoComplete,
   AutoCompleteGroup,
@@ -16,34 +7,24 @@ import {
   AutoCompleteItem,
   AutoCompleteList,
 } from "@choc-ui/chakra-autocomplete";
-import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import * as ScrollArea from "@radix-ui/react-scroll-area";
 import "src/styles/scrollbar.css";
 import { BeatLoader } from "react-spinners";
-import { faker } from "@faker-js/faker";
 import { BiSearchAlt } from "react-icons/bi";
 import { useGetChannelsByIdQuery } from "src/features/channels/channelsApi";
 import { useGetConversationsQuery } from "src/features/conversations/conversationsApi";
 import { useSelector } from "react-redux";
 
-const users = [...Array(30)].map(() => ({
-  id: faker.string.uuid(),
-  name: faker.internet.userName(),
-  avatar: faker.image.avatar(),
-}));
-
 const SearchDMsChannels = () => {
-  const currentUser = useSelector((state: any) => state.auth.user);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [query, setQuery] = useState<string>("");
+  const currentUser = useSelector((state: any) => state.user.currentUser);
   const navigate = useNavigate();
 
   const {
     data: channels,
     isLoading: isLoadingChannels,
     error: errorChannels,
-  } = useGetChannelsByIdQuery(currentUser.id, {
+  } = useGetChannelsByIdQuery(currentUser?.id, {
     refetchOnMountOrArgChange: true,
   });
 
@@ -55,17 +36,13 @@ const SearchDMsChannels = () => {
   return (
     <Flex direction="row" align="center" justify="center">
       <AutoComplete
-        // isLoading={isLoading}
+        isLoading={isLoadingConversations || isLoadingChannels}
         openOnFocus
         listAllValuesOnFocus
         closeOnSelect={true}
       >
         <InputGroup mr={4}>
           <AutoCompleteInput
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setQuery(e.target.value)
-            }
-            value={query}
             mr={2}
             flex={1}
             variant="filled"
@@ -139,11 +116,6 @@ const SearchDMsChannels = () => {
                       }
                       textTransform="capitalize"
                       bg="transparent"
-                      // boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.35)"
-                      // backdropFilter={"blur(20px)"}
-                      // bgImage={`url('src/assets/img/BlackNoise.png')`}
-                      // bgSize="cover"
-                      // bgRepeat="no-repeat"
                       borderRadius={5}
                       my={1}
                       _hover={{

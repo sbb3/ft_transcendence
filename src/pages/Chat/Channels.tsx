@@ -32,7 +32,7 @@ const menuBtnStyle = {
 };
 
 const Channels = ({}) => {
-  const currentUser = useSelector((state: any) => state.auth.user);
+  const currentUser = useSelector((state: any) => state.user.currentUser);
   const navigate = useNavigate();
   const { isOpen: isOpenCreateChannel, onToggle: onToggleCreateChannel } =
     useDisclosure();
@@ -45,7 +45,7 @@ const Channels = ({}) => {
     data: channels,
     isLoading: isLoadingChannels,
     error: errorChannels,
-  } = useGetChannelsByIdQuery(currentUser.id, {
+  } = useGetChannelsByIdQuery(currentUser?.id, {
     refetchOnMountOrArgChange: true,
   });
 

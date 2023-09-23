@@ -9,10 +9,10 @@ const ChannelContentBody = ({
   messages = [],
   toggleDrawer,
   isDrawerOpen,
-  error,
+  error = null,
   receiverUser = null,
 }) => {
-  const currentUser = useSelector((state: any) => state.auth.user);
+  const currentUser = useSelector((state: any) => state.user.currentUser);
   const messagesRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -28,8 +28,6 @@ const ChannelContentBody = ({
       scrollToBottom();
     };
   }, [messages]);
-
-  // console.log("receiverUser", receiverUser);
 
   return (
     <Stack
@@ -99,16 +97,16 @@ const ChannelContentBody = ({
                       src={message?.sender?.avatar}
                       // borderColor="green.400"
                       // borderWidth="3px"
-                      onClick={toggleDrawer} // TODO: show the user data in the drawer
                       style={{ width: "36px", height: "36px" }}
                       cursor="pointer"
+                      onClick={toggleDrawer} // TODO: show the user data in the drawer
                     />
                   )}
                   <Stack
                     w="full"
                     justify="center"
                     align={
-                      message?.sender.id === currentUser.id ? "end" : "start"
+                      message?.sender.id === currentUser?.id ? "end" : "start"
                     }
                   >
                     <Text
@@ -116,7 +114,7 @@ const ChannelContentBody = ({
                       fontWeight="medium"
                       color="whiteAlpha.900"
                       bg={
-                        message?.sender.id === currentUser.id
+                        message?.sender.id === currentUser?.id
                           ? "gray.600"
                           : "gray.700"
                       }
@@ -126,12 +124,21 @@ const ChannelContentBody = ({
                       px={2}
                       mx={1}
                       textAlign={
-                        message?.sender.id === currentUser.id ? "right" : "left"
+                        message?.sender.id === currentUser?.id
+                          ? "right"
+                          : "left"
                       }
                     >
                       {message?.content}
                     </Text>
                   </Stack>
+                  {isDrawerOpen && message?.sender.id !== currentUser?.id && (
+                    <ChatRightModal
+                      participantUserId={message?.sender?.id}
+                      isOpen={isDrawerOpen}
+                      toggleDrawer={toggleDrawer}
+                    />
+                  )}
                 </Flex>
               ))
             ) : (
@@ -166,13 +173,6 @@ const ChannelContentBody = ({
           <ScrollArea.Corner className="ScrollAreaCorner" />
         </ScrollArea.Root>
       )}
-      {/* {isDrawerOpen && (
-        <ChatRightModal
-          receiverUser={receiverUser}
-          isOpen={isDrawerOpen}
-          toggleDrawer={toggleDrawer}
-        />
-      )} */}
     </Stack>
   );
 };

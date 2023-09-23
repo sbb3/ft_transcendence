@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useLoginMutation } from "src/features/auth/authApi";
 
 export default function Signin() {
+  console.log(`Signin`);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -41,11 +42,11 @@ export default function Signin() {
   }
 
   return (
-    <div >
-      <div >
-        <div >
+    <div>
+      <div>
+        <div>
           <form onSubmit={handleSubmit}>
-            <div >
+            <div>
               <div>
                 <input
                   id="email-address"
@@ -71,13 +72,8 @@ export default function Signin() {
             </div>
 
             <div>
-              <button
-                type="submit"
-              >
-                Sign in
-              </button>
+              <button type="submit">Sign in</button>
             </div>
-
           </form>
         </div>
       </div>

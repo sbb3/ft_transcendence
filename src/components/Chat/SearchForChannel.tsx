@@ -55,7 +55,7 @@ const SearchForChannel = ({
 }) => {
   const [password, setPassword] = useState("");
   const [showPasswordInput, setShowPasswordInput] = useState("");
-  const currentUser = useSelector((state: any) => state.auth.user);
+  const currentUser = useSelector((state: any) => state.user.currentUser);
   const toast = useToast();
   const navigate = useNavigate();
   const {
@@ -75,7 +75,7 @@ const SearchForChannel = ({
   };
   const handleJoinChannel = async (channel) => {
     // TODO:  (password === channel.password) must be handled in the backend, add checkPassword query endpoint to channelsApi.tsx
-    if (channel?.members?.includes(currentUser.id)) {
+    if (channel?.members?.includes(currentUser?.id)) {
       toast({
         title: "Already a member.",
         description: "You're already a member of this channel.",
@@ -99,7 +99,7 @@ const SearchForChannel = ({
     await updateChannel({
       id: channel.id,
       data: {
-        members: [...channel.members, currentUser.id],
+        members: [...channel.members, currentUser?.id],
       },
     });
 
@@ -275,7 +275,7 @@ const SearchForChannel = ({
                                       {channel.name}
                                     </Text>
                                     {!channel?.members?.includes(
-                                      currentUser.id
+                                      currentUser?.id
                                     ) && (
                                       <IconButton
                                         aria-label="Join channel"
