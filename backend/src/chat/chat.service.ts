@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
+import { PrismaClient } from '@prisma/client';
 import { CreateChatDto } from './dto/create-chat.dto';
 import { UpdateChatDto } from './dto/update-chat.dto';
 
 @Injectable()
-export class ChatService {
+export class ChatService extends PrismaClient {
   create(createChatDto: CreateChatDto) {
     return 'This action adds a new chat';
   }
