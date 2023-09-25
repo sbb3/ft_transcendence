@@ -58,10 +58,10 @@ export class AuthController {
 		const {name, username} = req.user;
 		const userProfile = {name, username};
 
-		if (!userProfile)
+		if (!allInfos)
 			throw new UnauthorizedException();
 		const dbUser = await this.authService.createUserIfNotFound(allInfos);
-
+		console.log(dbUser);
 		if (!dbUser.isTwoFaEnabled)
 		{
 			await this.authService.initCookies(userProfile, userProfile, response);
