@@ -14,4 +14,21 @@ export class PrismaService extends PrismaClient {
 			}
 		})
 	}
+
+    async findUser(data : any) {
+        return await this.user.findUnique({
+            where : data
+        });
+    }
+
+    async createUser(userData : any) {
+        return await this.user.create({data : userData});
+    }
+
+    async updateUserData(whichUser : any, whichData : any) {
+        return await this.user.update({
+            where : whichUser, 
+            data : whichData
+        });
+    }
 }

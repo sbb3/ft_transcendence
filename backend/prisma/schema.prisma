@@ -13,12 +13,10 @@ datasource db {
 model user {
   id Int    @id @default(autoincrement())
   createdAt   DateTime  @default(now())
-  player_name String @unique
-  status String
-  max_score Int
-  level String
-  otp_enavled Boolean @default(false)
-  otp_secrect_tocken String
+  status String?
+  max_score Int?
+  level String?
+  otp_secrect_tocken String?
   is_profile_has_been_set Boolean @default(false)
   fr_user friend_user[]
   bq_user blocked_user[]
@@ -28,16 +26,19 @@ model user {
   send_info notification[] @relation(name: "user_send")
   player_one game[] @relation(name: "player_one")
   player_two game[] @relation(name: "player_two")
-  email String  @unique
-  login String  @unique
-  campus String  
-  avatar String
+  campus String?
   achievements achievement[] 
   // achievement achievement? @relation("user", fields: [achievement_id], references: [id])
-  achievement_id Int
+  achievement_id Int?
   msg_send message[]
   member membership[]
+
   // send_req request[]
+  email String  @unique
+  username String  @unique
+  avatar String
+  name String
+  is_otp_enabled Boolean @default(false)
 }
 
 model achievement {
