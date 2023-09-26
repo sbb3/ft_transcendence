@@ -5,15 +5,15 @@ import { user, Prisma } from '@prisma/client';
 @Injectable()
 export class UserService extends PrismaClient {
     
-    findOne(id_user: number): Promise<user> {
-        return this.user.findUnique({
+    async findUser(id_user: number): Promise<user> {
+        return await this.user.findUnique({
             where: {
                 id: id_user,
               },
         });
     }
    
-    async create(data: Prisma.userCreateInput): Promise<user> {
+    async createUser(data: Prisma.userCreateInput): Promise<user> {
         return await this.user.create({
             data,
         });

@@ -37,9 +37,9 @@ model user {
   username String  @unique
   name String
   avatar String
+  is_profile_set Boolean @default(false)
   is_otp_enabled Boolean @default(false)
   otp_secret String?
-  is_profile_set Boolean @default(false)
 }
 
 model achievement {

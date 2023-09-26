@@ -1,18 +1,35 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
-import { Prisma } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
+import { JwtGuard } from 'src/auth/guards/jwt.guard';
 
 @Controller('user')
-export class UserController {
-    constructor (private readonly userService: UserService){}
-    @Get(':id')
-    findOne(@Param('id') id: number){
-        return this.userService.findOne(id);
+export class UserController extends PrismaClient {
+
+    constructor (private readonly userService: UserService){
+        super();
     }
 
-    @Post()
-    async create(@Body() body: Prisma.userCreateInput) {
-        return this.userService.create(body);
+    @Get('profile/:id')
+    async findOne(@Param('id') id: number){
+        return await this.userService.findUser(id);
     }
 
+    // @Post()
+    // async create(@Body() body: Prisma.userCreateInput) {
+    //     return this.userService.create(body);
+    // }
+
+    @Get('profile')
+    @UseGuards(JwtGuard)
+    async getProfile(@Req() request : any) {
+        const {name, username} = request.user;
+        
+        return await this.user.findUnique({
+            where : {
+                name,
+                username,
+            }
+        });
+    }
 }
