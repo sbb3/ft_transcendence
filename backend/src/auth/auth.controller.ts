@@ -8,7 +8,7 @@ import { PrismaService } from 'src/prismaFolder/prisma.service';
 import { JwtGuard } from './guards/jwt.guard';
 import { GoogleGuard } from './guards/google.guard';
 
-@Controller('auth')
+@Controller('api/auth')
 export class AuthController {
 
 	constructor(
@@ -16,19 +16,19 @@ export class AuthController {
 			private prismaService : PrismaService
 		) { }
 
-	@Get('google/oauth2')
-	@UseGuards(GoogleGuard)
-	initGoogleAuth() {
+	// @Get('google/oauth2')
+	// @UseGuards(GoogleGuard)
+	// initGoogleAuth() {
 
-	}
+	// }
 
-	@Get('google/signin')
-	@UseGuards(GoogleGuard)
-	async googleSignIn(@Req() req : any, @Res() response : Response) {
-		this.handleSignInLogic(req, response);
-	}
+	// @Get('google/signin')
+	// @UseGuards(GoogleGuard)
+	// async googleSignIn(@Req() req : any, @Res() response : Response) {
+	// 	this.handleSignInLogic(req, response);
+	// }
 
-	@Get('42/oauth2')
+	@Get('login')
 	@UseGuards(FtGuard)
 	initOauth() {
 
@@ -37,17 +37,61 @@ export class AuthController {
 	@Get('signin')
 	@UseGuards(FtGuard)
 	async generateTokens(@Req() req : any, @Res() response : Response) {
-		this.handleSignInLogic(req, response);
+		this.signInLogic(req, response);
+	}
+
+	@Get('refresh')
+	async getNewAccessToken(@Req() req : Request, @Res() res : Response) {
+		const refreshToken = req.cookies['refresh_token'];
+
+		if (!await this.authService.isTokenValid(refreshToken, jwtConstants.rtSecret))
+			throw new UnauthorizedException();
+
+		const payload = this.authService.decodeToken(refreshToken);
+		const { id } = payload;
+		const newAccessToken = await this.authService.generateAccessToken({id});
+
+		res.json( { accessToken : newAccessToken, user : id } );
+	}
+
+	@Post('logout')
+	@UseGuards(JwtGuard)
+	logout(@Req() request : Request, @Res() response : Response) {
+		if (!request.cookies['refresh_token'])
+			throw new NotFoundException();
+
+		this.authService.removeCookie(response, 'refresh_token', {expires: new Date(0), sameSite : 'none', secure : true});
+		response.sendStatus(200);
+	}
+
+	private async signInLogic(request : any, response : Response) {
+
+		if (!request.user)
+			throw new UnauthorizedException();
+
+		const allInfos = request.user;
+		const dbUser = await this.authService.createUserIfNotFound(allInfos);
+		const profileId = dbUser.id;
+		const refreshToken = await this.authService.generateRefreshToken({id : profileId});
+
+		this.authService.initCookie('refresh_token', refreshToken, {
+			maxAge: 24 * 15 * 60 * 60 * 1000, // 15 days
+			httpOnly : true,
+			secure : true,
+			sameSite : 'none'
+		}, response);
+
+		return response.redirect('http://localhost:5173/');
 	}
 
 	@Get('2fa')
 	async getQrcode(@Req() request : Request) {
 		const authToken = request.cookies['tr_auth_token'];
 		const isValid = await this.authService.isTokenValid(authToken, jwtConstants.authSecret);
-		
+
 		if (!isValid)
 			throw new UnauthorizedException();
-	
+
 		const payload = this.authService.decodeToken(authToken);
 		const {username, name} =  payload;
 		const user = await this.prismaService.findUser({username, name});
@@ -80,35 +124,6 @@ export class AuthController {
 		return response.sendStatus(201);
 	}
 
-	@Post('refresh')
-	async getNewAccessToken(@Req() req : Request, @Res() res : Response, @Body('grant_type') grant : string | undefined) {
-
-		const refreshToken = req.cookies['tr_refresh_token'];
-
-		if (!grant || grant != "refresh_token")
-			throw new BadRequestException('Bad Grant Type');
-		if (!await this.authService.isTokenValid(refreshToken, jwtConstants.rtSecret))
-			throw new UnauthorizedException();
-
-		const payload = this.authService.decodeToken(refreshToken);
-		const {username, name} = payload;
-		const newAccessToken = await this.authService.generateAccessToken({username, name});
-
-		this.authService.initCookie('tr_access_token', newAccessToken, {maxAge :  15 * 60 * 1000, sameSite : 'none', secure : true}, res);
-
-		res.status(201).json( { access_token : newAccessToken } );
-	}
-
-	@Delete('logout')
-	@UseGuards(JwtGuard)
-	logout(@Req() request : Request, @Res() response : Response) {
-
-		if (!request.cookies['tr_access_token'] && !request.cookies['tr_refresh_token'])
-			throw new NotFoundException();
-		this.authService.removeCookie(response, 'tr_access_token', {expires: new Date(0), sameSite : 'none', secure : true});
-		this.authService.removeCookie(response, 'tr_refresh_token', {expires: new Date(0), sameSite : 'none', secure : true});
-		response.sendStatus(200);
-	}
 
 	@Put('twoFactorAuthStatus')
 	@UseGuards(JwtGuard)
@@ -126,37 +141,14 @@ export class AuthController {
 
 		if (!user)
 			return response.sendStatus(404);
-		
+
 		// Disconnecting the user here to make him relog but with otp validation this time
 		if (value)
 		{
-			this.authService.removeCookie(response, 'tr_access_token', {expires: new Date(0), sameSite : 'none', secure : true});
-			this.authService.removeCookie(response, 'tr_refresh_token', {expires: new Date(0), sameSite : 'none', secure : true});
+			this.authService.removeCookie(response, 'refresh_token', {expires: new Date(0), sameSite : 'none', secure : true});
 			return response.sendStatus(200);
 		}
-		return response.sendStatus(200);
+		return response.sendStatus(204);
 	}
 
-	private async handleSignInLogic(request : any, response : Response) {
-		const allInfos = request.user;
-		const {name, username} = request.user;
-		const userProfile = {name, username};
-
-		if (!allInfos)
-			throw new UnauthorizedException();
-		const dbUser = await this.authService.createUserIfNotFound(allInfos);
-
-		if (!dbUser.is_otp_enabled)
-		{
-			await this.authService.initCookies(userProfile, userProfile, response);
-			response.redirect('http://localhost:5173/profile');
-			return ;
-		}
-		// Check if the userProfile is registered (for the front-end to check if it should display the qrCode)
-		const authToken = await this.authService.generateAuthToken(userProfile);
-
-		this.authService.initCookie('tr_auth_token', authToken, {maxAge : 5 * 60 * 1000, sameSite : 'none', secure : true, httpOnly : true}, response);
-		return response.redirect('http://localhost:5173/2fa');
-
-	}
 }

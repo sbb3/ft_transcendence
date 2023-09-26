@@ -24,7 +24,6 @@ model user {
   send_info notification[] @relation(name: "user_send")
   player_one game[] @relation(name: "player_one")
   player_two game[] @relation(name: "player_two")
-  campus String?
   achievements achievement[] 
   // achievement achievement? @relation("user", fields: [achievement_id], references: [id])
   achievement_id Int?
@@ -37,6 +36,7 @@ model user {
   username String  @unique
   name String
   avatar String
+  campus String?
   is_profile_set Boolean @default(false)
   is_otp_enabled Boolean @default(false)
   otp_secret String?
