@@ -25,25 +25,7 @@ export class AuthController {
 	@Get('google/signin')
 	@UseGuards(GoogleGuard)
 	async googleSignIn(@Req() req : any, @Res() response : Response) {
-		const allInfos = req.user;
-		const {name, username} = req.user;
-		const userProfile = {name, username};
-
-		if (!allInfos)
-			throw new UnauthorizedException();
-		const dbUser = await this.authService.createUserIfNotFound(allInfos);
-
-		if (!dbUser.is_otp_enabled)
-		{
-			await this.authService.initCookies(userProfile, userProfile, response);
-			response.redirect('http://localhost:5173/profile');
-			return ;
-		}
-		// Check if the userProfile is registered (for the front-end to check if it should display the qrCode)
-		const authToken = await this.authService.generateAuthToken(userProfile);
-
-		this.authService.initCookie('tr_auth_token', authToken, {maxAge : 5 * 60 * 1000, sameSite : 'none', secure : true, httpOnly : true}, response);
-		return response.redirect('http://localhost:5173/2fa');
+		this.handleSignInLogic(req, response);
 	}
 
 	@Get('42/oauth2')
@@ -52,29 +34,10 @@ export class AuthController {
 
 	}
 
-	// Here same one as google. Need to remove repetition.
 	@Get('signin')
 	@UseGuards(FtGuard)
 	async generateTokens(@Req() req : any, @Res() response : Response) {
-		const allInfos = req.user;
-		const {name, username} = req.user;
-		const userProfile = {name, username};
-
-		if (!allInfos)
-			throw new UnauthorizedException();
-		const dbUser = await this.authService.createUserIfNotFound(allInfos);
-		console.log(dbUser);
-		if (!dbUser.is_otp_enabled)
-		{
-			await this.authService.initCookies(userProfile, userProfile, response);
-			response.redirect('http://localhost:5173/profile');
-			return ;
-		}
-		// Check if the userProfile is registered (for the front-end to check if it should directly display the qrCode)
-		const authToken = await this.authService.generateAuthToken(userProfile);
-
-		this.authService.initCookie('tr_auth_token', authToken, {maxAge : 5 * 60 * 1000, sameSite : 'none', secure : true, httpOnly : true}, response);
-		return response.redirect('http://localhost:5173/2fa');
+		this.handleSignInLogic(req, response);
 	}
 
 	@Get('2fa')
@@ -172,5 +135,28 @@ export class AuthController {
 			return response.sendStatus(200);
 		}
 		return response.sendStatus(200);
+	}
+
+	private async handleSignInLogic(request : any, response : Response) {
+		const allInfos = request.user;
+		const {name, username} = request.user;
+		const userProfile = {name, username};
+
+		if (!allInfos)
+			throw new UnauthorizedException();
+		const dbUser = await this.authService.createUserIfNotFound(allInfos);
+
+		if (!dbUser.is_otp_enabled)
+		{
+			await this.authService.initCookies(userProfile, userProfile, response);
+			response.redirect('http://localhost:5173/profile');
+			return ;
+		}
+		// Check if the userProfile is registered (for the front-end to check if it should display the qrCode)
+		const authToken = await this.authService.generateAuthToken(userProfile);
+
+		this.authService.initCookie('tr_auth_token', authToken, {maxAge : 5 * 60 * 1000, sameSite : 'none', secure : true, httpOnly : true}, response);
+		return response.redirect('http://localhost:5173/2fa');
+
 	}
 }
