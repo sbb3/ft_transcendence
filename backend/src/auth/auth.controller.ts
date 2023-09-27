@@ -6,32 +6,18 @@ import { Request, Response } from 'express';
 import { jwtConstants } from './auth.constants';
 import { PrismaService } from 'src/prismaFolder/prisma.service';
 import { JwtGuard } from './guards/jwt.guard';
-import { GoogleGuard } from './guards/google.guard';
 
-@Controller('api/auth')
+@Controller('/api/auth')
 export class AuthController {
 
 	constructor(
 			private authService : AuthService,
 			private prismaService : PrismaService
-		) { }
-
-	// @Get('google/oauth2')
-	// @UseGuards(GoogleGuard)
-	// initGoogleAuth() {
-
-	// }
-
-	// @Get('google/signin')
-	// @UseGuards(GoogleGuard)
-	// async googleSignIn(@Req() req : any, @Res() response : Response) {
-	// 	this.handleSignInLogic(req, response);
-	// }
+	) { }
 
 	@Get('login')
 	@UseGuards(FtGuard)
-	initOauth() {
-
+	initOauth(@Req() request : Request) {
 	}
 
 	@Get('signin')
@@ -42,55 +28,63 @@ export class AuthController {
 
 	@Get('refresh')
 	async getNewAccessToken(@Req() req : Request, @Res() res : Response) {
-		const refreshToken = req.cookies['refresh_token'];
+		try
+		{
+			const refreshToken = req?.cookies?.refresh_token;
 
-		if (!await this.authService.isTokenValid(refreshToken, jwtConstants.rtSecret))
-			throw new UnauthorizedException();
-
-		const payload = this.authService.decodeToken(refreshToken);
-		const { id } = payload;
-		const newAccessToken = await this.authService.generateAccessToken({id});
-
-		res.json( { accessToken : newAccessToken, user : id } );
+			await this.authService.isTokenValid(refreshToken, jwtConstants.rtSecret);
+			const payload = this.authService.decodeToken(refreshToken);
+			const { id } = payload;
+			const newAccessToken = await this.authService.generateAccessToken({id});
+	
+			return res.json( { accessToken : newAccessToken, user : { id } } );
+		}
+		catch (error) {
+			return res.status(401).json(error);
+		}
 	}
 
 	@Post('logout')
 	@UseGuards(JwtGuard)
 	logout(@Req() request : Request, @Res() response : Response) {
-		if (!request.cookies['refresh_token'])
-			throw new NotFoundException();
-
-		this.authService.removeCookie(response, 'refresh_token', {expires: new Date(0), sameSite : 'none', secure : true});
-		response.sendStatus(200);
+		if (request?.cookies?.refresh_token)
+			this.authService.removeCookie(response, 'refresh_token', {expires: new Date(0), sameSite : 'none', secure : true});
+		return response.sendStatus(200);
 	}
 
 	private async signInLogic(request : any, response : Response) {
+		try {
+			if (!request.user)
+				throw new UnauthorizedException();
+			const allInfos = request.user;
+			const dbUser = await this.authService.createUserIfNotFound(allInfos);
+			const profileId = dbUser.id;
+			const refreshToken = await this.authService.generateRefreshToken({id : profileId});
+	
+			this.authService.initCookie('refresh_token', refreshToken, {
+				maxAge: 24 * 15 * 60 * 60 * 1000, // 15 days
+				httpOnly : true,
+				secure : true,
+				sameSite : 'none'
+			}, response);
 
-		if (!request.user)
-			throw new UnauthorizedException();
-
-		const allInfos = request.user;
-		const dbUser = await this.authService.createUserIfNotFound(allInfos);
-		const profileId = dbUser.id;
-		const refreshToken = await this.authService.generateRefreshToken({id : profileId});
-
-		this.authService.initCookie('refresh_token', refreshToken, {
-			maxAge: 24 * 15 * 60 * 60 * 1000, // 15 days
-			httpOnly : true,
-			secure : true,
-			sameSite : 'none'
-		}, response);
-
-		return response.redirect('http://localhost:5173/');
+			return response.redirect(process.env.FRONT_URL + '');
+		}
+		catch (error) {
+			return response.status(401).json(error);
+		}
 	}
 
+	// Otp code here
 	@Get('2fa')
-	async getQrcode(@Req() request : Request) {
+	async getQrcode(@Req() request : Request, @Res() response : Response) {
 		const authToken = request.cookies['tr_auth_token'];
-		const isValid = await this.authService.isTokenValid(authToken, jwtConstants.authSecret);
-
-		if (!isValid)
-			throw new UnauthorizedException();
+		try {
+			await this.authService.isTokenValid(authToken, jwtConstants.authSecret);
+		}
+		catch (error) {
+			return response.status(401).json(error);
+		}
 
 		const payload = this.authService.decodeToken(authToken);
 		const {username, name} =  payload;
@@ -103,10 +97,12 @@ export class AuthController {
 	async verifyCode(@Req() request : Request, @Body('verificationCode') code : string | undefined, @Res() response : Response) {
 
 		const authToken = request.cookies['tr_auth_token'];
-		const isValid = await this.authService.isTokenValid(authToken, jwtConstants.authSecret);
-
-		if (!isValid)
-			throw new UnauthorizedException();
+		try {
+			await this.authService.isTokenValid(authToken, jwtConstants.authSecret);
+		}
+		catch (error) {
+			response.status(401).json(error);
+		}
 
 		const payload = this.authService.decodeToken(authToken);
 		const {username, name} = payload;
@@ -150,5 +146,4 @@ export class AuthController {
 		}
 		return response.sendStatus(204);
 	}
-
 }

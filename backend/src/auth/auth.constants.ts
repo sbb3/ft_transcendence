@@ -1,5 +1,5 @@
 export const jwtConstants = {
-    atSecret : 'acc-token-secret',
-    rtSecret : 'ref-token-secret',
+    atSecret : process.env.ACCESS_TOKEN_SECRET,
+    rtSecret : process.env.REFRESH_TOKEN_SECRET,
     authSecret : 'auth-token-secret',
 };

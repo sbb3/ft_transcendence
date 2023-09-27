@@ -1,4 +1,4 @@
-import { Injectable, Res, Response } from '@nestjs/common';
+import { Injectable, Res, Response, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { jwtConstants } from './auth.constants';
 import { PrismaService } from 'src/prismaFolder/prisma.service';
@@ -43,10 +43,10 @@ export class AuthService {
 
 		try {
 			await this.jwtService.verifyAsync(token, { secret : secretKey });
-			return true;
+			return ;
 		}
 		catch {
-			return false;
+			throw new UnauthorizedException();
 		}
 	}
 
