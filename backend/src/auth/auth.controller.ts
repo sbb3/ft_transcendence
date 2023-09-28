@@ -1,31 +1,36 @@
 import { Controller, Get, UseGuards, Req, UnauthorizedException, Res,
-	Post, Body, BadRequestException, Delete, NotFoundException, Put, ParseIntPipe } from '@nestjs/common';
+	Post, 
+	Body,
+	ParseIntPipe} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { FtGuard } from './guards/ft.guard';
-import { Request, response, Response } from 'express';
+import { Request, Response } from 'express';
 import { jwtConstants } from './auth.constants';
-import { PrismaService } from 'src/prismaFolder/prisma.service';
 import { JwtGuard } from './guards/jwt.guard';
+import { ApiExcludeEndpoint, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 
-@Controller('/api/auth')
+@ApiTags('auth')
+@Controller('auth')
 export class AuthController {
 
 	constructor(
 			private authService : AuthService,
-			private prismaService : PrismaService
 	) { }
 
+	@ApiOperation({summary : "Initialize the 42 intra authentication process and set \'status\' to \'online\'"})
 	@Get('login')
 	@UseGuards(FtGuard)
 	initOauth(@Req() request : Request) {
 	}
 
+	@ApiExcludeEndpoint()
 	@Get('signin')
 	@UseGuards(FtGuard)
 	async generateTokens(@Req() req : any, @Res() response : Response) {
 		this.signInLogic(req, response);
 	}
 
+	@ApiOperation({summary : "Get a new access token."})
 	@Get('refresh')
 	async getNewAccessToken(@Req() req : Request, @Res() res : Response) {
 		try
@@ -36,7 +41,7 @@ export class AuthController {
 			const payload = this.authService.decodeToken(refreshToken);
 			const { id } = payload;
 			const newAccessToken = await this.authService.generateAccessToken({id});
-	
+
 			return res.json( { accessToken : newAccessToken, user : { id } } );
 		}
 		catch (error) {
@@ -45,11 +50,23 @@ export class AuthController {
 	}
 
 	@Post('logout')
+	@ApiOperation({summary : "Delete jwt tokens and set \'status\' to \'offline\'"})
+	@ApiParam({name : 'userId'})
 	@UseGuards(JwtGuard)
-	logout(@Req() request : Request, @Res() response : Response) {
-		if (request?.cookies?.refresh_token)
-			this.authService.removeCookie(response, 'refresh_token', {expires: new Date(0), sameSite : 'none', secure : true});
-		return response.sendStatus(200);
+	async logout(@Req() request : Request, @Res() response : Response, @Body('userId', ParseIntPipe) userId : number) {
+		try {
+			await this.authService.updateUserData({id : userId}, {
+				is_otp_validated : false,
+				status : 'offline',
+			})
+
+			if (request?.cookies?.refresh_token)
+				this.authService.removeCookie(response, 'refresh_token', {expires: new Date(0), sameSite : 'none', secure : true});
+			return response.json({is_otp_validated : false});
+		}
+		catch (error) {
+			return response.status(404).json(error);
+		}
 	}
 
 	private async signInLogic(request : any, response : Response) {
@@ -68,100 +85,11 @@ export class AuthController {
 				sameSite : 'none'
 			}, response);
 
+			this.authService.updateUserData({ id : dbUser.id }, { status : 'online' });
 			return response.redirect(process.env.FRONT_URL + '');
 		}
 		catch (error) {
 			return response.status(401).json(error);
 		}
 	}
-
-	@Post('otp-disable')
-	async disableOtp(@Body('id', ParseIntPipe) userId : number, @Res() response : Response) {
-		try {
-			await this.authService.updateUserData({id : userId}, {is_otp_enabled : false});
-
-			return response.json({ otp_disabled : true });
-		}
-		catch (error) {
-			return response.status(404).json(error);
-		}
-	}
-
-	@Post('profile-check-completed')
-	async updateProfileCheck(@Body('id', ParseIntPipe) userId : number, @Res() response : Response) {
-		try {
-			await this.authService.updateUserData({id : userId}, {is_profile_completed : true});
-
-			return response.json({message : 'is_profile_completed has been set to true'});
-		}
-		catch (error) {
-			return response.status(404).json(error);
-		}
-	}
-
-	@Post('otp-uncheck-validated')
-	async updateOtpValidated(@Body('id', ParseIntPipe) userId : number, @Res() response : Response) {
-		try {
-			await this.authService.updateUserData({id : userId}, {is_otp_validated : false})
-
-			return response.json({message : 'is_otp_validated has been set to false'})
-		}
-		catch (error) {
-			return response.status(404).json(error);
-		}
-	}
-
-	@Post('otp-generate')
-	async generateOtpSecret(@Body('id', ParseIntPipe) userId : number, @Res() response : Response) {
-		try {
-			const user = await this.authService.findUser({id : userId});
-			const secret = this.authService.generateOtpSecret();
-			const otpURL = this.authService.generateOtpUrl(secret, user.username);
-			await this.authService.updateUserData({id : userId}, {otp_secret : secret});
-
-			return response.json({ otpAuthUrl : otpURL });
-		}
-		catch (error) {
-			return response.status(404).json(error);
-		}
-	}
-
-	@Post('otp-verify')
-	async verifyOtp(@Body('id', ParseIntPipe) userId : number,
-		@Body('pin') userPin : string, @Res() response : Response) {
-		try {
-			const user = await this.authService.findUser({id : userId});
-			const isValid = this.authService.verifyTwoFaCode(userPin, user.otp_secret);
-
-			if (isValid)
-			{
-				await this.authService.updateUserData({id : userId}, {is_otp_enabled : true});
-				return response.json({ verified : true });
-			}
-			return response.status(403).json({ verified : false });
-		}
-		catch (error) {
-			return response.status(404).json(error);
-		}
-	}
-
-	@Post('otp-validate')
-	async validateOtp(@Body('id', ParseIntPipe) userId : number,
-		@Body('pin') userPin : string, @Res() response : Response) {
-		try {
-			const user = await this.authService.findUser({id : userId});
-			const isValid = this.authService.verifyTwoFaCode(userPin, user.otp_secret);
-
-			if (isValid)
-			{
-				await this.authService.updateUserData({id : userId}, {is_otp_validated : true});
-				return response.json({ validated : true });
-			}
-			return response.status(403).json({ validated : false });
-		}
-		catch (error) {
-			return response.status(404).json(error);
-		}
-	}
-
 }
