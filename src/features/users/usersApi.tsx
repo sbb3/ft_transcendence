@@ -53,10 +53,17 @@ const usersApi = apiSlice.injectEndpoints({
       },
     }),
     getCurrentUser: builder.query({
-      query: (currentUserId) => `users/${currentUserId}`,
+      query: (currentUserId) => (
+        {
+          url: `/users/currentuser/${currentUserId}`,
+          method: "GET",
+          // mode: "no-cors"
+        }
+      ),
       async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
         try {
           const result = await queryFulfilled;
+          console.log("result: ", result);
           await dispatch(setCurrentUser(result.data));
         } catch (error) {
           console.log("error: ", error);
@@ -128,6 +135,13 @@ const usersApi = apiSlice.injectEndpoints({
         body: { blockedUserId },
       }),
     }),
+    unblockUser: builder.mutation({
+      query: ({ id, blockedUserId }) => ({
+        url: `users/${id}/unblockuser`,
+        method: "PATCH",
+        body: { blockedUserId },
+      }),
+    })
   }),
 });
 
@@ -147,6 +161,7 @@ export const {
   useDisableOTPMutation,
   useCheckProfileCompletedMutation,
   useBlockUserMutation,
+  useUnblockUserMutation,
 } = usersApi;
 
 export default usersApi;

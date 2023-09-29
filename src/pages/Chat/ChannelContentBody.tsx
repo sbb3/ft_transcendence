@@ -1,9 +1,10 @@
 import { Avatar, Box, Flex, Stack, Text } from "@chakra-ui/react";
 import * as ScrollArea from "@radix-ui/react-scroll-area";
 import "src/styles/scrollbarChatBody.css";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import ChatRightModal from "./ChatRightModal";
+import usersApi from "src/features/users/usersApi";
 
 const ChannelContentBody = ({
   messages = [],
@@ -12,12 +13,18 @@ const ChannelContentBody = ({
   error = null,
   receiverUser = null,
 }) => {
-  const currentUser = useSelector((state: any) => state.user.currentUser);
+  const currentUser = useSelector((state: any) => state?.user?.currentUser);
   const messagesRef = useRef(null);
+  const [participantUserId, setParticipantUserId] = useState(null);
 
   const scrollToBottom = () => {
     messagesRef?.current?.scrollIntoView({ behavior: "smooth" });
   };
+
+
+  const [triggerGetCurrentUser, { isLoading: isLoadingGetCurrentUser }] =
+    usersApi.useLazyGetCurrentUserQuery();
+
 
   useEffect(() => {
     // console.log("messagesRef.current", messagesRef.current);
@@ -28,6 +35,21 @@ const ChannelContentBody = ({
       scrollToBottom();
     };
   }, [messages]);
+
+  const refetchCurrentUser = async () => {
+    // const result = await usersApi.endpoints.getCurrentUser.initiate(undefined, {
+    //   force: true,
+    // } as any);
+    // if (result?.data) {
+    //   // dispatch(setCurrentUser(result?.data));
+    // }
+    try {
+      await triggerGetCurrentUser(currentUser?.id).unwrap();
+
+    } catch (error) {
+      console.log("error: ", error);
+    }
+  }
 
   return (
     <Stack
@@ -48,12 +70,12 @@ const ChannelContentBody = ({
       bgImage={`url('src/assets/img/BlackNoise.png')`}
       bgSize="cover"
       bgRepeat="no-repeat"
-      // bg="red.400"
-      // onClick={() => {
-      //   if (isDrawerOpen) {
-      //     toggleDrawer();
-      //   }
-      // }}
+    // bg="red.400"
+    // onClick={() => {
+    //   if (isDrawerOpen) {
+    //     toggleDrawer();
+    //   }
+    // }}
     >
       {error ? (
         <Flex
@@ -109,7 +131,10 @@ const ChannelContentBody = ({
                       // borderWidth="3px"
                       style={{ width: "36px", height: "36px" }}
                       cursor="pointer"
-                      onClick={toggleDrawer} // TODO: show the user data in the drawer
+                      onClick={() => {
+                        setParticipantUserId(message?.sender?.id);
+                        toggleDrawer()
+                      }} // TODO: show the user data in the drawer
                     />
                   )}
                   <Stack
@@ -142,13 +167,15 @@ const ChannelContentBody = ({
                       {message?.content}
                     </Text>
                   </Stack>
-                  {isDrawerOpen && message?.sender.id !== currentUser?.id && (
-                    <ChatRightModal
-                      participantUserId={message?.sender?.id}
-                      isOpen={isDrawerOpen}
-                      toggleDrawer={toggleDrawer}
-                    />
-                  )}
+                  {/* {isDrawerOpen && message?.sender.id !== currentUser?.id &&
+                    participantUserId === message?.sender?.id &&
+                    (
+                      <ChatRightModal
+                        participantUserId={message?.sender?.id}
+                        isOpen={isDrawerOpen}
+                        toggleDrawer={toggleDrawer}
+                      />
+                    )} */}
                 </Flex>
               ))
             ) : (
@@ -183,6 +210,15 @@ const ChannelContentBody = ({
           <ScrollArea.Corner className="ScrollAreaCorner" />
         </ScrollArea.Root>
       )}
+      {isDrawerOpen && participantUserId !== currentUser?.id &&
+        (
+          <ChatRightModal
+            participantUserId={participantUserId}
+            isOpen={isDrawerOpen}
+            toggleDrawer={toggleDrawer}
+            refetchCurrentUser={refetchCurrentUser}
+          />
+        )}
     </Stack>
   );
 };

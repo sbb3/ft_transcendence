@@ -36,42 +36,42 @@ import store from "src/app/store";
 import { setCurrentUser } from "src/features/users/usersSlice";
 import { useEffect, useReducer } from "react";
 import useSocket from "src/hooks/useSocket";
-// import
-
+import { CgUnblock } from "react-icons/cg";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 dayjs.extend(relativeTime);
 
-const iconButtonStyles = [
-  {
-    label: "Send a message",
-    icon: <FiMessageSquare />,
-    to: "/chat/conversation",
-  },
-  {
-    label: "View profile",
-    icon: <HiOutlineUserCircle />,
-    to: "/profile",
-  },
-  {
-    label: "Send friend request",
-    icon: <AiOutlineUserAdd />,
-  },
-  {
-    label: "Send game request",
-    icon: <IoGameControllerOutline />,
-  },
-  {
-    label: "Spectacle",
-    icon: <GoEye />,
-  },
-  {
-    label: "Block",
-    icon: <MdBlockFlipped />,
-  },
-];
+// const iconButtonStyles = [
+//   {
+//     label: "Send a message",
+//     icon: <FiMessageSquare />,
+//     to: "/chat/conversation",
+//   },
+//   {
+//     label: "View profile",
+//     icon: <HiOutlineUserCircle />,
+//     to: "/profile",
+//   },
+//   {
+//     label: "Send friend request",
+//     icon: <AiOutlineUserAdd />,
+//   },
+//   {
+//     label: "Send game request",
+//     icon: <IoGameControllerOutline />,
+//   },
+//   {
+//     label: "Spectacle",
+//     icon: <GoEye />,
+//   },
+//   {
+//     label: "Block",
+//     icon: <MdBlockFlipped />,
+//   },
+// ];
 
-const ChatRightModal = ({ participantUserId, isOpen, toggleDrawer }) => {
+const ChatRightModal = ({ participantUserId, isOpen, toggleDrawer, refetchCurrentUser }) => {
+  console.log("participantUserId: ", participantUserId);
   const currentUser = useSelector((state: any) => state?.user?.currentUser);
   const prefetchUser = usersApi.usePrefetch("getCurrentUser", {
     force: true,
@@ -128,6 +128,8 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleDrawer }) => {
   ] = useCreateConversationWithoutMessageMutation();
 
   const [blockUser] = usersApi.useBlockUserMutation();
+
+  const [unblockUser] = usersApi.useUnblockUserMutation();
 
   if (isLoadingParticipantUser) return <Loader />;
 
@@ -271,13 +273,50 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleDrawer }) => {
     }
   };
 
+  const handleUnBlockUser = async () => {
+    try {
+      await unblockUser({
+        id: currentUser?.id,
+        blockedUserId: participantUser?.id,
+      }).unwrap();
+
+      // await triggerGetCurrentUser(currentUser?.id).unwrap();
+      // await prefetchUser(currentUser?.id).then((data) => {
+      //   store.dispatch(setCurrentUser(data?.data));
+      // }
+      // );
+      toast({
+        title: "User unblocked",
+        description: "User unblocked successfully",
+        status: "success",
+        duration: 2000,
+        isClosable: true,
+      });
+      toggleDrawer();
+      refetchCurrentUser();
+    } catch (error) {
+      console.log("error: ", error);
+      toast({
+        title: "Error",
+        description: error?.data?.message || "Error happened",
+        status: "error",
+        duration: 2000,
+        isClosable: true,
+      });
+    }
+  }
+
   const handleBlockUser = async () => {
     try {
       await blockUser({
         id: currentUser?.id,
         blockedUserId: participantUser?.id,
       }).unwrap();
-
+      // await triggerGetCurrentUser(currentUser?.id).unwrap();
+      // await prefetchUser(currentUser?.id).then((data) => {
+      //   store.dispatch(setCurrentUser(data?.data));
+      // }
+      // );
       toast({
         title: "User blocked",
         description: "User blocked successfully",
@@ -286,6 +325,7 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleDrawer }) => {
         isClosable: true,
       });
       toggleDrawer();
+      refetchCurrentUser();
     } catch (error) {
       console.log("error: ", error);
       toast({
@@ -315,6 +355,8 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleDrawer }) => {
         backgroundColor: "rgba(51, 51, 51, 0.9)",
         // padding: "4px",
       }}
+      closeOnEsc={true}
+
     >
       <Stack
         w="full"
@@ -408,9 +450,8 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleDrawer }) => {
           justify="center"
           align="center"
           borderRadius={8}
-          // wrap={"wrap"}
+        // wrap={"wrap"}
         >
-          {/* {iconButtonStyles.map(({ icon, label }) => ( */}
           <IconButton
             // key={label}
             size="sm"
@@ -487,18 +528,37 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleDrawer }) => {
               toggleDrawer();
             }}
           />
-          <IconButton
-            size="sm"
-            fontSize="lg"
-            bg={"pong_cl_primary"}
-            color={"white"}
-            borderRadius={8}
-            aria-label="Block"
-            icon={<MdBlockFlipped />}
-            _hover={{ bg: "white", color: "pong_cl_primary" }}
-            onClick={handleBlockUser}
-          />
-          {/* // ))} */}
+          {
+            currentUser?.blockedUsers.includes(participantUser?.id) ? (
+              <IconButton
+                size="sm"
+                fontSize="lg"
+                bg={"green.500"}
+                color={"white"}
+                borderRadius={8}
+                aria-label="Block"
+                icon={<CgUnblock />
+                }
+                _hover={{ bg: "white", color: "green.500" }}
+                onClick={handleUnBlockUser}
+              />
+            ) : (
+              <IconButton
+                size="sm"
+                fontSize="lg"
+                bg={"pong_cl_primary"}
+                color={"white"}
+                borderRadius={8}
+                aria-label="Block"
+                icon={
+                  <MdBlockFlipped />
+                }
+                _hover={{ bg: "white", color: "pong_cl_primary" }}
+                onClick={handleBlockUser}
+              />
+
+            )
+          }
         </Flex>
         <Stack direction="column" spacing={2} align="start" w="full">
           <Text fontSize="md" fontWeight="medium">
