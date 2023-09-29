@@ -1,5 +1,5 @@
-import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
+import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { channel, PrismaClient } from '@prisma/client';
 import { CreateChannelDto } from './dto/create-channel.dto';
 import * as bcrypt from 'bcrypt';
 import { UpdateChannelDto } from './dto/update-channel.dto';
@@ -8,8 +8,7 @@ import { UpdateChannelDto } from './dto/update-channel.dto';
 export class ChannelsService extends PrismaClient {
 
 	async createChannel(channelDto : CreateChannelDto) {
-
-		this.checkIfChannelExists(channelDto.name);
+		await this.checkIfChannelExists(channelDto.name);
 
 		if (channelDto.privacy === 'protected')
 			channelDto.password = await bcrypt.hash(channelDto.password, 10);
@@ -22,7 +21,7 @@ export class ChannelsService extends PrismaClient {
 			throw new InternalServerErrorException();
 	}
 
-	async updateChannel(channelDto : UpdateChannelDto) {
+	async updateChannel(channelDto : UpdateChannelDto, userId : number) {
 		const channelId = channelDto.channelId;
 		const oldChannel = await this.channel.findUnique({ where : {
 			id : channelId
@@ -30,6 +29,8 @@ export class ChannelsService extends PrismaClient {
 
 		if (!oldChannel)
 			throw new NotFoundException("Channel to update not found");
+		if (!this.isAdminOrOwner(oldChannel, userId))
+			throw new UnauthorizedException("Only the owner and admins can update channel's properties")
 		if (channelDto.name)
 			await this.checkIfChannelExists(channelDto.name);
 
@@ -43,6 +44,11 @@ export class ChannelsService extends PrismaClient {
 
 		if (!updatedChannel)
 			throw new InternalServerErrorException();
+	}
+
+	private isAdminOrOwner(channel : channel, userId : number) {
+		// Here change logic after adding admins and ownerId in the data model
+		return true;
 	}
 
 	private async checkNewPassword(channelDto : UpdateChannelDto) {
