@@ -13,21 +13,34 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { useDeleteChannelMutation } from "src/features/channels/channelsApi";
+import channelsApi, {
+  useDeleteChannelMutation,
+} from "src/features/channels/channelsApi";
 dayjs.extend(relativeTime);
 
-const ChannelInfo = ({ channel }) => {
-  const currentUser = useSelector((state: any) => state.user.currentUser);
+const ChannelAbout = ({ channel }) => {
+  const currentUser = useSelector((state: any) => state?.user?.currentUser);
 
   const navigate = useNavigate();
   const [deleteChannel, { isLoading: isDeletingChannel }] =
     useDeleteChannelMutation();
 
-  // TODO: leave channel, must be done in the backend, need the channel id and the current user id
-  // TODO: invalidate the cache
-  const handleLeaveChannel = async () => {};
+  const [LeaveChannel] = channelsApi.useLeaveChannelMutation();
 
-  // TODO: delete channel by the owner, done in the backend, need the channel id and the user id to remove it from the channel
+  // TODO: invalidate the cache
+  const handleLeaveChannel = async () => {
+    try {
+      await LeaveChannel({
+        channelId: channel?.id,
+        channelName: channel?.name,
+        memberId: currentUser?.id,
+      }).unwrap();
+      navigate("/chat", { replace: true });
+    } catch (error) {
+      console.log("error did not leave channel : ", error);
+    }
+  };
+
   // TODO: invalidate the cache
   const handleDeleteChannel = async () => {
     try {
@@ -118,4 +131,4 @@ const ChannelInfo = ({ channel }) => {
   );
 };
 
-export default ChannelInfo;
+export default ChannelAbout;

@@ -39,6 +39,7 @@ import useSocket from "src/hooks/useSocket";
 import { CgUnblock } from "react-icons/cg";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import channelsApi from "src/features/channels/channelsApi";
 dayjs.extend(relativeTime);
 
 // const iconButtonStyles = [
@@ -70,7 +71,7 @@ dayjs.extend(relativeTime);
 //   },
 // ];
 
-const ChatRightModal = ({ participantUserId, isOpen, toggleDrawer, refetchCurrentUser }) => {
+const ChatRightModal = ({ participantUserId, isOpen, toggleProfileDrawer }) => {
   console.log("participantUserId: ", participantUserId);
   const currentUser = useSelector((state: any) => state?.user?.currentUser);
   const prefetchUser = usersApi.usePrefetch("getCurrentUser", {
@@ -162,7 +163,7 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleDrawer, refetchCurren
         await createConversationWithoutMessage(conversation).unwrap();
         id = conversation.id;
       }
-      toggleDrawer();
+      toggleProfileDrawer();
       navigate(`/chat/conversation/${id}`);
     } catch (error) {
       console.log("error: ", error);
@@ -186,7 +187,7 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleDrawer, refetchCurren
         isClosable: true,
       });
       // re-render the component
-      toggleDrawer();
+      toggleProfileDrawer();
       return;
     }
     try {
@@ -215,7 +216,7 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleDrawer, refetchCurren
         duration: 2000,
         isClosable: true,
       });
-      toggleDrawer();
+      toggleProfileDrawer();
     } catch (error) {
       console.log("error accepting friend request: ", error);
       console.log("error: ", error);
@@ -260,7 +261,7 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleDrawer, refetchCurren
         duration: 2000,
         isClosable: true,
       });
-      toggleDrawer();
+      toggleProfileDrawer();
     } catch (error) {
       console.log("error: ", error);
       toast({
@@ -279,12 +280,6 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleDrawer, refetchCurren
         id: currentUser?.id,
         blockedUserId: participantUser?.id,
       }).unwrap();
-
-      // await triggerGetCurrentUser(currentUser?.id).unwrap();
-      // await prefetchUser(currentUser?.id).then((data) => {
-      //   store.dispatch(setCurrentUser(data?.data));
-      // }
-      // );
       toast({
         title: "User unblocked",
         description: "User unblocked successfully",
@@ -292,8 +287,7 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleDrawer, refetchCurren
         duration: 2000,
         isClosable: true,
       });
-      toggleDrawer();
-      refetchCurrentUser();
+      toggleProfileDrawer();
     } catch (error) {
       console.log("error: ", error);
       toast({
@@ -304,7 +298,7 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleDrawer, refetchCurren
         isClosable: true,
       });
     }
-  }
+  };
 
   const handleBlockUser = async () => {
     try {
@@ -312,11 +306,6 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleDrawer, refetchCurren
         id: currentUser?.id,
         blockedUserId: participantUser?.id,
       }).unwrap();
-      // await triggerGetCurrentUser(currentUser?.id).unwrap();
-      // await prefetchUser(currentUser?.id).then((data) => {
-      //   store.dispatch(setCurrentUser(data?.data));
-      // }
-      // );
       toast({
         title: "User blocked",
         description: "User blocked successfully",
@@ -324,8 +313,7 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleDrawer, refetchCurren
         duration: 2000,
         isClosable: true,
       });
-      toggleDrawer();
-      refetchCurrentUser();
+      toggleProfileDrawer();
     } catch (error) {
       console.log("error: ", error);
       toast({
@@ -341,7 +329,7 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleDrawer, refetchCurren
   return (
     <Drawer
       open={isOpen}
-      onClose={toggleDrawer}
+      onClose={toggleProfileDrawer}
       direction="right"
       enableOverlay={false}
       duration={0}
@@ -355,8 +343,6 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleDrawer, refetchCurren
         backgroundColor: "rgba(51, 51, 51, 0.9)",
         // padding: "4px",
       }}
-      closeOnEsc={true}
-
     >
       <Stack
         w="full"
@@ -376,7 +362,7 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleDrawer, refetchCurren
             color="pong_cl_primary"
             bg={"white"}
             borderRadius={"50%"}
-            onClick={toggleDrawer}
+            onClick={toggleProfileDrawer}
           />
         </Flex>
         <Flex justify="center" align="center" w="full">
@@ -450,7 +436,7 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleDrawer, refetchCurren
           justify="center"
           align="center"
           borderRadius={8}
-        // wrap={"wrap"}
+          // wrap={"wrap"}
         >
           <IconButton
             // key={label}
@@ -486,7 +472,7 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleDrawer, refetchCurren
             icon={<HiOutlineUserCircle />}
             _hover={{ bg: "white", color: "pong_cl_primary" }}
             onClick={() => {
-              toggleDrawer();
+              toggleProfileDrawer();
               navigate(`/profile/${participantUser?.username}`); // TODO: change to id or username
             }}
           />
@@ -525,40 +511,34 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleDrawer, refetchCurren
             _hover={{ bg: "white", color: "pong_cl_primary" }}
             onClick={() => {
               // TODO: Spectacle
-              toggleDrawer();
+              toggleProfileDrawer();
             }}
           />
-          {
-            currentUser?.blockedUsers.includes(participantUser?.id) ? (
-              <IconButton
-                size="sm"
-                fontSize="lg"
-                bg={"green.500"}
-                color={"white"}
-                borderRadius={8}
-                aria-label="Block"
-                icon={<CgUnblock />
-                }
-                _hover={{ bg: "white", color: "green.500" }}
-                onClick={handleUnBlockUser}
-              />
-            ) : (
-              <IconButton
-                size="sm"
-                fontSize="lg"
-                bg={"pong_cl_primary"}
-                color={"white"}
-                borderRadius={8}
-                aria-label="Block"
-                icon={
-                  <MdBlockFlipped />
-                }
-                _hover={{ bg: "white", color: "pong_cl_primary" }}
-                onClick={handleBlockUser}
-              />
-
-            )
-          }
+          {currentUser?.blockedUsers.includes(participantUser?.id) ? (
+            <IconButton
+              size="sm"
+              fontSize="lg"
+              bg={"green.500"}
+              color={"white"}
+              borderRadius={8}
+              aria-label="Block"
+              icon={<CgUnblock />}
+              _hover={{ bg: "white", color: "green.500" }}
+              onClick={handleUnBlockUser}
+            />
+          ) : (
+            <IconButton
+              size="sm"
+              fontSize="lg"
+              bg={"pong_cl_primary"}
+              color={"white"}
+              borderRadius={8}
+              aria-label="Block"
+              icon={<MdBlockFlipped />}
+              _hover={{ bg: "white", color: "pong_cl_primary" }}
+              onClick={handleBlockUser}
+            />
+          )}
         </Flex>
         <Stack direction="column" spacing={2} align="start" w="full">
           <Text fontSize="md" fontWeight="medium">

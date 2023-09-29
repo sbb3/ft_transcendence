@@ -30,7 +30,8 @@ const ConversationContent = () => {
   const [skip, setSkip] = useState(true);
   const currentUser = useSelector((state: any) => state.user.currentUser);
   const navigate = useNavigate();
-  const { isOpen: isDrawerOpen, onToggle: toggleDrawer } = useDisclosure();
+  const { isOpen: isProfileDrawerOpen, onToggle: toggleProfileDrawer } =
+    useDisclosure();
   const toast = useToast();
   let { id } = useParams();
 
@@ -108,6 +109,8 @@ const ConversationContent = () => {
   }, [receiversData]);
 
   // TODO: loadings and errors
+  // TODO: check if user is a member of the conversations, if not, redirect to chat
+
   const onSendMessage = async (data: any) => {
     const { message } = data;
     const receiver = receiversData[0] as IChatReceiver;
@@ -199,15 +202,15 @@ const ConversationContent = () => {
         ) : conversations?.length > 0 ? (
           <>
             <ChatContentHeader
-              toggleDrawer={toggleDrawer}
+              toggleProfileDrawer={toggleProfileDrawer}
               type={"DM"}
               receiverUser={receiverUser}
             />
             <ChatContentBody
               messages={messages}
-              toggleDrawer={toggleDrawer}
+              toggleProfileDrawer={toggleProfileDrawer}
               error={errorGettingMessages}
-              isDrawerOpen={isDrawerOpen}
+              isProfileDrawerOpen={isProfileDrawerOpen}
               receiverUser={receiverUser}
             />
             <ChatContentFooter

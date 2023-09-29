@@ -43,7 +43,9 @@ import { MdGroupAdd } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import * as ScrollArea from "@radix-ui/react-scroll-area";
 import "src/styles/scrollbar.css";
-import { useGetAllChannelsQuery } from "src/features/channels/channelsApi";
+import channelsApi, {
+  useGetAllChannelsQuery,
+} from "src/features/channels/channelsApi";
 import { useSelector } from "react-redux";
 import { useUpdateChannelMutation } from "src/features/channels/channelsApi";
 const SearchForChannel = ({
@@ -66,8 +68,8 @@ const SearchForChannel = ({
     refetchOnMountOrArgChange: true,
   });
 
-  const [updateChannel, { isLoading: isLoadingUpdateChannel }] =
-    useUpdateChannelMutation();
+  const [joinChannel, { isLoading: isJoininChannel }] =
+    channelsApi.useJoinChannelMutation();
 
   const clearStates = () => {
     setPassword("");
@@ -75,7 +77,7 @@ const SearchForChannel = ({
   };
   const handleJoinChannel = async (channel) => {
     // TODO:  (password === channel.password) must be handled in the backend, add checkPassword query endpoint to channelsApi.tsx
-    if (channel?.members?.includes(currentUser?.id)) {
+    if (channel?.members?.map((m) => m.id).includes(currentUser?.id)) {
       toast({
         title: "Already a member.",
         description: "You're already a member of this channel.",
@@ -85,6 +87,19 @@ const SearchForChannel = ({
       });
       return;
     }
+    // if (
+    //   // .map((m) => m.id)
+    //   channel?.bannedMembers?.includes(currentUser?.id)
+    // ) {
+    //   toast({
+    //     title: "Banned.",
+    //     description: "You're banned from this channel, you cannot join in",
+    //     status: "error",
+    //     duration: 2000,
+    //     isClosable: true,
+    //   });
+    //   return;
+    // }
     if (channel.privacy === "private" && password !== channel.password) {
       toast({
         title: "Wrong password.",
@@ -96,23 +111,35 @@ const SearchForChannel = ({
       return;
     }
 
-    await updateChannel({
-      id: channel.id,
-      data: {
-        members: [...channel.members, currentUser?.id],
-      },
-    });
+    try {
+      await joinChannel({
+        channelId: channel?.id,
+        data: {
+          userId: currentUser?.id,
+          name: currentUser?.name,
+          avatar: currentUser?.avatar,
+        },
+      }).unwrap();
 
-    clearStates();
-    // onToggleSearchChannel();
-    // navigate(`/chat/channels/${channel.name}`);
-    toast({
-      title: "joined channel.",
-      description: "You've joined the channel.",
-      status: "success",
-      duration: 2000,
-      isClosable: true,
-    });
+      clearStates();
+      onToggleSearchChannel();
+      toast({
+        title: "joined channel.",
+        description: "You've joined the channel.",
+        status: "success",
+        duration: 2000,
+        isClosable: true,
+      });
+    } catch (error) {
+      console.log("error ", error);
+      toast({
+        title: "Unable to join channel.",
+        description: error?.data?.message || "Unable to join channel.",
+        status: "error",
+        duration: 2000,
+        isClosable: true,
+      });
+    }
   };
 
   return (
@@ -291,7 +318,7 @@ const SearchForChannel = ({
                                           bg: "white",
                                           color: "pong_cl_primary",
                                         }}
-                                        isLoading={isLoadingUpdateChannel}
+                                        isLoading={isJoininChannel}
                                         // onClick={handleJoinChannel}
                                         onClick={() => {
                                           if (channel.privacy === "public") {

@@ -48,7 +48,7 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { useSelector } from "react-redux";
 import ChannelSettings from "./ChannelSettings";
-import ChannelInfo from "./ChannelInfo";
+import ChannelAbout from "./ChannelInfo";
 dayjs.extend(relativeTime);
 
 const ChannelInfoAbout = ({
@@ -162,7 +162,7 @@ const ChannelInfoAbout = ({
                   </TabList>
                   <TabPanels p={0}>
                     <TabPanel>
-                      <ChannelInfo channel={channel} />
+                      <ChannelAbout channel={channel} />
                     </TabPanel>
                     <TabPanel>
                       <Members channel={channel} />

@@ -40,7 +40,6 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useSelector } from "react-redux";
 import usersApi from "src/features/users/usersApi";
-import { RiUserVoiceFill } from "react-icons/ri";
 import { BiMicrophone, BiSolidMicrophoneOff } from "react-icons/bi";
 import channelsApi from "src/features/channels/channelsApi";
 const ROLES = ["member", "admin", "owner"];
@@ -71,7 +70,8 @@ const Members = ({ channel }) => {
 
   const [muteChannelMember] = channelsApi.useMuteChannelMemberMutation();
   const [unmuteChannelMember] = channelsApi.useUnmuteChannelMemberMutation();
-
+  const [banChannelMember] = channelsApi.useBanChannelMemberMutation();
+  const [kickChannelMember] = channelsApi.useKickChannelMemberMutation();
   const onAddOrEditUser = async (data: any) => {
     const { username, permissions } = data; // TODO: username or email address
     console.log("data: ", data);
@@ -123,8 +123,13 @@ const Members = ({ channel }) => {
   };
 
   // TODO:
-  const handleKickMember = async () => {
+  const handleKickMember = async (memberId) => {
     try {
+      await kickChannelMember({
+        channelId: channel?.id,
+        memberId,
+        channelName: channel?.name,
+      }).unwrap();
       toast({
         title: "Member Kicked.",
         description: "Member kicked from the channel.",
@@ -135,7 +140,7 @@ const Members = ({ channel }) => {
     } catch (error) {
       console.log("error: ", error);
       toast({
-        title: "Member not added.",
+        title: "Member not Kicked.",
         description: error.message,
         status: "error",
         duration: 2000,
@@ -196,7 +201,31 @@ const Members = ({ channel }) => {
     }
   };
 
-  const handleBanMember = async () => {};
+  const handleBanMember = async (memberId) => {
+    try {
+      await banChannelMember({
+        channelId: channel?.id,
+        userId: memberId,
+        channelName: channel?.name,
+      }).unwrap();
+      toast({
+        title: "Member Banned.",
+        description: "Member banned from the channel.",
+        status: "success",
+        duration: 2000,
+        isClosable: true,
+      });
+    } catch (error) {
+      console.log("error: ", error);
+      toast({
+        title: "Member not banned.",
+        description: error.message || "Member not banned from the channel.",
+        status: "error",
+        duration: 2000,
+        isClosable: true,
+      });
+    }
+  };
 
   useEffect(() => {}, []);
   return (
@@ -486,25 +515,30 @@ const Members = ({ channel }) => {
                                       bg: "red.500",
                                       color: "white",
                                     }}
-                                    onClick={handleKickMember}
+                                    onClick={() => handleKickMember(member?.id)}
                                   />
-
-                                  <IconButton
-                                    size="xs"
-                                    fontSize="md"
-                                    bg={"white"}
-                                    color={"red.500"}
-                                    borderColor="red.500"
-                                    borderWidth="1px"
-                                    borderRadius={8}
-                                    aria-label="Ban member"
-                                    icon={<MdBlockFlipped />}
-                                    _hover={{
-                                      bg: "red.500",
-                                      color: "white",
-                                    }}
-                                    onClick={handleBanMember}
-                                  />
+                                  {!channel?.bannedMembers
+                                    // ?.map((member) => member?.id)
+                                    ?.includes(member?.id) && (
+                                    <IconButton
+                                      size="xs"
+                                      fontSize="md"
+                                      bg={"white"}
+                                      color={"red.500"}
+                                      borderColor="red.500"
+                                      borderWidth="1px"
+                                      borderRadius={8}
+                                      aria-label="Ban member"
+                                      icon={<MdBlockFlipped />}
+                                      _hover={{
+                                        bg: "red.500",
+                                        color: "white",
+                                      }}
+                                      onClick={() =>
+                                        handleBanMember(member?.id)
+                                      }
+                                    />
+                                  )}
                                   {channel?.mutedMembers
                                     // ?.map((member) => member?.id)
                                     ?.includes(member?.id) ? (
@@ -522,9 +556,9 @@ const Members = ({ channel }) => {
                                         bg: "green.500",
                                         color: "white",
                                       }}
-                                      onClick={() => {
-                                        handleUnMuteMember(member?.id);
-                                      }}
+                                      onClick={() =>
+                                        handleUnMuteMember(member?.id)
+                                      }
                                     />
                                   ) : (
                                     <IconButton
@@ -541,9 +575,9 @@ const Members = ({ channel }) => {
                                         bg: "red.500",
                                         color: "white",
                                       }}
-                                      onClick={() => {
-                                        handleMuteMember(member?.id);
-                                      }}
+                                      onClick={() =>
+                                        handleMuteMember(member?.id)
+                                      }
                                     />
                                   )}
                                 </>

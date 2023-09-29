@@ -14,7 +14,7 @@ import { FiInfo } from "react-icons/fi";
 import ChannelInfoAbout from "src/components/Chat/ChannelInfoAbout";
 
 const ChatContentHeader = ({
-  toggleDrawer,
+  toggleProfileDrawer,
   type,
   receiverUser = null,
   channel = null,
@@ -49,7 +49,7 @@ const ChatContentHeader = ({
           align="center"
           justify={"start"}
           w="full"
-          onClick={toggleDrawer}
+          onClick={toggleProfileDrawer}
           cursor="pointer"
         >
           <Avatar

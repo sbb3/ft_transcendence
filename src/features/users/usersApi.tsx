@@ -53,13 +53,11 @@ const usersApi = apiSlice.injectEndpoints({
       },
     }),
     getCurrentUser: builder.query({
-      query: (currentUserId) => (
-        {
-          url: `/users/currentuser/${currentUserId}`,
-          method: "GET",
-          // mode: "no-cors"
-        }
-      ),
+      query: (currentUserId) => ({
+        url: `/users/currentuser/${currentUserId}`,
+        method: "GET",
+        // mode: "no-cors"
+      }),
       async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
         try {
           const result = await queryFulfilled;
@@ -134,6 +132,27 @@ const usersApi = apiSlice.injectEndpoints({
         method: "PATCH",
         body: { blockedUserId },
       }),
+      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
+        try {
+          const result = await queryFulfilled;
+          const user = result?.data;
+          await dispatch(setCurrentUser(user));
+          // !! NOTE:
+          // or send another request to get the updated user
+          // but this will cause another request and anotger rerender
+          // await dispatch(
+          //   usersApi.util.prefetch(
+          //     "getCurrentUser",
+          //     getState()?.user?.currentUser?.id,
+          //     {
+          //       force: true,
+          //     } as any
+          //   )
+          // );
+        } catch (error) {
+          console.log("error: ", error);
+        }
+      },
     }),
     unblockUser: builder.mutation({
       query: ({ id, blockedUserId }) => ({
@@ -141,7 +160,16 @@ const usersApi = apiSlice.injectEndpoints({
         method: "PATCH",
         body: { blockedUserId },
       }),
-    })
+      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
+        try {
+          const result = await queryFulfilled;
+          const user = result?.data;
+          await dispatch(setCurrentUser(user));
+        } catch (error) {
+          console.log("error: ", error);
+        }
+      },
+    }),
   }),
 });
 

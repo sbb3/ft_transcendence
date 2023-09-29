@@ -1,6 +1,7 @@
 import { apiSlice } from "src/app/api/apiSlice";
 import io from "socket.io-client";
 import useSocket from "src/hooks/useSocket";
+import channelsApi from "../channels/channelsApi";
 
 const channelMessagesApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
@@ -60,7 +61,6 @@ const channelMessagesApi = apiSlice.injectEndpoints({
       }),
       async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
         const message = arg;
-        // const { channelId } = message;
         const { channelName } = message;
         // optimistic update
         const patchResultMsg = dispatch(
@@ -77,6 +77,15 @@ const channelMessagesApi = apiSlice.injectEndpoints({
           await queryFulfilled;
         } catch (error) {
           console.log("error : ", error);
+          await dispatch(
+            channelsApi.util.prefetch(
+              "getChannelsByMemberId",
+              getState()?.user?.currentUser?.id,
+              {
+                force: true,
+              }
+            )
+          );
           patchResultMsg.undo();
         }
       },
@@ -85,7 +94,6 @@ const channelMessagesApi = apiSlice.injectEndpoints({
 });
 
 export const {
-  // useGetMessagesByChannelIdQuery,
   useGetMessagesByChannelNameQuery,
   useCreateChannelMessageMutation,
 } = channelMessagesApi;

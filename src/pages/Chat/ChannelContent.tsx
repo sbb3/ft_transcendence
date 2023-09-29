@@ -13,34 +13,63 @@ import {
   useCreateChannelMessageMutation,
 } from "src/features/channelMessages/channelMessagesApi";
 import ChannelContentBody from "./ChannelContentBody";
+import { useEffect } from "react";
 
 dayjs.extend(relativeTime);
 
 const ChannelContent = () => {
-  const currentUser = useSelector((state: any) => state.user.currentUser);
+  const currentUser = useSelector((state: any) => state?.user?.currentUser);
   const navigate = useNavigate();
-  //   TODO: rename isDrawerOpen isProfileDrawerOpen
-  const { isOpen: isDrawerOpen, onToggle: toggleDrawer } = useDisclosure();
+  const { isOpen: isProfileDrawerOpen, onToggle: toggleProfileDrawer } =
+    useDisclosure();
   const toast = useToast();
   let { channelname } = useParams();
 
-  const { data: channels, isLoading: isLoadingChannels } =
-    useGetSingleChannelByNameQuery(channelname, {
-      refetchOnMountOrArgChange: true,
-    });
+  const {
+    data: channels,
+    isLoading: isLoadingChannels,
+    isFetching: isFetchingChannels,
+    isUninitialized: isUninitializedChannels,
+    isError: isErrorGettingChannels,
+  } = useGetSingleChannelByNameQuery(channelname, {
+    refetchOnMountOrArgChange: true,
+  });
 
   const {
     data: messages,
     isLoading: isLoadingMessages,
+    isFetching: isFetchingMessages,
+    isUninitialized: isUninitializedMessages,
     isError: isErrorGettingMessages,
   } = useGetMessagesByChannelNameQuery(channelname);
 
   const [createChannelMessage, { isLoading: isCreatingChannelMsg }] =
     useCreateChannelMessageMutation();
 
-  // TODO: loadings and errors
+  useEffect(() => {
+    if (isUninitializedChannels) return;
+    if (channels?.length > 0) {
+      const channel = channels[0];
+      if (!channel.members.map((m) => m.id).includes(currentUser?.id)) {
+        navigate("/chat", { replace: true });
+      }
+    }
+  }, [channels]);
+
+  if (isErrorGettingChannels || isErrorGettingMessages) {
+    toast({
+      title: "An error occurred.",
+      description: "Unable to get channels or messages.",
+      status: "error",
+      duration: 4000,
+      isClosable: true,
+    });
+  }
+
+  // TODO: check if user is a member of the channel, if not, redirect to chat
   const onSendMessage = async (data: any) => {
     const { message } = data;
+    if (channels?.length === 0 || !message) return;
     const channel = channels[0];
     const msg = {
       id: uuidv4(),
@@ -67,12 +96,12 @@ const ChannelContent = () => {
         duration: 2000,
         isClosable: true,
       });
+      navigate("/chat", { replace: true });
     }
   };
 
   return (
     <Flex
-      //   direction="row"
       // bg={"pong_bg_secondary"}
       pos="relative"
       alignSelf={"stretch"}
@@ -90,8 +119,6 @@ const ChannelContent = () => {
       //   gap={6}
     >
       <Stack
-        // pos="relative"
-        // ml={2}
         // bg={"gray"}
         justify="start"
         align="center"
@@ -102,7 +129,10 @@ const ChannelContent = () => {
         spacing={1}
         pl={{ base: 1 }}
       >
-        {isLoadingMessages || isLoadingChannels ? (
+        {isLoadingMessages ||
+        isLoadingChannels ||
+        isFetchingChannels ||
+        isFetchingMessages ? (
           <Flex
             justify="center"
             align="center"
@@ -115,22 +145,38 @@ const ChannelContent = () => {
             <Loader />
           </Flex>
         ) : channels?.length > 0 ? (
-          <>
-            <ChatContentHeader
-              toggleDrawer={toggleDrawer}
-              type={"Channel"}
-              channel={channels[0]}
-            />
-            <ChannelContentBody
-              messages={messages}
-              toggleDrawer={toggleDrawer}
-              isDrawerOpen={isDrawerOpen}
-            />
-            <ChatContentFooter
-              onSendMessage={onSendMessage}
-              isLoading={isCreatingChannelMsg}
-            />
-          </>
+          channels[0]?.members.map((m) => m.id).includes(currentUser?.id) ? (
+            <>
+              <ChatContentHeader
+                toggleProfileDrawer={toggleProfileDrawer}
+                type={"Channel"}
+                channel={channels[0]}
+              />
+              <ChannelContentBody
+                messages={messages}
+                toggleProfileDrawer={toggleProfileDrawer}
+                isProfileDrawerOpen={isProfileDrawerOpen}
+              />
+              <ChatContentFooter
+                onSendMessage={onSendMessage}
+                isLoading={isCreatingChannelMsg}
+              />
+            </>
+          ) : (
+            <Flex
+              justify="center"
+              align="center"
+              h="100%"
+              w="100%"
+              color="white"
+              fontSize="xl"
+              fontWeight="semibold"
+            >
+              <Text fontSize="xl" fontWeight="normal" color="white">
+                You are not a member of this channel
+              </Text>
+            </Flex>
+          )
         ) : (
           <Flex
             justify="center"
@@ -142,7 +188,7 @@ const ChannelContent = () => {
             fontWeight="semibold"
           >
             <Text fontSize="xl" fontWeight="normal" color="white">
-              Channel not found.
+              Channel not found
             </Text>
           </Flex>
         )}

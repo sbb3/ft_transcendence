@@ -8,9 +8,9 @@ const channelsApi = apiSlice.injectEndpoints({
     getAllChannels: builder.query({
       query: () => `/channels`,
     }),
-    getSingleChannelById: builder.query({
-      query: (id) => `/channels/${id}`,
-    }),
+    // getSingleChannelById: builder.query({
+    //   query: (id) => `/channels/${id}`,
+    // }),
     getSingleChannelByName: builder.query({
       query: (name) => `/channels?name=${name}`,
       async onCacheEntryAdded(
@@ -223,16 +223,66 @@ const channelsApi = apiSlice.injectEndpoints({
       },
     }),
     removeUserFromChannel: builder.mutation({
-      query: ({ id, userId }: { id: number; userId: number }) => ({
-        url: `/channels/${id}/members/${userId}`,
+      query: ({
+        channelId,
+        userId,
+      }: {
+        channelId: number;
+        userId: number;
+      }) => ({
+        url: `/channels/${channelId}/members/${userId}`,
         method: "DELETE",
       }),
     }),
     LeaveChannel: builder.mutation({
-      query: ({ id, userId }: { id: number; userId: number }) => ({
-        url: `/channels/${id}/members/${userId}`,
-        method: "DELETE",
+      query: ({
+        channelId,
+        channelName,
+        memberId,
+      }: {
+        channelId: number;
+        memberId: number;
+        channelName: string;
+      }) => ({
+        url: `channels/${channelId}/members/${memberId}/leave`,
+        method: "PATCH",
       }),
+      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
+        const channelId = arg.channelId;
+        const patchResult = dispatch(
+          channelsApi.util.updateQueryData(
+            "getChannelsByMemberId",
+            getState()?.user.currentUser?.id,
+            (draft) => {
+              const channelIndex = draft?.findIndex((c) => c.id === channelId);
+              if (channelIndex !== -1) {
+                draft?.splice(channelIndex, 1);
+              }
+            }
+          )
+        );
+
+        const patchResult2 = dispatch(
+          channelsApi.util.updateQueryData(
+            "getSingleChannelByName",
+            arg?.channelName,
+            (draft) => {
+              const index = draft?.findIndex((c) => c.id === channelId);
+              if (channelId && index !== -1) {
+                draft?.splice(index, 1);
+              }
+            }
+          )
+        );
+
+        try {
+          await queryFulfilled;
+        } catch (error) {
+          console.log("error: ", error);
+          patchResult.undo();
+          patchResult2.undo();
+        }
+      },
     }),
     // : {
     //   channelId: number;
@@ -297,12 +347,125 @@ const channelsApi = apiSlice.injectEndpoints({
         }
       },
     }),
+    banChannelMember: builder.mutation({
+      query: ({ channelId, userId }) => ({
+        url: `channels/${channelId}/members/${userId}/ban`,
+        method: "PATCH",
+      }),
+      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
+        const channelId = arg.channelId;
+        const patchResult = dispatch(
+          channelsApi.util.updateQueryData(
+            "getSingleChannelByName",
+            arg?.channelName,
+            (draft) => {
+              const index = draft?.findIndex((c) => c.id === channelId);
+              if (index !== -1) {
+                draft[index].bannedMembers.push(arg.userId);
+                const bannedMember = draft[index].members.find(
+                  (member) => member?.id === arg.userId
+                );
+                if (bannedMember?.id) {
+                  draft[index].members = draft[index].members.filter(
+                    (member) => member?.id !== arg.userId
+                  );
+                }
+                const bannedMemberIfAdmin = draft[index].admins.find(
+                  (admin) => admin?.id === arg.userId
+                );
+                if (bannedMemberIfAdmin?.id) {
+                  draft[index].admins = draft[index].admins.filter(
+                    (admin) => admin?.id !== arg.userId
+                  );
+                }
+              }
+            }
+          )
+        );
+
+        try {
+          await queryFulfilled;
+        } catch (error) {
+          console.log("error: ", error);
+          patchResult.undo();
+        }
+      },
+    }),
+    joinChannel: builder.mutation({
+      query: ({ channelId, data }) => ({
+        url: `channels/${channelId}/join`,
+        method: "PATCH",
+        body: { ...data },
+      }),
+      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
+        const channelId = arg.id;
+
+        try {
+          await queryFulfilled;
+          await dispatch(
+            channelsApi.util.prefetch(
+              "getChannelsByMemberId",
+              getState()?.user.currentUser?.id,
+              {
+                force: true,
+              }
+            )
+          );
+        } catch (error) {
+          console.log("error: ", error);
+          // patchResult.undo();
+        }
+      },
+    }),
+    kickChannelMember: builder.mutation({
+      query: ({ channelId, memberId, channelName }) => ({
+        url: `channels/${channelId}/members/${memberId}/kick`,
+        method: "PATCH",
+      }),
+      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
+        const channelId = arg.channelId;
+        const patchResult = dispatch(
+          channelsApi.util.updateQueryData(
+            "getSingleChannelByName",
+            arg?.channelName,
+            (draft) => {
+              const channelIndex = draft?.findIndex((c) => c.id === channelId);
+              if (channelIndex !== -1) {
+                const kickedMember = draft[channelIndex].members.find(
+                  (m) => m?.id === arg.memberId
+                );
+                if (kickedMember?.id) {
+                  draft[channelIndex].members = draft[
+                    channelIndex
+                  ].members.filter((m) => m?.id !== arg.memberId);
+                }
+                const kickedMemberIfAdmin = draft[channelIndex].admins.find(
+                  (a) => a?.id === arg.memberId
+                );
+                if (kickedMemberIfAdmin?.id) {
+                  draft[channelIndex].admins = draft[
+                    channelIndex
+                  ].admins.filter((a) => a?.id !== arg.memberId);
+                }
+              }
+            }
+          )
+        );
+
+        try {
+          await queryFulfilled;
+        } catch (error) {
+          console.log("error: ", error);
+          patchResult.undo();
+        }
+      },
+    }),
   }),
 });
 
 export const {
   useGetAllChannelsQuery,
-  useGetSingleChannelByIdQuery,
+  // useGetSingleChannelByIdQuery,
   useGetSingleChannelByNameQuery,
   useGetChannelsByMemberIdQuery,
   useCreateChannelMutation,
@@ -314,6 +477,9 @@ export const {
   useLeaveChannelMutation,
   useMuteChannelMemberMutation,
   useUnmuteChannelMemberMutation,
+  useBanChannelMemberMutation,
+  useJoinChannelMutation,
+  useKickChannelMemberMutation,
 } = channelsApi;
 
 export default channelsApi;

@@ -1,15 +1,15 @@
-import { Avatar, Box, Flex, Stack, Text } from "@chakra-ui/react";
+import { Box, Flex, Stack, Text } from "@chakra-ui/react";
 import * as ScrollArea from "@radix-ui/react-scroll-area";
 import "src/styles/scrollbarChatBody.css";
 import { useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
-import ChatRightModal from "./ChatRightModal";
+import ConversationMessage from "./ConversationMessage";
 
 const ChatContentBody = ({
   messages = [],
-  toggleDrawer,
+  toggleProfileDrawer,
   error,
-  isDrawerOpen,
+  isProfileDrawerOpen,
   receiverUser = null,
 }) => {
   const currentUser = useSelector((state: any) => state?.user?.currentUser);
@@ -65,71 +65,13 @@ const ChatContentBody = ({
           >
             {messages?.length > 0 ? (
               messages?.map((message) => (
-                <Flex
-                  id="first_flex"
-                  key={message?.id}
-                  direction="row"
-                  w="full"
-                  gap={1}
-                  align="center"
-                  justify="start"
-                  borderRadius={6}
-                  p={1}
-                >
-                  {message?.sender.email !== currentUser?.email && (
-                    <Avatar
-                      // size="sm"
-                      name={receiverUser?.name}
-                      src={receiverUser?.avatar}
-                      onClick={toggleDrawer}
-                      style={{ width: "36px", height: "36px" }}
-                      cursor="pointer"
-                    />
-                  )}
-
-                  <Flex
-                    w="full"
-                    align="center"
-                    justify={
-                      message?.sender.email === currentUser?.email
-                        ? "end"
-                        : "start"
-                    }
-                  >
-                    <Text
-                      fontSize="12px"
-                      fontWeight="medium"
-                      color="whiteAlpha.900"
-                      bg={
-                        message?.sender.email === currentUser?.email
-                          ? "gray.600"
-                          : "gray.700"
-                      }
-                      maxW={"300px"}
-                      p={2}
-                      px={2}
-                      mx={1}
-                      textAlign={
-                        message?.sender.email === currentUser?.email
-                          ? "right"
-                          : "left"
-                      }
-                    >
-                      {message?.content}
-                    </Text>
-                  </Flex>
-                  {isDrawerOpen && message?.sender.id !== currentUser?.id && (
-                    <ChatRightModal
-                      participantUserId={
-                        message?.sender?.id !== currentUser?.id
-                          ? message?.sender?.id
-                          : message?.receiver?.id
-                      }
-                      isOpen={isDrawerOpen}
-                      toggleDrawer={toggleDrawer}
-                    />
-                  )}
-                </Flex>
+                <ConversationMessage
+                  message={message}
+                  currentUser={currentUser}
+                  receiverUser={receiverUser}
+                  toggleProfileDrawer={toggleProfileDrawer}
+                  isProfileDrawerOpen={isProfileDrawerOpen}
+                />
               ))
             ) : (
               <Flex

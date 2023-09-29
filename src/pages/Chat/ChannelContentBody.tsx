@@ -5,29 +5,23 @@ import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import ChatRightModal from "./ChatRightModal";
 import usersApi from "src/features/users/usersApi";
+import ChannelMessage from "./ChannelMessage";
 
 const ChannelContentBody = ({
   messages = [],
-  toggleDrawer,
-  isDrawerOpen,
+  toggleProfileDrawer,
+  isProfileDrawerOpen,
   error = null,
-  receiverUser = null,
 }) => {
   const currentUser = useSelector((state: any) => state?.user?.currentUser);
   const messagesRef = useRef(null);
-  const [participantUserId, setParticipantUserId] = useState(null);
+  const [participantUserId, setParticipantUserId] = useState(0);
 
   const scrollToBottom = () => {
     messagesRef?.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-
-  const [triggerGetCurrentUser, { isLoading: isLoadingGetCurrentUser }] =
-    usersApi.useLazyGetCurrentUserQuery();
-
-
   useEffect(() => {
-    // console.log("messagesRef.current", messagesRef.current);
     if (messagesRef.current) {
       scrollToBottom();
     }
@@ -36,31 +30,12 @@ const ChannelContentBody = ({
     };
   }, [messages]);
 
-  const refetchCurrentUser = async () => {
-    // const result = await usersApi.endpoints.getCurrentUser.initiate(undefined, {
-    //   force: true,
-    // } as any);
-    // if (result?.data) {
-    //   // dispatch(setCurrentUser(result?.data));
-    // }
-    try {
-      await triggerGetCurrentUser(currentUser?.id).unwrap();
-
-    } catch (error) {
-      console.log("error: ", error);
-    }
-  }
-
   return (
     <Stack
-      // position="relative"
-      id="ChannelContentBodyStack"
-      // direction={"column-reverse"}
       justify={"start"}
       w={"full"}
       // h={"full"}
       h={"800px"}
-      //   bg={"red.400"}
       borderRadius={6}
       p={2}
       spacing={4}
@@ -70,12 +45,6 @@ const ChannelContentBody = ({
       bgImage={`url('src/assets/img/BlackNoise.png')`}
       bgSize="cover"
       bgRepeat="no-repeat"
-    // bg="red.400"
-    // onClick={() => {
-    //   if (isDrawerOpen) {
-    //     toggleDrawer();
-    //   }
-    // }}
     >
       {error ? (
         <Flex
@@ -99,84 +68,12 @@ const ChannelContentBody = ({
           >
             {messages?.length > 0 ? (
               messages?.map((message) => (
-                <Flex
-                  id="first_flex"
-                  key={message?.id}
-                  direction="row"
-                  w="full"
-                  //   h="full"
-                  gap={1}
-                  align="center"
-                  justify="start"
-                  borderRadius={6}
-                  //   border="1px solid white"
-                  p={1}
-                  // display={
-                  //   currentUser?.blockedUsers?.includes(message?.sender?.id)
-                  //     ? "none"
-                  //     : "flex"
-                  // }
-                  filter={
-                    currentUser?.blockedUsers?.includes(message?.sender?.id)
-                      ? "blur(6px)"
-                      : "none"
-                  }
-                >
-                  {message?.sender?.id !== currentUser?.id && (
-                    <Avatar
-                      // size="sm"
-                      name={message?.sender?.name}
-                      src={message?.sender?.avatar}
-                      // borderColor="green.400"
-                      // borderWidth="3px"
-                      style={{ width: "36px", height: "36px" }}
-                      cursor="pointer"
-                      onClick={() => {
-                        setParticipantUserId(message?.sender?.id);
-                        toggleDrawer()
-                      }} // TODO: show the user data in the drawer
-                    />
-                  )}
-                  <Stack
-                    w="full"
-                    justify="center"
-                    align={
-                      message?.sender.id === currentUser?.id ? "end" : "start"
-                    }
-                  >
-                    <Text
-                      fontSize="12px"
-                      fontWeight="medium"
-                      color="whiteAlpha.900"
-                      bg={
-                        message?.sender.id === currentUser?.id
-                          ? "gray.600"
-                          : "gray.700"
-                      }
-                      //   minW="300px"
-                      maxW={"300px"}
-                      p={2}
-                      px={2}
-                      mx={1}
-                      textAlign={
-                        message?.sender.id === currentUser?.id
-                          ? "right"
-                          : "left"
-                      }
-                    >
-                      {message?.content}
-                    </Text>
-                  </Stack>
-                  {/* {isDrawerOpen && message?.sender.id !== currentUser?.id &&
-                    participantUserId === message?.sender?.id &&
-                    (
-                      <ChatRightModal
-                        participantUserId={message?.sender?.id}
-                        isOpen={isDrawerOpen}
-                        toggleDrawer={toggleDrawer}
-                      />
-                    )} */}
-                </Flex>
+                <ChannelMessage
+                  message={message}
+                  currentUser={currentUser}
+                  setParticipantUserId={setParticipantUserId}
+                  toggleProfileDrawer={toggleProfileDrawer}
+                />
               ))
             ) : (
               <Flex
@@ -210,15 +107,13 @@ const ChannelContentBody = ({
           <ScrollArea.Corner className="ScrollAreaCorner" />
         </ScrollArea.Root>
       )}
-      {isDrawerOpen && participantUserId !== currentUser?.id &&
-        (
-          <ChatRightModal
-            participantUserId={participantUserId}
-            isOpen={isDrawerOpen}
-            toggleDrawer={toggleDrawer}
-            refetchCurrentUser={refetchCurrentUser}
-          />
-        )}
+      {isProfileDrawerOpen && participantUserId !== currentUser?.id && (
+        <ChatRightModal
+          participantUserId={participantUserId}
+          isOpen={isProfileDrawerOpen}
+          toggleProfileDrawer={toggleProfileDrawer}
+        />
+      )}
     </Stack>
   );
 };
