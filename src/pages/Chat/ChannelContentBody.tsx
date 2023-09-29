@@ -89,6 +89,16 @@ const ChannelContentBody = ({
                   borderRadius={6}
                   //   border="1px solid white"
                   p={1}
+                  // display={
+                  //   currentUser?.blockedUsers?.includes(message?.sender?.id)
+                  //     ? "none"
+                  //     : "flex"
+                  // }
+                  filter={
+                    currentUser?.blockedUsers?.includes(message?.sender?.id)
+                      ? "blur(6px)"
+                      : "none"
+                  }
                 >
                   {message?.sender?.id !== currentUser?.id && (
                     <Avatar

@@ -51,8 +51,8 @@ const channelsApi = apiSlice.injectEndpoints({
         }
       },
     }),
-    getChannelsById: builder.query({
-      query: (currentUserId) => `/channels?members_like=${currentUserId}`,
+    getChannelsByMemberId: builder.query({
+      query: (currentUserId) => `/channels/members/${currentUserId}`,
       async onCacheEntryAdded(
         arg,
         { dispatch, updateCachedData, cacheDataLoaded, cacheEntryRemoved }
@@ -91,7 +91,7 @@ const channelsApi = apiSlice.injectEndpoints({
         const channelId = arg.id;
         const patchResult = dispatch(
           channelsApi.util.updateQueryData(
-            "getChannelsById",
+            "getChannelsByMemberId",
             getState()?.user.currentUser?.id,
             (draft) => {
               console.log("draft: ", draft);
@@ -146,7 +146,7 @@ const channelsApi = apiSlice.injectEndpoints({
 
         const patchResult2 = dispatch(
           channelsApi.util.updateQueryData(
-            "getChannelsById",
+            "getChannelsByMemberId",
             getState()?.user.currentUser?.id,
             (draft) => {
               const index = draft?.findIndex((c) => c.id === channelId);
@@ -187,7 +187,7 @@ const channelsApi = apiSlice.injectEndpoints({
         const channelId = arg.id;
         const patchResult = dispatch(
           channelsApi.util.updateQueryData(
-            "getChannelsById",
+            "getChannelsByMemberId",
             getState()?.user.currentUser?.id,
             (draft) => {
               const index = draft?.findIndex((c) => c.id === channelId);
@@ -234,6 +234,69 @@ const channelsApi = apiSlice.injectEndpoints({
         method: "DELETE",
       }),
     }),
+    // : {
+    //   channelId: number;
+    //   userId: number;
+    //   channelName: string;
+    // }
+    muteChannelMember: builder.mutation({
+      query: ({ channelId, userId, channelName }) => ({
+        url: `/channels/${channelId}/members/${userId}/mute`,
+        method: "PATCH",
+      }),
+      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
+        const channelId = arg.channelId;
+        const patchResult = dispatch(
+          channelsApi.util.updateQueryData(
+            "getSingleChannelByName",
+            arg?.channelName,
+            (draft) => {
+              const index = draft?.findIndex((c) => c.id === channelId);
+              if (index !== -1) {
+                draft[index].mutedMembers.push(arg.userId);
+              }
+            }
+          )
+        );
+
+        try {
+          await queryFulfilled;
+        } catch (error) {
+          console.log("error: ", error);
+          patchResult.undo();
+        }
+      },
+    }),
+    unmuteChannelMember: builder.mutation({
+      query: ({ channelId, userId, channelName }) => ({
+        url: `/channels/${channelId}/members/${userId}/unmute`,
+        method: "PATCH",
+      }),
+      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
+        const channelId = arg.channelId;
+        const patchResult = dispatch(
+          channelsApi.util.updateQueryData(
+            "getSingleChannelByName",
+            arg?.channelName,
+            (draft) => {
+              const index = draft?.findIndex((c) => c.id === channelId);
+              if (index !== -1) {
+                draft[index].mutedMembers = draft[index].mutedMembers.filter(
+                  (id) => id !== arg.userId
+                );
+              }
+            }
+          )
+        );
+
+        try {
+          await queryFulfilled;
+        } catch (error) {
+          console.log("error: ", error);
+          patchResult.undo();
+        }
+      },
+    }),
   }),
 });
 
@@ -241,7 +304,7 @@ export const {
   useGetAllChannelsQuery,
   useGetSingleChannelByIdQuery,
   useGetSingleChannelByNameQuery,
-  useGetChannelsByIdQuery,
+  useGetChannelsByMemberIdQuery,
   useCreateChannelMutation,
   useUpdateChannelMutation,
   useEditChannelInfoMutation,
@@ -249,6 +312,8 @@ export const {
   useDeleteChannelMutation,
   useRemoveUserFromChannelMutation,
   useLeaveChannelMutation,
+  useMuteChannelMemberMutation,
+  useUnmuteChannelMemberMutation,
 } = channelsApi;
 
 export default channelsApi;

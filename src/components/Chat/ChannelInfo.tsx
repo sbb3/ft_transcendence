@@ -73,8 +73,10 @@ const ChannelInfo = ({ channel }) => {
           Managed by
         </Text>
         <List spacing={2} flexWrap="wrap" w="full" textAlign={"start"}>
-          {channel?.members?.map((user) => (
-            <ListItem ml={2}>{user}</ListItem>
+          {channel?.admins?.map((admin) => (
+            <ListItem key={admin?.id} ml={2}>
+              {admin?.name}
+            </ListItem>
           ))}
         </List>
       </Stack>

@@ -1,5 +1,5 @@
 import { Box, Icon, IconButton, Input, InputGroup } from "@chakra-ui/react";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { MdSend } from "react-icons/md";
 
@@ -17,8 +17,8 @@ const ChatContentFooter = ({ onSendMessage, isLoading }) => {
   }, []);
   return (
     <Box
-      w={"full"}
       // bg={"gray.400"}
+      w={"full"}
       borderRadius={6}
       mb={2}
       px={2}
@@ -39,7 +39,6 @@ const ChatContentFooter = ({ onSendMessage, isLoading }) => {
           id="message"
           type="text"
           variant="filled"
-          // bg="#F9F9F9"
           bg="pong_bg_secondary"
           w={"full"}
           placeholder="Type a message"

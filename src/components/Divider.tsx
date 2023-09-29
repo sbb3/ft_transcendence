@@ -1,5 +1,4 @@
 import { Box } from "@chakra-ui/react";
-import React from "react";
 
 const Divider = ({ color, mt = 0, mb = 0 }) => {
   if (color === "orange") {

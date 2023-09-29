@@ -46,7 +46,7 @@ const channelMessagesApi = apiSlice.injectEndpoints({
             }
           });
         } catch (error) {
-          console.log("error happened in getMessagesByChannelId : ", error);
+          console.log("error : ", error);
           await cacheEntryRemoved;
           socket.disconnect();
         }
@@ -54,7 +54,7 @@ const channelMessagesApi = apiSlice.injectEndpoints({
     }),
     createChannelMessage: builder.mutation({
       query: (msgData) => ({
-        url: `/channelMessages`,
+        url: `/channels/addmessage`,
         method: "POST",
         body: { ...msgData },
       }),
@@ -76,7 +76,7 @@ const channelMessagesApi = apiSlice.injectEndpoints({
         try {
           await queryFulfilled;
         } catch (error) {
-          console.log("error happened in createChannelMessage : ", error);
+          console.log("error : ", error);
           patchResultMsg.undo();
         }
       },

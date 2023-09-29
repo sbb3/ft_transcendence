@@ -10,19 +10,17 @@ import {
   Stack,
   Text,
   useDisclosure,
+  useToast,
 } from "@chakra-ui/react";
 import * as ScrollArea from "@radix-ui/react-scroll-area";
 import "src/styles/scrollbar.css";
 import { ChevronDownIcon, ChevronRightIcon } from "@chakra-ui/icons";
-import { FiHash, FiInfo, FiPlus, FiSearch } from "react-icons/fi";
-import channels from "src/config/data/channels";
-import ChannelInfoAbout from "src/components/Chat/ChannelInfoAbout";
+import { FiHash, FiPlus, FiSearch } from "react-icons/fi";
 import SearchForChannel from "src/components/Chat/SearchForChannel";
 import CreateChannel from "src/components/Chat/CreateChannel";
-import { useGetChannelsByIdQuery } from "src/features/channels/channelsApi";
+import { useGetChannelsByMemberIdQuery } from "src/features/channels/channelsApi";
 import Loader from "src/components/Utils/Loader";
 import { useSelector } from "react-redux";
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const menuBtnStyle = {
@@ -33,23 +31,32 @@ const menuBtnStyle = {
 
 const Channels = ({}) => {
   const currentUser = useSelector((state: any) => state.user.currentUser);
+  const toast = useToast();
   const navigate = useNavigate();
   const { isOpen: isOpenCreateChannel, onToggle: onToggleCreateChannel } =
     useDisclosure();
-  // const { isOpen: isOpenChannelInfo, onToggle: onToggleChannelInfo } =
-  //   useDisclosure();
   const { isOpen: isOpenSearchChannel, onToggle: onToggleSearchChannel } =
     useDisclosure();
 
   const {
     data: channels,
     isLoading: isLoadingChannels,
-    error: errorChannels,
-  } = useGetChannelsByIdQuery(currentUser?.id, {
+    isFetching: isFetchingChannels,
+    error: errorGettingsChannels,
+  } = useGetChannelsByMemberIdQuery(currentUser?.id, {
     refetchOnMountOrArgChange: true,
   });
 
-  if (isLoadingChannels) return <Loader size="md" />;
+  if (isLoadingChannels || isFetchingChannels) return <Loader size="md" />;
+
+  if (errorGettingsChannels)
+    toast({
+      title: "An error occurred.",
+      description: "Unable to get channels.",
+      status: "error",
+      duration: 9000,
+      isClosable: true,
+    });
 
   return (
     <Stack justify="start" align="start" w="full" gap="0px">
@@ -100,15 +107,13 @@ const Channels = ({}) => {
                   h="250px"
                   borderRadius={"16px"}
                   border={"none"}
-                  // bg={"red"}
-                  // overflowY={"hidden"}
                 >
                   <ScrollArea.Root className="ScrollAreaRoot">
                     <ScrollArea.Viewport className="ScrollAreaViewport">
-                      {channels.length > 0 ? (
+                      {channels?.length > 0 ? (
                         channels?.map((channel, index) => (
                           <MenuItem
-                            key={channel.id}
+                            key={channel?.id}
                             bg={"trasparent"}
                             borderRadius={"6px"}
                             icon={<FiHash />}
@@ -121,10 +126,10 @@ const Channels = ({}) => {
                               md: "15px",
                             }}
                             onClick={() => {
-                              navigate(`/chat/channel/${channel.name}`);
+                              navigate(`/chat/channel/${channel?.name}`);
                             }}
                           >
-                            {channel.name}
+                            {channel?.name}
                           </MenuItem>
                         ))
                       ) : (
@@ -200,14 +205,6 @@ const Channels = ({}) => {
           onToggleSearchChannel={onToggleSearchChannel}
         />
       )}
-      {/* 
-      {isOpenChannelInfo && (
-        <ChannelInfoAbout
-          isOpenChannelInfo={isOpenChannelInfo}
-          onToggleChannelInfo={onToggleChannelInfo}
-          // currentChannel={currentChannel}
-        />
-      )} */}
 
       {isOpenCreateChannel && (
         <CreateChannel

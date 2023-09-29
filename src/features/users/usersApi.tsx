@@ -63,9 +63,9 @@ const usersApi = apiSlice.injectEndpoints({
         }
       },
     }),
-    updateUser: builder.mutation({
+    updateUserSettings: builder.mutation({
       query: ({ id, data }: { id: number; data: any }) => ({
-        url: `users/${id}`,
+        url: `users/${id}/settings`,
         method: "PATCH",
         body: { ...data },
       }),
@@ -86,6 +86,48 @@ const usersApi = apiSlice.injectEndpoints({
         method: "DELETE",
       }),
     }),
+    generateOTP: builder.mutation({
+      query: (userId) => ({
+        url: `otp-generate`,
+        method: "POST",
+        body: { userId },
+      }),
+    }),
+    verifyOTP: builder.mutation({
+      query: ({ userId, userPin }) => ({
+        url: `otp-verify`,
+        method: "POST",
+        body: { userId, userPin },
+      }),
+    }),
+    validateOTP: builder.mutation({
+      query: ({ userId, userPin }) => ({
+        url: `otp-validate`,
+        method: "POST",
+        body: { userId, userPin },
+      }),
+    }),
+    disableOTP: builder.mutation({
+      query: (userId) => ({
+        url: `otp-disable`,
+        method: "POST",
+        body: { userId },
+      }),
+    }),
+    checkProfileCompleted: builder.mutation({
+      query: (userId) => ({
+        url: `profile-check-completed`,
+        method: "POST",
+        body: { userId },
+      }),
+    }),
+    blockUser: builder.mutation({
+      query: ({ id, blockedUserId }) => ({
+        url: `users/${id}/blockuser`,
+        method: "PATCH",
+        body: { blockedUserId },
+      }),
+    }),
   }),
 });
 
@@ -94,10 +136,17 @@ export const {
   useGetUserByIdQuery,
   useGetUserByUsernameQuery,
   useGetUserByEmailQuery,
-  useUpdateUserMutation,
   useGetFriendsQuery,
   useAddFriendMutation,
   useGetCurrentUserQuery,
+  useDeleteFriendMutation,
+  useUpdateUserSettingsMutation,
+  useGenerateOTPMutation,
+  useVerifyOTPMutation,
+  useValidateOTPMutation,
+  useDisableOTPMutation,
+  useCheckProfileCompletedMutation,
+  useBlockUserMutation,
 } = usersApi;
 
 export default usersApi;

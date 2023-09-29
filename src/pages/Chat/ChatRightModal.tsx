@@ -30,8 +30,7 @@ import conversationApi from "src/features/conversations/conversationsApi";
 import { v4 as uuidv4 } from "uuid";
 import { useCreateConversationWithoutMessageMutation } from "src/features/conversations/conversationsApi";
 import { useSelector } from "react-redux";
-import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
+
 import notificationsApi from "src/features/notifications/notificationsApi";
 import store from "src/app/store";
 import { setCurrentUser } from "src/features/users/usersSlice";
@@ -39,6 +38,8 @@ import { useEffect, useReducer } from "react";
 import useSocket from "src/hooks/useSocket";
 // import
 
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
 dayjs.extend(relativeTime);
 
 const iconButtonStyles = [
@@ -70,12 +71,8 @@ const iconButtonStyles = [
   },
 ];
 
-const ChatRightModal = ({
-  currentUser,
-  participantUserId,
-  isOpen,
-  toggleDrawer,
-}) => {
+const ChatRightModal = ({ participantUserId, isOpen, toggleDrawer }) => {
+  const currentUser = useSelector((state: any) => state?.user?.currentUser);
   const prefetchUser = usersApi.usePrefetch("getCurrentUser", {
     force: true,
   });
@@ -130,12 +127,14 @@ const ChatRightModal = ({
     { isLoading: isLoadingCreateConversationWithoutMessage },
   ] = useCreateConversationWithoutMessageMutation();
 
+  const [blockUser] = usersApi.useBlockUserMutation();
+
   if (isLoadingParticipantUser) return <Loader />;
 
   // console.log("participantUser: ", participantUser);
   // console.log("currentUser: ", currentUser);
 
-  const handleOpenConversation = async () => {
+  const handleSendDirectMessage = async () => {
     try {
       const conversations = await triggerGetConversationByMembersEmails([
         currentUser?.email,
@@ -214,9 +213,80 @@ const ChatRightModal = ({
         duration: 2000,
         isClosable: true,
       });
-      // toggleDrawer();
+      toggleDrawer();
     } catch (error) {
       console.log("error accepting friend request: ", error);
+      console.log("error: ", error);
+      toast({
+        title: "Error",
+        description: error?.data?.message || "Error happened",
+        status: "error",
+        duration: 2000,
+        isClosable: true,
+      });
+    }
+  };
+  // TODO: handle the case when the user send a game request to a user who already have a game request from him
+  // TODO: listen for game request accepted socket.io event (oppoent accepted)
+  // TODO: cannot send a game request to a opponent who is already playing a game
+  // TODO: possible to send a direct game request only to a friend, not all
+  // TODO: later, think about other  possible cases
+  const handleSendGameChallengeNotification = async () => {
+    try {
+      const notification = {
+        id: uuidv4(),
+        type: "gameRequest",
+        sender: {
+          id: currentUser?.id,
+          email: currentUser?.email,
+          name: currentUser?.name,
+        },
+        receiver: {
+          id: participantUser?.id,
+          email: participantUser?.email,
+          name: participantUser?.name,
+        },
+        createdAt: dayjs().valueOf(),
+      };
+      store.dispatch(
+        await notificationsApi.endpoints.sendNotification.initiate(notification)
+      );
+      toast({
+        title: "Game request sent",
+        description: "Game request sent successfully",
+        status: "success",
+        duration: 2000,
+        isClosable: true,
+      });
+      toggleDrawer();
+    } catch (error) {
+      console.log("error: ", error);
+      toast({
+        title: "Error",
+        description: error?.data?.message || "Error happened",
+        status: "error",
+        duration: 2000,
+        isClosable: true,
+      });
+    }
+  };
+
+  const handleBlockUser = async () => {
+    try {
+      await blockUser({
+        id: currentUser?.id,
+        blockedUserId: participantUser?.id,
+      }).unwrap();
+
+      toast({
+        title: "User blocked",
+        description: "User blocked successfully",
+        status: "success",
+        duration: 2000,
+        isClosable: true,
+      });
+      toggleDrawer();
+    } catch (error) {
       console.log("error: ", error);
       toast({
         title: "Error",
@@ -353,7 +423,7 @@ const ChatRightModal = ({
             icon={<FiMessageSquare />}
             // icon={icon}
             _hover={{ bg: "white", color: "pong_cl_primary" }}
-            onClick={handleOpenConversation}
+            onClick={handleSendDirectMessage}
             isLoading={
               isLoadingGetConversationByMembersEmails ||
               isLoadingCreateConversationWithoutMessage ||
@@ -401,10 +471,7 @@ const ChatRightModal = ({
             aria-label="Send game request"
             icon={<IoGameControllerOutline />}
             _hover={{ bg: "white", color: "pong_cl_primary" }}
-            onClick={() => {
-              // TODO: send game request
-              toggleDrawer();
-            }}
+            onClick={handleSendGameChallengeNotification}
           />
           <IconButton
             size="sm"
@@ -429,10 +496,7 @@ const ChatRightModal = ({
             aria-label="Block"
             icon={<MdBlockFlipped />}
             _hover={{ bg: "white", color: "pong_cl_primary" }}
-            onClick={() => {
-              // TODO: block
-              toggleDrawer();
-            }}
+            onClick={handleBlockUser}
           />
           {/* // ))} */}
         </Flex>

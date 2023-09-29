@@ -27,7 +27,7 @@ const NotFoundPage = () => {
         align="center"
         w="full"
         h="full"
-        bg="white"
+        // bg="white"
       >
         {/* <Link
 				pos="relative"

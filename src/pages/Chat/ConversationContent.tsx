@@ -1,33 +1,10 @@
-import {
-  Box,
-  Button,
-  Flex,
-  Icon,
-  IconButton,
-  Image,
-  Input,
-  InputGroup,
-  InputRightElement,
-  Stack,
-  Text,
-  Textarea,
-  Toast,
-  useDisclosure,
-  useToast,
-} from "@chakra-ui/react";
-import React, { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import { MdSend } from "react-icons/md";
+import { Flex, Stack, Text, useDisclosure, useToast } from "@chakra-ui/react";
+import { useEffect, useState } from "react";
 import ChatContentFooter from "./ChatContentFooter";
 import ChatContentHeader from "./ChatContentHeader";
 import ChatContentBody from "./ChatContentBody";
-import { useImmer } from "use-immer";
-
-import msgs from "src/config/data/messages.js";
-import { faker } from "@faker-js/faker";
-import ChatRightModal from "./ChatRightModal";
 import { useGetMessagesByConversationIdQuery } from "src/features/messages/messagesApi";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Loader from "src/components/Utils/Loader";
 import { useAddMessageMutation } from "src/features/messages/messagesApi";
 import { useGetConversationQuery } from "src/features/conversations/conversationsApi";
@@ -64,7 +41,6 @@ const ConversationContent = () => {
     error: errorGettingConversation,
   } = useGetConversationQuery(id, {
     refetchOnMountOrArgChange: true,
-    subscribe: true,
   });
 
   const {
@@ -75,15 +51,14 @@ const ConversationContent = () => {
     skip,
   });
 
-  const [addMessage, { isLoading: isAdding, error: error2 }] =
-    useAddMessageMutation();
+  const [addMessage, { isLoading: isAdding }] = useAddMessageMutation();
 
   const {
     data: messages,
     isLoading: isLoadingMessages,
     isError: isErrorGettingMessages,
     error: errorGettingMessages,
-  } = useGetMessagesByConversationIdQuery(id);
+  } = useGetMessagesByConversationIdQuery(id); // add page = 1, limit = 10
 
   useEffect(() => {
     if (conversations?.length > 0) {
@@ -136,7 +111,6 @@ const ConversationContent = () => {
   const onSendMessage = async (data: any) => {
     const { message } = data;
     const receiver = receiversData[0] as IChatReceiver;
-    // console.log("id: ", id);
     try {
       const msgData = {
         id: uuidv4(),
@@ -172,9 +146,6 @@ const ConversationContent = () => {
     }
   };
 
-  // if (isLoadingMessages || isLoadingConversation || isLoadinGetUserByEmail)
-  //   return <Loader />;
-
   if (errorGettingConversation) {
     toast({
       title: "Conversation not found.",
@@ -183,13 +154,9 @@ const ConversationContent = () => {
       duration: 2000,
       isClosable: true,
     });
-    // return null;
-    // navigate("/chat");
   }
   return (
     <Flex
-      //   direction="row"
-      // bg={"pong_bg_secondary"}
       pos="relative"
       alignSelf={"stretch"}
       justify="center"
@@ -206,9 +173,6 @@ const ConversationContent = () => {
       //   gap={6}
     >
       <Stack
-        // pos="relative"
-        // ml={2}
-        // bg={"gray"}
         justify="start"
         align="center"
         w={"full"}

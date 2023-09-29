@@ -3,190 +3,16 @@ import { GiGamepadCross } from "react-icons/gi";
 import * as ScrollArea from "@radix-ui/react-scroll-area";
 import "src/styles/scrollbar.css";
 import { useNavigate } from "react-router-dom";
+import { useGetUserRecentGamesQuery } from "src/features/game/gameApi";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+dayjs.extend(relativeTime);
 
-// TODO: fetch leaderboard data using the username as as slug
-
-const personData = [
-  {
-    name: "Anas Douib",
-    opponent: "Dan Abramov",
-    image: "https://anasdouib.me/images/picture.webp",
-    opponentImage: "https://bit.ly/dan-abramov",
-    date: "04.09.2023 12:00",
-    score: "2 - 0",
-    status: "FINISHED",
-    winStatus: "win",
-  },
-  {
-    name: "Anas Douib",
-    opponent: "Dan Abramov",
-    image: "https://anasdouib.me/images/picture.webp",
-    opponentImage: "https://bit.ly/dan-abramov",
-    date: "04.09.2023 12:00",
-    score: "0 - 1",
-    status: "FINISHED",
-    winStatus: "lost",
-  },
-  {
-    name: "Anas Douib",
-    opponent: "Dan Abramov",
-    image: "https://anasdouib.me/images/picture.webp",
-    opponentImage: "https://bit.ly/dan-abramov",
-    date: "04.09.2023 12:00",
-    score: "1 - 1",
-    status: "FINISHED",
-    winStatus: "draw",
-  },
-  {
-    name: "Anas Douib",
-    opponent: "Dan Abramov",
-    image: "https://anasdouib.me/images/picture.webp",
-    opponentImage: "https://bit.ly/dan-abramov",
-    date: "04.09.2023 12:00",
-    score: "1 - 1",
-    status: "FINISHED",
-    winStatus: "win",
-  },
-  {
-    name: "Anas Douib",
-    opponent: "Dan Abramov",
-    image: "https://anasdouib.me/images/picture.webp",
-    opponentImage: "https://bit.ly/dan-abramov",
-    date: "04.09.2023 12:00",
-    score: "1 - 1",
-    status: "FINISHED",
-    winStatus: "draw",
-  },
-  {
-    name: "Anas Douib",
-    opponent: "Dan Abramov",
-    image: "https://anasdouib.me/images/picture.webp",
-    opponentImage: "https://bit.ly/dan-abramov",
-    date: "04.09.2023 12:00",
-    score: "1 - 1",
-    status: "FINISHED",
-    winStatus: "draw",
-  },
-  {
-    name: "Anas Douib",
-    opponent: "Dan Abramov",
-    image: "https://anasdouib.me/images/picture.webp",
-    opponentImage: "https://bit.ly/dan-abramov",
-    date: "04.09.2023 12:00",
-    score: "1 - 1",
-    status: "FINISHED",
-    winStatus: "draw",
-  },
-  {
-    name: "Anas Douib",
-    opponent: "Dan Abramov",
-    image: "https://anasdouib.me/images/picture.webp",
-    opponentImage: "https://bit.ly/dan-abramov",
-    date: "04.09.2023 12:00",
-    score: "1 - 1",
-    status: "FINISHED",
-    winStatus: "draw",
-  },
-  {
-    name: "Anas Douib",
-    opponent: "Dan Abramov",
-    image: "https://anasdouib.me/images/picture.webp",
-    opponentImage: "https://bit.ly/dan-abramov",
-    date: "04.09.2023 12:00",
-    score: "1 - 1",
-    status: "FINISHED",
-    winStatus: "draw",
-  },
-  {
-    name: "Anas Douib",
-    opponent: "Dan Abramov",
-    image: "https://anasdouib.me/images/picture.webp",
-    opponentImage: "https://bit.ly/dan-abramov",
-    date: "04.09.2023 12:00",
-    score: "1 - 1",
-    status: "FINISHED",
-    winStatus: "draw",
-  },
-];
-
-const Card = ({ person }) => {
-  const {
-    name,
-    opponent,
-    image,
-    opponentImage,
-    date,
-    score,
-    status,
-    winStatus,
-  } = person;
-
+const RecentGames = ({ user }) => {
+  // const { data: recentGames, isLoading, isFetching, isError, error } = useGetUserRecentGamesQuery(currentUser?.id);
+  // const { recentGames } = user;
   const navigate = useNavigate();
-  return (
-    <Flex
-      direction="row"
-      justify="center"
-      align="start"
-      gap={"18px"}
-      borderColor={
-        winStatus === "win"
-          ? "green.400"
-          : winStatus === "lost"
-          ? "red.400"
-          : "yellow.400"
-      }
-      borderWidth="1px"
-      borderRadius="15px"
-      borderStyle="dashed"
-      p={2}
-    >
-      <Stack direction="column" spacing={2} align="center">
-        <Avatar
-          size="lg"
-          name={name}
-          src={image}
-          borderColor={"green.400"}
-          borderWidth="2px"
-          borderRadius="15px"
-        />
-        <Text fontSize="12px" fontWeight="medium" color="whiteAlpha.800">
-          {name}
-        </Text>
-      </Stack>
-      <Stack direction="column" spacing={0.5} align="center">
-        <Text fontSize="10px" fontWeight="normal" color="gray.400">
-          {date}
-        </Text>
-        <Text fontSize="20px" fontWeight="semibold" color="whiteAlpha.900">
-          {score}
-        </Text>
-        <Text fontSize="13px" fontWeight="semibold" color="pong_cl_primary">
-          {status}
-        </Text>
-      </Stack>
-      <Stack
-        direction="column"
-        spacing={2}
-        align="center"
-        onClick={() => navigate("/profile/username")} // TODO: navigate to the user profile
-      >
-        <Avatar
-          size="lg"
-          name={opponent}
-          src={opponentImage}
-          borderColor={"green.400"}
-          borderWidth="2px"
-          borderRadius="15px"
-        />
-        <Text fontSize="12px" fontWeight="medium" color="whiteAlpha.800">
-          {opponent}
-        </Text>
-      </Stack>
-    </Flex>
-  );
-};
 
-const RecentGames = () => {
   return (
     <Stack
       direction={{ base: "column" }}
@@ -213,15 +39,7 @@ const RecentGames = () => {
           Recent Games
         </Text>
       </Flex>
-      <Box
-        w="100%"
-        h="100%"
-        borderRadius="xl"
-        p={1}
-        mb={2}
-        overflow="hidden"
-        // outline="2px solid red"
-      >
+      <Box w="100%" h="100%" borderRadius="xl" p={1} mb={2} overflow="hidden">
         <ScrollArea.Root className="ScrollAreaRoot">
           <ScrollArea.Viewport className="ScrollAreaViewport">
             <Flex
@@ -235,11 +53,102 @@ const RecentGames = () => {
               wrap="wrap"
               overflow="hidden"
               mr={2}
-              // outline="2px solid white"
             >
-              {personData.map((person, i) => (
-                <Card key={i} person={person} />
-              ))}
+              {user?.recentGames?.length > 0 ? (
+                user?.recentGames
+                  .slice()
+                  ?.sort((a, b) =>
+                    dayjs(b?.createdAt).isAfter(dayjs(a?.createdAt))
+                  )
+                  ?.map(({ id, player, opponent, date, status, winStatus }) => (
+                    <>
+                      <Flex
+                        key={id}
+                        direction="row"
+                        justify="center"
+                        align="start"
+                        gap={"18px"}
+                        borderColor={
+                          winStatus === "win"
+                            ? "green.400"
+                            : winStatus === "lost"
+                            ? "red.400"
+                            : "yellow.400"
+                        }
+                        borderWidth="1px"
+                        borderRadius="15px"
+                        // borderStyle="dashed"
+                        p={2}
+                      >
+                        <Stack direction="column" spacing={2} align="center">
+                          <Avatar
+                            size="lg"
+                            name={player?.name}
+                            src={player?.avatar}
+                            borderRadius="15px"
+                          />
+                          <Text
+                            fontSize="12px"
+                            fontWeight="medium"
+                            color="whiteAlpha.800"
+                          >
+                            {player?.name}
+                          </Text>
+                        </Stack>
+                        <Stack direction="column" spacing={0.5} align="center">
+                          <Text
+                            fontSize="10px"
+                            fontWeight="normal"
+                            color="gray.400"
+                          >
+                            {dayjs(date).fromNow()}
+                          </Text>
+                          <Text
+                            fontSize="20px"
+                            fontWeight="semibold"
+                            color="whiteAlpha.900"
+                          >
+                            {`${player?.score} - ${opponent?.score}`}
+                          </Text>
+                          <Text
+                            fontSize="13px"
+                            fontWeight="semibold"
+                            color="pong_cl_primary"
+                          >
+                            {status}
+                          </Text>
+                        </Stack>
+                        <Stack direction="column" spacing={2} align="center">
+                          <Avatar
+                            size="lg"
+                            name={opponent?.name}
+                            src={opponent?.avatar}
+                            borderRadius="15px"
+                            cursor={"pointer"}
+                            onClick={() =>
+                              navigate(`/profile/${opponent?.username}`)
+                            }
+                          />
+                          <Text
+                            fontSize="12px"
+                            fontWeight="medium"
+                            color="whiteAlpha.800"
+                          >
+                            {opponent?.name}
+                          </Text>
+                        </Stack>
+                      </Flex>
+                    </>
+                  ))
+              ) : (
+                <Text
+                  fontSize="12px"
+                  fontWeight="medium"
+                  color="whiteAlpha.800"
+                >
+                  No games played
+                </Text>
+              )}
             </Flex>
           </ScrollArea.Viewport>
           <ScrollArea.Scrollbar

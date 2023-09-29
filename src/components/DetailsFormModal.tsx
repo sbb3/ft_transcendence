@@ -10,27 +10,19 @@ import {
   ModalBody,
   ModalCloseButton,
   ModalContent,
-  ModalFooter,
   ModalHeader,
   ModalOverlay,
   Stack,
-  VStack,
-  useDisclosure,
 } from "@chakra-ui/react";
-import { useForm, UseFormRegisterReturn } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useToast } from "@chakra-ui/react";
-import { ReactNode, useEffect, useRef } from "react";
-
+import { useRef } from "react";
 import { Icon, InputGroup } from "@chakra-ui/react";
 import { FiFile } from "react-icons/fi";
-import { useNavigate } from "react-router-dom";
-
-interface FormData {
-  username: string;
-  avatar: FileList;
-}
+import usersApi from "src/features/users/usersApi";
+import { useSelector } from "react-redux";
 
 const validationSchema = yup.object().shape({
   username: yup
@@ -42,11 +34,12 @@ const validationSchema = yup.object().shape({
   avatar: yup
     .mixed()
     .required("Avatar is required")
-    // .test("fileRequired", "File is required", (value) => {
-    //   return value && value[0]?.length > 0;
-    // })
-    .test("fileSize", "Come on dude! Max file size is 5mb!", (value) => {
-      return value && value[0]?.size <= 2000000;
+    .test("fileRequired", "File is required", (files) => {
+      console.log("files: ", files);
+      return files && files?.length > 0;
+    })
+    .test("fileSize", "Max file size is 3mb!", (files) => {
+      return files && files[0]?.size <= 3000000; // 3mb
     })
     .test("fileFormat", "Only jpg, jpeg, png are accepted", (value) => {
       return (
@@ -58,55 +51,66 @@ const validationSchema = yup.object().shape({
     }),
 });
 
-const DetailsFormModal = ({ isOpen, onClose, onOpen }: any) => {
-  const navigate = useNavigate();
+const ProfileDetailsFormModal = ({ isOpen, onToggle }: any) => {
+  const currentUser = useSelector((state: any) => state?.user?.currentUser);
   const toast = useToast();
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
     reset,
   } = useForm({
     resolver: yupResolver(validationSchema),
   });
+  const [triggerGetCurrentUser, { isLoading: isLoadingGetCurrentUser }] =
+    usersApi.useLazyGetCurrentUserQuery();
 
-  useEffect(() => {
-    onOpen();
-  }, [onOpen]);
+  const [checkProfileCompleted] = usersApi.useCheckProfileCompletedMutation();
 
-  const onSubmit = (data: any) => {
-    console.log("data: ", data);
-    toast({
-      title: "Profile updated.",
-      description: "We've created your account for you.",
-      status: "success",
-      duration: 2000,
-      isClosable: true,
-    });
-    reset({
-      username: "",
-      avatar: undefined,
-    });
-    // TODO: set user profile_complete to true
-    onClose();
-    navigate("/");
+  const [updateUserSettings] = usersApi.useUpdateUserSettingsMutation();
+
+  const onUpdateProfileDetails = async (data: any) => {
+    console.log("onUpdateProfileDetails data: ", data);
+    const formData = new FormData();
+    formData.append("username", data.username);
+    formData.append("avatar", data.avatar[0]);
+    try {
+      // await updateUserSettings({
+      //   id: currentUser?.id,
+      //   data: formData,
+      // }).unwrap();
+      await checkProfileCompleted(currentUser?.id).unwrap();
+      await triggerGetCurrentUser(currentUser?.id);
+      // onToggle();
+      toast({
+        title: "Profile updated.",
+        description: "Profile updated successfully.",
+        status: "success",
+        duration: 2000,
+        isClosable: true,
+      });
+      reset({
+        username: "",
+        avatar: undefined,
+      });
+    } catch (error) {
+      console.log("error: ", error);
+      toast({
+        title: "Error.",
+        description: error?.data?.message || "Something went wrong.",
+        status: "error",
+        duration: 2000,
+        isClosable: true,
+      });
+    }
   };
-
-  // TODO: add validation with yup
-  // TODO: add loading state
-  // TODO: add error state
-  // TODO: add success state
-  // TODO: add toast notification and remove toast from onSubmit
-  // TODO: upload to cloudinary and save url to db
-  // TODO: change color scheme
-
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   const { ref, ...rest } = register("avatar");
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
-      <ModalOverlay />{" "}
+    <Modal isOpen={isOpen} onClose={onToggle}>
+      <ModalOverlay onClick={onToggle} />
       <ModalContent
         // mt={4}
         border="1px solid rgba(251, 102, 19, 0.3)"
@@ -119,7 +123,11 @@ const DetailsFormModal = ({ isOpen, onClose, onOpen }: any) => {
         minW={{ base: "350px", sm: "450px", md: "700px" }}
       >
         <ModalHeader>Complete your profile</ModalHeader>
-        <ModalCloseButton color="pong_cl_primary" bg={"white"} />
+        <ModalCloseButton
+          color="pong_cl_primary"
+          bg={"white"}
+          onClick={onToggle}
+        />
         <ModalBody
           // p={2}
           borderRadius={40}
@@ -147,7 +155,7 @@ const DetailsFormModal = ({ isOpen, onClose, onOpen }: any) => {
                 align="start"
                 justify="start"
               >
-                <FormControl isInvalid={!!errors.username} mt={6} isRequired>
+                <FormControl isInvalid={!!errors.username} mt={6}>
                   <FormLabel htmlFor="username" fontSize="lg">
                     Username
                   </FormLabel>
@@ -155,13 +163,13 @@ const DetailsFormModal = ({ isOpen, onClose, onOpen }: any) => {
                     id="username"
                     type="text"
                     placeholder="username"
-                    {...register("username")}
+                    {...(register("username") as any)}
                   />
                   <FormErrorMessage>
                     {errors.username && errors.username.message}
                   </FormErrorMessage>
                 </FormControl>
-                <FormControl isInvalid={!!errors.avatar} isRequired>
+                <FormControl isInvalid={!!errors.avatar}>
                   <FormLabel htmlFor="avatar" fontSize="lg">
                     Avatar
                   </FormLabel>
@@ -186,15 +194,16 @@ const DetailsFormModal = ({ isOpen, onClose, onOpen }: any) => {
                 </FormControl>
               </Stack>
               <Button
+                w="full"
+                letterSpacing={2}
                 colorScheme="orange"
                 mr={3}
-                // isLoading={isLoading}
-                // isLoading={isFetching}
-                // isDisabled={isSubmitting}
+                isLoading={isLoadingGetCurrentUser}
+                isDisabled={isLoadingGetCurrentUser}
                 cursor="pointer"
-                onClick={handleSubmit(onSubmit)}
+                onClick={handleSubmit(onUpdateProfileDetails)}
               >
-                Continue
+                Save
               </Button>
             </Stack>
             <Box>
@@ -212,4 +221,4 @@ const DetailsFormModal = ({ isOpen, onClose, onOpen }: any) => {
   );
 };
 
-export default DetailsFormModal;
+export default ProfileDetailsFormModal;

@@ -96,8 +96,22 @@ const CreateChannel = ({
       await createChannel({
         id: uuidv4(),
         ...data,
-        members: [currentUser?.id],
-        admins: [currentUser?.id],
+        mutedMembers: [],
+        bannedMembers: [],
+        members: [
+          {
+            id: currentUser?.id,
+            name: currentUser?.name,
+            avatar: currentUser?.avatar,
+          },
+        ],
+        admins: [
+          {
+            id: currentUser?.id,
+            name: currentUser?.name,
+            avatar: currentUser?.avatar,
+          },
+        ],
         owner: {
           id: currentUser?.id,
           name: currentUser?.name,

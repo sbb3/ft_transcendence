@@ -15,9 +15,6 @@ const Chat = () => {
       justify={{ base: "center", md: "start" }}
       align="center"
       borderRadius={26}
-      // bg="orange.700"
-      // p={2}
-      // gap={2}
     >
       <ChatLeftSidebar />
       <Outlet />

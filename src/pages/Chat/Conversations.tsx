@@ -29,6 +29,7 @@ import DeleteConversationAlert from "./DeleteConversationAlert";
 import AddDirectMessage from "src/components/Chat/AddDirectMessage";
 import Loader from "src/components/Utils/Loader";
 dayjs.extend(relativeTime);
+``;
 
 const Conversations = ({}) => {
   const { isOpen: isOpenDM, onToggle: onToggleDM } = useDisclosure();
@@ -41,12 +42,16 @@ const Conversations = ({}) => {
 
   const currentUser = useSelector((state: any) => state.user.currentUser);
   const navigate = useNavigate();
-  const { data: conversations, isLoading: isLoadingConversations } =
-    useGetConversationsQuery(currentUser?.email, {
-      refetchOnMountOrArgChange: true,
-    });
+  const {
+    data: conversations,
+    isLoading: isLoadingConversations,
+    isFetching: isFetchingConversations,
+  } = useGetConversationsQuery(currentUser?.email, {
+    refetchOnMountOrArgChange: true,
+  });
 
-  if (isLoadingConversations) return <Loader size="md" />;
+  if (isLoadingConversations || isFetchingConversations)
+    return <Loader size="md" />;
 
   return (
     <>

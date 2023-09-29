@@ -69,9 +69,6 @@ const ChatContentHeader = ({
             <Text fontSize="18px" fontWeight="semibold" color="whiteAlpha.900">
               {receiverUser?.name}
             </Text>
-            {/* <Text fontSize="14px" fontWeight="medium" color="green.300">
-              {conversation?.status}
-            </Text> */}
           </Stack>
         </Flex>
       ) : (
@@ -82,15 +79,12 @@ const ChatContentHeader = ({
           spacing={1}
           align="center"
           justify={"start"}
-          // bg={"rgba(51, 51, 51, 0.9)"}
-          // bg="red.400"
         >
           <Flex
             w="full"
             direction="row"
             align="center"
             justify={"space-between"}
-            // ml={4}
           >
             <Flex
               w="full"
@@ -98,7 +92,6 @@ const ChatContentHeader = ({
               align="center"
               justify={"start"}
               gap={3}
-              // bg="green.400"
             >
               <Icon as={FaHashtag} boxSize="20px" color="whiteAlpha.900" />
               <Text

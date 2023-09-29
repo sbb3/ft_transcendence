@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  Divider,
   Flex,
   Icon,
   IconButton,
@@ -26,6 +27,7 @@ import store from "src/app/store";
 import { useDeleteNotificationMutation } from "src/features/notifications/notificationsApi";
 import { CloseIcon } from "@chakra-ui/icons";
 import usersApi, { useAddFriendMutation } from "src/features/users/usersApi";
+import { useAcceptGameChallengeMutation } from "src/features/game/gameApi";
 import { useDispatch, useSelector } from "react-redux";
 import {
   setCurrentUser,
@@ -55,6 +57,9 @@ function Notifications() {
 
   const [addFriend, { isLoading: isAddingFriend }] = useAddFriendMutation();
 
+  const [acceptGameChallenge, { isLoading: isAcceptingGameChallenge }] =
+    useAcceptGameChallengeMutation();
+
   const [triggerGetCurrentUser, { isLoading: isLoadingGetCurrentUser }] =
     usersApi.useLazyGetCurrentUserQuery();
 
@@ -74,6 +79,7 @@ function Notifications() {
     }
   };
   // TODO: check IN THE BACK if the user is already a friend,
+  // TODO: handle other checks and cases
   const handleAcceptFriendRequest = async ({ id, sender }) => {
     if (currentUser?.friends.includes(sender?.id)) {
       toast({
@@ -118,7 +124,35 @@ function Notifications() {
       });
     }
   };
-  const handleRejectFriendRequest = async ({
+
+  const handleAcceptGameChallenge = async ({ id, sender }) => {
+    try {
+      await deleteNotification(id).unwrap();
+      await acceptGameChallenge({
+        challengedUserId: currentUser?.id,
+        challengerUserId: sender?.id,
+      }).unwrap();
+      refetch();
+      toast({
+        title: "Done",
+        description: "Game challenge accepted",
+        status: "info",
+        duration: 2000,
+        isClosable: true,
+      });
+    } catch (error) {
+      console.log("error accepting game challenge: ", error);
+      toast({
+        title: "Error",
+        description: error?.data?.message || "Error accepting game challenge",
+        status: "error",
+        duration: 2000,
+        isClosable: true,
+      });
+    }
+  };
+
+  const handleRejectNotification = async ({
     notificationId,
   }: {
     notificationId: string;
@@ -126,18 +160,18 @@ function Notifications() {
     try {
       await deleteNotification(notificationId).unwrap();
       refetch();
-      toast({
-        title: "Success",
-        description: "Friend request rejected",
-        status: "info",
-        duration: 2000,
-        isClosable: true,
-      });
+      // toast({
+      //   title: "Info",
+      //   description: "Request rejected",
+      //   status: "info",
+      //   duration: 2000,
+      //   isClosable: true,
+      // });
     } catch (error) {
-      console.log("error rejecting friend request: ", error);
+      console.log("Error rejecting request: ", error);
       toast({
         title: "Error",
-        description: "Error rejecting friend request",
+        description: "Error rejecting request",
         status: "error",
         duration: 2000,
         isClosable: true,
@@ -216,29 +250,56 @@ function Notifications() {
                     as={Flex}
                     justify={"space-between"}
                     align={"center"}
-                    gap={4}
+                    gap={2}
                     minH="40px"
-                    bg={"transparent"}
+                    // bg={"transparent"}
+                    bg={"pong_bg.100"}
                     cursor={"pointer"}
-                    onClick={() => {
-                      handleMessageNotification({
-                        notificationId: notification?.id,
-                        conversationId: notification?.conversationId,
-                      });
-                    }}
+                    borderBottom={"1px solid rgba(255, 255, 255, 0.1)"}
                   >
-                    <span>
-                      New message from {""}
-                      {notification?.sender?.name}
-                    </span>
-                    <Text
-                      as={"span"}
-                      color={"whiteAlpha.800"}
-                      fontSize={"0.7rem"}
-                      ml={"auto"}
+                    <Stack
+                      direction={"column"}
+                      align={"start"}
+                      justify={"center"}
+                      spacing={1}
+                      onClick={() => {
+                        handleMessageNotification({
+                          notificationId: notification?.id,
+                          conversationId: notification?.conversationId,
+                        });
+                      }}
                     >
-                      {dayjs(notification?.createdAt).fromNow()}
-                    </Text>
+                      <span>
+                        New message from {""}
+                        {notification?.sender?.name}
+                      </span>
+                      <Text
+                        as={"span"}
+                        color={"whiteAlpha.800"}
+                        fontSize={"0.7rem"}
+                      >
+                        {dayjs(notification?.createdAt).fromNow()}
+                      </Text>
+                    </Stack>
+                    <IconButton
+                      aria-label={"Ignore friend request"}
+                      bg={"transparent"}
+                      fontSize={"2rem"}
+                      size={"md"}
+                      color={"white"}
+                      icon={<Icon boxSize={"14px"} as={CloseIcon} />}
+                      isLoading={isDeleting}
+                      isDisabled={isDeleting}
+                      _hover={{
+                        bg: "transparent",
+                        color: "white",
+                      }}
+                      onClick={() => {
+                        handleRejectNotification({
+                          notificationId: notification?.id,
+                        });
+                      }}
+                    />
                   </MenuItem>
                 ) : notification?.type === "friendRequest" &&
                   notification?.receiver?.id === currentUser?.id ? (
@@ -249,8 +310,10 @@ function Notifications() {
                     align={"center"}
                     gap={4}
                     minH="40px"
-                    bg={"transparent"}
+                    // bg={"transparent"}
+                    bg={"pong_bg.100"}
                     cursor={"pointer"}
+                    borderBottom={"1px solid rgba(255, 255, 255, 0.1)"}
                   >
                     <Stack
                       direction={"column"}
@@ -291,7 +354,7 @@ function Notifications() {
                           color: "red.600",
                         }}
                         onClick={() => {
-                          handleRejectFriendRequest({
+                          handleRejectNotification({
                             notificationId: notification?.id,
                           });
                         }}
@@ -332,24 +395,93 @@ function Notifications() {
                     align={"center"}
                     gap={4}
                     minH="40px"
-                    bg={"transparent"}
+                    bg={"pong_bg.100"}
+                    borderRadius={5}
                     cursor={"pointer"}
-                    onClick={() => {
-                      // TODO: delete notification from the list and db
-                    }}
+                    borderBottom={"1px solid rgba(255, 255, 255, 0.1)"}
                   >
-                    <span>
-                      New friend request from {""}
-                      {notification?.sender?.name}
-                    </span>
-                    <Text
-                      as={"span"}
-                      color={"gray.500"}
-                      fontSize={"0.7rem"}
-                      ml={"auto"}
+                    <Stack
+                      direction={"column"}
+                      align={"start"}
+                      justify={"center"}
+                      spacing={1}
                     >
-                      {dayjs(notification?.createdAt).fromNow()}
-                    </Text>
+                      <span>
+                        <span
+                          style={{
+                            color: "#FF8707",
+                            fontWeight: "semibold",
+                            textTransform: "uppercase",
+                            letterSpacing: "1px",
+                            paddingRight: "2px",
+                          }}
+                        >
+                          Game
+                        </span>
+                        challenge from {""}
+                        <span
+                          style={{
+                            color: "#FF8707",
+                            fontWeight: "semibold",
+                            textTransform: "uppercase",
+                            letterSpacing: "1px",
+                          }}
+                        >
+                          {notification?.sender?.name}
+                        </span>
+                      </span>
+                      <Text
+                        as={"span"}
+                        color={"whiteAlpha.800"}
+                        fontSize={"0.7rem"}
+                      >
+                        {dayjs(notification?.createdAt).fromNow()}
+                      </Text>
+                    </Stack>
+                    <Flex
+                      direction={"row"}
+                      align={"center"}
+                      justify={"center"}
+                      gap={1.5}
+                    >
+                      <IconButton
+                        aria-label={"Reject game challenge"}
+                        isRound
+                        bg={"red.400"}
+                        fontSize={"2rem"}
+                        size={"md"}
+                        color={"white"}
+                        icon={<Icon boxSize={"14px"} as={CloseIcon} />}
+                        isLoading={isDeleting}
+                        isDisabled={isDeleting}
+                        _hover={{
+                          bg: "white",
+                          color: "red.600",
+                        }}
+                        onClick={() => {
+                          handleRejectNotification({
+                            notificationId: notification?.id,
+                          });
+                        }}
+                      />
+                      <IconButton
+                        aria-label={"Accept friend request"}
+                        isRound
+                        bg={"green.500"}
+                        size={"md"}
+                        color={"white"}
+                        icon={<Icon as={FaCheck} />}
+                        isLoading={isDeleting || isLoadingGetCurrentUser}
+                        isDisabled={isDeleting || isLoadingGetCurrentUser}
+                        _hover={{
+                          bg: "white",
+                          color: "green.500",
+                        }}
+                        onClick={() => {
+                          handleAcceptGameChallenge(notification);
+                        }}
+                      />
+                    </Flex>
                   </MenuItem>
                 ) : null
               )

@@ -30,29 +30,19 @@ import {
 } from "@choc-ui/chakra-autocomplete";
 import { useEffect, useState } from "react";
 import { GiThreeFriends } from "react-icons/gi";
-import { Link as RouterLink } from "react-router-dom";
-import { FiMessageSquare } from "react-icons/fi";
 import { HiUserRemove } from "react-icons/hi";
 import { MdBlockFlipped } from "react-icons/md";
-import { IoGameControllerOutline } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 import * as ScrollArea from "@radix-ui/react-scroll-area";
 import "src/styles/scrollbar.css";
-import { faker } from "@faker-js/faker";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useSelector } from "react-redux";
-import styled from "@emotion/styled";
 import usersApi from "src/features/users/usersApi";
-
-// TODO: add member to channel only if the user is an admin or owner
-const members = [...Array(30)].map(() => ({
-  id: faker.string.uuid(),
-  name: faker.internet.userName(),
-  avatar: faker.image.avatar(),
-}));
-
+import { RiUserVoiceFill } from "react-icons/ri";
+import { BiMicrophone, BiSolidMicrophoneOff } from "react-icons/bi";
+import channelsApi from "src/features/channels/channelsApi";
 const ROLES = ["member", "admin", "owner"];
 
 const validationSchema = yup.object().shape({
@@ -62,7 +52,6 @@ const validationSchema = yup.object().shape({
 
 const Members = ({ channel }) => {
   const currentUser = useSelector((state: any) => state.user.currentUser);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [query, setQuery] = useState<string>("");
   const navigate = useNavigate();
   const toast = useToast();
@@ -78,7 +67,10 @@ const Members = ({ channel }) => {
   });
 
   const [trigger, { isLoading: isLoadinGetUserByEmail }] =
-    usersApi.endpoints.getUserByEmail.useLazyQuery();
+    usersApi.useLazyGetUserByEmailQuery();
+
+  const [muteChannelMember] = channelsApi.useMuteChannelMemberMutation();
+  const [unmuteChannelMember] = channelsApi.useUnmuteChannelMemberMutation();
 
   const onAddOrEditUser = async (data: any) => {
     const { username, permissions } = data; // TODO: username or email address
@@ -130,6 +122,82 @@ const Members = ({ channel }) => {
     });
   };
 
+  // TODO:
+  const handleKickMember = async () => {
+    try {
+      toast({
+        title: "Member Kicked.",
+        description: "Member kicked from the channel.",
+        status: "success",
+        duration: 2000,
+        isClosable: true,
+      });
+    } catch (error) {
+      console.log("error: ", error);
+      toast({
+        title: "Member not added.",
+        description: error.message,
+        status: "error",
+        duration: 2000,
+        isClosable: true,
+      });
+    }
+  };
+
+  const handleMuteMember = async (memberId) => {
+    try {
+      await muteChannelMember({
+        channelId: channel?.id,
+        userId: memberId,
+        channelName: channel?.name,
+      });
+      toast({
+        title: "Member Muted.",
+        description: "Member has been muted.",
+        status: "success",
+        duration: 2000,
+        isClosable: true,
+      });
+    } catch (error) {
+      console.log("error: ", error);
+      toast({
+        title: "Error.",
+        description: error.message,
+        status: "error",
+        duration: 2000,
+        isClosable: true,
+      });
+    }
+  };
+
+  const handleUnMuteMember = async (memberId) => {
+    try {
+      await unmuteChannelMember({
+        channelId: channel?.id,
+        userId: memberId,
+        channelName: channel?.name,
+      });
+      toast({
+        title: "Member UnMuted.",
+        description: "Member has been unmuted.",
+        status: "success",
+        duration: 2000,
+        isClosable: true,
+      });
+    } catch (error) {
+      console.log("error: ", error);
+      toast({
+        title: "Error.",
+        description: error.message,
+        status: "error",
+        duration: 2000,
+        isClosable: true,
+      });
+    }
+  };
+
+  const handleBanMember = async () => {};
+
   useEffect(() => {}, []);
   return (
     <Stack
@@ -171,14 +239,14 @@ const Members = ({ channel }) => {
             Members
           </Text>
           <AvatarGroup size="sm" max={4} color={"pong_bg_primary"}>
-            {members.map((member, i) => (
+            {channel?.members.map((member, i) => (
               <Avatar
-                key={i}
+                key={member?.id}
                 bg="pong_bg_secondary"
                 p={0.5}
                 ml={2}
-                name={member.name}
-                src={"https://bit.ly/ryan-florence"}
+                name={member?.name}
+                src={member?.avatar}
               />
             ))}
           </AvatarGroup>
@@ -260,7 +328,7 @@ const Members = ({ channel }) => {
           <AutoComplete
             as={Stack}
             rollNavigation
-            isLoading={isLoading}
+            // isLoading={isLoading}
             openOnFocus
             defaultIsOpen={true}
             listAllValuesOnFocus
@@ -326,8 +394,8 @@ const Members = ({ channel }) => {
                 <ScrollArea.Viewport className="ScrollAreaViewport">
                   {channel?.members?.map((member, i) => (
                     <AutoCompleteItem
-                      key={i}
-                      value={member}
+                      key={member?.id}
+                      value={member?.name}
                       textTransform="capitalize"
                       // bg="pong_bg.300"
                       boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.35)"
@@ -362,10 +430,10 @@ const Members = ({ channel }) => {
                           w={"full"}
                           // onClick={() => navigate(`/profile/${member.name}`)}
                         >
-                          {/* <Avatar
+                          <Avatar
                             size="sm"
-                            name={member.name}
-                            src={member.avatar}
+                            name={member?.name}
+                            src={member?.avatar}
                             borderColor={"green.400"}
                             borderWidth="2px"
                           >
@@ -374,45 +442,113 @@ const Members = ({ channel }) => {
                               border="1px solid white"
                               bg={"green.400"}
                             />
-                          </Avatar> */}
+                          </Avatar>
                           <Text
                             color="white"
                             fontSize="14px"
                             fontWeight="medium"
                             ml={2}
                             flex={1}
+                            textTransform={"capitalize"}
                           >
-                            {/* {member.name} */}
-                            {member}
+                            {member?.name}
                           </Text>
                         </Flex>
                         <Flex direction="row" gap="6px" mr={0}>
-                          {channel.owner.id === currentUser?.id && (
-                            <IconButton
-                              size="xs"
-                              fontSize="md"
-                              bg={"white"}
-                              color={"red.500"}
-                              borderColor="red.500"
-                              borderWidth="1px"
-                              borderRadius={8}
-                              aria-label="Remove member"
-                              icon={<HiUserRemove />}
-                              _hover={{
-                                bg: "red.500",
-                                color: "white",
-                              }}
-                              onClick={() => {
-                                console.log("delete member");
-                                toast({
-                                  title: "Member removed.",
-                                  description: "Member removed from the group.",
-                                  status: "success",
-                                  duration: 2000,
-                                  isClosable: true,
-                                });
-                              }}
-                            />
+                          {(channel?.owner?.id === currentUser?.id ||
+                            channel?.admins
+                              ?.map((member) => member?.id)
+                              ?.includes(currentUser?.id)) && (
+                            <>
+                              {currentUser?.id !== member?.id &&
+                              (channel?.admins
+                                ?.map((admin) => admin?.id)
+                                ?.includes(currentUser?.id) ||
+                              channel?.owner?.id === currentUser?.id
+                                ? !channel?.admins
+                                    ?.map((member) => member?.id)
+                                    ?.includes(member?.id) ||
+                                  (member.id !== channel.owner.id &&
+                                    channel.owner.id === currentUser.id)
+                                : false) ? (
+                                <>
+                                  <IconButton
+                                    size="xs"
+                                    fontSize="md"
+                                    bg={"white"}
+                                    color={"red.500"}
+                                    borderColor="red.500"
+                                    borderWidth="1px"
+                                    borderRadius={8}
+                                    aria-label="Kick member"
+                                    icon={<HiUserRemove />}
+                                    _hover={{
+                                      bg: "red.500",
+                                      color: "white",
+                                    }}
+                                    onClick={handleKickMember}
+                                  />
+
+                                  <IconButton
+                                    size="xs"
+                                    fontSize="md"
+                                    bg={"white"}
+                                    color={"red.500"}
+                                    borderColor="red.500"
+                                    borderWidth="1px"
+                                    borderRadius={8}
+                                    aria-label="Ban member"
+                                    icon={<MdBlockFlipped />}
+                                    _hover={{
+                                      bg: "red.500",
+                                      color: "white",
+                                    }}
+                                    onClick={handleBanMember}
+                                  />
+                                  {channel?.mutedMembers
+                                    // ?.map((member) => member?.id)
+                                    ?.includes(member?.id) ? (
+                                    <IconButton
+                                      size="xs"
+                                      fontSize="md"
+                                      bg={"white"}
+                                      color={"green.500"}
+                                      borderColor="green.500"
+                                      borderWidth="1px"
+                                      borderRadius={8}
+                                      aria-label="Mute member"
+                                      icon={<BiMicrophone />}
+                                      _hover={{
+                                        bg: "green.500",
+                                        color: "white",
+                                      }}
+                                      onClick={() => {
+                                        handleUnMuteMember(member?.id);
+                                      }}
+                                    />
+                                  ) : (
+                                    <IconButton
+                                      size="xs"
+                                      fontSize="md"
+                                      bg={"white"}
+                                      color={"red.500"}
+                                      borderColor="red.500"
+                                      borderWidth="1px"
+                                      borderRadius={8}
+                                      aria-label="Mute member"
+                                      icon={<BiSolidMicrophoneOff />}
+                                      _hover={{
+                                        bg: "red.500",
+                                        color: "white",
+                                      }}
+                                      onClick={() => {
+                                        handleMuteMember(member?.id);
+                                      }}
+                                    />
+                                  )}
+                                </>
+                              ) : null}
+                            </>
                           )}
                         </Flex>
                       </Flex>

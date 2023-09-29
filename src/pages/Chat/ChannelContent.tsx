@@ -1,18 +1,4 @@
-import {
-  Flex,
-  Icon,
-  IconButton,
-  Image,
-  Input,
-  InputGroup,
-  InputRightElement,
-  Stack,
-  Text,
-  Textarea,
-  Toast,
-  useDisclosure,
-  useToast,
-} from "@chakra-ui/react";
+import { Flex, Stack, Text, useDisclosure, useToast } from "@chakra-ui/react";
 import ChatContentFooter from "./ChatContentFooter";
 import ChatContentHeader from "./ChatContentHeader";
 import { useNavigate, useParams } from "react-router-dom";
@@ -26,7 +12,6 @@ import {
   useGetMessagesByChannelNameQuery,
   useCreateChannelMessageMutation,
 } from "src/features/channelMessages/channelMessagesApi";
-import ChatContentBody from "./ChatContentBody";
 import ChannelContentBody from "./ChannelContentBody";
 
 dayjs.extend(relativeTime);
@@ -61,7 +46,6 @@ const ChannelContent = () => {
       id: uuidv4(),
       channelId: channel.id,
       channelName: channelname,
-      //   sender: { id: currentUser?.id },
       sender: {
         id: currentUser?.id,
         name: currentUser?.name,
@@ -70,16 +54,15 @@ const ChannelContent = () => {
       receivers: [...channel.members],
       content: message,
       lastMessageCreatedAt: dayjs().valueOf(),
-      //   updatedAt: dayjs().format(),
     };
 
     try {
-      createChannelMessage(msg).unwrap();
+      await createChannelMessage(msg).unwrap();
     } catch (error) {
-      console.log("error happened on submit new channel msg: ", error);
+      console.log("error ", error);
       toast({
         title: "Message not sent.",
-        description: "Message not sent to the channel.",
+        description: error?.data?.message || "Message not sent to the channel.",
         status: "error",
         duration: 2000,
         isClosable: true,

@@ -12,6 +12,7 @@ import {
   Progress,
   Stack,
   Text,
+  useToast,
 } from "@chakra-ui/react";
 import { FiMessageSquare } from "react-icons/fi";
 import { AiOutlineUserAdd, AiOutlineUserDelete } from "react-icons/ai";
@@ -22,26 +23,201 @@ import { GiAchievement } from "react-icons/gi";
 import * as ScrollArea from "@radix-ui/react-scroll-area";
 import "src/styles/scrollbar.css";
 import { badges } from "src/config/data/data";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import usersApi, { useDeleteFriendMutation } from "src/features/users/usersApi";
+import { setCurrentUser } from "src/features/users/usersSlice";
+import conversationApi, {
+  useCreateConversationWithoutMessageMutation,
+} from "src/features/conversations/conversationsApi";
+import { v4 as uuidv4 } from "uuid";
 
-const Profile = ({ user = {} }) => {
-  const currentUserId = useSelector(
-    (state: any) => state?.user?.currentUser?.id
-  );
-  const {
-    username = "username",
-    name = "name",
-    status = "in-game",
-    email = "email",
-    campus = "1337 Benguerir",
-    rank = "103",
-    avatar = "avatar",
-    gameWin = 12,
-    gameLoss = 2,
-    level = "10",
-  } = user;
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import useSocket from "src/hooks/useSocket";
+import store from "src/app/store";
+import notificationsApi from "src/features/notifications/notificationsApi";
+dayjs.extend(relativeTime);
+
+const Profile = ({ user }) => {
+  const currentUser = useSelector((state: any) => state?.user?.currentUser);
+  const toast = useToast();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const [deleteFriend, { isLoading: isDeletingFriend }] =
+    useDeleteFriendMutation();
+
+  const [triggerGetCurrentUser, { isLoading: isLoadingGetCurrentUser }] =
+    usersApi.useLazyGetCurrentUserQuery();
+
   const gameWonRate =
-    (parseInt(gameWin) / (parseInt(gameWin) + parseInt(gameLoss))) * 100;
+    (parseInt(user?.gameWin) /
+      (parseInt(user?.gameWin) + parseInt(user?.gameLoss))) *
+    100;
+
+  // const [triggerGetCurrentUser, { isLoading: isLoadingGetCurrentUser }] =
+  //   usersApi.useLazyGetCurrentUserQuery();
+
+  // useEffect(() => {
+  //   const socket = useSocket();
+  //   socket.on("friend_accepted", async (data: any) => {
+  //     // console.log("incoming friend_accepted: ", data);
+  //     // store.dispatch(setCurrentUser(data?.data));
+  //     if (data?.data?.id === currentUser?.id) {
+  //       try {
+  //         // await prefetchUser(currentUser?.id).then((data) => {
+  //         //   store.dispatch(setCurrentUser(data?.data));
+  //         // });
+  //         await triggerGetCurrentUser(currentUser?.id).unwrap();
+  //       } catch (error) {
+  //         console.log("error: ", error);
+  //         toast({
+  //           title: "Error",
+  //           description: "Error happened while accepting friend request",
+  //           status: "error",
+  //           duration: 2000,
+  //           isClosable: true,
+  //         });
+  //       }
+  //     }
+  //   });
+
+  //   return () => {
+  //     socket.disconnect();
+  //   };
+  // }, []);
+
+  const [
+    triggerGetConversationByMembersEmails,
+    { isLoading: isLoadingGetConversationByMembersEmails },
+  ] = conversationApi.endpoints.getConversationByMembersEmails.useLazyQuery();
+
+  const [
+    createConversationWithoutMessage,
+    { isLoading: isLoadingCreateConversationWithoutMessage },
+  ] = useCreateConversationWithoutMessageMutation();
+
+  const handleDeleteFriend = async (friendId) => {
+    try {
+      await deleteFriend({ currentUserId: currentUser?.id, friendId });
+      await triggerGetCurrentUser(currentUser?.id);
+      // dispatch(
+      //   setCurrentUser({
+      //     ...currentUser,
+      //     friends: currentUser?.friends?.filter(
+      //       (friend) => friend !== friendId
+      //     ),
+      //   })
+      // );
+      toast({
+        title: "Suceess",
+        description: "Friend deleted",
+        status: "success",
+        duration: 2000,
+        isClosable: true,
+      });
+    } catch (error) {
+      console.log(error);
+      toast({
+        title: "Error",
+        description: error?.data?.message || "Error deleting friend",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
+
+  const handleSendFriendNotification = async () => {
+    if (currentUser?.friends.includes(user?.id)) {
+      toast({
+        title: "Info",
+        description: "He is already your friend",
+        status: "info",
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+    try {
+      const notification = {
+        id: uuidv4(),
+        type: "friendRequest",
+        sender: {
+          id: currentUser?.id,
+          email: currentUser?.email,
+          name: currentUser?.name,
+        },
+        receiver: {
+          id: user?.id,
+          email: user?.email,
+          name: user?.name,
+        },
+        createdAt: dayjs().valueOf(),
+      };
+      store.dispatch(
+        await notificationsApi.endpoints.sendNotification.initiate(notification)
+      );
+      toast({
+        title: "Friend request sent",
+        description: "Friend request sent successfully",
+        status: "success",
+        duration: 2000,
+        isClosable: true,
+      });
+    } catch (error) {
+      console.log("error accepting friend request: ", error);
+      console.log("error: ", error);
+      toast({
+        title: "Error",
+        description: error?.data?.message || "Error happened",
+        status: "error",
+        duration: 2000,
+        isClosable: true,
+      });
+    }
+  };
+  const handleSendDirectMessage = async () => {
+    try {
+      const conversations = await triggerGetConversationByMembersEmails([
+        currentUser?.email,
+        user?.email,
+      ]).unwrap();
+      let id;
+      if (conversations?.length > 0) {
+        const conversation = conversations[0];
+        id = conversation.id;
+        console.log("id->: ", id);
+      } else {
+        const conversation = {
+          id: uuidv4(),
+          name: [currentUser?.name, user?.name],
+          avatar: [
+            { id: currentUser?.id, avatar: currentUser?.avatar },
+            { id: user?.id, avatar: user?.avatar },
+          ],
+          members: [currentUser?.email, user?.email],
+          lastMessageContent: "",
+          lastMessageCreatedAt: dayjs().valueOf(),
+        };
+        await createConversationWithoutMessage(conversation).unwrap();
+        id = conversation.id;
+      }
+      navigate(`/chat/conversation/${id}`);
+    } catch (error) {
+      console.log("error: ", error);
+      toast({
+        title: "Error",
+        description: "Error happened while opening the conversation",
+        status: "error",
+        duration: 2000,
+        isClosable: true,
+      });
+    }
+  };
+
   return (
     <Flex
       w={{ sm: "380px" }}
@@ -64,12 +240,12 @@ const Profile = ({ user = {} }) => {
         <Flex direction="row" gap="28px" align="center">
           <Avatar
             size="xl"
-            name={name}
-            src={avatar}
+            name={user?.name}
+            src={user?.avatar}
             borderColor={
               status === "online"
                 ? "green.400"
-                : status === "offline"
+                : user?.status === "offline"
                 ? "gray.300"
                 : "red.400"
             }
@@ -79,9 +255,9 @@ const Profile = ({ user = {} }) => {
               boxSize="0.6em"
               border="3px solid white"
               bg={
-                status === "online"
+                user?.status === "online"
                   ? "green.400"
-                  : status === "offline"
+                  : user?.status === "offline"
                   ? "gray.400"
                   : "red.400"
               }
@@ -95,11 +271,11 @@ const Profile = ({ user = {} }) => {
                 boxSize={5}
               />
               <Text fontSize="lg" fontWeight="medium">
-                {username}
+                {user?.username}
               </Text>
             </Flex>
             {/* TODO: hide these buttons when visiting my own profile, do conditional rendering of the username or id of the passed user with the store */}
-            {currentUserId !== user?.id && (
+            {currentUser?.id !== user?.id && (
               <Flex direction="row" gap="14px" align="center">
                 <IconButton
                   size="sm"
@@ -110,8 +286,13 @@ const Profile = ({ user = {} }) => {
                   aria-label="Send a message"
                   icon={<FiMessageSquare />}
                   _hover={{ bg: "white", color: "pong_cl_primary" }}
+                  onClick={handleSendDirectMessage}
+                  isLoading={
+                    isLoadingCreateConversationWithoutMessage ||
+                    isLoadingGetConversationByMembersEmails
+                  }
                 />
-                {!user?.friends?.includes(currentUserId) && (
+                {!user?.friends?.includes(currentUser?.id) && (
                   <IconButton
                     size="sm"
                     fontSize="lg"
@@ -121,9 +302,14 @@ const Profile = ({ user = {} }) => {
                     aria-label="Send friend request"
                     icon={<AiOutlineUserAdd />}
                     _hover={{ bg: "white", color: "pong_cl_primary" }}
+                    onClick={handleSendFriendNotification}
+                    // isLoading={
+                    //   isLoadingCreateConversationWithoutMessage ||
+                    //   isLoadingGetConversationByMembersEmails
+                    // }
                   />
                 )}
-                {user?.friends?.includes(currentUserId) && (
+                {user?.friends?.includes(currentUser?.id) && (
                   <>
                     <IconButton
                       size="sm"
@@ -134,6 +320,9 @@ const Profile = ({ user = {} }) => {
                       aria-label="Send friend request"
                       icon={<AiOutlineUserDelete />}
                       _hover={{ bg: "white", color: "red.500" }}
+                      isLoading={isDeletingFriend || isLoadingGetCurrentUser}
+                      isDisabled={isDeletingFriend || isLoadingGetCurrentUser}
+                      onClick={() => handleDeleteFriend(user?.id)}
                     />
                     <IconButton
                       size="sm"
@@ -177,7 +366,7 @@ const Profile = ({ user = {} }) => {
                 Email
               </Text>
               <Text fontSize="12px" fontWeight="light" color="pong_cl_primary">
-                {email}
+                {user?.email}
               </Text>
             </Stack>
           </Flex>
@@ -187,7 +376,7 @@ const Profile = ({ user = {} }) => {
                 Login 42
               </Text>
               <Text fontSize="12px" fontWeight="medium" color="whiteAlpha.400">
-                {username}
+                {user?.username}
               </Text>
             </Flex>
             <Flex direction={"column"} gap={1}>
@@ -195,7 +384,7 @@ const Profile = ({ user = {} }) => {
                 Campus
               </Text>
               <Text fontSize="12px" fontWeight="medium" color="whiteAlpha.400">
-                {campus}
+                {user?.campus}
               </Text>
             </Flex>
           </Flex>
@@ -275,15 +464,15 @@ const Profile = ({ user = {} }) => {
           >
             <Flex direction="row" gap={3} align="center">
               <Text fontSize="13px" fontWeight="regular" color="whiteAlpha.900">
-                {rank}
+                {user?.rank}
               </Text>
-              <Avatar size="sm" name={name} src={avatar} />
+              <Avatar size="sm" name={user?.name} src={user?.avatar} />
               <Text fontSize="13px" fontWeight="regular" color="whiteAlpha.900">
-                {name}
+                {user?.name}
               </Text>
             </Flex>
             <Text fontSize="13px" fontWeight="semibold" color="pong_cl_primary">
-              {level}
+              {user?.level}
             </Text>
           </Flex>
         </Flex>
@@ -317,7 +506,7 @@ const Profile = ({ user = {} }) => {
                     fontWeight="regular"
                     color="whiteAlpha.600"
                   >
-                    {user.gameWin} W {user.gameLoss} L
+                    {user?.gameWin} W {user?.gameLoss} L
                   </Text>
                 </Stack>
               </CircularProgressLabel>
@@ -348,7 +537,7 @@ const Profile = ({ user = {} }) => {
                     fontWeight="semibold"
                     color="whiteAlpha.900"
                   >
-                    {parseInt(gameWin) + parseInt(gameLoss)}
+                    {parseInt(user?.gameWin) + parseInt(user?.gameLoss)}
                   </Text>
                   <Text
                     fontSize="10px"

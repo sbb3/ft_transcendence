@@ -1,16 +1,13 @@
 import {
   Box,
   Button,
-  Divider,
   Flex,
   Icon,
-  IconButton,
   Stack,
   Text,
   Tooltip,
   createIcon,
 } from "@chakra-ui/react";
-import { css } from "@emotion/react";
 import { GoPlay } from "react-icons/go";
 import { HiOutlineStatusOnline } from "react-icons/hi";
 import { IoChatbubbleEllipsesSharp, IoSettingsOutline } from "react-icons/io5";
@@ -20,8 +17,10 @@ import { BiSolidLogOutCircle } from "react-icons/bi";
 import { BeatLoader } from "react-spinners";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { userLoggedOut } from "src/features/auth/authSlice";
 import { useDispatch, useSelector } from "react-redux";
+import usersApi from "src/features/users/usersApi";
+import store from "src/app/store";
+import authApi from "src/features/auth/authApi";
 
 export const BrandIcon = createIcon({
   displayName: "BrandIcon",
@@ -50,7 +49,7 @@ const NavigationPanel = [
   {
     name: "Play",
     icon: GoPlay,
-    path: "/play",
+    path: "/game",
   },
   {
     name: "Watch",
@@ -67,11 +66,6 @@ const NavigationPanel = [
     icon: MdContactSupport,
     path: "/support",
   },
-  // {
-  //   name: "Logout",
-  //   icon: BiSolidLogOutCircle,
-  //   path: "/login",
-  // },
   {
     name: "Logout",
     icon: BiSolidLogOutCircle,
@@ -80,8 +74,7 @@ const NavigationPanel = [
 ];
 
 const Sidebar = () => {
-  const currentUser = useSelector((state: any) => state.user.currentUser);
-  const dispatch = useDispatch();
+  const currentUser = useSelector((state: any) => state?.user?.currentUser);
   const navigate = useNavigate();
   const players_online = 10;
   const player_lvl = 2;
@@ -104,24 +97,8 @@ const Sidebar = () => {
       bgRepeat="no-repeat"
       // m={2}
     >
-      <Stack
-        spacing={5}
-        align="center"
-        w="full"
-        // h="full"
-        pos="relative"
-        // outline="2px solid red"
-      >
-        {/* <BrandIcon
-					boxSize={"40px"}
-					borderRadius={"50%"}
-					bg={"white"}
-					border="1px solid "
-					borderColor={"#FF8707"}
-					onClick={() => console.log("clicked")}
-	/> */}
+      <Stack spacing={5} align="center" w="full" pos="relative">
         <MotionBrandIcon
-          // pos="absolute"
           w={{ base: "40px" }}
           h={{ base: "40px" }}
           bgImage="url('src/assets/svgs/brand_icon.svg')"
@@ -224,10 +201,14 @@ const Sidebar = () => {
                         : "6px 0px 0px 6px",
                     color: nav.name === "Logout" ? "#E53E3E" : "#FB6613",
                   }}
-                  onClick={() => {
+                  onClick={async () => {
                     if (nav.name === "Logout") {
-                      dispatch(userLoggedOut());
+                      // TODO: uncomment below dispatch later and remove localStorage.clear()
+                      await store.dispatch(
+                        authApi.endpoints.sendLogOut.initiate(currentUser?.id)
+                      );
                       localStorage.clear();
+                      navigate(nav.path, { replace: true });
                     } else {
                       navigate(nav.path);
                     }
@@ -243,57 +224,6 @@ const Sidebar = () => {
           h="2px"
           background="linear-gradient(270deg, rgba(255, 255, 255, 0.00) 0%, #FFF 55.73%, rgba(255, 255, 255, 0.00) 100%)"
         />
-      </Stack>
-      <Stack
-        spacing={0}
-        align="end"
-        // p={2}
-        // outline="1px solid yellow"
-        w="full"
-        // h="full"
-      >
-        {/* <Flex
-          direction={"column"}
-          justify="center"
-          align="center"
-          gap={5}
-          // outline="1px solid red"
-        >
-          <Tooltip
-            label={"Logout"}
-            aria-label={"Logout"}
-            placement="right"
-            closeOnClick
-            hasArrow
-            bg={"red.500"}
-          >
-            <Button
-              w="120px"
-              size="lg"
-              color={"white"}
-              bg={"none"}
-              pr={{ base: 0, md: "10px", lg: "20px" }}
-              alignItems={"center"}
-              alignSelf={"stretch"}
-              borderRight="7px solid rgba(255, 255, 255, 0)"
-              leftIcon={
-                <Icon
-                  as={BiSolidLogOutCircle}
-                  boxSize={"22px"}
-                  borderRadius={"50%"}
-                />
-              }
-              _hover={{
-                background:
-                  "linear-gradient(90deg, rgba(229,62,62,0.2) 3.89%, rgba(253,127,44,0.12) 47.44%, rgba(133,30,30,0.5) 80.48%)",
-                borderRight: "7px solid #E53E3E",
-                borderRadius: "6px 0px 6px 6px",
-                color: "#E53E3E",
-              }}
-              onClick={() => console.log("clicked on dashboard")}
-            />
-          </Tooltip>
-        </Flex> */}
       </Stack>
     </Stack>
   );

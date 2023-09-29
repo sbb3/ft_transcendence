@@ -8,7 +8,11 @@ import { useGetUserByUsernameQuery } from "src/features/users/usersApi";
 // TODO: later on, get the username url from the useParams hook, and fetch the user data then pass it to the Profile and RecentGames components
 const PlayerProfile = () => {
   const { username } = useParams();
-  const { data: users, isLoading } = useGetUserByUsernameQuery(username, {
+  const {
+    data: users,
+    isLoading,
+    isFetching,
+  } = useGetUserByUsernameQuery(username, {
     refetchOnMountOrArgChange: true,
   });
   return (
@@ -23,12 +27,12 @@ const PlayerProfile = () => {
       gap={4}
       p={4}
     >
-      {isLoading ? (
+      {isLoading || isFetching ? (
         <Loader />
       ) : users?.length > 0 ? (
         <Flex direction={{ base: "column", xl: "row" }} gap={4}>
           <Profile user={users[0]} />
-          <RecentGames />
+          <RecentGames user={users[0]} />
         </Flex>
       ) : (
         <Flex
@@ -40,7 +44,7 @@ const PlayerProfile = () => {
           fontSize="xl"
           fontWeight="semibold"
         >
-          No user found.
+          User not found
         </Flex>
       )}
     </Flex>

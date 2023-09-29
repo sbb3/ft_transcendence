@@ -12,7 +12,7 @@ const ChatContentBody = ({
   isDrawerOpen,
   receiverUser = null,
 }) => {
-  const currentUser = useSelector((state: any) => state.user.currentUser);
+  const currentUser = useSelector((state: any) => state?.user?.currentUser);
   const messagesRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -20,7 +20,6 @@ const ChatContentBody = ({
   };
 
   useEffect(() => {
-    // console.log("messagesRef.current", messagesRef.current);
     if (messagesRef.current) {
       scrollToBottom();
     }
@@ -29,18 +28,11 @@ const ChatContentBody = ({
     };
   }, [messages]);
 
-  // console.log("receiverUser", receiverUser);
-
   return (
     <Stack
-      // position="relative"
-      id="ChatContentBodyStack"
-      // direction={"column-reverse"}
       justify={"start"}
       w={"full"}
-      // h={"full"}
       h={"800px"}
-      //   bg={"red.400"}
       borderRadius={6}
       p={2}
       spacing={4}
@@ -50,12 +42,6 @@ const ChatContentBody = ({
       bgImage={`url('src/assets/img/BlackNoise.png')`}
       bgSize="cover"
       bgRepeat="no-repeat"
-      // bg="red.400"
-      // onClick={() => {
-      //   if (isDrawerOpen) {
-      //     toggleDrawer();
-      //   }
-      // }}
     >
       {error ? (
         <Flex
@@ -84,13 +70,10 @@ const ChatContentBody = ({
                   key={message?.id}
                   direction="row"
                   w="full"
-                  //   h="full"
                   gap={1}
                   align="center"
                   justify="start"
-                  // bg={"teal.300"}
                   borderRadius={6}
-                  //   border="1px solid white"
                   p={1}
                 >
                   {message?.sender.email !== currentUser?.email && (
@@ -98,16 +81,13 @@ const ChatContentBody = ({
                       // size="sm"
                       name={receiverUser?.name}
                       src={receiverUser?.avatar}
-                      // borderColor="green.400"
-                      // borderWidth="3px"
-                      onClick={toggleDrawer} // TODO: show the user data in the drawer
+                      onClick={toggleDrawer}
                       style={{ width: "36px", height: "36px" }}
                       cursor="pointer"
                     />
                   )}
 
                   <Flex
-                    // bg={"green.400"}
                     w="full"
                     align="center"
                     justify={
@@ -125,7 +105,6 @@ const ChatContentBody = ({
                           ? "gray.600"
                           : "gray.700"
                       }
-                      //   minW="300px"
                       maxW={"300px"}
                       p={2}
                       px={2}
@@ -141,7 +120,6 @@ const ChatContentBody = ({
                   </Flex>
                   {isDrawerOpen && message?.sender.id !== currentUser?.id && (
                     <ChatRightModal
-                      currentUser={currentUser}
                       participantUserId={
                         message?.sender?.id !== currentUser?.id
                           ? message?.sender?.id
