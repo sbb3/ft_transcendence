@@ -1,9 +1,11 @@
 import { Controller, ParseIntPipe, Res } from '@nestjs/common';
-import { ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { OtpService } from './otp.service';
 import { UseGuards, Post, Body } from '@nestjs/common';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import { Response } from 'express';
+import { userIdDto } from 'src/user/dto/creatuserDto';
+import { userIdAndPinDto } from './dto/userIdAndPinDto';
 
 @ApiTags('otp')
 @Controller('otp')
@@ -11,7 +13,7 @@ export class OtpController {
   constructor(private readonly otpService: OtpService) {}
 
 	@ApiOperation({ summary : 'Generate a new otp secret and set it in the db.' })
-	@ApiParam({ name : "userId" })
+	@ApiBody({ type : userIdDto })
 	@Post('generate')
 	@UseGuards(JwtGuard)
 	async generateOtpSecret(@Body('userId', ParseIntPipe) userId : number, @Res() response : Response) {
@@ -29,8 +31,7 @@ export class OtpController {
 	}
 
 	@ApiOperation({ summary : 'Check if the pin is valid and update \'is_otp_enabled\' to true.' })
-	@ApiParam({ name : "userId" })
-	@ApiParam({ name : "userPin" })
+	@ApiBody({type : userIdAndPinDto})
 	@Post('verify')
 	@UseGuards(JwtGuard)
 	async verifyOtp(@Body('userId', ParseIntPipe) userId : number,
@@ -53,8 +54,7 @@ export class OtpController {
 
 	@Post('validate')
 	@ApiOperation({ summary : 'Check if the pin is valid and update \'is_otp_validated\' to true.' })
-	@ApiParam({ name : "userId" })
-	@ApiParam({ name : "userPin" })
+	@ApiBody({type : userIdAndPinDto})
 	@UseGuards(JwtGuard)
 	async validateOtp(@Body('userId', ParseIntPipe) userId : number,
 		@Body('userPin') userPin : string, @Res() response : Response) {
@@ -76,7 +76,7 @@ export class OtpController {
 
 	@Post('disable')
 	@ApiOperation({ summary : 'Set \'is_otp_enabled\' and \'is_otp_validated\' to false.' })
-	@ApiParam({ name : "userId" })
+	@ApiBody({ type : userIdDto })
 	@UseGuards(JwtGuard)
 	async disableOtp(@Body('userId', ParseIntPipe) userId : number, @Res() response : Response) {
 		try {

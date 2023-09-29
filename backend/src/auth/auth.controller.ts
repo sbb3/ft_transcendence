@@ -7,7 +7,8 @@ import { FtGuard } from './guards/ft.guard';
 import { Request, Response } from 'express';
 import { jwtConstants } from './auth.constants';
 import { JwtGuard } from './guards/jwt.guard';
-import { ApiExcludeEndpoint, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiExcludeEndpoint, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import { userIdDto } from 'src/user/dto/creatuserDto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -51,7 +52,7 @@ export class AuthController {
 
 	@Post('logout')
 	@ApiOperation({summary : "Delete jwt tokens and set \'status\' to \'offline\'"})
-	@ApiParam({name : 'userId'})
+	@ApiBody({type : userIdDto})
 	@UseGuards(JwtGuard)
 	async logout(@Req() request : Request, @Res() response : Response, @Body('userId', ParseIntPipe) userId : number) {
 		try {

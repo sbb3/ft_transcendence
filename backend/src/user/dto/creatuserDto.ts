@@ -1,28 +1,12 @@
-import { IsBoolean, IsNumber, IsString } from "class-validator";
+import { ApiProperty } from "@nestjs/swagger";
+import { IsNumber } from "class-validator";
 
-export class CreatUserDto {
+export class userIdDto {
 
+    @ApiProperty({
+        example : 1
+    })
     @IsNumber()
-    id : number;
+    userId : number;
 
-    @IsString()
-    player_name : string;
-
-    @IsString()
-    status : string;
-
-    @IsNumber()
-    max_score : number;
-
-    @IsString()
-    level : string;
-
-    @IsString()
-    otp_enavled : boolean;
-
-    @IsString()
-    otp_secrect_tocken : string;
-
-    @IsBoolean()
-    is_profile_has_been_set : boolean;
 }

@@ -3,7 +3,8 @@ import { UserService } from './user.service';
 import { PrismaClient } from '@prisma/client';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import { Response } from 'express';
-import { ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import { userIdDto } from './dto/creatuserDto';
 
 @ApiTags('user')
 @Controller('user')
@@ -13,8 +14,8 @@ export class UserController extends PrismaClient {
         super();
     }
     
+	@ApiBody({type : userIdDto})
 	@ApiOperation({ summary : 'Set \'is_profile_completed\' to true.' })
-	@ApiParam({name : 'userId'})
 	@Post('profile-check-completed')
 	@UseGuards(JwtGuard)
 	async updateProfileCheck(@Body('userId', ParseIntPipe) userId : number, @Res() response : Response) {
