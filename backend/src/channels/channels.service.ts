@@ -3,19 +3,21 @@ import { channel, PrismaClient } from '@prisma/client';
 import { CreateChannelDto } from './dto/create-channel.dto';
 import * as bcrypt from 'bcrypt';
 import { UpdateChannelDto } from './dto/update-channel.dto';
+import { DeleteChannelDto } from './dto/delete-channel.dto';
 
 @Injectable()
 export class ChannelsService extends PrismaClient {
 
-	async createChannel(channelDto : CreateChannelDto) {
+	async createChannel(channelDto : CreateChannelDto, userId : number) {
 		await this.checkIfChannelExists(channelDto.name);
+		channelDto.ownerId = userId;
 
 		if (channelDto.privacy === 'protected')
 			channelDto.password = await bcrypt.hash(channelDto.password, 10);
 
 		const newChannel = await this.channel.create({
 			data : channelDto
-		})
+		});
 
 		if (!newChannel)
 			throw new InternalServerErrorException();
@@ -29,7 +31,7 @@ export class ChannelsService extends PrismaClient {
 
 		if (!oldChannel)
 			throw new NotFoundException("Channel to update not found");
-		if (!this.isAdminOrOwner(oldChannel, userId))
+		if (!this.isOwner(oldChannel, userId))
 			throw new UnauthorizedException("Only the owner and admins can update channel's properties")
 		if (channelDto.name)
 			await this.checkIfChannelExists(channelDto.name);
@@ -46,8 +48,23 @@ export class ChannelsService extends PrismaClient {
 			throw new InternalServerErrorException();
 	}
 
-	private isAdminOrOwner(channel : channel, userId : number) {
-		// Here change logic after adding admins and ownerId in the data model
+	async deleteChannel(deleteChannelDto : DeleteChannelDto, userId : number) {
+		const channelToDelete = await this.channel.findUnique({ where : {id : deleteChannelDto.channelId} });
+
+		if (!channelToDelete)
+			throw new NotFoundException("Channel to delete not found.")
+		if (!this.isOwner(channelToDelete, userId))
+			throw new UnauthorizedException("Only the owner can delete this channel.")
+		if (!await this.channel.delete({where : { id : deleteChannelDto.channelId }}))
+			throw new InternalServerErrorException();
+	}
+
+	private isOwner(channel : channel, userId : number) {
+		return channel.ownerId === userId;
+	}
+
+	private isAdmin(channel : channel, userId : number) {
+		// Check if the user that wants to change smthg on the channel is an admin
 		return true;
 	}
 

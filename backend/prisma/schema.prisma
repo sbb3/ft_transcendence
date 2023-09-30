@@ -11,42 +11,61 @@ datasource db {
 }
 
 model user {
-	id             Int            @id @default(autoincrement())
-	createdAt      DateTime       @default(now())
-	max_score      Int?
-	level          String?
-	friends_users  friend_user[]
-	blocked_users  blocked_user[]
-	not_req        request[]      @relation(name: "user")
-	send_req       request[]      @relation(name: "user_send")
-	not_info       notification[] @relation(name: "user")
-	send_info      notification[] @relation(name: "user_send")
-	player_one     game[]         @relation(name: "player_one")
-	player_two     game[]         @relation(name: "player_two")
-	achievements   achievement[]
-	// achievement achievement? @relation("user", fields: [achievement_id], references: [id])
-	achievement_id Int?
-	// msg_send message[]
-	member         membership[]
-	// send_req request[]
+  id             Int            @id @default(autoincrement())
+  createdAt      DateTime       @default(now())
+  max_score      Int?
+  level          String?
+  friends_users  friend_user[]
+  blocked_users  blocked_user[]
+  not_req        request[]      @relation(name: "user")
+  send_req       request[]      @relation(name: "user_send")
+  not_info       notification[] @relation(name: "user")
+  send_info      notification[] @relation(name: "user_send")
+  player_one     game[]         @relation(name: "player_one")
+  player_two     game[]         @relation(name: "player_two")
+  achievements   achievement[]
+  // achievement achievement? @relation("user", fields: [achievement_id], references: [id])
+  achievement_id Int?
+  // msg_send message[]
+  member         membership[]
+  // send_req request[]
 
-	// Here auth/chat user infos
-	email                String   @unique
-	username             String   @unique
-	name                 String
-	avatar               String
-	campus               String?
-	status                String?
-	is_profile_completed Boolean  @default(false)
-	is_otp_enabled       Boolean  @default(false)
-	is_otp_validated     Boolean  @default(false)
-	otp_secret           String?
-	// channels channel[]
+
+
+
+
+  // Here auth/chat user infos
+  email                String   @unique
+  username             String   @unique
+  name                 String
+  avatar               String
+  campus               String?
+  status               String?
+  is_profile_completed Boolean  @default(false)
+  is_otp_enabled       Boolean  @default(false)
+  is_otp_validated     Boolean  @default(false)
+  otp_secret           String?
+
+  memberInChannelId   Int
+  memberInChannel channel @relation("members", fields: [memberInChannelId], references: [id])
+
+  adminsInChannelId   Int
+  adminsInChannel     channel @relation("admins", fields: [adminsInChannelId], references: [id])
+
+  mutedInChannelId    Int
+  mutedInChannel      channel @relation("muted", fields: [mutedInChannelId], references: [id])
+
+  kickedInChannelId    Int
+  kickedInChannel      channel @relation("kicked", fields: [kickedInChannelId], references: [id])
+
+  bannedInChannelId    Int
+  bannedInChannel      channel @relation("banned", fields: [bannedInChannelId], references: [id])
 }
 
 // The owner can change the name, the description, the password, remove the channel.
 model channel {
   id          Int      @id @default(autoincrement())
+  ownerId     Int
   name        String   @unique
   owner       String
   privacy     String
@@ -54,11 +73,11 @@ model channel {
   description String
   createdAt   DateTime @default(now())
 
-//   members user[]
-  // admins user[]
-  // muted user[]
-  // kicked user[]
-  // banned user[]
+  members user[] @relation("members")
+  admins  user[] @relation("admins")
+  muted   user[] @relation("muted")
+  kicked  user[] @relation("kicked")
+  banned  user[] @relation("banned")
 }
 
 // model channelMessages {

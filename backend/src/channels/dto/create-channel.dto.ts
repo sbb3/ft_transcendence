@@ -46,4 +46,5 @@ export class CreateChannelDto {
 	description : string;
 
 
+	ownerId : number
 }
