@@ -13,21 +13,21 @@ datasource db {
 model user {
   id             Int            @id @default(autoincrement())
   createdAt      DateTime       @default(now())
-  max_score      Int?
-  level          String?
-  friends_users  friend_user[]
-  blocked_users  blocked_user[]
-  not_req        request[]      @relation(name: "user")
-  send_req       request[]      @relation(name: "user_send")
-  not_info       notification[] @relation(name: "user")
-  send_info      notification[] @relation(name: "user_send")
-  player_one     game[]         @relation(name: "player_one")
-  player_two     game[]         @relation(name: "player_two")
-  achievements   achievement[]
+  // max_score      Int?
+  // level          String?
+  // friends_users  friend_user[]
+  // blocked_users  blocked_user[]
+  // not_req        request[]      @relation(name: "user")
+  // send_req       request[]      @relation(name: "user_send")
+  // not_info       notification[] @relation(name: "user")
+  // send_info      notification[] @relation(name: "user_send")
+  // player_one     game[]         @relation(name: "player_one")
+  // player_two     game[]         @relation(name: "player_two")
+  // achievements   achievement[]
   // achievement achievement? @relation("user", fields: [achievement_id], references: [id])
-  achievement_id Int?
+  // achievement_id Int?
   // msg_send message[]
-  member         membership[]
+  // member         membership[]
   // send_req request[]
 
 
@@ -46,125 +46,126 @@ model user {
   is_otp_validated     Boolean  @default(false)
   otp_secret           String?
 
-  memberInChannelId   Int
-  memberInChannel channel @relation("members", fields: [memberInChannelId], references: [id])
-
-  adminsInChannelId   Int
-  adminsInChannel     channel @relation("admins", fields: [adminsInChannelId], references: [id])
-
-  mutedInChannelId    Int
-  mutedInChannel      channel @relation("muted", fields: [mutedInChannelId], references: [id])
-
-  kickedInChannelId    Int
-  kickedInChannel      channel @relation("kicked", fields: [kickedInChannelId], references: [id])
-
+  // Relationships here
   bannedInChannelId    Int
   bannedInChannel      channel @relation("banned", fields: [bannedInChannelId], references: [id])
+
+  memberId            Int @unique
+  channelMember       channelMember  @relation("memberInChannel", fields: [memberId], references: [id])
+
+  userId              Int @unique
+  userChannelMessage  channelMessage  @relation(fields: [userId], references: [id])
 }
 
-// The owner can change the name, the description, the password, remove the channel.
 model channel {
   id          Int      @id @default(autoincrement())
+  createdAt   DateTime @default(now())
   ownerId     Int
   name        String   @unique
   owner       String
   privacy     String
   password    String?
   description String
-  createdAt   DateTime @default(now())
 
-  members user[] @relation("members")
-  admins  user[] @relation("admins")
-  muted   user[] @relation("muted")
-  kicked  user[] @relation("kicked")
+  members channelMember[] @relation("channelMembers")
   banned  user[] @relation("banned")
 }
 
-// model channelMessages {
-// lastMessageCreatedAt
-// add receivers (members who can see the messages)
-// channelId
-// content
-// senderId
-// createdAt
-// message id
+model channelMember {
+  id		Int @id @default(autoincrement())
+  role		String
+  user		user? @relation("memberInChannel")
+  isMuted	Boolean @default(false)
+  isKicked	Boolean @default(false)
+
+  // Relationship here
+  channelId	Int
+  inChannel	channel @relation("channelMembers", fields: [channelId], references: [id])
+}
+
+model channelMessage {
+	id				Int	@id @default(autoincrement())
+	createdAt		DateTime @default(now())
+	channelId		Int
+	content			String
+	sender      user?
+}
+
+// model achievement {
+//   id                Int            @id @default(autoincrement())
+//   notification_send notification[]
+//   level_for_get_it  Int
+//   title             String
+//   achevement_image  String
+//   users             user[]
+//   // user user? @relation("achievement", fields: [user_id], references: [id])
+//   user_id           Int
 // }
 
-model achievement {
-  id                Int            @id @default(autoincrement())
-  notification_send notification[]
-  level_for_get_it  Int
-  title             String
-  achevement_image  String
-  users             user[]
-  // user user? @relation("achievement", fields: [user_id], references: [id])
-  user_id           Int
-}
+// model friend_user {
+//   id       Int     @id @default(autoincrement())
+//   user     user    @relation(fields: [userId], references: [id])
+//   userId   Int
+//   is_mute  Boolean @default(false)
+//   unfriend Boolean @default(false)
+//   // message_reseve message[]
+// }
 
-model friend_user {
-  id       Int     @id @default(autoincrement())
-  user     user    @relation(fields: [userId], references: [id])
-  userId   Int
-  is_mute  Boolean @default(false)
-  unfriend Boolean @default(false)
-  // message_reseve message[]
-}
-
-model blocked_user {
-  id      Int     @id @default(autoincrement())
-  user    user    @relation(fields: [userId], references: [id])
-  userId  Int
-  unblock Boolean @default(false)
-}
+// model blocked_user {
+//   id      Int     @id @default(autoincrement())
+//   user    user    @relation(fields: [userId], references: [id])
+//   userId  Int
+//   unblock Boolean @default(false)
+// }
 
 // model user_achievements {
 //   id Int    @id @default(autoincrement())
 // }
 
-model notification {
-  id              Int         @id @default(autoincrement())
-  user            user        @relation(fields: [userId], references: [id], name: "user")
-  userId          Int
-  is_req_fr_acc   Boolean     @default(false)
-  id_user_send    user        @relation(fields: [user_snd], references: [id], name: "user_send")
-  user_snd        Int
-  type            String
-  content         String
-  is_seen         Boolean     @default(false)
-  is_delete       Boolean     @default(false)
-  id_achevement   achievement @relation(fields: [achievement_get], references: [id])
-  achievement_get Int
-}
+// model notification {
+//   id              Int         @id @default(autoincrement())
+//   user            user        @relation(fields: [userId], references: [id], name: "user")
+//   userId          Int
+//   is_req_fr_acc   Boolean     @default(false)
+//   id_user_send    user        @relation(fields: [user_snd], references: [id], name: "user_send")
+//   user_snd        Int
+//   type            String
+//   content         String
+//   is_seen         Boolean     @default(false)
+//   is_delete       Boolean     @default(false)
+//   id_achevement   achievement @relation(fields: [achievement_get], references: [id])
+//   achievement_get Int
+// }
 
-model request {
-  id            Int      @id @default(autoincrement())
-  user          user     @relation(fields: [userId], references: [id], name: "user")
-  userId        Int
-  is_req_fr_acc Boolean  @default(false)
-  id_user_send  user     @relation(fields: [user_snd], references: [id], name: "user_send")
-  user_snd      Int
-  id_game_send  game     @relation(fields: [id_game], references: [id])
-  id_game       Int
-  time_exper    DateTime @default(dbgenerated("NOW() + interval '1 year'"))
-  is_exper      Boolean  @default(false)
-  is_seen       Boolean  @default(false)
-  is_delete     Boolean  @default(false)
-}
+// model request {
+//   id            Int      @id @default(autoincrement())
+//   user          user     @relation(fields: [userId], references: [id], name: "user")
+//   userId        Int
+//   is_req_fr_acc Boolean  @default(false)
+//   id_user_send  user     @relation(fields: [user_snd], references: [id], name: "user_send")
+//   user_snd      Int
+//   id_game_send  game     @relation(fields: [id_game], references: [id])
+//   id_game       Int
+//   time_exper    DateTime @default(dbgenerated("NOW() + interval '1 year'"))
+//   is_exper      Boolean  @default(false)
+//   is_seen       Boolean  @default(false)
+//   is_delete     Boolean  @default(false)
+// }
 
-model game {
-  id               Int       @id @default(autoincrement())
-  send_as_request  request[]
-  player_one       user      @relation(fields: [player_one_id], references: [id], name: "player_one")
-  player_one_id    Int
-  player_two       user      @relation(fields: [player_two_id], references: [id], name: "player_two")
-  player_two_id    Int
-  id_winer         Int
-  theme            String
-  player_one_score Int
-  player_two_score Int
-  status           String
-  createdAt        DateTime  @default(now())
-}
+// model game {
+//   id               Int       @id @default(autoincrement())
+//   send_as_request  request[]
+//   player_one       user      @relation(fields: [player_one_id], references: [id], name: "player_one")
+//   player_one_id    Int
+//   player_two       user      @relation(fields: [player_two_id], references: [id], name: "player_two")
+//   player_two_id    Int
+//   id_winer         Int
+//   theme            String
+//   player_one_score Int
+//   player_two_score Int
+//   status           String
+//   createdAt        DateTime  @default(now())
+// }
 
 // model message {
 // createdAt   DateTime  @default(now())
@@ -183,15 +184,15 @@ model game {
 // createdAt
 // }
 
-model membership {
-  // id Int    @id @default(autoincrement())
-  id_send    user    @relation(fields: [user_id], references: [id])
-  user_id    Int
-  // id_channel channel @relation(fields: [channel_id], references: [id])
-  channel_id Int
-  is_admine  Boolean @default(false)
-  is_muted   Boolean @default(false)
-  is_banned  Boolean @default(false)
+// model membership {
+//   // id Int    @id @default(autoincrement())
+//   id_send    user    @relation(fields: [user_id], references: [id])
+//   user_id    Int
+//   // id_channel channel @relation(fields: [channel_id], references: [id])
+//   channel_id Int
+//   is_admine  Boolean @default(false)
+//   is_muted   Boolean @default(false)
+//   is_banned  Boolean @default(false)
 
-  @@id([user_id, channel_id])
-}
+//   @@id([user_id, channel_id])
+// }

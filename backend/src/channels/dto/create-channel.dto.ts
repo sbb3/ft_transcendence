@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsIn, IsNotEmpty, IsString, MinLength, ValidateIf } from "class-validator";
+import { IsIn, IsNotEmpty, IsString, MaxLength, MinLength, ValidateIf } from "class-validator";
 
 export class CreateChannelDto {
 
@@ -8,6 +8,8 @@ export class CreateChannelDto {
 	})
 	@IsString()
 	@IsNotEmpty()
+	@MinLength(3)
+	@MaxLength(15)
 	name : string;
 
 
@@ -34,7 +36,8 @@ export class CreateChannelDto {
 	@ValidateIf(o => o.privacy === 'protected')
 	@IsString()
 	@IsNotEmpty()
-	@MinLength(4,  {message : 'password must at least have 4 characters'})
+	@MinLength(5,  {message : 'password must at least have 5 characters'})
+	@MaxLength(20, {message : 'maximum characters allowed in password are 20'})
 	password : string;
 
 
@@ -43,6 +46,8 @@ export class CreateChannelDto {
 	})
 	@IsString()
 	@IsNotEmpty()
+	@MinLength(3)
+	@MaxLength(50)
 	description : string;
 
 
