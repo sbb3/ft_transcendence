@@ -7,6 +7,7 @@ const routes = require("./routes");
 const env = require("./envalid");
 const verifyJWTAccessToken = require("./JWTmiddleware");
 
+
 const app = express();
 
 const allowedOrigins = [
