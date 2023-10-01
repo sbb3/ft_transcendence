@@ -1,12 +1,39 @@
-import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable,
+		InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { channel, PrismaClient } from '@prisma/client';
 import { CreateChannelDto } from './dto/create-channel.dto';
 import * as bcrypt from 'bcrypt';
 import { UpdateChannelDto } from './dto/update-channel.dto';
-import { DeleteChannelDto } from './dto/delete-channel.dto';
 
 @Injectable()
 export class ChannelsService extends PrismaClient {
+
+	constructor() {
+		super();
+	}
+
+	async findChannelById(channelId : number, selectOptions : any) {
+		const channel = await this.channel.findUnique({
+			where : {
+				id : channelId
+			},
+			select : selectOptions
+		})
+
+		if (!channel)
+			throw new NotFoundException("Channel not found");
+		return channel;
+	}
+
+	async getAvailableChannels() {
+		const allChannels = await this.channel.findMany({where : {
+			privacy : {
+				in : ["public", "protected"]
+			}
+		}})
+
+		return allChannels;
+	}
 
 	async createChannel(channelDto : CreateChannelDto, userId : number) {
 		await this.checkIfChannelExists(channelDto.name);
@@ -23,21 +50,19 @@ export class ChannelsService extends PrismaClient {
 			throw new InternalServerErrorException();
 	}
 
-	async updateChannel(channelDto : UpdateChannelDto, userId : number) {
-		const channelId = channelDto.channelId;
+	async updateChannel(channelDto : UpdateChannelDto, userId : number, channelId : number) {
 		const oldChannel = await this.channel.findUnique({ where : {
 			id : channelId
 		}});
 
 		if (!oldChannel)
-			throw new NotFoundException("Channel to update not found");
+			throw new NotFoundException('Channel to update not found.');
 		if (!this.isOwner(oldChannel, userId))
-			throw new UnauthorizedException("Only the owner and admins can update channel's properties")
+			throw new UnauthorizedException('Only the owner and admins can update channel\'s properties')
 		if (channelDto.name)
 			await this.checkIfChannelExists(channelDto.name);
 
 		await this.checkNewPassword(channelDto);
-		delete channelDto.channelId;
 
 		const updatedChannel = await this.channel.update({
 			where : {id : channelId},
@@ -48,14 +73,14 @@ export class ChannelsService extends PrismaClient {
 			throw new InternalServerErrorException();
 	}
 
-	async deleteChannel(deleteChannelDto : DeleteChannelDto, userId : number) {
-		const channelToDelete = await this.channel.findUnique({ where : {id : deleteChannelDto.channelId} });
+	async deleteChannel(channelId : number, userId : number) {
+		const channelToDelete = await this.channel.findUnique({ where : {id : channelId} });
 
 		if (!channelToDelete)
 			throw new NotFoundException("Channel to delete not found.")
 		if (!this.isOwner(channelToDelete, userId))
 			throw new UnauthorizedException("Only the owner can delete this channel.")
-		if (!await this.channel.delete({where : { id : deleteChannelDto.channelId }}))
+		if (!await this.channel.delete({where : { id : channelId }}))
 			throw new InternalServerErrorException();
 	}
 
@@ -91,4 +116,5 @@ export class ChannelsService extends PrismaClient {
 		if (channel)
 			throw new ConflictException("Channel name \'" + name + "\' is already taken");
 	}
+
 }

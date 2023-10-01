@@ -78,7 +78,7 @@ export class AuthController {
 			const dbUser = await this.authService.createUserIfNotFound(allInfos);
 			const profileId = dbUser.id;
 			const refreshToken = await this.authService.generateRefreshToken({id : profileId});
-	
+
 			this.authService.initCookie('refresh_token', refreshToken, {
 				maxAge: 24 * 15 * 60 * 60 * 1000, // 15 days
 				httpOnly : true,

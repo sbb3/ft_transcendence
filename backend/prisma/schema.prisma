@@ -47,14 +47,14 @@ model user {
   otp_secret           String?
 
   // Relationships here
-  bannedInChannelId    Int
-  bannedInChannel      channel @relation("banned", fields: [bannedInChannelId], references: [id])
+  bannedInChannelId    Int?
+  bannedInChannel      channel? @relation("banned", fields: [bannedInChannelId], references: [id])
 
-  memberId            Int @unique
-  channelMember       channelMember  @relation("memberInChannel", fields: [memberId], references: [id])
+  memberId            Int? @unique
+  channelMember       channelMember?  @relation("memberInChannel", fields: [memberId], references: [id])
 
-  userId              Int @unique
-  userChannelMessage  channelMessage  @relation(fields: [userId], references: [id])
+  userId              Int? @unique
+  userChannelMessage  channelMessage?  @relation(fields: [userId], references: [id])
 }
 
 model channel {

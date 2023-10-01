@@ -3,10 +3,6 @@ import { IsIn, IsNotEmpty, IsNumber, IsOptional, IsString, ValidateIf } from 'cl
 
 export class UpdateChannelDto {
 
-	@ApiProperty({example : "10"})
-	@IsNumber()
-	channelId : number
-
 	@ApiPropertyOptional({example : "channelName"})
 	@IsOptional()
 	@IsString()
@@ -30,4 +26,5 @@ export class UpdateChannelDto {
 	@IsString()
 	@IsNotEmpty()
 	description : string
+
 }
