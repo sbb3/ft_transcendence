@@ -101,7 +101,19 @@ export class ChannelsController {
 				owner : true,
 				privacy : true,
 				description : true,
-				members : true
+				members : {
+					select : {
+						isMuted : true,
+						role : true,
+						user : {
+							select : {
+								name : true,
+								avatar : true,
+								username : true
+							}
+						}
+					}
+				}
 			})));
 		}
 		catch (error) {
@@ -128,8 +140,26 @@ export class ChannelsController {
 		}
 	}
 
+	@Get(':id/members')
+	@UseGuards(JwtGuard)
+	@ApiOperation({summary : 'Get all members of a specified channel.'})
+	@ApiParam({name : 'id', required : true})
+	async getAllChannelMembers(@Param('id', ParseIntPipe) channelId : number, @Res() response : Response) {
+		try {
+			const allMembers = await this.channelsService.getAllChannelMembers(channelId);
+
+			return response.status(200).json(allMembers);
+		}
+		catch (error) {
+			if (error?.status)
+				return response.status(error.status).json(error);
+			return response.status(500).json(error);
+		}
+	}
 }
 
 // When getting resources, select specific informations (check for getting channels)
 // Check for the patch route (should we handle every channel info in one route ?)
-// Should not forget the password validation route (join directly or not)
+// Destructure channel members and put them in a single object
+// Add name, username, avatar when listing members
+// Add owner as owner when creating the channel

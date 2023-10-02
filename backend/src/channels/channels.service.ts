@@ -27,6 +27,33 @@ export class ChannelsService extends PrismaClient {
 		return channel;
 	}
 
+	async getAllChannelMembers(channelId : number) {
+		const allmembers = await this.channel.findUnique({
+			where : {
+				id : channelId
+			},
+			select : {
+				members : {
+					select : {
+						user : {
+							select : {
+								name : true,
+								avatar : true, 
+								username : true
+							}
+						},
+						role : true,
+						isMuted : true
+					}
+				}
+			}
+		});
+
+		if (!allmembers)
+			throw new NotFoundException("Channel not found.");
+		return allmembers;
+	}
+
 	async getAvailableChannels() {
 		const allChannels = await this.channel.findMany({
 			where : {
@@ -38,15 +65,21 @@ export class ChannelsService extends PrismaClient {
 				name : true,
 				description : true,
 				privacy : true, 
-				members : true,
+				members : {
+					select : {
+						user : true,
+						isMuted : true,
+						role : true
+					}
+				},
 			}
 		})
 
 		return allChannels;
 	}
 
-	async joinChannel(channelId : number, userId : number, members : any) {
-		if (members.find((member: { user: { id: number; }; }) => member?.user?.id == userId))
+	async joinChannel(channelId : number, userId : number, members : any, role : string) {
+		if (role != 'owner' && members.find((member: { user: { id: number; }; }) => member?.user?.id == userId))
 			throw new ConflictException("Already a member of this channel.")
 
 		const newMember = await this.channelMember.create({
@@ -56,9 +89,10 @@ export class ChannelsService extends PrismaClient {
 						id : userId
 					}
 				},
-				role : "member"
+				role : role
 			}
 		});
+
 		if (!newMember)
 			throw new InternalServerErrorException();
 
@@ -69,6 +103,7 @@ export class ChannelsService extends PrismaClient {
 				}
 			}
 		});
+
 		if (!updatedChannel)
 			throw new InternalServerErrorException();
 	}
@@ -91,7 +126,7 @@ export class ChannelsService extends PrismaClient {
 		if (!await bcrypt.compare(passwordDto.password, channel.password))
 			throw new UnauthorizedException('Invalid password.');
 
-		await this.joinChannel(channelId, user.id, channel.members);
+		await this.joinChannel(channelId, user.id, channel.members, "member");
 	}
 
 	async createChannel(channelDto : CreateChannelDto, userId : number) {
@@ -105,6 +140,7 @@ export class ChannelsService extends PrismaClient {
 			data : channelDto
 		});
 
+		await this.joinChannel(newChannel.id, userId, null, "owner");
 		if (!newChannel)
 			throw new InternalServerErrorException();
 	}
@@ -114,6 +150,7 @@ export class ChannelsService extends PrismaClient {
 			id : channelId
 		}});
 
+		console.log("nice")
 		if (!oldChannel)
 			throw new NotFoundException('Channel to update not found.');
 		if (!this.isOwner(oldChannel, userId))

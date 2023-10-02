@@ -76,7 +76,6 @@ model channelMember {
   role		String
   user		user? @relation("memberInChannel")
   isMuted	Boolean @default(false)
-  isKicked	Boolean @default(false)
 
   // Relationship here
   channelId	Int?
