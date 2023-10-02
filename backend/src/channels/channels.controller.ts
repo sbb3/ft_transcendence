@@ -1,11 +1,13 @@
 import { Controller, Post, Body, Res, Patch, UseGuards, Req,
-	BadRequestException, Delete, Get, Param, ParseIntPipe } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+	BadRequestException, Delete, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
+import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import { ChannelsService } from './channels.service';
 import { CreateChannelDto } from './dto/create-channel.dto';
 import { UpdateChannelDto } from './dto/update-channel.dto';
+import { QueryDto } from './dto/query.dto';
+import { CheckPasswordDto } from './dto/check-password.dto';
 
 @ApiTags('channels')
 @Controller('channels')
@@ -69,13 +71,30 @@ export class ChannelsController {
 		}
 	}
 
+	@Get()
+	@UseGuards(JwtGuard)
+	@ApiQuery({name : "name", required : false})
+	@ApiOperation({summary : "Get a single channel by name or all channels that are either public or protected."})
+	async getAll(@Query() queryDto : QueryDto,  @Res() response : Response) {
+		try {
+			return response.json(queryDto.name 
+				? await this.channelsService.findUniqueChannel({name : queryDto.name}, undefined)
+				: await this.channelsService.getAvailableChannels());
+		}
+		catch (error) {
+			if (error.status)
+				return response.status(error.status).json(error);
+			return response.status(500).json(error);
+		}
+	}
+
 	@Get(':id')
 	@UseGuards(JwtGuard)
-	@ApiParam({name : 'id'})
-	@ApiOperation({summary : "Get a specific channel from the db."})
+	@ApiParam({name : 'id', required : true})
+	@ApiOperation({summary : "Get a channel by id."})
 	async getSingleChannel(@Param('id', ParseIntPipe) id : number, @Res() response : Response) {
 		try {
-			return (response.status(200).json(await this.channelsService.findChannelById(id, {
+			return (response.status(200).json(await this.channelsService.findUniqueChannel({id : id}, {
 				id : true,
 				name : true,
 				createdAt : true,
@@ -92,17 +111,23 @@ export class ChannelsController {
 		}
 	}
 
-	@Get()
+	@Post(':id/checkPassword')
 	@UseGuards(JwtGuard)
-	@ApiOperation({summary : "Get all channels that are either public or protected."})
-	async getAll(@Res() response : Response) {
+	@ApiParam({name : 'id', required : false})
+	@ApiOperation({summary : 'Validate input password and join a protected channel.'})
+	async validateAndJoin(@Param('id', ParseIntPipe) channelId : number, @Res() response : Response, @Body() checkPasswordDto : CheckPasswordDto) {
 		try {
-			return response.json(await this.channelsService.getAvailableChannels());
+			await this.channelsService.validateChannelPassword(channelId, checkPasswordDto);
+
+			return response.status(200).json({message : 'User has joined this channel succesfully.'});
 		}
 		catch (error) {
+			if (error?.status)
+				return response.status(error.status).json(error);
 			return response.status(500).json(error);
 		}
 	}
+
 }
 
 // When getting resources, select specific informations (check for getting channels)

@@ -4,6 +4,7 @@ import { channel, PrismaClient } from '@prisma/client';
 import { CreateChannelDto } from './dto/create-channel.dto';
 import * as bcrypt from 'bcrypt';
 import { UpdateChannelDto } from './dto/update-channel.dto';
+import { CheckPasswordDto } from './dto/check-password.dto';
 
 @Injectable()
 export class ChannelsService extends PrismaClient {
@@ -12,13 +13,14 @@ export class ChannelsService extends PrismaClient {
 		super();
 	}
 
-	async findChannelById(channelId : number, selectOptions : any) {
-		const channel = await this.channel.findUnique({
-			where : {
-				id : channelId
-			},
-			select : selectOptions
-		})
+	async findUniqueChannel(data : any, selectOptions : any) {
+		const channel = selectOptions ?
+			await this.channel.findUnique({
+				where : data,
+				select : selectOptions
+			}) : await this.channel.findUnique({
+			where : data
+		});
 
 		if (!channel)
 			throw new NotFoundException("Channel not found");
@@ -26,13 +28,70 @@ export class ChannelsService extends PrismaClient {
 	}
 
 	async getAvailableChannels() {
-		const allChannels = await this.channel.findMany({where : {
+		const allChannels = await this.channel.findMany({
+			where : {
 			privacy : {
 				in : ["public", "protected"]
+			},
+			},
+			select : {
+				name : true,
+				description : true,
+				privacy : true, 
+				members : true,
 			}
-		}})
+		})
 
 		return allChannels;
+	}
+
+	async joinChannel(channelId : number, userId : number, members : any) {
+		if (members.find((member: { user: { id: number; }; }) => member?.user?.id == userId))
+			throw new ConflictException("Already a member of this channel.")
+
+		const newMember = await this.channelMember.create({
+			data : {
+				user : {
+					connect : {
+						id : userId
+					}
+				},
+				role : "member"
+			}
+		});
+		if (!newMember)
+			throw new InternalServerErrorException();
+
+		const updatedChannel = await this.updateUniqueChannel({ id : channelId }, {
+			members : {
+				connect : {
+					id : newMember.id
+				}
+			}
+		});
+		if (!updatedChannel)
+			throw new InternalServerErrorException();
+	}
+
+	async validateChannelPassword(channelId : number, passwordDto : CheckPasswordDto) {
+		const channel : any = await this.findUniqueChannel({id : channelId}, { password : true,
+			privacy : true,
+			members : {
+				select : {
+					user : true
+				}
+			}
+		});
+		const user = await this.user.findUnique({where : { id : passwordDto.userId }});
+
+		if (!user)
+			throw new NotFoundException("User not found.")
+		if (channel.privacy == 'public' || channel.privacy == 'private')
+			throw new ConflictException('This channel does not require any password.');
+		if (!await bcrypt.compare(passwordDto.password, channel.password))
+			throw new UnauthorizedException('Invalid password.');
+
+		await this.joinChannel(channelId, user.id, channel.members);
 	}
 
 	async createChannel(channelDto : CreateChannelDto, userId : number) {
@@ -117,4 +176,12 @@ export class ChannelsService extends PrismaClient {
 			throw new ConflictException("Channel name \'" + name + "\' is already taken");
 	}
 
+	private async updateUniqueChannel(where : any, data : any) {
+		const channel = this.channel.update({
+			where : where,
+			data : data
+		});
+
+		return channel;
+	}
 }

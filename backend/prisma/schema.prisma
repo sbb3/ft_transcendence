@@ -79,8 +79,8 @@ model channelMember {
   isKicked	Boolean @default(false)
 
   // Relationship here
-  channelId	Int
-  inChannel	channel @relation("channelMembers", fields: [channelId], references: [id])
+  channelId	Int?
+  inChannel	channel? @relation("channelMembers", fields: [channelId], references: [id])
 }
 
 model channelMessage {
