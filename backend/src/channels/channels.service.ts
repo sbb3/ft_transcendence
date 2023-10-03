@@ -168,6 +168,52 @@ export class ChannelsService extends PrismaClient {
 			throw new InternalServerErrorException();
 	}
 
+	async muteOrUnmute(isMuted : boolean, channelId : number, userId : number) {
+		const updatedMember = await this.channelMember.updateMany({
+			where : {
+				channelId : channelId,
+				user : {
+					id : userId
+				}
+			},
+			data : {
+				isMuted : isMuted
+			}
+		});
+
+		// Check if owner|admin.
+		if (updatedMember.count == 0)
+			throw new NotFoundException("User to mute/unmute or channel not found.");
+	}
+
+	async removeMember(channelId : number, userId : number) {
+		const memberToLeave = await this.channelMember.findMany({
+			where : {
+				channelId : channelId,
+				user : {
+					id : userId
+				}
+			}
+		})
+
+		if (memberToLeave.length == 0)
+			throw new NotFoundException("Member to leave or channel not found.");
+		if (memberToLeave[0].role == "owner")
+			throw new ConflictException("The owner can't leave the channel.")
+
+		const left = await this.channelMember.deleteMany({
+			where : {
+				channelId : channelId,
+				user : {
+					id : userId
+				}
+			}
+		})
+
+		if (left.count == 0)
+			throw new InternalServerErrorException();
+	}
+
 	formatMembers(members : any) {
 		return members.map((member) => {
 			const {avatar, name, username} = member.user;

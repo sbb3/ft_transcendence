@@ -150,6 +150,64 @@ export class ChannelsController {
 		}
 	}
 
+	@Patch(':channelId/members/:userId/mute')
+	@UseGuards(JwtGuard)
+	@ApiParam({name : 'channelId'})
+	@ApiParam({name : 'userId'})
+	@ApiOperation({summary : 'Mute a member of a specific channel.'})
+	async muteMember(@Param('channelId', ParseIntPipe) channelId : number,
+				@Param('userId', ParseIntPipe) userId : number,
+				@Res() response : Response) {
+		try {
+			await this.channelsService.muteOrUnmute(true, channelId, userId);
+
+			return response.status(200).json({message : 'Member has been muted.'});
+		}
+		catch (error) {
+			if (error.status)
+				return response.status(error.status).json(error);
+			return response.status(500).json(error);
+		}
+	}
+
+	@Patch(':channelId/members/:userId/unmute')
+	@UseGuards(JwtGuard)
+	@ApiParam({name : 'channelId'})
+	@ApiParam({name : 'userId'})
+	@ApiOperation({summary : 'Unmute a member of a specific channel.'})
+	async unmuteMember(@Param('channelId', ParseIntPipe) channelId : number,
+				@Param('userId', ParseIntPipe) userId : number,
+				@Res() response : Response) {
+		try {
+			await this.channelsService.muteOrUnmute(false, channelId, userId);
+
+			return response.status(200).json({message : 'Member has been unmuted.'})
+		}
+		catch (error) {
+			if (error.status)
+				return response.status(error.status).json(error);
+			return response.status(500).json(error);
+		}
+	}
+
+	@Patch(':channelId/members/:userId/leave')
+	@UseGuards(JwtGuard)
+	@ApiParam({name : 'channelId'})
+	@ApiParam({name : 'userId'})
+	@ApiOperation({summary : 'Remove a user from a channel.'})
+	async leaveChannel(@Param('channelId', ParseIntPipe) channelId : number,
+			@Param('userId', ParseIntPipe) userId : number ,@Res() response : Response) {
+		try {
+			await this.channelsService.removeMember(channelId, userId);
+
+			return response.json({message : 'This member has been removed from the channel.'});
+		}
+		catch (error) {
+			if (error.status)
+				return response.status(error.status).json(error);
+			return response.status(500).json(error);
+		}
+	}
 
 	private readonly channelSelectionOptions = {
 					name : true,
@@ -158,12 +216,12 @@ export class ChannelsController {
 					owner : true,
 					members : {
 						select : {
-							user : 
+							user :
 							{
 								select : {
 									name : true,
 									username : true,
-									avatar : true
+									avatar : true,
 								}
 							},
 							isMuted : true,
@@ -175,3 +233,15 @@ export class ChannelsController {
 
 // When getting resources, select specific informations (check for getting channels)
 // Check for the patch route (should we handle every channel info in one route ?)
+
+// To do
+// Kick => PATCH /channels/:channelId/members/:memberId/kick
+// Join => PATCH /channels/:channelId/join?username=''
+// Ban => PATCH /channels/:channelId/members/:memberId/ban
+// Mute => PATCH /channels/:channelId/members/:memberId/mute : need validation
+// Unmute => PATCH /channels/:channelId/members/:memberId/unmute : need validation
+// Leave => PATCH /channels/:channelId/members/:memberId/leave : done
+
+// To check later
+// Remove member in service : check if the owner can leave (atm he can't, if he will, then remove the channel ?)
+// MuteOrUnmute : can the admin mute the admin
