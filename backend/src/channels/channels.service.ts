@@ -170,7 +170,21 @@ export class ChannelsService extends PrismaClient {
 			throw new InternalServerErrorException();
 	}
 
-	async muteOrUnmute(isMuted : boolean, channelId : number, userId : number) {
+	async muteOrUnmute(isMuted : boolean, channelId : number, userId : number, muterId : number) {
+		const toMute = await this.channelMember.findMany({
+			where : {
+				channelId : channelId,
+				user : {
+					id : userId,
+				}
+			}
+		});
+
+		if (toMute.length == 0)
+			throw new NotFoundException('User to mute not found.');
+		if (!await this.canControl(muterId, toMute[0].role, channelId))
+			throw new UnauthorizedException('No priviliges to mute/unmute this member.')
+
 		const updatedMember = await this.channelMember.updateMany({
 			where : {
 				channelId : channelId,
@@ -183,12 +197,12 @@ export class ChannelsService extends PrismaClient {
 			}
 		});
 
-		// Check if owner|admin.
 		if (updatedMember.count == 0)
-			throw new NotFoundException("User to mute/unmute or channel not found.");
+			throw new InternalServerErrorException();
 	}
 
-	async removeMember(channelId : number, userId : number) {
+
+	async removeMember(channelId : number, userId : number, action : string, kickerId : number) {
 		const memberToLeave = await this.channelMember.findMany({
 			where : {
 				channelId : channelId,
@@ -196,12 +210,15 @@ export class ChannelsService extends PrismaClient {
 					id : userId
 				}
 			}
-		})
+		});
 
 		if (memberToLeave.length == 0)
-			throw new NotFoundException("Member to leave or channel not found.");
-		if (memberToLeave[0].role == "owner")
-			throw new ConflictException("The owner can't leave the channel.")
+			throw new NotFoundException('Member to leave/kick or channel not found.');
+		if (memberToLeave[0].role == 'owner')
+			throw new ConflictException('The owner can\'t leave or be kicked from this channel.');
+
+		if (action == 'kick' && !this.canControl(kickerId, memberToLeave[0].role, channelId))
+			throw new UnauthorizedException('No privileges to kick this user.');
 
 		const left = await this.channelMember.deleteMany({
 			where : {
@@ -210,7 +227,7 @@ export class ChannelsService extends PrismaClient {
 					id : userId
 				}
 			}
-		})
+		});
 
 		if (left.count == 0)
 			throw new InternalServerErrorException();
@@ -236,12 +253,12 @@ export class ChannelsService extends PrismaClient {
 			}
 		});
 
-		if (channel.privacy == 'protected')
-			throw new BadRequestException('This channel requires a password.')
-		if (!user)
-			throw new NotFoundException('User not found.')
 		if (!channel)
 			throw new NotFoundException('Channel not found.');
+		if (channel.privacy == 'protected')
+			throw new BadRequestException('This channel requires a password.');
+		if (!user)
+			throw new NotFoundException('User not found.');
 		if (channel.members.find(member => member.user.username == username))
 			throw new ConflictException('User is already a member of this channel.');
 
@@ -255,6 +272,21 @@ export class ChannelsService extends PrismaClient {
 
 			return ({avatar, name, username, role, isMuted});
 		})
+	}
+
+	private async canControl(senderId : number, toControlRole : string, channelId : number) {
+		const sender = await this.channelMember.findMany({
+			where : {
+				channelId : channelId,
+				user : {
+					id : senderId,
+				}
+			}
+		});
+
+		if (!sender)
+			throw new NotFoundException('User to kick a member not found.');
+		return ((sender[0].role == 'owner' && toControlRole != 'owner') || (sender[0].role == 'admin' && toControlRole == 'member'));
 	}
 
 	private isOwner(channel : channel, userId : number) {

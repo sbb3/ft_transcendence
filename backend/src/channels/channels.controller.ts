@@ -161,12 +161,12 @@ export class ChannelsController {
 	async patchMemberOfAChannel(@Query() actionQueryDto : ActionQueryDto,
 		@Param('channelId', ParseIntPipe) channelId : number,
 		@Param('userId', ParseIntPipe) userId : number,
-		@Res() response : Response) {
+		@Res() response : Response, @Req() request : Request) {
 		try {
 			if (actionQueryDto.action == 'leave' || actionQueryDto.action == 'kick')
-				await this.channelsService.removeMember(channelId, userId);
-			else
-				await this.channelsService.muteOrUnmute(actionQueryDto.action == 'mute' ? true : false, channelId, userId);
+				await this.channelsService.removeMember(channelId, userId, actionQueryDto.action, request['user'].id);
+			else if (actionQueryDto.action == 'mute' || actionQueryDto.action == 'unmute')
+				await this.channelsService.muteOrUnmute(actionQueryDto.action == 'mute' ? true : false, channelId, userId, request['user'].id);
 
 			return response.status(200).json({message : 'The action \'' + actionQueryDto.action + '\' has been completed.'});
 		}
@@ -220,13 +220,14 @@ export class ChannelsController {
 // Check for the patch route (should we handle every channel info in one route ?)
 
 // To do
-// Kick => PATCH /channels/:channelId/members/:memberId/kick : need validation
+// Kick => PATCH /channels/:channelId/members/:memberId/kick : done
 // Join => PATCH /channels/:channelId/join?username='' : done
 // Ban => PATCH /channels/:channelId/members/:memberId/ban
-// Mute => PATCH /channels/:channelId/members/:memberId/mute : need validation
-// Unmute => PATCH /channels/:channelId/members/:memberId/unmute : need validation
+// Mute => PATCH /channels/:channelId/members/:memberId/mute : done
+// Unmute => PATCH /channels/:channelId/members/:memberId/unmute : done
 // Leave => PATCH /channels/:channelId/members/:memberId/leave : done
 
 // To check later
 // Remove member in service : check if the owner can leave (atm he can't, if he will, then remove the channel ?)
 // MuteOrUnmute : can the admin mute the admin
+// Group mute/unmute/kick/leave
