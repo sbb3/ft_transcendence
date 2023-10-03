@@ -201,6 +201,47 @@ export class ChannelsService extends PrismaClient {
 			throw new InternalServerErrorException();
 	}
 
+	async editMemberRole(channelId : number, username : string, editorId : number, role : string) {
+		const toEdit = await this.channelMember.findMany({
+				where : {
+					channelId : channelId,
+					user : {
+						username : username
+					}
+				}
+			});
+
+		const editor = await this.channelMember.findMany({
+			where :{
+				channelId : channelId,
+				user : {
+					id : editorId,
+				}
+			}
+		})	
+
+		if (toEdit[0].role == 'owner')
+			throw new ConflictException('Owner can\'t edit his role.');
+		if (toEdit.length == 0)
+			throw new NotFoundException('User to edit not found.');
+		if (!editor)
+			throw new NotFoundException('Editor not found.');
+
+		const updatedMember = await this.channelMember.updateMany({
+			where : {
+				channelId : channelId,
+				user : {
+					username : username
+				}
+			},
+			data : {
+				role : role
+			}
+		});
+
+		if (updatedMember.count == 0)
+			throw new InternalServerErrorException();
+	}
 
 	async removeMember(channelId : number, userId : number, action : string, kickerId : number) {
 		const memberToLeave = await this.channelMember.findMany({

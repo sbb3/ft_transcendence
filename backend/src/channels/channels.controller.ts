@@ -10,6 +10,7 @@ import { QueryDto } from './dto/query.dto';
 import { CheckPasswordDto } from './dto/check-password.dto';
 import { ActionQueryDto } from './dto/action-query-dto';
 import { UsernameQueryDto } from './dto/username-query-dto';
+import { EditRoleDto } from './dto/edit-role.dto';
 
 @ApiTags('channels')
 @Controller('channels')
@@ -178,6 +179,8 @@ export class ChannelsController {
 	}
 
 	@Patch(':channelId/join')
+	@UseGuards(JwtGuard)
+	@ApiOperation({summary : 'Join a specific private or public channel.'})
 	@ApiParam({name : 'channelId'})
 	@ApiQuery({name : 'username', required : true})
 	async joinAChannel(@Param('channelId', ParseIntPipe) channelId : number,
@@ -192,6 +195,26 @@ export class ChannelsController {
 				return response.status(error.status).json(error);
 			return response.status(500).json(error);
 		}
+	}
+
+	@Patch(':channelId/members/:username/edit')
+	@UseGuards(JwtGuard)
+	@ApiOperation({summary : 'Edit the role of a member.'})
+	@ApiParam({name : 'channelId'})
+	@ApiParam({name : 'username'})
+	@ApiBody({type : EditRoleDto})
+	async editRoleOfMembers(@Res() response : Response, @Param('channelId', ParseIntPipe) channelId : number,
+		@Param('username') username : string, @Req() request : Request, @Body() roleDto : EditRoleDto) {
+			try {
+				await this.channelsService.editMemberRole(channelId, username, request['user'].id, roleDto.role);
+
+				return response.status(200).json({message : 'Role of user has been edited.'})
+			}
+			catch (error) {
+				if (error.status)
+					return response.status(error.status).json(error);
+				return response.status(500).json(error);
+			}
 	}
 
 	private readonly channelSelectionOptions = {
