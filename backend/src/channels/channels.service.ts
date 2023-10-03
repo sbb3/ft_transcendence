@@ -68,7 +68,7 @@ export class ChannelsService extends PrismaClient {
 	}
 
 	async joinChannel(channelId : number, userId : number, members : any, role : string) {
-		if (role != 'owner' && members.find((member: { user: { id: number; }; }) => member?.user?.id == userId))
+		if (role != 'owner' && members && members.find((member: { user: { id: number; }; }) => member?.user?.id == userId))
 			throw new ConflictException("Already a member of this channel.")
 
 		const newMember = await this.channelMember.create({
@@ -139,6 +139,8 @@ export class ChannelsService extends PrismaClient {
 			id : channelId
 		}});
 
+		if (Object.keys(channelDto).length === 0)
+			throw new BadRequestException('No data found in body.');
 		if (!oldChannel)
 			throw new NotFoundException('Channel to update not found.');
 		if (!this.isOwner(oldChannel, userId))
@@ -212,6 +214,38 @@ export class ChannelsService extends PrismaClient {
 
 		if (left.count == 0)
 			throw new InternalServerErrorException();
+	}
+
+	async validateAndJoinChannel(channelId : number, username : string) {
+		const channel = await this.channel.findUnique({
+			where : {
+				id : channelId
+			},
+			select : {
+				privacy : true,
+				members : {
+					select : {
+						user : true
+					}
+				}
+			}
+		});
+		const user = await this.user.findUnique({
+			where : {
+				username : username
+			}
+		});
+
+		if (channel.privacy == 'protected')
+			throw new BadRequestException('This channel requires a password.')
+		if (!user)
+			throw new NotFoundException('User not found.')
+		if (!channel)
+			throw new NotFoundException('Channel not found.');
+		if (channel.members.find(member => member.user.username == username))
+			throw new ConflictException('User is already a member of this channel.');
+
+		await this.joinChannel(channelId, user.id, null, 'member');
 	}
 
 	formatMembers(members : any) {

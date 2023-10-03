@@ -8,6 +8,8 @@ import { CreateChannelDto } from './dto/create-channel.dto';
 import { UpdateChannelDto } from './dto/update-channel.dto';
 import { QueryDto } from './dto/query.dto';
 import { CheckPasswordDto } from './dto/check-password.dto';
+import { ActionQueryDto } from './dto/action-query-dto';
+import { UsernameQueryDto } from './dto/username-query-dto';
 
 @ApiTags('channels')
 @Controller('channels')
@@ -150,18 +152,23 @@ export class ChannelsController {
 		}
 	}
 
-	@Patch(':channelId/members/:userId/mute')
+	@Patch(':channelId/members/:userId/')
 	@UseGuards(JwtGuard)
 	@ApiParam({name : 'channelId'})
 	@ApiParam({name : 'userId'})
-	@ApiOperation({summary : 'Mute a member of a specific channel.'})
-	async muteMember(@Param('channelId', ParseIntPipe) channelId : number,
-				@Param('userId', ParseIntPipe) userId : number,
-				@Res() response : Response) {
+	@ApiQuery({name : 'action'})
+	@ApiOperation({summary : 'Leave/Kick/Mute/Unmute a member.'})
+	async patchMemberOfAChannel(@Query() actionQueryDto : ActionQueryDto,
+		@Param('channelId', ParseIntPipe) channelId : number,
+		@Param('userId', ParseIntPipe) userId : number,
+		@Res() response : Response) {
 		try {
-			await this.channelsService.muteOrUnmute(true, channelId, userId);
+			if (actionQueryDto.action == 'leave' || actionQueryDto.action == 'kick')
+				await this.channelsService.removeMember(channelId, userId);
+			else
+				await this.channelsService.muteOrUnmute(actionQueryDto.action == 'mute' ? true : false, channelId, userId);
 
-			return response.status(200).json({message : 'Member has been muted.'});
+			return response.status(200).json({message : 'The action \'' + actionQueryDto.action + '\' has been completed.'});
 		}
 		catch (error) {
 			if (error.status)
@@ -170,37 +177,15 @@ export class ChannelsController {
 		}
 	}
 
-	@Patch(':channelId/members/:userId/unmute')
-	@UseGuards(JwtGuard)
+	@Patch(':channelId/join')
 	@ApiParam({name : 'channelId'})
-	@ApiParam({name : 'userId'})
-	@ApiOperation({summary : 'Unmute a member of a specific channel.'})
-	async unmuteMember(@Param('channelId', ParseIntPipe) channelId : number,
-				@Param('userId', ParseIntPipe) userId : number,
-				@Res() response : Response) {
+	@ApiQuery({name : 'username', required : true})
+	async joinAChannel(@Param('channelId', ParseIntPipe) channelId : number,
+		@Query() usernameQuery : UsernameQueryDto, @Res() response : Response) {
 		try {
-			await this.channelsService.muteOrUnmute(false, channelId, userId);
+			await this.channelsService.validateAndJoinChannel(channelId, usernameQuery.username);
 
-			return response.status(200).json({message : 'Member has been unmuted.'})
-		}
-		catch (error) {
-			if (error.status)
-				return response.status(error.status).json(error);
-			return response.status(500).json(error);
-		}
-	}
-
-	@Patch(':channelId/members/:userId/leave')
-	@UseGuards(JwtGuard)
-	@ApiParam({name : 'channelId'})
-	@ApiParam({name : 'userId'})
-	@ApiOperation({summary : 'Remove a user from a channel.'})
-	async leaveChannel(@Param('channelId', ParseIntPipe) channelId : number,
-			@Param('userId', ParseIntPipe) userId : number ,@Res() response : Response) {
-		try {
-			await this.channelsService.removeMember(channelId, userId);
-
-			return response.json({message : 'This member has been removed from the channel.'});
+			return response.status(200).json({message : 'User has joined the channel.'});
 		}
 		catch (error) {
 			if (error.status)
@@ -235,8 +220,8 @@ export class ChannelsController {
 // Check for the patch route (should we handle every channel info in one route ?)
 
 // To do
-// Kick => PATCH /channels/:channelId/members/:memberId/kick
-// Join => PATCH /channels/:channelId/join?username=''
+// Kick => PATCH /channels/:channelId/members/:memberId/kick : need validation
+// Join => PATCH /channels/:channelId/join?username='' : done
 // Ban => PATCH /channels/:channelId/members/:memberId/ban
 // Mute => PATCH /channels/:channelId/members/:memberId/mute : need validation
 // Unmute => PATCH /channels/:channelId/members/:memberId/unmute : need validation
