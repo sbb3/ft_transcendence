@@ -54,25 +54,14 @@ export class ChannelsService extends PrismaClient {
 		return allmembers;
 	}
 
-	async getAvailableChannels() {
+	async getAvailableChannels(selectOptions : any) {
 		const allChannels = await this.channel.findMany({
 			where : {
 			privacy : {
 				in : ["public", "protected"]
 			},
 			},
-			select : {
-				name : true,
-				description : true,
-				privacy : true, 
-				members : {
-					select : {
-						user : true,
-						isMuted : true,
-						role : true
-					}
-				},
-			}
+			select : selectOptions
 		})
 
 		return allChannels;
@@ -150,7 +139,6 @@ export class ChannelsService extends PrismaClient {
 			id : channelId
 		}});
 
-		console.log("nice")
 		if (!oldChannel)
 			throw new NotFoundException('Channel to update not found.');
 		if (!this.isOwner(oldChannel, userId))
@@ -178,6 +166,15 @@ export class ChannelsService extends PrismaClient {
 			throw new UnauthorizedException("Only the owner can delete this channel.")
 		if (!await this.channel.delete({where : { id : channelId }}))
 			throw new InternalServerErrorException();
+	}
+
+	formatMembers(members : any) {
+		return members.map((member) => {
+			const {avatar, name, username} = member.user;
+			const {role, isMuted} = member;
+
+			return ({avatar, name, username, role, isMuted});
+		})
 	}
 
 	private isOwner(channel : channel, userId : number) {

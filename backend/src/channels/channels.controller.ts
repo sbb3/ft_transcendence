@@ -12,6 +12,7 @@ import { CheckPasswordDto } from './dto/check-password.dto';
 @ApiTags('channels')
 @Controller('channels')
 export class ChannelsController {
+
 	constructor(private readonly channelsService: ChannelsService) {}
 
 	@Post()
@@ -77,9 +78,18 @@ export class ChannelsController {
 	@ApiOperation({summary : "Get a single channel by name or all channels that are either public or protected."})
 	async getAll(@Query() queryDto : QueryDto,  @Res() response : Response) {
 		try {
-			return response.json(queryDto.name 
-				? await this.channelsService.findUniqueChannel({name : queryDto.name}, undefined)
-				: await this.channelsService.getAvailableChannels());
+			const data : any = queryDto.name 
+				? await this.channelsService.findUniqueChannel({name : queryDto.name}, this.channelSelectionOptions)
+				: await this.channelsService.getAvailableChannels(this.channelSelectionOptions);
+
+			if (queryDto.name)
+				data.members = this.channelsService.formatMembers(data.members);
+			else {
+				data.forEach(channel => {
+					channel.members = this.channelsService.formatMembers(channel.members);
+				})
+			}
+			return response.status(200).json(data);
 		}
 		catch (error) {
 			if (error.status)
@@ -94,27 +104,10 @@ export class ChannelsController {
 	@ApiOperation({summary : "Get a channel by id."})
 	async getSingleChannel(@Param('id', ParseIntPipe) id : number, @Res() response : Response) {
 		try {
-			return (response.status(200).json(await this.channelsService.findUniqueChannel({id : id}, {
-				id : true,
-				name : true,
-				createdAt : true,
-				owner : true,
-				privacy : true,
-				description : true,
-				members : {
-					select : {
-						isMuted : true,
-						role : true,
-						user : {
-							select : {
-								name : true,
-								avatar : true,
-								username : true
-							}
-						}
-					}
-				}
-			})));
+			const channel : any = await this.channelsService.findUniqueChannel({id : id}, this.channelSelectionOptions);
+
+			channel.members = this.channelsService.formatMembers(channel.members);
+			return (response.status(200).json(channel));
 		}
 		catch (error) {
 			if (error?.status)
@@ -148,7 +141,7 @@ export class ChannelsController {
 		try {
 			const allMembers = await this.channelsService.getAllChannelMembers(channelId);
 
-			return response.status(200).json(allMembers);
+			return response.status(200).json(this.channelsService.formatMembers(allMembers.members));
 		}
 		catch (error) {
 			if (error?.status)
@@ -156,10 +149,29 @@ export class ChannelsController {
 			return response.status(500).json(error);
 		}
 	}
+
+
+	private readonly channelSelectionOptions = {
+					name : true,
+					privacy : true, 
+					description : true,
+					owner : true,
+					members : {
+						select : {
+							user : 
+							{
+								select : {
+									name : true,
+									username : true,
+									avatar : true
+								}
+							},
+							isMuted : true,
+							role : true,
+						}
+					}
+				};
 }
 
 // When getting resources, select specific informations (check for getting channels)
 // Check for the patch route (should we handle every channel info in one route ?)
-// Destructure channel members and put them in a single object
-// Add name, username, avatar when listing members
-// Add owner as owner when creating the channel
