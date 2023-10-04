@@ -75,6 +75,7 @@ export class AuthController {
 			if (!request.user)
 				throw new UnauthorizedException();
 			const allInfos = request.user;
+			allInfos.status = 'online';
 			const dbUser = await this.authService.createUserIfNotFound(allInfos);
 			const profileId = dbUser.id;
 			const refreshToken = await this.authService.generateRefreshToken({id : profileId});
@@ -86,7 +87,6 @@ export class AuthController {
 				sameSite : 'none'
 			}, response);
 
-			this.authService.updateUserData({ id : dbUser.id }, { status : 'online' });
 			return response.redirect(process.env.FRONT_URL + '');
 		}
 		catch (error) {

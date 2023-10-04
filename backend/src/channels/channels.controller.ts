@@ -46,7 +46,9 @@ export class ChannelsController {
 	async updateChannelFields(@Body() updateChannelDto : UpdateChannelDto,
 		@Param('id', ParseIntPipe) channelId : number, @Res() res : Response, @Req() req : any) {
 		try {
-			await this.channelsService.updateChannel(updateChannelDto, req?.user?.id, channelId);
+			if (!req['user']?.id)
+				throw new BadRequestException("Request must contain the owner id.");
+			await this.channelsService.updateChannel(updateChannelDto, req['user'].id, channelId);
 
 			return res.status(200).json({message : "Channel has been updated."});
 		}
@@ -75,49 +77,49 @@ export class ChannelsController {
 		}
 	}
 
-	@Get()
-	@UseGuards(JwtGuard)
-	@ApiQuery({name : "name", required : false})
-	@ApiOperation({summary : "Get a single channel by name or all channels that are either public or protected."})
-	async getAll(@Query() queryDto : QueryDto,  @Res() response : Response) {
-		try {
-			const data : any = queryDto.name 
-				? await this.channelsService.findUniqueChannel({name : queryDto.name}, this.channelSelectionOptions)
-				: await this.channelsService.getAvailableChannels(this.channelSelectionOptions);
+	// @Get()
+	// @UseGuards(JwtGuard)
+	// @ApiQuery({name : "name", required : false})
+	// @ApiOperation({summary : "Get a single channel by name or all channels that are either public or protected."})
+	// async getAll(@Query() queryDto : QueryDto,  @Res() response : Response) {
+	// 	try {
+	// 		const data : any = queryDto.name 
+	// 			? await this.channelsService.findUniqueChannel({name : queryDto.name}, this.channelSelectionOptions)
+	// 			: await this.channelsService.getAvailableChannels(this.channelSelectionOptions);
 
-			if (queryDto.name)
-				data.members = this.channelsService.formatMembers(data.members);
-			else {
-				data.forEach(channel => {
-					channel.members = this.channelsService.formatMembers(channel.members);
-				})
-			}
-			return response.status(200).json(data);
-		}
-		catch (error) {
-			if (error.status)
-				return response.status(error.status).json(error);
-			return response.status(500).json(error);
-		}
-	}
+	// 		if (queryDto.name)
+	// 			data.members = this.channelsService.formatMembers(data.members);
+	// 		else {
+	// 			data.forEach(channel => {
+	// 				channel.members = this.channelsService.formatMembers(channel.members);
+	// 			})
+	// 		}
+	// 		return response.status(200).json(data);
+	// 	}
+	// 	catch (error) {
+	// 		if (error.status)
+	// 			return response.status(error.status).json(error);
+	// 		return response.status(500).json(error);
+	// 	}
+	// }
 
-	@Get(':id')
-	@UseGuards(JwtGuard)
-	@ApiParam({name : 'id', required : true})
-	@ApiOperation({summary : "Get a channel by id."})
-	async getSingleChannel(@Param('id', ParseIntPipe) id : number, @Res() response : Response) {
-		try {
-			const channel : any = await this.channelsService.findUniqueChannel({id : id}, this.channelSelectionOptions);
+	// @Get(':id')
+	// @UseGuards(JwtGuard)
+	// @ApiParam({name : 'id', required : true})
+	// @ApiOperation({summary : "Get a channel by id."})
+	// async getSingleChannel(@Param('id', ParseIntPipe) id : number, @Res() response : Response) {
+	// 	try {
+	// 		const channel : any = await this.channelsService.findUniqueChannel({id : id}, this.channelSelectionOptions);
 
-			channel.members = this.channelsService.formatMembers(channel.members);
-			return (response.status(200).json(channel));
-		}
-		catch (error) {
-			if (error?.status)
-				return response.status(error.status).json(error);
-			return response.status(500).json(error);
-		}
-	}
+	// 		channel.members = this.channelsService.formatMembers(channel.members);
+	// 		return (response.status(200).json(channel));
+	// 	}
+	// 	catch (error) {
+	// 		if (error?.status)
+	// 			return response.status(error.status).json(error);
+	// 		return response.status(500).json(error);
+	// 	}
+	// }
 
 	@Post(':id/checkPassword')
 	@UseGuards(JwtGuard)
@@ -144,7 +146,7 @@ export class ChannelsController {
 		try {
 			const allMembers = await this.channelsService.getAllChannelMembers(channelId);
 
-			return response.status(200).json(this.channelsService.formatMembers(allMembers.members));
+			return response.status(200).json(allMembers);
 		}
 		catch (error) {
 			if (error?.status)
@@ -153,30 +155,30 @@ export class ChannelsController {
 		}
 	}
 
-	@Patch(':channelId/members/:userId/')
-	@UseGuards(JwtGuard)
-	@ApiParam({name : 'channelId'})
-	@ApiParam({name : 'userId'})
-	@ApiQuery({name : 'action'})
-	@ApiOperation({summary : 'Leave/Kick/Mute/Unmute a member.'})
-	async patchMemberOfAChannel(@Query() actionQueryDto : ActionQueryDto,
-		@Param('channelId', ParseIntPipe) channelId : number,
-		@Param('userId', ParseIntPipe) userId : number,
-		@Res() response : Response, @Req() request : Request) {
-		try {
-			if (actionQueryDto.action == 'leave' || actionQueryDto.action == 'kick')
-				await this.channelsService.removeMember(channelId, userId, actionQueryDto.action, request['user'].id);
-			else if (actionQueryDto.action == 'mute' || actionQueryDto.action == 'unmute')
-				await this.channelsService.muteOrUnmute(actionQueryDto.action == 'mute' ? true : false, channelId, userId, request['user'].id);
+	// @Patch(':channelId/members/:userId/')
+	// @UseGuards(JwtGuard)
+	// @ApiParam({name : 'channelId'})
+	// @ApiParam({name : 'userId'})
+	// @ApiQuery({name : 'action'})
+	// @ApiOperation({summary : 'Leave/Kick/Mute/Unmute a member.'})
+	// async patchMemberOfAChannel(@Query() actionQueryDto : ActionQueryDto,
+	// 	@Param('channelId', ParseIntPipe) channelId : number,
+	// 	@Param('userId', ParseIntPipe) userId : number,
+	// 	@Res() response : Response, @Req() request : Request) {
+	// 	try {
+	// 		if (actionQueryDto.action == 'leave' || actionQueryDto.action == 'kick')
+	// 			await this.channelsService.removeMember(channelId, userId, actionQueryDto.action, request['user'].id);
+	// 		else if (actionQueryDto.action == 'mute' || actionQueryDto.action == 'unmute')
+	// 			await this.channelsService.muteOrUnmute(actionQueryDto.action == 'mute' ? true : false, channelId, userId, request['user'].id);
 
-			return response.status(200).json({message : 'The action \'' + actionQueryDto.action + '\' has been completed.'});
-		}
-		catch (error) {
-			if (error.status)
-				return response.status(error.status).json(error);
-			return response.status(500).json(error);
-		}
-	}
+	// 		return response.status(200).json({message : 'The action \'' + actionQueryDto.action + '\' has been completed.'});
+	// 	}
+	// 	catch (error) {
+	// 		if (error.status)
+	// 			return response.status(error.status).json(error);
+	// 		return response.status(500).json(error);
+	// 	}
+	// }
 
 	@Patch(':channelId/join')
 	@UseGuards(JwtGuard)
@@ -197,46 +199,46 @@ export class ChannelsController {
 		}
 	}
 
-	@Patch(':channelId/members/:username/edit')
-	@UseGuards(JwtGuard)
-	@ApiOperation({summary : 'Edit the role of a member.'})
-	@ApiParam({name : 'channelId'})
-	@ApiParam({name : 'username'})
-	@ApiBody({type : EditRoleDto})
-	async editRoleOfMembers(@Res() response : Response, @Param('channelId', ParseIntPipe) channelId : number,
-		@Param('username') username : string, @Req() request : Request, @Body() roleDto : EditRoleDto) {
-			try {
-				await this.channelsService.editMemberRole(channelId, username, request['user'].id, roleDto.role);
+	// @Patch(':channelId/members/:username/edit')
+	// @UseGuards(JwtGuard)
+	// @ApiOperation({summary : 'Edit the role of a member.'})
+	// @ApiParam({name : 'channelId'})
+	// @ApiParam({name : 'username'})
+	// @ApiBody({type : EditRoleDto})
+	// async editRoleOfMembers(@Res() response : Response, @Param('channelId', ParseIntPipe) channelId : number,
+	// 	@Param('username') username : string, @Req() request : Request, @Body() roleDto : EditRoleDto) {
+	// 		try {
+	// 			await this.channelsService.editMemberRole(channelId, username, request['user'].id, roleDto.role);
 
-				return response.status(200).json({message : 'Role of user has been edited.'})
-			}
-			catch (error) {
-				if (error.status)
-					return response.status(error.status).json(error);
-				return response.status(500).json(error);
-			}
-	}
+	// 			return response.status(200).json({message : 'Role of user has been edited.'})
+	// 		}
+	// 		catch (error) {
+	// 			if (error.status)
+	// 				return response.status(error.status).json(error);
+	// 			return response.status(500).json(error);
+	// 		}
+	// }
 
-	private readonly channelSelectionOptions = {
-					name : true,
-					privacy : true, 
-					description : true,
-					owner : true,
-					members : {
-						select : {
-							user :
-							{
-								select : {
-									name : true,
-									username : true,
-									avatar : true,
-								}
-							},
-							isMuted : true,
-							role : true,
-						}
-					}
-				};
+	// private readonly channelSelectionOptions = {
+	// 				name : true,
+	// 				privacy : true, 
+	// 				description : true,
+	// 				owner : true,
+	// 				members : {
+	// 					select : {
+	// 						user :
+	// 						{
+	// 							select : {
+	// 								name : true,
+	// 								username : true,
+	// 								avatar : true,
+	// 							}
+	// 						},
+	// 						isMuted : true,
+	// 						role : true,
+	// 					}
+	// 				}
+	// 			};
 }
 
 // When getting resources, select specific informations (check for getting channels)
@@ -252,5 +254,5 @@ export class ChannelsController {
 
 // To check later
 // Remove member in service : check if the owner can leave (atm he can't, if he will, then remove the channel ?)
-// MuteOrUnmute : can the admin mute the admin
 // Group mute/unmute/kick/leave
+// User information filtering in get routes (members or channels) => functions : getAllChannelMembers

@@ -14,14 +14,6 @@ export class CreateChannelDto {
 
 
 	@ApiProperty({
-		example : "ownerName"
-	})
-	@IsString()
-	@IsNotEmpty()
-	owner : string;
-
-
-	@ApiProperty({
 		example : "public/protected/private"
 	})
 	@IsString()
@@ -49,7 +41,6 @@ export class CreateChannelDto {
 	@MinLength(3)
 	@MaxLength(50)
 	description : string;
-
 
 	ownerId : number
 }

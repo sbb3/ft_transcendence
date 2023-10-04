@@ -28,83 +28,81 @@ export class ChannelsService extends PrismaClient {
 	}
 
 	async getAllChannelMembers(channelId : number) {
-		const allmembers = await this.channel.findUnique({
+		const allMembersIds = await this.channelMember.findMany({
 			where : {
-				id : channelId
+				channelId : channelId,
 			},
 			select : {
-				members : {
-					select : {
-						user : {
-							select : {
-								name : true,
-								avatar : true, 
-								username : true
-							}
-						},
-						role : true,
-						isMuted : true
-					}
-				}
+				role : true,
+				isMuted : true,
+				userId : true
 			}
 		});
 
-		if (!allmembers)
+		if (allMembersIds.length == 0)
 			throw new NotFoundException("Channel not found.");
-		return allmembers;
-	}
-
-	async getAvailableChannels(selectOptions : any) {
-		const allChannels = await this.channel.findMany({
+		const membersAsUsers = await this.user.findMany({
 			where : {
-			privacy : {
-				in : ["public", "protected"]
-			},
-			},
-			select : selectOptions
-		})
-
-		return allChannels;
-	}
-
-	async joinChannel(channelId : number, userId : number, members : any, role : string) {
-		if (role != 'owner' && members && members.find((member: { user: { id: number; }; }) => member?.user?.id == userId))
-			throw new ConflictException("Already a member of this channel.")
-
-		const newMember = await this.channelMember.create({
-			data : {
-				user : {
-					connect : {
-						id : userId
-					}
-				},
-				role : role
-			}
-		});
-
-		if (!newMember)
-			throw new InternalServerErrorException();
-
-		const updatedChannel = await this.updateUniqueChannel({ id : channelId }, {
-			members : {
-				connect : {
-					id : newMember.id
+				id : {
+					in : allMembersIds.map(member => member.userId)
 				}
 			}
 		});
 
-		if (!updatedChannel)
-			throw new InternalServerErrorException();
+		return membersAsUsers.map(member => {
+			const {role, isMuted} = {...allMembersIds.find(memberId => memberId.userId == member.id)};
+
+			return {...member, role, isMuted};
+		});
 	}
+
+	// async getAvailableChannels(selectOptions : any) {
+	// 	const allChannels = await this.channel.findMany({
+	// 		where : {
+	// 		privacy : {
+	// 			in : ["public", "protected"]
+	// 		},
+	// 		},
+	// 		select : selectOptions
+	// 	})
+
+	// 	return allChannels;
+	// }
+
+	// async joinChannel(channelId : number, userId : number, members : any, role : string) {
+	// 	if (role != 'owner' && members && members.find((member: { user: { id: number; }; }) => member?.user?.id == userId))
+	// 		throw new ConflictException("Already a member of this channel.")
+
+	// 	const newMember = await this.channelMember.create({
+	// 		data : {
+	// 			user : {
+	// 				connect : {
+	// 					id : userId
+	// 				}
+	// 			},
+	// 			role : role
+	// 		}
+	// 	});
+
+	// 	if (!newMember)
+	// 		throw new InternalServerErrorException();
+
+	// 	const updatedChannel = await this.updateUniqueChannel({ id : channelId }, {
+	// 		members : {
+	// 			connect : {
+	// 				id : newMember.id
+	// 			}
+	// 		}
+	// 	});
+
+	// 	if (!updatedChannel)
+	// 		throw new InternalServerErrorException();
+	// }
 
 	async validateChannelPassword(channelId : number, passwordDto : CheckPasswordDto) {
 		const channel : any = await this.findUniqueChannel({id : channelId}, { password : true,
 			privacy : true,
-			members : {
-				select : {
-					user : true
-				}
-			}
+			members : true
 		});
 		const user = await this.user.findUnique({where : { id : passwordDto.userId }});
 
@@ -115,13 +113,42 @@ export class ChannelsService extends PrismaClient {
 		if (!await bcrypt.compare(passwordDto.password, channel.password))
 			throw new UnauthorizedException('Invalid password.');
 
-		await this.joinChannel(channelId, user.id, channel.members, "member");
+		await this.joinChannel(channelId, user.id, channel.members, true);
 	}
 
-	async createChannel(channelDto : CreateChannelDto, userId : number) {
-		await this.checkIfChannelExists(channelDto.name);
-		channelDto.ownerId = userId;
+	async joinChannel(channelId : number, userId : number, members : any, shouldCheck : boolean) {
+		if (shouldCheck && members?.find(member => member.userId == userId && channelId == channelId))
+				throw new ConflictException('Already a member of this channel.')
 
+		const newMember = await this.channelMember.create({
+			data : {
+				userId : userId,
+				role : shouldCheck ? 'member' : 'owner',
+			}
+		});
+
+		if (!newMember)
+			throw new InternalServerErrorException();
+		const updatedChannel = await this.channel.update({
+			where : {
+				id : channelId,
+			},
+			data : {
+				members : {
+					connect : {
+						id : newMember.id,
+					}
+				}
+			}
+			})
+		if (!updatedChannel)
+			throw new InternalServerErrorException();
+	}
+
+	async createChannel(channelDto : CreateChannelDto, creatorId : number) {
+		await this.checkIfChannelExists(channelDto.name);
+
+		channelDto.ownerId = creatorId;
 		if (channelDto.privacy === 'protected')
 			channelDto.password = await bcrypt.hash(channelDto.password, 10);
 
@@ -129,9 +156,7 @@ export class ChannelsService extends PrismaClient {
 			data : channelDto
 		});
 
-		await this.joinChannel(newChannel.id, userId, null, "owner");
-		if (!newChannel)
-			throw new InternalServerErrorException();
+		await this.joinChannel(newChannel.id, creatorId, null, false);
 	}
 
 	async updateChannel(channelDto : UpdateChannelDto, userId : number, channelId : number) {
@@ -143,8 +168,8 @@ export class ChannelsService extends PrismaClient {
 			throw new BadRequestException('No data found in body.');
 		if (!oldChannel)
 			throw new NotFoundException('Channel to update not found.');
-		if (!this.isOwner(oldChannel, userId))
-			throw new UnauthorizedException('Only the owner and admins can update channel\'s properties')
+		if (userId != oldChannel.ownerId)
+			throw new UnauthorizedException('Only the owner and admins can update the channel\'s properties')
 		if (channelDto.name)
 			await this.checkIfChannelExists(channelDto.name);
 
@@ -164,115 +189,115 @@ export class ChannelsService extends PrismaClient {
 
 		if (!channelToDelete)
 			throw new NotFoundException("Channel to delete not found.")
-		if (!this.isOwner(channelToDelete, userId))
+		if (userId != channelToDelete.ownerId)
 			throw new UnauthorizedException("Only the owner can delete this channel.")
 		if (!await this.channel.delete({where : { id : channelId }}))
 			throw new InternalServerErrorException();
 	}
 
-	async muteOrUnmute(isMuted : boolean, channelId : number, userId : number, muterId : number) {
-		const toMute = await this.channelMember.findMany({
-			where : {
-				channelId : channelId,
-				user : {
-					id : userId,
-				}
-			}
-		});
+	// async muteOrUnmute(isMuted : boolean, channelId : number, userId : number, muterId : number) {
+	// 	const toMute = await this.channelMember.findMany({
+	// 		where : {
+	// 			channelId : channelId,
+	// 			user : {
+	// 				id : userId,
+	// 			}
+	// 		}
+	// 	});
 
-		if (toMute.length == 0)
-			throw new NotFoundException('User to mute not found.');
-		if (!await this.canControl(muterId, toMute[0].role, channelId))
-			throw new UnauthorizedException('No priviliges to mute/unmute this member.')
+	// 	if (toMute.length == 0)
+	// 		throw new NotFoundException('User to mute not found.');
+	// 	if (!await this.canControl(muterId, toMute[0].role, channelId))
+	// 		throw new UnauthorizedException('No priviliges to mute/unmute this member.')
 
-		const updatedMember = await this.channelMember.updateMany({
-			where : {
-				channelId : channelId,
-				user : {
-					id : userId
-				}
-			},
-			data : {
-				isMuted : isMuted
-			}
-		});
+	// 	const updatedMember = await this.channelMember.updateMany({
+	// 		where : {
+	// 			channelId : channelId,
+	// 			user : {
+	// 				id : userId
+	// 			}
+	// 		},
+	// 		data : {
+	// 			isMuted : isMuted
+	// 		}
+	// 	});
 
-		if (updatedMember.count == 0)
-			throw new InternalServerErrorException();
-	}
+	// 	if (updatedMember.count == 0)
+	// 		throw new InternalServerErrorException();
+	// }
 
-	async editMemberRole(channelId : number, username : string, editorId : number, role : string) {
-		const toEdit = await this.channelMember.findMany({
-				where : {
-					channelId : channelId,
-					user : {
-						username : username
-					}
-				}
-			});
+	// async editMemberRole(channelId : number, username : string, editorId : number, role : string) {
+	// 	const toEdit = await this.channelMember.findMany({
+	// 			where : {
+	// 				channelId : channelId,
+	// 				user : {
+	// 					username : username
+	// 				}
+	// 			}
+	// 		});
 
-		const editor = await this.channelMember.findMany({
-			where :{
-				channelId : channelId,
-				user : {
-					id : editorId,
-				}
-			}
-		})	
+	// 	const editor = await this.channelMember.findMany({
+	// 		where :{
+	// 			channelId : channelId,
+	// 			user : {
+	// 				id : editorId,
+	// 			}
+	// 		}
+	// 	})	
 
-		if (toEdit[0].role == 'owner')
-			throw new ConflictException('Owner can\'t edit his role.');
-		if (toEdit.length == 0)
-			throw new NotFoundException('User to edit not found.');
-		if (!editor)
-			throw new NotFoundException('Editor not found.');
+	// 	if (toEdit[0].role == 'owner')
+	// 		throw new ConflictException('Owner can\'t edit his role.');
+	// 	if (toEdit.length == 0)
+	// 		throw new NotFoundException('User to edit not found.');
+	// 	if (!editor)
+	// 		throw new NotFoundException('Editor not found.');
 
-		const updatedMember = await this.channelMember.updateMany({
-			where : {
-				channelId : channelId,
-				user : {
-					username : username
-				}
-			},
-			data : {
-				role : role
-			}
-		});
+	// 	const updatedMember = await this.channelMember.updateMany({
+	// 		where : {
+	// 			channelId : channelId,
+	// 			user : {
+	// 				username : username
+	// 			}
+	// 		},
+	// 		data : {
+	// 			role : role
+	// 		}
+	// 	});
 
-		if (updatedMember.count == 0)
-			throw new InternalServerErrorException();
-	}
+	// 	if (updatedMember.count == 0)
+	// 		throw new InternalServerErrorException();
+	// }
 
-	async removeMember(channelId : number, userId : number, action : string, kickerId : number) {
-		const memberToLeave = await this.channelMember.findMany({
-			where : {
-				channelId : channelId,
-				user : {
-					id : userId
-				}
-			}
-		});
+	// async removeMember(channelId : number, userId : number, action : string, kickerId : number) {
+	// 	const memberToLeave = await this.channelMember.findMany({
+	// 		where : {
+	// 			channelId : channelId,
+	// 			user : {
+	// 				id : userId
+	// 			}
+	// 		}
+	// 	});
 
-		if (memberToLeave.length == 0)
-			throw new NotFoundException('Member to leave/kick or channel not found.');
-		if (memberToLeave[0].role == 'owner')
-			throw new ConflictException('The owner can\'t leave or be kicked from this channel.');
+	// 	if (memberToLeave.length == 0)
+	// 		throw new NotFoundException('Member to leave/kick or channel not found.');
+	// 	if (memberToLeave[0].role == 'owner')
+	// 		throw new ConflictException('The owner can\'t leave or be kicked from this channel.');
 
-		if (action == 'kick' && !this.canControl(kickerId, memberToLeave[0].role, channelId))
-			throw new UnauthorizedException('No privileges to kick this user.');
+	// 	if (action == 'kick' && !this.canControl(kickerId, memberToLeave[0].role, channelId))
+	// 		throw new UnauthorizedException('No privileges to kick this user.');
 
-		const left = await this.channelMember.deleteMany({
-			where : {
-				channelId : channelId,
-				user : {
-					id : userId
-				}
-			}
-		});
+	// 	const left = await this.channelMember.deleteMany({
+	// 		where : {
+	// 			channelId : channelId,
+	// 			user : {
+	// 				id : userId
+	// 			}
+	// 		}
+	// 	});
 
-		if (left.count == 0)
-			throw new InternalServerErrorException();
-	}
+	// 	if (left.count == 0)
+	// 		throw new InternalServerErrorException();
+	// }
 
 	async validateAndJoinChannel(channelId : number, username : string) {
 		const channel = await this.channel.findUnique({
@@ -281,11 +306,7 @@ export class ChannelsService extends PrismaClient {
 			},
 			select : {
 				privacy : true,
-				members : {
-					select : {
-						user : true
-					}
-				}
+				members : true,
 			}
 		});
 		const user = await this.user.findUnique({
@@ -300,44 +321,42 @@ export class ChannelsService extends PrismaClient {
 			throw new BadRequestException('This channel requires a password.');
 		if (!user)
 			throw new NotFoundException('User not found.');
-		if (channel.members.find(member => member.user.username == username))
-			throw new ConflictException('User is already a member of this channel.');
 
-		await this.joinChannel(channelId, user.id, null, 'member');
+		await this.joinChannel(channelId, user.id, channel.members, true);
 	}
 
-	formatMembers(members : any) {
-		return members.map((member) => {
-			const {avatar, name, username} = member.user;
-			const {role, isMuted} = member;
+	// formatMembers(members : any) {
+	// 	return members.map((member) => {
+	// 		const {avatar, name, username} = member.user;
+	// 		const {role, isMuted} = member;
 
-			return ({avatar, name, username, role, isMuted});
-		})
-	}
+	// 		return ({avatar, name, username, role, isMuted});
+	// 	})
+	// }
 
-	private async canControl(senderId : number, toControlRole : string, channelId : number) {
-		const sender = await this.channelMember.findMany({
-			where : {
-				channelId : channelId,
-				user : {
-					id : senderId,
-				}
-			}
-		});
+	// private async canControl(senderId : number, toControlRole : string, channelId : number) {
+	// 	const sender = await this.channelMember.findMany({
+	// 		where : {
+	// 			channelId : channelId,
+	// 			user : {
+	// 				id : senderId,
+	// 			}
+	// 		}
+	// 	});
 
-		if (!sender)
-			throw new NotFoundException('User to kick a member not found.');
-		return ((sender[0].role == 'owner' && toControlRole != 'owner') || (sender[0].role == 'admin' && toControlRole == 'member'));
-	}
+	// 	if (!sender)
+	// 		throw new NotFoundException('User to kick a member not found.');
+	// 	return ((sender[0].role == 'owner' && toControlRole != 'owner') || (sender[0].role == 'admin' && toControlRole == 'member'));
+	// }
 
-	private isOwner(channel : channel, userId : number) {
-		return channel.ownerId === userId;
-	}
+	// private isOwner(channel : channel, userId : number) {
+	// 	return channel.ownerId === userId;
+	// }
 
-	private isAdmin(channel : channel, userId : number) {
-		// Check if the user that wants to change smthg on the channel is an admin
-		return true;
-	}
+	// private isAdmin(channel : channel, userId : number) {
+	// 	// Check if the user that wants to change smthg on the channel is an admin
+	// 	return true;
+	// }
 
 	private async checkNewPassword(channelDto : UpdateChannelDto) {
 		let privacy = channelDto.privacy;
@@ -363,12 +382,12 @@ export class ChannelsService extends PrismaClient {
 			throw new ConflictException("Channel name \'" + name + "\' is already taken");
 	}
 
-	private async updateUniqueChannel(where : any, data : any) {
-		const channel = this.channel.update({
-			where : where,
-			data : data
-		});
+	// private async updateUniqueChannel(where : any, data : any) {
+	// 	const channel = this.channel.update({
+	// 		where : where,
+	// 		data : data
+	// 	});
 
-		return channel;
-	}
+	// 	return channel;
+	// }
 }
