@@ -39,6 +39,24 @@ export class ChannelsController {
 		}
 	}
 
+	@Post(':id/checkPassword')
+	@UseGuards(JwtGuard)
+	@ApiParam({name : 'id', required : false})
+	@ApiBody({type : CheckPasswordDto})
+	@ApiOperation({summary : 'Validate input password and join a protected channel.'})
+	async validateAndJoin(@Param('id', ParseIntPipe) channelId : number, @Res() response : Response, @Body() checkPasswordDto : CheckPasswordDto) {
+		try {
+			await this.channelsService.validateChannelPassword(channelId, checkPasswordDto);
+
+			return response.status(200).json({message : 'User has joined this channel succesfully.'});
+		}
+		catch (error) {
+			if (error?.status)
+				return response.status(error.status).json(error);
+			return response.status(500).json(error);
+		}
+	}
+
 	@Patch(':id')
 	@UseGuards(JwtGuard)
 	@ApiOperation({summary : "Update one of the channel's general infos in the db."})
@@ -105,24 +123,6 @@ export class ChannelsController {
 			const channel : any = await this.channelsService.getChannelWithMembers(null, this.channelSelectionOptions, id);
 
 			return response.status(200).json(channel);
-		}
-		catch (error) {
-			if (error?.status)
-				return response.status(error.status).json(error);
-			return response.status(500).json(error);
-		}
-	}
-
-	@Post(':id/checkPassword')
-	@UseGuards(JwtGuard)
-	@ApiParam({name : 'id', required : false})
-	@ApiBody({type : CheckPasswordDto})
-	@ApiOperation({summary : 'Validate input password and join a protected channel.'})
-	async validateAndJoin(@Param('id', ParseIntPipe) channelId : number, @Res() response : Response, @Body() checkPasswordDto : CheckPasswordDto) {
-		try {
-			await this.channelsService.validateChannelPassword(channelId, checkPasswordDto);
-
-			return response.status(200).json({message : 'User has joined this channel succesfully.'});
 		}
 		catch (error) {
 			if (error?.status)
@@ -220,6 +220,7 @@ export class ChannelsController {
 	@UseGuards(JwtGuard)
 	@ApiParam({name : 'channelId'})
 	@ApiParam({name : 'memberId'})
+	@ApiOperation({summary : 'Ban a player from a channel.'})
 	async banMember(@Req() request : Request, @Param('channelId', ParseIntPipe) channelId : number,
 		@Param('memberId', ParseIntPipe) userId : number, @Res() response : Response) {
 			try {
@@ -228,6 +229,27 @@ export class ChannelsController {
 
 				await this.channelsService.ban(channelId, userId, request['user'].id);
 				return response.status(200).json({message : 'User has been banned from this channel'})
+			}
+			catch (error) {
+				if (error.status)
+					return response.status(error.status).json(error);
+				return response.status(500).json(error);
+			}
+	}
+
+	@Patch(':channelId/members/:memberId/unban')
+	@UseGuards(JwtGuard)
+	@ApiParam({name : 'channelId'})
+	@ApiParam({name : 'memberId'})
+	@ApiOperation({summary : 'Ban a player from a channel.'})
+	async unbanMember(@Req() request : Request, @Param('channelId', ParseIntPipe) channelId : number,
+		@Param('memberId', ParseIntPipe) userId : number, @Res() response : Response) {
+			try {
+				if (!request['user']?.id)
+					throw new BadRequestException('Request must contain the owner id.');
+
+				await this.channelsService.unban(channelId, userId, request['user'].id);
+				return response.status(200).json({message : 'User has been unbanned from this channel'})
 			}
 			catch (error) {
 				if (error.status)
@@ -260,3 +282,4 @@ export class ChannelsController {
 // Change username to userId in : PATCH /channels/:channelId/members/:username/edit
 // Add edit route with the route that handles every member action. (query)
 // Check validation of actio route (muter can't mute himself)
+// Add unban route

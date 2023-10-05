@@ -114,7 +114,8 @@ export class ChannelsService extends PrismaClient {
 	async validateChannelPassword(channelId : number, passwordDto : CheckPasswordDto) {
 		const channel : any = await this.findUniqueChannel({id : channelId}, { password : true,
 			privacy : true,
-			members : true
+			members : true,
+			banned : true,
 		});
 		const user = await this.user.findUnique({where : { id : passwordDto.userId }});
 
@@ -125,10 +126,12 @@ export class ChannelsService extends PrismaClient {
 		if (!await bcrypt.compare(passwordDto.password, channel.password))
 			throw new UnauthorizedException('Invalid password.');
 
-		await this.joinChannel(channelId, user.id, channel.members, true);
+		await this.joinChannel(channelId, user.id, channel.members, true, channel.banned);
 	}
 
-	async joinChannel(channelId : number, userId : number, members : any, shouldCheck : boolean) {
+	async joinChannel(channelId : number, userId : number, members : any, shouldCheck : boolean, banned : number[]) {
+		if (banned.find(bannedUserId => bannedUserId == userId))
+			throw new UnauthorizedException('Banned from this channel.');
 		if (shouldCheck && members?.find(member => member.userId == userId && channelId == channelId))
 				throw new ConflictException('Already a member of this channel.')
 
@@ -168,7 +171,7 @@ export class ChannelsService extends PrismaClient {
 			data : channelDto
 		});
 
-		await this.joinChannel(newChannel.id, creatorId, null, false);
+		await this.joinChannel(newChannel.id, creatorId, null, false, []);
 	}
 
 	async updateChannel(channelDto : UpdateChannelDto, userId : number, channelId : number) {
@@ -210,15 +213,15 @@ export class ChannelsService extends PrismaClient {
 	async ban(channelId : number, memberToBanId : number, editorId : number) {
 		const channel : any = await this.findUniqueChannel({id : channelId}, {members : true, banned : true});
 		const toBan = channel.members.find(member => member.userId === memberToBanId);
-		const banner = channel.members.find(member => member.userId === editorId);
+		const editor = channel.members.find(member => member.userId === editorId);
 
 		if (channel.banned.find(banned => banned == memberToBanId))
 			throw new ConflictException('This user is already banned.');
-		if (!toBan || !banner)
+		if (!toBan || !editor)
 			throw new NotFoundException(!toBan ? 'Member to ban not found.' : 'Member that wants to ban not found.');
-		if (toBan.userId === banner.userId)
+		if (toBan.userId === editor.userId)
 			throw new UnauthorizedException('Member that wants to ban can\'t ban himself.');
-		if (!this.canControl(banner.role, toBan.role))
+		if (!this.canControl(editor.role, toBan.role))
 			throw new UnauthorizedException('No privileges to ban this member.');
 		const banned = [...channel.banned, memberToBanId];
 
@@ -234,6 +237,27 @@ export class ChannelsService extends PrismaClient {
 			},
 			data : {
 				banned : banned,
+			}
+		})
+	}
+
+	async unban(channelId : number, memberToUnbanId : number, editorId : number) {
+		const channel : any = await this.findUniqueChannel({id : channelId}, {members : true, banned : true});
+		const editor = channel.members.find(member => member.userId === editorId);
+		const bannedMember = channel.banned.find(bannedId => bannedId === memberToUnbanId);
+
+		if (!bannedMember || !editor)
+			throw new NotFoundException(!editor ? 'Member that wants to unban not found.' : 'User to unban not found in the banned list.');
+		if (editor.role == 'member')
+			throw new UnauthorizedException('Only the owner and admins can unban users.');
+		let updatedArrayOfBannedUsers = channel.banned.filter(banned => banned != memberToUnbanId);
+	
+		await this.channel.update({
+			where : {
+				id : channelId
+			},
+			data : {
+				banned : updatedArrayOfBannedUsers,
 			}
 		})
 	}
@@ -320,6 +344,7 @@ export class ChannelsService extends PrismaClient {
 			select : {
 				privacy : true,
 				members : true,
+				banned : true,
 			}
 		});
 		const user = await this.user.findUnique({
@@ -335,7 +360,7 @@ export class ChannelsService extends PrismaClient {
 		if (!user)
 			throw new NotFoundException('User not found.');
 
-		await this.joinChannel(channelId, user.id, channel.members, true);
+		await this.joinChannel(channelId, user.id, channel.members, true, channel.banned);
 	}
 
 	private async checkNewPassword(channelDto : UpdateChannelDto) {
