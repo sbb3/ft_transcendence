@@ -163,8 +163,8 @@ export class ChannelsController {
 				throw new BadRequestException('Request must contain the owner id.');
 			if (actionQueryDto.action == 'leave' || actionQueryDto.action == 'kick')
 				await this.channelsService.removeMember(channelId, userId, actionQueryDto.action, request['user'].id);
-			// else if (actionQueryDto.action == 'mute' || actionQueryDto.action == 'unmute')
-			// 	await this.channelsService.muteOrUnmute(actionQueryDto.action == 'mute' ? true : false, channelId, userId, request['user'].id);
+			else if (actionQueryDto.action == 'mute' || actionQueryDto.action == 'unmute')
+				await this.channelsService.muteOrUnmute(actionQueryDto.action == 'mute' ? true : false, channelId, userId, request['user'].id);
 
 			return response.status(200).json({message : 'The action \'' + actionQueryDto.action + '\' has been completed.'});
 		}
@@ -216,6 +216,26 @@ export class ChannelsController {
 			}
 	}
 
+	@Patch(':channelId/members/:memberId/ban')
+	@UseGuards(JwtGuard)
+	@ApiParam({name : 'channelId'})
+	@ApiParam({name : 'memberId'})
+	async banMember(@Req() request : Request, @Param('channelId', ParseIntPipe) channelId : number,
+		@Param('memberId', ParseIntPipe) userId : number, @Res() response : Response) {
+			try {
+				if (!request['user']?.id)
+					throw new BadRequestException('Request must contain the owner id.');
+
+				await this.channelsService.ban(channelId, userId, request['user'].id);
+				return response.status(200).json({message : 'User has been banned from this channel'})
+			}
+			catch (error) {
+				if (error.status)
+					return response.status(error.status).json(error);
+				return response.status(500).json(error);
+			}
+	}
+
 	private readonly channelSelectionOptions = {
 					name : true,
 					privacy : true, 
@@ -239,3 +259,4 @@ export class ChannelsController {
 // Create a formmating function that gets channels and users as members.
 // Change username to userId in : PATCH /channels/:channelId/members/:username/edit
 // Add edit route with the route that handles every member action. (query)
+// Check validation of actio route (muter can't mute himself)

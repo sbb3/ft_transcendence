@@ -46,10 +46,7 @@ model user {
   is_otp_validated     Boolean  @default(false)
   otp_secret           String?
 
-  // Relationships here
-  bannedInChannelId    Int?
-  bannedInChannel      channel? @relation("banned", fields: [bannedInChannelId], references: [id])
-
+  // Message relationship
   userId              Int? @unique
   userChannelMessage  channelMessage?  @relation(fields: [userId], references: [id])
 }
@@ -62,9 +59,9 @@ model channel {
   privacy     String
   password    String?
   description String
+  banned      Int[]
 
   members channelMember[] @relation("channelMembers")
-  banned  user[] @relation("banned")
 }
 
 model channelMember {

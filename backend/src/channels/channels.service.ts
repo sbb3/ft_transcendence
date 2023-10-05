@@ -111,36 +111,6 @@ export class ChannelsService extends PrismaClient {
 		return formattedChannels;
 	}
 
-	// async joinChannel(channelId : number, userId : number, members : any, role : string) {
-	// 	if (role != 'owner' && members && members.find((member: { user: { id: number; }; }) => member?.user?.id == userId))
-	// 		throw new ConflictException("Already a member of this channel.")
-
-	// 	const newMember = await this.channelMember.create({
-	// 		data : {
-	// 			user : {
-	// 				connect : {
-	// 					id : userId
-	// 				}
-	// 			},
-	// 			role : role
-	// 		}
-	// 	});
-
-	// 	if (!newMember)
-	// 		throw new InternalServerErrorException();
-
-	// 	const updatedChannel = await this.updateUniqueChannel({ id : channelId }, {
-	// 		members : {
-	// 			connect : {
-	// 				id : newMember.id
-	// 			}
-	// 		}
-	// 	});
-
-	// 	if (!updatedChannel)
-	// 		throw new InternalServerErrorException();
-	// }
-
 	async validateChannelPassword(channelId : number, passwordDto : CheckPasswordDto) {
 		const channel : any = await this.findUniqueChannel({id : channelId}, { password : true,
 			privacy : true,
@@ -237,36 +207,58 @@ export class ChannelsService extends PrismaClient {
 			throw new InternalServerErrorException();
 	}
 
-	// async muteOrUnmute(isMuted : boolean, channelId : number, userId : number, muterId : number) {
-	// 	const toMute = await this.channelMember.findMany({
-	// 		where : {
-	// 			channelId : channelId,
-	// 			user : {
-	// 				id : userId,
-	// 			}
-	// 		}
-	// 	});
+	async ban(channelId : number, memberToBanId : number, editorId : number) {
+		const channel : any = await this.findUniqueChannel({id : channelId}, {members : true, banned : true});
+		const toBan = channel.members.find(member => member.userId === memberToBanId);
+		const banner = channel.members.find(member => member.userId === editorId);
 
-	// 	if (toMute.length == 0)
-	// 		throw new NotFoundException('User to mute not found.');
-	// 	if (!await this.canControl(muterId, toMute[0].role, channelId))
-	// 		throw new UnauthorizedException('No priviliges to mute/unmute this member.')
+		if (channel.banned.find(banned => banned == memberToBanId))
+			throw new ConflictException('This user is already banned.');
+		if (!toBan || !banner)
+			throw new NotFoundException(!toBan ? 'Member to ban not found.' : 'Member that wants to ban not found.');
+		if (toBan.userId === banner.userId)
+			throw new UnauthorizedException('Member that wants to ban can\'t ban himself.');
+		if (!this.canControl(banner.role, toBan.role))
+			throw new UnauthorizedException('No privileges to ban this member.');
+		const banned = [...channel.banned, memberToBanId];
 
-	// 	const updatedMember = await this.channelMember.updateMany({
-	// 		where : {
-	// 			channelId : channelId,
-	// 			user : {
-	// 				id : userId
-	// 			}
-	// 		},
-	// 		data : {
-	// 			isMuted : isMuted
-	// 		}
-	// 	});
+		await this.channelMember.deleteMany({
+			where : {
+				channelId : channelId,
+				userId : memberToBanId,
+			}
+		});
+		await this.channel.update({
+			where : {
+				id : channelId
+			},
+			data : {
+				banned : banned,
+			}
+		})
+	}
 
-	// 	if (updatedMember.count == 0)
-	// 		throw new InternalServerErrorException();
-	// }
+	async muteOrUnmute(isMuted : boolean, channelId : number, memberToMuteId : number, muterId : number) {
+		const channel : any = await this.findUniqueChannel({id : channelId}, {members : true});
+		const toMute = channel?.members?.find(member => member.userId == memberToMuteId);
+		const muter = channel?.members?.find(member => member.userId == muterId);
+
+		if (!toMute || !muter)
+			throw new NotFoundException(!toMute ? 'Member to mute not found.' : 'Muter not found.');
+		if (toMute.id == muter.id)
+			throw new ConflictException('Muter can\'t mute himself.');
+		if (!this.canControl(muter.role, toMute.role))
+			throw new UnauthorizedException('No privileges to mute this member.');
+		await this.channelMember.updateMany({
+			where : {
+				channelId : channelId,
+				userId : memberToMuteId,
+			},
+			data : {
+				isMuted : isMuted,
+			}
+		});
+	}
 
 	private canControl(roleOfEditor : string, roleOfUserToEdit : string) {
 		return (roleOfEditor == 'owner' || (roleOfEditor == 'admin' && roleOfUserToEdit == 'member'));
@@ -346,15 +338,6 @@ export class ChannelsService extends PrismaClient {
 		await this.joinChannel(channelId, user.id, channel.members, true);
 	}
 
-	// formatMembers(members : any) {
-	// 	return members.map((member) => {
-	// 		const {avatar, name, username} = member.user;
-	// 		const {role, isMuted} = member;
-
-	// 		return ({avatar, name, username, role, isMuted});
-	// 	})
-	// }
-
 	private async checkNewPassword(channelDto : UpdateChannelDto) {
 		let privacy = channelDto.privacy;
 
@@ -378,13 +361,4 @@ export class ChannelsService extends PrismaClient {
 		if (channel)
 			throw new ConflictException("Channel name \'" + name + "\' is already taken");
 	}
-
-	// private async updateUniqueChannel(where : any, data : any) {
-	// 	const channel = this.channel.update({
-	// 		where : where,
-	// 		data : data
-	// 	});
-
-	// 	return channel;
-	// }
 }
