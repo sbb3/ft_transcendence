@@ -1,6 +1,6 @@
 import { BadRequestException, ConflictException, Injectable,
 		InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
-import { channel, PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { CreateChannelDto } from './dto/create-channel.dto';
 import * as bcrypt from 'bcrypt';
 import { UpdateChannelDto } from './dto/update-channel.dto';
@@ -268,78 +268,57 @@ export class ChannelsService extends PrismaClient {
 	// 		throw new InternalServerErrorException();
 	// }
 
-	// async editMemberRole(channelId : number, username : string, editorId : number, role : string) {
-	// 	const toEdit = await this.channelMember.findMany({
-	// 			where : {
-	// 				channelId : channelId,
-	// 				user : {
-	// 					username : username
-	// 				}
-	// 			}
-	// 		});
+	private canControl(roleOfEditor : string, roleOfUserToEdit : string) {
+		return (roleOfEditor == 'owner' || (roleOfEditor == 'admin' && roleOfUserToEdit == 'member'));
+	}
 
-	// 	const editor = await this.channelMember.findMany({
-	// 		where :{
-	// 			channelId : channelId,
-	// 			user : {
-	// 				id : editorId,
-	// 			}
-	// 		}
-	// 	})	
+	async editMemberRole(channelId : number, userToEditId : number, editorId : number, role : string) {
+		const channel : any = await this.findUniqueChannel({id : channelId}, {members : true});
+		const memberToEdit = channel?.members?.find(member => member.userId == userToEditId);
+		const editor = channel?.members?.find(member => member.userId == editorId);
 
-	// 	if (toEdit[0].role == 'owner')
-	// 		throw new ConflictException('Owner can\'t edit his role.');
-	// 	if (toEdit.length == 0)
-	// 		throw new NotFoundException('User to edit not found.');
-	// 	if (!editor)
-	// 		throw new NotFoundException('Editor not found.');
+		if (!memberToEdit || !editor)
+			throw new NotFoundException(!memberToEdit ? 'Member to edit not found.' : 'Editor not found.');
+		if (memberToEdit.id == editor.id)
+			throw new ConflictException('Editor can\'t edit himself.');
+		if (editor.role != 'owner')
+			throw new UnauthorizedException('Only the owner can change the role of a member.');
+		await this.channelMember.updateMany({
+			where : {
+				channelId : channelId,
+				userId : userToEditId,
+			},
+			data : {
+				role : role,
+			}
+		});
+	}
 
-	// 	const updatedMember = await this.channelMember.updateMany({
-	// 		where : {
-	// 			channelId : channelId,
-	// 			user : {
-	// 				username : username
-	// 			}
-	// 		},
-	// 		data : {
-	// 			role : role
-	// 		}
-	// 	});
+	async removeMember(channelId : number, userToLeaveId : number, action : string, kickerId : number) {
+		const channel : any = await this.findUniqueChannel({id : channelId}, {members : true});
+		const memberToLeave = channel?.members?.find(member => member.userId == userToLeaveId);
+		const kicker = action == 'kick' ? channel?.members?.find(member => member.userId == kickerId) : null;
 
-	// 	if (updatedMember.count == 0)
-	// 		throw new InternalServerErrorException();
-	// }
-
-	// async removeMember(channelId : number, userId : number, action : string, kickerId : number) {
-	// 	const memberToLeave = await this.channelMember.findMany({
-	// 		where : {
-	// 			channelId : channelId,
-	// 			user : {
-	// 				id : userId
-	// 			}
-	// 		}
-	// 	});
-
-	// 	if (memberToLeave.length == 0)
-	// 		throw new NotFoundException('Member to leave/kick or channel not found.');
-	// 	if (memberToLeave[0].role == 'owner')
-	// 		throw new ConflictException('The owner can\'t leave or be kicked from this channel.');
-
-	// 	if (action == 'kick' && !this.canControl(kickerId, memberToLeave[0].role, channelId))
-	// 		throw new UnauthorizedException('No privileges to kick this user.');
-
-	// 	const left = await this.channelMember.deleteMany({
-	// 		where : {
-	// 			channelId : channelId,
-	// 			user : {
-	// 				id : userId
-	// 			}
-	// 		}
-	// 	});
-
-	// 	if (left.count == 0)
-	// 		throw new InternalServerErrorException();
-	// }
+		if (!memberToLeave)
+			throw new NotFoundException(action == 'kick' ? 'Member to kick not found.' : 'Member to leave not found.' );
+		if (memberToLeave.role == 'owner')
+			throw new UnauthorizedException('The owner can\'t leave or be kicked from this channel.');
+		if (action == 'kick')
+		{
+			if (!kicker)
+				throw new NotFoundException('Kicker not found.');
+			else if (!this.canControl(kicker.role, memberToLeave.role))
+				throw new UnauthorizedException('No provileges to kick this member.');
+			else if (kicker.userId == memberToLeave.userId)
+				throw new ConflictException('The kicker can\'t kick himself.');
+		}
+		await this.channelMember.deleteMany({
+			where : {
+				channelId : channelId,
+				userId : userToLeaveId,
+			}
+		});
+	}
 
 	async validateAndJoinChannel(channelId : number, username : string) {
 		const channel = await this.channel.findUnique({
@@ -374,30 +353,6 @@ export class ChannelsService extends PrismaClient {
 
 	// 		return ({avatar, name, username, role, isMuted});
 	// 	})
-	// }
-
-	// private async canControl(senderId : number, toControlRole : string, channelId : number) {
-	// 	const sender = await this.channelMember.findMany({
-	// 		where : {
-	// 			channelId : channelId,
-	// 			user : {
-	// 				id : senderId,
-	// 			}
-	// 		}
-	// 	});
-
-	// 	if (!sender)
-	// 		throw new NotFoundException('User to kick a member not found.');
-	// 	return ((sender[0].role == 'owner' && toControlRole != 'owner') || (sender[0].role == 'admin' && toControlRole == 'member'));
-	// }
-
-	// private isOwner(channel : channel, userId : number) {
-	// 	return channel.ownerId === userId;
-	// }
-
-	// private isAdmin(channel : channel, userId : number) {
-	// 	// Check if the user that wants to change smthg on the channel is an admin
-	// 	return true;
 	// }
 
 	private async checkNewPassword(channelDto : UpdateChannelDto) {

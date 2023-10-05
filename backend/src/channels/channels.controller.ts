@@ -116,6 +116,7 @@ export class ChannelsController {
 	@Post(':id/checkPassword')
 	@UseGuards(JwtGuard)
 	@ApiParam({name : 'id', required : false})
+	@ApiBody({type : CheckPasswordDto})
 	@ApiOperation({summary : 'Validate input password and join a protected channel.'})
 	async validateAndJoin(@Param('id', ParseIntPipe) channelId : number, @Res() response : Response, @Body() checkPasswordDto : CheckPasswordDto) {
 		try {
@@ -147,30 +148,32 @@ export class ChannelsController {
 		}
 	}
 
-	// @Patch(':channelId/members/:userId/')
-	// @UseGuards(JwtGuard)
-	// @ApiParam({name : 'channelId'})
-	// @ApiParam({name : 'userId'})
-	// @ApiQuery({name : 'action'})
-	// @ApiOperation({summary : 'Leave/Kick/Mute/Unmute a member.'})
-	// async patchMemberOfAChannel(@Query() actionQueryDto : ActionQueryDto,
-	// 	@Param('channelId', ParseIntPipe) channelId : number,
-	// 	@Param('userId', ParseIntPipe) userId : number,
-	// 	@Res() response : Response, @Req() request : Request) {
-	// 	try {
-	// 		if (actionQueryDto.action == 'leave' || actionQueryDto.action == 'kick')
-	// 			await this.channelsService.removeMember(channelId, userId, actionQueryDto.action, request['user'].id);
-	// 		else if (actionQueryDto.action == 'mute' || actionQueryDto.action == 'unmute')
-	// 			await this.channelsService.muteOrUnmute(actionQueryDto.action == 'mute' ? true : false, channelId, userId, request['user'].id);
+	@Patch(':channelId/members/:userId/')
+	@UseGuards(JwtGuard)
+	@ApiParam({name : 'channelId'})
+	@ApiParam({name : 'userId'})
+	@ApiQuery({name : 'action'})
+	@ApiOperation({summary : 'Leave/Kick/Mute/Unmute a member.'})
+	async patchMemberOfAChannel(@Query() actionQueryDto : ActionQueryDto,
+		@Param('channelId', ParseIntPipe) channelId : number,
+		@Param('userId', ParseIntPipe) userId : number,
+		@Res() response : Response, @Req() request : Request) {
+		try {
+			if (!request['user'].id)
+				throw new BadRequestException('Request must contain the owner id.');
+			if (actionQueryDto.action == 'leave' || actionQueryDto.action == 'kick')
+				await this.channelsService.removeMember(channelId, userId, actionQueryDto.action, request['user'].id);
+			// else if (actionQueryDto.action == 'mute' || actionQueryDto.action == 'unmute')
+			// 	await this.channelsService.muteOrUnmute(actionQueryDto.action == 'mute' ? true : false, channelId, userId, request['user'].id);
 
-	// 		return response.status(200).json({message : 'The action \'' + actionQueryDto.action + '\' has been completed.'});
-	// 	}
-	// 	catch (error) {
-	// 		if (error.status)
-	// 			return response.status(error.status).json(error);
-	// 		return response.status(500).json(error);
-	// 	}
-	// }
+			return response.status(200).json({message : 'The action \'' + actionQueryDto.action + '\' has been completed.'});
+		}
+		catch (error) {
+			if (error.status)
+				return response.status(error.status).json(error);
+			return response.status(500).json(error);
+		}
+	}
 
 	@Patch(':channelId/join')
 	@UseGuards(JwtGuard)
@@ -191,25 +194,27 @@ export class ChannelsController {
 		}
 	}
 
-	// @Patch(':channelId/members/:username/edit')
-	// @UseGuards(JwtGuard)
-	// @ApiOperation({summary : 'Edit the role of a member.'})
-	// @ApiParam({name : 'channelId'})
-	// @ApiParam({name : 'username'})
-	// @ApiBody({type : EditRoleDto})
-	// async editRoleOfMembers(@Res() response : Response, @Param('channelId', ParseIntPipe) channelId : number,
-	// 	@Param('username') username : string, @Req() request : Request, @Body() roleDto : EditRoleDto) {
-	// 		try {
-	// 			await this.channelsService.editMemberRole(channelId, username, request['user'].id, roleDto.role);
+	@Patch(':channelId/members/:userId/edit')
+	@UseGuards(JwtGuard)
+	@ApiOperation({summary : 'Edit the role of a member.'})
+	@ApiParam({name : 'channelId'})
+	@ApiParam({name : 'userId'})
+	@ApiBody({type : EditRoleDto})
+	async editRoleOfMembers(@Res() response : Response, @Param('channelId', ParseIntPipe) channelId : number,
+		@Param('userId', ParseIntPipe) userToEditId : number, @Req() request : Request, @Body() roleDto : EditRoleDto) {
+			try {
+				if (!request['user']?.id)
+					throw new BadRequestException('Request must contain the owner id.');
+				await this.channelsService.editMemberRole(channelId, userToEditId, request['user'].id, roleDto.role);
 
-	// 			return response.status(200).json({message : 'Role of user has been edited.'})
-	// 		}
-	// 		catch (error) {
-	// 			if (error.status)
-	// 				return response.status(error.status).json(error);
-	// 			return response.status(500).json(error);
-	// 		}
-	// }
+				return response.status(200).json({message : 'Role of user has been edited.'})
+			}
+			catch (error) {
+				if (error.status)
+					return response.status(error.status).json(error);
+				return response.status(500).json(error);
+			}
+	}
 
 	private readonly channelSelectionOptions = {
 					name : true,
@@ -223,15 +228,14 @@ export class ChannelsController {
 // Check for the patch route (should we handle every channel info in one route ?)
 
 // To do
-// Kick => PATCH /channels/:channelId/members/:memberId/kick : done
-// Join => PATCH /channels/:channelId/join?username='' : done
 // Ban => PATCH /channels/:channelId/members/:memberId/ban
-// Mute => PATCH /channels/:channelId/members/:memberId/mute : done
-// Unmute => PATCH /channels/:channelId/members/:memberId/unmute : done
-// Leave => PATCH /channels/:channelId/members/:memberId/leave : done
+// Mute => PATCH /channels/:channelId/members/:memberId/mute : need update
+// Unmute => PATCH /channels/:channelId/members/:memberId/unmute : need update
 
 // To check later
 // Remove member in service : check if the owner can leave (atm he can't, if he will, then remove the channel ?)
 // Group mute/unmute/kick/leave
 // User information filtering in get routes (members or channels) => functions : getAllChannelMembers
 // Create a formmating function that gets channels and users as members.
+// Change username to userId in : PATCH /channels/:channelId/members/:username/edit
+// Add edit route with the route that handles every member action. (query)
