@@ -56,18 +56,60 @@ export class ChannelsService extends PrismaClient {
 		});
 	}
 
-	// async getAvailableChannels(selectOptions : any) {
-	// 	const allChannels = await this.channel.findMany({
-	// 		where : {
-	// 		privacy : {
-	// 			in : ["public", "protected"]
-	// 		},
-	// 		},
-	// 		select : selectOptions
-	// 	})
+	async getChannelWithMembers(channelName : string, selectOptions : any, channelId : number) {
+		const channel : any = channelName
+		? await this.findUniqueChannel({name : channelName}, selectOptions)
+		: await this.findUniqueChannel({id : channelId}, selectOptions);
 
-	// 	return allChannels;
-	// }
+		const members = await this.user.findMany({
+			where : {
+				id : {
+					in : channel.members.map((member: { userId: number; }) => member.userId)
+				}
+			}
+		});
+
+		channel.members = members.map(user => {
+			const member = channel.members.find((member : {userId: number}) => member.userId == user.id);
+			const {isMuted, role} = member;
+
+			return {...user, isMuted, role};
+		});
+		return channel;
+	}
+
+	async getAvailableChannels(selectOptions : any) {
+		const allChannels = await this.channel.findMany({
+			where : {
+				privacy : {
+					in : ["public", "protected"]
+				},
+			},
+			select : selectOptions
+		})
+
+		const formattedChannels = await Promise.all(allChannels.map(async (channel : any) => {
+			const usersAsMembers = await this.user.findMany({
+				where : {
+					id : {
+						in : channel.members.map(member => member.userId)
+					}
+				}
+			});
+
+			const formattedUsers = usersAsMembers.map(user => {
+				const member = channel.members.find(member => member.userId == user.id);
+				const {isMuted, role} = member;
+
+				return {...user, isMuted, role};
+			});
+
+			channel.members = formattedUsers;
+			return channel;
+		}));
+
+		return formattedChannels;
+	}
 
 	// async joinChannel(channelId : number, userId : number, members : any, role : string) {
 	// 	if (role != 'owner' && members && members.find((member: { user: { id: number; }; }) => member?.user?.id == userId))

@@ -77,49 +77,41 @@ export class ChannelsController {
 		}
 	}
 
-	// @Get()
-	// @UseGuards(JwtGuard)
-	// @ApiQuery({name : "name", required : false})
-	// @ApiOperation({summary : "Get a single channel by name or all channels that are either public or protected."})
-	// async getAll(@Query() queryDto : QueryDto,  @Res() response : Response) {
-	// 	try {
-	// 		const data : any = queryDto.name 
-	// 			? await this.channelsService.findUniqueChannel({name : queryDto.name}, this.channelSelectionOptions)
-	// 			: await this.channelsService.getAvailableChannels(this.channelSelectionOptions);
+	@Get()
+	@UseGuards(JwtGuard)
+	@ApiQuery({name : "name", required : false})
+	@ApiOperation({summary : "Get a single channel by name or all channels that are either public or protected."})
+	async getUniqueOrAllChannels(@Query() queryDto : QueryDto,  @Res() response : Response) {
+		try {
+			const data = queryDto.name
+				? await this.channelsService.getChannelWithMembers(queryDto.name, this.channelSelectionOptions, -1)
+				: await this.channelsService.getAvailableChannels(this.channelSelectionOptions);
 
-	// 		if (queryDto.name)
-	// 			data.members = this.channelsService.formatMembers(data.members);
-	// 		else {
-	// 			data.forEach(channel => {
-	// 				channel.members = this.channelsService.formatMembers(channel.members);
-	// 			})
-	// 		}
-	// 		return response.status(200).json(data);
-	// 	}
-	// 	catch (error) {
-	// 		if (error.status)
-	// 			return response.status(error.status).json(error);
-	// 		return response.status(500).json(error);
-	// 	}
-	// }
+			return response.status(200).json(data);
+		}
+		catch (error) {
+			if (error.status)
+				return response.status(error.status).json(error);
+			return response.status(500).json(error);
+		}
+	}
 
-	// @Get(':id')
-	// @UseGuards(JwtGuard)
-	// @ApiParam({name : 'id', required : true})
-	// @ApiOperation({summary : "Get a channel by id."})
-	// async getSingleChannel(@Param('id', ParseIntPipe) id : number, @Res() response : Response) {
-	// 	try {
-	// 		const channel : any = await this.channelsService.findUniqueChannel({id : id}, this.channelSelectionOptions);
+	@Get(':id')
+	@UseGuards(JwtGuard)
+	@ApiParam({name : 'id', required : true})
+	@ApiOperation({summary : "Get a channel by id."})
+	async getSingleChannel(@Param('id', ParseIntPipe) id : number, @Res() response : Response) {
+		try {
+			const channel : any = await this.channelsService.getChannelWithMembers(null, this.channelSelectionOptions, id);
 
-	// 		channel.members = this.channelsService.formatMembers(channel.members);
-	// 		return (response.status(200).json(channel));
-	// 	}
-	// 	catch (error) {
-	// 		if (error?.status)
-	// 			return response.status(error.status).json(error);
-	// 		return response.status(500).json(error);
-	// 	}
-	// }
+			return response.status(200).json(channel);
+		}
+		catch (error) {
+			if (error?.status)
+				return response.status(error.status).json(error);
+			return response.status(500).json(error);
+		}
+	}
 
 	@Post(':id/checkPassword')
 	@UseGuards(JwtGuard)
@@ -219,26 +211,12 @@ export class ChannelsController {
 	// 		}
 	// }
 
-	// private readonly channelSelectionOptions = {
-	// 				name : true,
-	// 				privacy : true, 
-	// 				description : true,
-	// 				owner : true,
-	// 				members : {
-	// 					select : {
-	// 						user :
-	// 						{
-	// 							select : {
-	// 								name : true,
-	// 								username : true,
-	// 								avatar : true,
-	// 							}
-	// 						},
-	// 						isMuted : true,
-	// 						role : true,
-	// 					}
-	// 				}
-	// 			};
+	private readonly channelSelectionOptions = {
+					name : true,
+					privacy : true, 
+					description : true,
+					members : true
+				};
 }
 
 // When getting resources, select specific informations (check for getting channels)
@@ -256,3 +234,4 @@ export class ChannelsController {
 // Remove member in service : check if the owner can leave (atm he can't, if he will, then remove the channel ?)
 // Group mute/unmute/kick/leave
 // User information filtering in get routes (members or channels) => functions : getAllChannelMembers
+// Create a formmating function that gets channels and users as members.
