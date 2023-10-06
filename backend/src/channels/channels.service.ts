@@ -5,12 +5,70 @@ import { CreateChannelDto } from './dto/create-channel.dto';
 import * as bcrypt from 'bcrypt';
 import { UpdateChannelDto } from './dto/update-channel.dto';
 import { CheckPasswordDto } from './dto/check-password.dto';
+import { EditRoleDto } from './dto/edit-role.dto';
 
 @Injectable()
 export class ChannelsService extends PrismaClient {
 
 	constructor() {
 		super();
+	}
+
+	async createChannel(channelDto : CreateChannelDto, creatorId : number) {
+		await this.checkIfChannelExists(channelDto.name);
+
+		channelDto.ownerId = creatorId;
+		if (channelDto.privacy === 'protected')
+			channelDto.password = await bcrypt.hash(channelDto.password, 10);
+
+		const newChannel = await this.channel.create({
+			data : channelDto
+		});
+
+		await this.joinChannel(newChannel.id, creatorId, null, false, [], 'owner');
+	}
+
+	async validateChannelPassword(channelId : number, passwordDto : CheckPasswordDto) {
+		const channel : any = await this.findUniqueChannel({id : channelId}, { password : true,
+			privacy : true,
+			members : true,
+			banned : true,
+		});
+		const user = await this.user.findUnique({where : { id : passwordDto.userId }});
+
+		if (!user)
+			throw new NotFoundException("User to join the channel not found.")
+		if (channel.privacy == 'public' || channel.privacy == 'private')
+			throw new ConflictException('This channel does not require any password.');
+		if (!await bcrypt.compare(passwordDto.password, channel.password))
+			throw new UnauthorizedException('Invalid password.');
+
+		await this.joinChannel(channelId, user.id, channel.members, true, channel.banned, 'member');
+	}
+
+	async updateChannel(channelDto : UpdateChannelDto, userId : number, channelId : number) {
+		const oldChannel = await this.channel.findUnique({ where : {
+			id : channelId
+		}});
+
+		if (Object.keys(channelDto).length === 0)
+			throw new BadRequestException('No data found in body.');
+		if (!oldChannel)
+			throw new NotFoundException('Channel to update not found.');
+		if (userId != oldChannel.ownerId)
+			throw new UnauthorizedException('Only the owner can update the channel\'s general infos.')
+		if (channelDto.name)
+			await this.checkIfChannelExists(channelDto.name);
+
+		await this.checkNewPassword(channelDto);
+
+		const updatedChannel = await this.channel.update({
+			where : { id : channelId },
+			data : channelDto,
+		});
+
+		if (!updatedChannel)
+			throw new InternalServerErrorException();
 	}
 
 	async findUniqueChannel(data : any, selectOptions : any) {
@@ -46,6 +104,14 @@ export class ChannelsService extends PrismaClient {
 				id : {
 					in : allMembersIds.map(member => member.userId)
 				}
+			},
+			select : {
+				id : true,
+				avatar: true,
+				name : true,
+				createdAt : true,
+				email : true,
+				username : true,
 			}
 		});
 
@@ -66,6 +132,14 @@ export class ChannelsService extends PrismaClient {
 				id : {
 					in : channel.members.map((member: { userId: number; }) => member.userId)
 				}
+			},
+			select : {
+				id : true,
+				avatar: true,
+				name : true,
+				createdAt : true,
+				email : true,
+				username : true,
 			}
 		});
 
@@ -94,6 +168,14 @@ export class ChannelsService extends PrismaClient {
 					id : {
 						in : channel.members.map(member => member.userId)
 					}
+				},
+				select : {
+					id : true,
+					avatar: true,
+					name : true,
+					createdAt : true,
+					email : true,
+					username : true,
 				}
 			});
 
@@ -111,25 +193,7 @@ export class ChannelsService extends PrismaClient {
 		return formattedChannels;
 	}
 
-	async validateChannelPassword(channelId : number, passwordDto : CheckPasswordDto) {
-		const channel : any = await this.findUniqueChannel({id : channelId}, { password : true,
-			privacy : true,
-			members : true,
-			banned : true,
-		});
-		const user = await this.user.findUnique({where : { id : passwordDto.userId }});
-
-		if (!user)
-			throw new NotFoundException("User not found.")
-		if (channel.privacy == 'public' || channel.privacy == 'private')
-			throw new ConflictException('This channel does not require any password.');
-		if (!await bcrypt.compare(passwordDto.password, channel.password))
-			throw new UnauthorizedException('Invalid password.');
-
-		await this.joinChannel(channelId, user.id, channel.members, true, channel.banned);
-	}
-
-	async joinChannel(channelId : number, userId : number, members : any, shouldCheck : boolean, banned : number[]) {
+	async joinChannel(channelId : number, userId : number, members : any, shouldCheck : boolean, banned : number[], role : string) {
 		if (banned.find(bannedUserId => bannedUserId == userId))
 			throw new UnauthorizedException('Banned from this channel.');
 		if (shouldCheck && members?.find(member => member.userId == userId && channelId == channelId))
@@ -138,7 +202,7 @@ export class ChannelsService extends PrismaClient {
 		const newMember = await this.channelMember.create({
 			data : {
 				userId : userId,
-				role : shouldCheck ? 'member' : 'owner',
+				role : role,
 			}
 		});
 
@@ -160,52 +224,13 @@ export class ChannelsService extends PrismaClient {
 			throw new InternalServerErrorException();
 	}
 
-	async createChannel(channelDto : CreateChannelDto, creatorId : number) {
-		await this.checkIfChannelExists(channelDto.name);
-
-		channelDto.ownerId = creatorId;
-		if (channelDto.privacy === 'protected')
-			channelDto.password = await bcrypt.hash(channelDto.password, 10);
-
-		const newChannel = await this.channel.create({
-			data : channelDto
-		});
-
-		await this.joinChannel(newChannel.id, creatorId, null, false, []);
-	}
-
-	async updateChannel(channelDto : UpdateChannelDto, userId : number, channelId : number) {
-		const oldChannel = await this.channel.findUnique({ where : {
-			id : channelId
-		}});
-
-		if (Object.keys(channelDto).length === 0)
-			throw new BadRequestException('No data found in body.');
-		if (!oldChannel)
-			throw new NotFoundException('Channel to update not found.');
-		if (userId != oldChannel.ownerId)
-			throw new UnauthorizedException('Only the owner and admins can update the channel\'s properties')
-		if (channelDto.name)
-			await this.checkIfChannelExists(channelDto.name);
-
-		await this.checkNewPassword(channelDto);
-
-		const updatedChannel = await this.channel.update({
-			where : {id : channelId},
-			data : channelDto,
-		});
-
-		if (!updatedChannel)
-			throw new InternalServerErrorException();
-	}
-
 	async deleteChannel(channelId : number, userId : number) {
 		const channelToDelete = await this.channel.findUnique({ where : {id : channelId} });
 
 		if (!channelToDelete)
 			throw new NotFoundException("Channel to delete not found.")
 		if (userId != channelToDelete.ownerId)
-			throw new UnauthorizedException("Only the owner can delete this channel.")
+			throw new UnauthorizedException("Only the owner can delete his channel.")
 		if (!await this.channel.delete({where : { id : channelId }}))
 			throw new InternalServerErrorException();
 	}
@@ -270,7 +295,7 @@ export class ChannelsService extends PrismaClient {
 		if (!toMute || !muter)
 			throw new NotFoundException(!toMute ? 'Member to mute not found.' : 'Muter not found.');
 		if (toMute.id == muter.id)
-			throw new ConflictException('Muter can\'t mute himself.');
+			throw new ConflictException('Muter can\'t mute/unmute himself.');
 		if (!this.canControl(muter.role, toMute.role))
 			throw new UnauthorizedException('No privileges to mute this member.');
 		await this.channelMember.updateMany({
@@ -288,26 +313,32 @@ export class ChannelsService extends PrismaClient {
 		return (roleOfEditor == 'owner' || (roleOfEditor == 'admin' && roleOfUserToEdit == 'member'));
 	}
 
-	async editMemberRole(channelId : number, userToEditId : number, editorId : number, role : string) {
-		const channel : any = await this.findUniqueChannel({id : channelId}, {members : true});
-		const memberToEdit = channel?.members?.find(member => member.userId == userToEditId);
+	async editMemberRole(channelId : number, editorId : number, editDto : EditRoleDto) {
+		const channel : any = await this.findUniqueChannel({id : channelId}, {members : true, banned: true});
 		const editor = channel?.members?.find(member => member.userId == editorId);
+		const userToEdit = await this.user.findUnique({where : { username : editDto.username }});
 
-		if (!memberToEdit || !editor)
-			throw new NotFoundException(!memberToEdit ? 'Member to edit not found.' : 'Editor not found.');
-		if (memberToEdit.id == editor.id)
+		if (!userToEdit || !editor)
+			throw new NotFoundException(!userToEdit ? 'User not found.' : 'Editor not found.');
+		const memberToEdit = channel?.members?.find(member => member.userId == userToEdit.id);
+
+		if (memberToEdit && memberToEdit.id == editor.id)
 			throw new ConflictException('Editor can\'t edit himself.');
-		if (editor.role != 'owner')
-			throw new UnauthorizedException('Only the owner can change the role of a member.');
-		await this.channelMember.updateMany({
-			where : {
-				channelId : channelId,
-				userId : userToEditId,
-			},
-			data : {
-				role : role,
-			}
-		});
+		if (memberToEdit && this.canControl(editor.role, memberToEdit.role))
+		{
+			await this.channelMember.updateMany({
+				where : {
+					channelId : channelId,
+					userId : memberToEdit.userId,
+				},
+				data : {
+					role : editDto.role,
+				}
+			});
+			return 'Role of member has been edited.';
+		}
+		await this.joinChannel(channelId, userToEdit.id, [], false, channel.banned, editDto.role);
+		return 'New member with role \'' + editDto.role+ '\' has been created.';
 	}
 
 	async removeMember(channelId : number, userToLeaveId : number, action : string, kickerId : number) {
@@ -360,7 +391,7 @@ export class ChannelsService extends PrismaClient {
 		if (!user)
 			throw new NotFoundException('User not found.');
 
-		await this.joinChannel(channelId, user.id, channel.members, true, channel.banned);
+		await this.joinChannel(channelId, user.id, channel.members, true, channel.banned, 'member');
 	}
 
 	private async checkNewPassword(channelDto : UpdateChannelDto) {
@@ -371,7 +402,7 @@ export class ChannelsService extends PrismaClient {
 		if (privacy != 'protected')
 			channelDto.password = null;
 		else if (privacy == 'protected' && (!channelDto.hasOwnProperty('password') || channelDto.password.length < 4))
-			throw new BadRequestException(!channelDto.hasOwnProperty('password') ? "Protected channels must have a password" : "Channel password must have at least 4 characters" );
+			throw new BadRequestException(!channelDto.hasOwnProperty('password') ? 'Protected channels must have a password.' : 'Channel password must have at least 4 characters.' );
 		else if (privacy == 'protected')
 			channelDto.password = await bcrypt.hash(channelDto.password, 10);
 	}
