@@ -6,6 +6,7 @@ import * as bcrypt from 'bcrypt';
 import { UpdateChannelDto } from './dto/update-channel.dto';
 import { CheckPasswordDto } from './dto/check-password.dto';
 import { EditRoleDto } from './dto/edit-role.dto';
+import {v4 as uuidv4 } from 'uuid'
 
 @Injectable()
 export class ChannelsService extends PrismaClient {
@@ -18,6 +19,7 @@ export class ChannelsService extends PrismaClient {
 		await this.checkIfChannelExists(channelDto.name);
 
 		channelDto.ownerId = creatorId;
+		channelDto.roomName = uuidv4();
 		if (channelDto.privacy === 'protected')
 			channelDto.password = await bcrypt.hash(channelDto.password, 10);
 

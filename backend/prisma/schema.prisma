@@ -60,6 +60,7 @@ model channel {
   password    String?
   description String
   banned      Int[]
+  roomName    String @unique
 
   members channelMember[] @relation("channelMembers")
 }
@@ -81,6 +82,7 @@ model channelMessage {
 	channelId		Int
 	content			String
 	sender      user?
+  senderId    Int
 }
 
 // model achievement {
