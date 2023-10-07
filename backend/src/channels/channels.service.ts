@@ -7,6 +7,7 @@ import { UpdateChannelDto } from './dto/update-channel.dto';
 import { CheckPasswordDto } from './dto/check-password.dto';
 import { EditRoleDto } from './dto/edit-role.dto';
 import {v4 as uuidv4 } from 'uuid'
+import { CreateMessageDto } from './dto/create-message.dto';
 
 @Injectable()
 export class ChannelsService extends PrismaClient {
@@ -394,6 +395,62 @@ export class ChannelsService extends PrismaClient {
 			throw new NotFoundException('User not found.');
 
 		await this.joinChannel(channelId, user.id, channel.members, true, channel.banned, 'member');
+	}
+
+	async createChannelMessage(createMessageDto : CreateMessageDto, senderIdFromJwt : number) {
+		const channel : any = await this.findUniqueChannel({id : createMessageDto.channelId}, {members : true, banned : true});
+		const sender = channel.members.find(member => member.userId == createMessageDto.senderId);
+		const isBanned = channel.banned.find(banned => banned == createMessageDto.senderId);
+
+		if (senderIdFromJwt != createMessageDto.senderId)
+			throw new UnauthorizedException('Sender id is different from the id provided.');
+		if (!sender)
+			throw new NotFoundException('Member not found in channel.');
+		if (isBanned)
+			throw new UnauthorizedException('Member banned from this channel.');
+		const createdMessage = await this.channelMessage.create({
+			data : createMessageDto
+		});
+
+		if (!createdMessage)
+			throw new InternalServerErrorException('Could not create message.')
+	}
+
+	async getAllChannelMessages(channelId : number) {
+		const channel : any = await this.findUniqueChannel({id : channelId}, null);
+
+		const allChannelMessages = await this.channelMessage.findMany({
+			where : {
+				channelId : channelId,
+			}
+		});
+
+		const allUsers = await this.user.findMany({
+			where : {
+				id : {
+					in : Array.from(new Set(allChannelMessages.map(channelMessage => channelMessage.senderId)))
+				}
+			},
+			select : {
+				id : true,
+				email : true,
+				username : true,
+				name : true,
+				avatar : true,
+				campus : true,
+				status : true
+			}
+		});
+
+		const formattedMessages = allChannelMessages.map(message => {
+			const user = allUsers.find(user => user.id == message.senderId);
+			const createdAt = message.createdAt;
+
+			delete message.createdAt;
+			return {user : user, ...message, lastMessageCreatedAt : createdAt, channelName : channel.name};
+		});
+
+		return formattedMessages;
 	}
 
 	private async checkNewPassword(channelDto : UpdateChannelDto) {

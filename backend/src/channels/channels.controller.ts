@@ -10,6 +10,7 @@ import { QueryDto } from './dto/query.dto';
 import { CheckPasswordDto } from './dto/check-password.dto';
 import { UsernameQueryDto } from './dto/username-query-dto';
 import { EditRoleDto } from './dto/edit-role.dto';
+import { CreateMessageDto } from './dto/create-message.dto';
 
 @ApiTags('channels')
 @Controller('channels')
@@ -293,6 +294,39 @@ export class ChannelsController {
 		}
 	}
 
+	@Post('message')
+	@UseGuards(JwtGuard)
+	async createMessage(@Body() createMessageDto : CreateMessageDto, @Res() response : Response, @Req() req : Request) {
+		try {
+			if (!req['user']?.id)
+				throw new BadRequestException('Request must contain the owner id.');
+			await this.channelsService.createChannelMessage(createMessageDto, req['user'].id);
+			return response.status(201).json({message : 'Message created successfully.'})
+		}
+		catch (error) {
+			if (error.status)
+				return response.status(error.status).json(error);
+			return response.status(500).json(error);
+
+		}
+	}
+
+	@Get(':channelId/messages')
+	@ApiParam({name : 'channelId'})
+	@UseGuards(JwtGuard)
+	async getAllChannelMessages(@Param('channelId', ParseIntPipe) channelId : number, @Res() response : Response) {
+		try {
+			const allMessages = await this.channelsService.getAllChannelMessages(channelId);
+
+			return response.status(200).json(allMessages);
+		}
+		catch (error) {
+			if (error.status)
+				return response.status(error.status).json(error);
+			return response.status(500).json(error);
+		}
+	}
+
 	private readonly channelSelectionOptions = {
 					name : true,
 					privacy : true, 
@@ -300,3 +334,5 @@ export class ChannelsController {
 					members : true
 				};
 }
+
+// Confirm message validation with front.
