@@ -10,7 +10,7 @@ import { QueryDto } from './dto/query.dto';
 import { CheckPasswordDto } from './dto/check-password.dto';
 import { UsernameQueryDto } from './dto/username-query-dto';
 import { EditRoleDto } from './dto/edit-role.dto';
-import { CreateMessageDto } from './dto/create-message.dto';
+import { CreateChannelMessageDto } from './dto/create-channel-message.dto';
 
 @ApiTags('channels')
 @Controller('channels')
@@ -296,7 +296,7 @@ export class ChannelsController {
 
 	@Post('message')
 	@UseGuards(JwtGuard)
-	async createMessage(@Body() createMessageDto : CreateMessageDto, @Res() response : Response, @Req() req : Request) {
+	async createMessage(@Body() createMessageDto : CreateChannelMessageDto, @Res() response : Response, @Req() req : Request) {
 		try {
 			if (!req['user']?.id)
 				throw new BadRequestException('Request must contain the owner id.');
@@ -307,7 +307,6 @@ export class ChannelsController {
 			if (error.status)
 				return response.status(error.status).json(error);
 			return response.status(500).json(error);
-
 		}
 	}
 

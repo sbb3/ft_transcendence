@@ -48,23 +48,23 @@ model user {
 }
 
 model channel {
-  id          Int      @id @default(autoincrement())
-  createdAt   DateTime @default(now())
-  ownerId     Int
-  name        String   @unique
-  privacy     String
-  password    String?
-  description String
-  banned      Int[]
-  roomName    String @unique
+  id			Int	@id @default(autoincrement())
+  createdAt		DateTime @default(now())
+  ownerId		Int
+  name			String @unique
+  privacy		String
+  password		String?
+  description	String
+  banned		Int[]
+  roomName		String @unique
 
-  members channelMember[] @relation("channelMembers")
+  members		channelMember[] @relation("channelMembers")
 }
 
 model channelMember {
   id		Int @id @default(autoincrement())
   role		String
-  userId  Int
+  userId	Int
   isMuted	Boolean @default(false)
 
   // Relationship here
@@ -73,11 +73,29 @@ model channelMember {
 }
 
 model channelMessage {
-	id				Int	@id @default(autoincrement())
-	createdAt		DateTime @default(now())
-	channelId		Int
-	content			String
-  senderId    Int
+	id			Int	@id @default(autoincrement())
+	createdAt	DateTime @default(now())
+	channelId	Int
+	content		String
+	senderId	Int
+	receivers	Int[]
+}
+
+model messageData {
+	id						Int @id @default(autoincrement())
+	conversationId			Int
+	senderId        Int
+	receiverId				Int
+	content					String
+	lastMessageCreatedAt	DateTime @default(now())
+}
+
+model conversation {
+	id						Int @id @default(autoincrement())
+	firstMember				Int
+	secondMember			Int
+	lastMessageContent		String?
+	lastMessageCreatedAt	DateTime?
 }
 
 // model achievement {

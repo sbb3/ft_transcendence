@@ -1,7 +1,7 @@
-import { ApiParam, ApiProperty } from "@nestjs/swagger";
+import { ApiProperty } from "@nestjs/swagger";
 import { IsNotEmpty, IsNumber, IsString } from "class-validator";
 
-export class CreateMessageDto {
+export class CreateChannelMessageDto {
 
 	@IsNumber()
 	@ApiProperty({example : 'channelId'})
@@ -15,4 +15,6 @@ export class CreateMessageDto {
 	@IsNumber()
 	@ApiProperty({example : '21'})
 	senderId : number;
+
+	receivers : number[]
 }

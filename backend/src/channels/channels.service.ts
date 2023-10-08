@@ -7,7 +7,7 @@ import { UpdateChannelDto } from './dto/update-channel.dto';
 import { CheckPasswordDto } from './dto/check-password.dto';
 import { EditRoleDto } from './dto/edit-role.dto';
 import {v4 as uuidv4 } from 'uuid'
-import { CreateMessageDto } from './dto/create-message.dto';
+import { CreateChannelMessageDto } from './dto/create-channel-message.dto';
 
 @Injectable()
 export class ChannelsService extends PrismaClient {
@@ -397,7 +397,7 @@ export class ChannelsService extends PrismaClient {
 		await this.joinChannel(channelId, user.id, channel.members, true, channel.banned, 'member');
 	}
 
-	async createChannelMessage(createMessageDto : CreateMessageDto, senderIdFromJwt : number) {
+	async createChannelMessage(createMessageDto : CreateChannelMessageDto, senderIdFromJwt : number) {
 		const channel : any = await this.findUniqueChannel({id : createMessageDto.channelId}, {members : true, banned : true});
 		const sender = channel.members.find(member => member.userId == createMessageDto.senderId);
 		const isBanned = channel.banned.find(banned => banned == createMessageDto.senderId);
@@ -408,6 +408,7 @@ export class ChannelsService extends PrismaClient {
 			throw new NotFoundException('Member not found in channel.');
 		if (isBanned)
 			throw new UnauthorizedException('Member banned from this channel.');
+		createMessageDto.receivers = channel.members.map(member => member.id);
 		const createdMessage = await this.channelMessage.create({
 			data : createMessageDto
 		});
