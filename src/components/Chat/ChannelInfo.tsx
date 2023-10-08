@@ -44,8 +44,7 @@ const ChannelAbout = ({ channel }) => {
   // TODO: invalidate the cache
   const handleDeleteChannel = async () => {
     try {
-      // TODO: also delete the messages
-      await deleteChannel({ id: channel?.id, name: channel?.name });
+      await deleteChannel({ id: channel?.id });
       navigate("/chat", { replace: true });
       console.log("channel got deleted");
     } catch (error) {
@@ -86,11 +85,19 @@ const ChannelAbout = ({ channel }) => {
           Managed by
         </Text>
         <List spacing={2} flexWrap="wrap" w="full" textAlign={"start"}>
-          {channel?.admins?.map((admin) => (
-            <ListItem key={admin?.id} ml={2}>
-              {admin?.name}
-            </ListItem>
-          ))}
+          {channel?.members
+            ?.filter((m) => m?.role === "admin" || m?.role === "owner")
+            ?.map((m) => (
+              <ListItem
+                key={m?.id}
+                fontSize="14px"
+                fontWeight="medium"
+                color="pong_cl_primary"
+                ml={2}
+              >
+                {m?.name}
+              </ListItem>
+            ))}
         </List>
       </Stack>
       <Stack spacing={1} align="start" w="full">
@@ -116,7 +123,7 @@ const ChannelAbout = ({ channel }) => {
           borderRadius={10}
           onClick={handleLeaveChannel}
         />
-        {channel?.owner?.id === currentUser?.id && (
+        {channel?.ownerId === currentUser?.id && (
           <IconButton
             aria-label="Delete channel"
             icon={<Icon as={AiFillDelete} boxSize={6} />}

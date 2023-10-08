@@ -44,7 +44,7 @@ import { useNavigate } from "react-router-dom";
 import * as ScrollArea from "@radix-ui/react-scroll-area";
 import "src/styles/scrollbar.css";
 import channelsApi, {
-  useGetAllChannelsQuery,
+  useGetAllChannelsExceptPrivateOnesQuery,
 } from "src/features/channels/channelsApi";
 import { useSelector } from "react-redux";
 import { useUpdateChannelMutation } from "src/features/channels/channelsApi";
@@ -64,54 +64,28 @@ const SearchForChannel = ({
     data: channels,
     isLoading,
     error,
-  } = useGetAllChannelsQuery({
+  } = useGetAllChannelsExceptPrivateOnesQuery({
     refetchOnMountOrArgChange: true,
   });
 
   const [joinChannel, { isLoading: isJoininChannel }] =
     channelsApi.useJoinChannelMutation();
 
+  const [checkChannelPassword] = channelsApi.useCheckChannelPasswordMutation();
+
   const clearStates = () => {
     setPassword("");
     setShowPasswordInput("");
   };
   const handleJoinChannel = async (channel) => {
-    // TODO:  (password === channel.password) must be handled in the backend, add checkPassword query endpoint to channelsApi.tsx
-    if (channel?.members?.map((m) => m.id).includes(currentUser?.id)) {
-      toast({
-        title: "Already a member.",
-        description: "You're already a member of this channel.",
-        status: "error",
-        duration: 2000,
-        isClosable: true,
-      });
-      return;
-    }
-    // if (
-    //   // .map((m) => m.id)
-    //   channel?.bannedMembers?.includes(currentUser?.id)
-    // ) {
-    //   toast({
-    //     title: "Banned.",
-    //     description: "You're banned from this channel, you cannot join in",
-    //     status: "error",
-    //     duration: 2000,
-    //     isClosable: true,
-    //   });
-    //   return;
-    // }
-    if (channel.privacy === "private" && password !== channel.password) {
-      toast({
-        title: "Wrong password.",
-        description: "Please enter the correct password.",
-        status: "error",
-        duration: 2000,
-        isClosable: true,
-      });
-      return;
-    }
-
     try {
+      // await checkChannelPassword({
+      //   channelId: channel?.id,
+      //   data: {
+      //     userId: currentUser?.id,
+      //     password: password,
+      //   },
+      // }).unwrap();
       await joinChannel({
         channelId: channel?.id,
         data: {

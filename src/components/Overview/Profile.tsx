@@ -22,7 +22,7 @@ import { HiOutlineMail } from "react-icons/hi";
 import { GiAchievement } from "react-icons/gi";
 import * as ScrollArea from "@radix-ui/react-scroll-area";
 import "src/styles/scrollbar.css";
-import { badges } from "src/config/data/data";
+import { badges } from "src/config/data/badges";
 import { useDispatch, useSelector } from "react-redux";
 import usersApi, { useDeleteFriendMutation } from "src/features/users/usersApi";
 import { setCurrentUser } from "src/features/users/usersSlice";
@@ -40,7 +40,31 @@ import store from "src/app/store";
 import notificationsApi from "src/features/notifications/notificationsApi";
 dayjs.extend(relativeTime);
 
-const Profile = ({ user }) => {
+interface ProfileProps {
+  user: {
+    id: string;
+    username: string;
+    name: string;
+    email: string;
+    avatar: string;
+    status: string;
+    gameWin: string;
+    gameLoss: string;
+    rank: string;
+    level: string;
+    campus: string;
+    recentGames: object[];
+    friends: object[];
+    blockedUsers: number[];
+    otp_enabled: boolean;
+    otp_validated: boolean;
+    otp_secret: string;
+    otp_url: string;
+    is_profile_completed: boolean;
+  };
+}
+
+const Profile = ({ user }: ProfileProps) => {
   const currentUser = useSelector((state: any) => state?.user?.currentUser);
   const toast = useToast();
   const dispatch = useDispatch();
@@ -233,8 +257,6 @@ const Profile = ({ user }) => {
       bgSize="cover"
       bgRepeat="no-repeat"
       gap="12px"
-      // wrap="wrap"
-      // outline="2px solid orange"
     >
       <Stack p={1} direction={{ base: "column" }} spacing="12px">
         <Flex direction="row" gap="28px" align="center">
@@ -274,7 +296,6 @@ const Profile = ({ user }) => {
                 {user?.username}
               </Text>
             </Flex>
-            {/* TODO: hide these buttons when visiting my own profile, do conditional rendering of the username or id of the passed user with the store */}
             {currentUser?.id !== user?.id && (
               <Flex direction="row" gap="14px" align="center">
                 <IconButton
@@ -398,7 +419,6 @@ const Profile = ({ user }) => {
               Achievements
             </Text>
           </Flex>
-          {/* TODO: scroll area on y-axis */}
           <ScrollArea.Root className="ScrollAreaRoot">
             <ScrollArea.Viewport className="ScrollAreaViewport">
               <Flex

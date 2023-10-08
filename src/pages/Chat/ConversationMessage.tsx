@@ -6,11 +6,9 @@ const ConversationMessage = ({
   currentUser,
   receiverUser,
   toggleProfileDrawer,
-  isProfileDrawerOpen,
 }) => {
   return (
     <Flex
-      id="first_flex"
       key={message?.id}
       direction="row"
       w="full"
@@ -41,8 +39,8 @@ const ConversationMessage = ({
           color="whiteAlpha.900"
           bg={
             message?.sender.email === currentUser?.email
-              ? "gray.600"
-              : "gray.700"
+              ? "gray.700"
+              : "gray.800"
           }
           maxW={"300px"}
           p={2}
@@ -51,21 +49,11 @@ const ConversationMessage = ({
           textAlign={
             message?.sender.email === currentUser?.email ? "right" : "left"
           }
+          borderRadius={6}
         >
           {message?.content}
         </Text>
       </Flex>
-      {isProfileDrawerOpen && message?.sender.id !== currentUser?.id && (
-        <ChatRightModal
-          participantUserId={
-            message?.sender?.id !== currentUser?.id
-              ? message?.sender?.id
-              : message?.receiver?.id
-          }
-          isOpen={isProfileDrawerOpen}
-          toggleProfileDrawer={toggleProfileDrawer}
-        />
-      )}
     </Flex>
   );
 };

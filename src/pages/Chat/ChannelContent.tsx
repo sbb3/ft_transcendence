@@ -77,6 +77,7 @@ const ChannelContent = () => {
       channelName: channelname,
       sender: {
         id: currentUser?.id,
+        username: currentUser?.username,
         name: currentUser?.name,
         avatar: currentUser?.avatar,
       },
@@ -96,7 +97,13 @@ const ChannelContent = () => {
         duration: 2000,
         isClosable: true,
       });
-      navigate("/chat", { replace: true });
+      if (
+        error?.data?.message === "Channel not found" ||
+        error?.data?.message === "User not a member of the channel" ||
+        error?.data?.message === "User not found"
+      ) {
+        navigate("/chat", { replace: true });
+      }
     }
   };
 

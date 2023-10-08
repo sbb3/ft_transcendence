@@ -27,11 +27,33 @@ import * as ScrollArea from "@radix-ui/react-scroll-area";
 import "src/styles/scrollbar.css";
 import { useGetFriendsQuery } from "src/features/users/usersApi";
 
-const Friends = ({ user }) => {
+interface FriendsProps {
+  user: {
+    id: number;
+    name: string;
+    username: string;
+    avatar: string;
+    email: string;
+  };
+}
+
+type Friend = {
+  id: number;
+  name: string;
+  username: string;
+  avatar: string;
+  email: string;
+};
+
+interface Friends {
+  friends: Friend[];
+}
+
+const Friends = ({ user }: FriendsProps) => {
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const {
-    data: friends,
+    data: friends = [],
     isLoading: isLoadingFriends,
     isFetching: isFetchingFriends,
   } = useGetFriendsQuery(user?.id);
@@ -74,7 +96,7 @@ const Friends = ({ user }) => {
             Friends
           </Text>
           <AvatarGroup size="sm" max={4} color={"pong_bg_primary"}>
-            {friends?.map((friend, i) => (
+            {(friends as []).map((friend: Friend) => (
               <Avatar
                 bg="pong_bg_secondary"
                 p={0.5}
@@ -163,7 +185,7 @@ const Friends = ({ user }) => {
                   //  bg="green"
                   mr={4}
                 >
-                  {friends?.map((friend) => (
+                  {(friends as Friend[]).map((friend: Friend) => (
                     <AutoCompleteItem
                       // w="150px"
                       key={friend?.id}

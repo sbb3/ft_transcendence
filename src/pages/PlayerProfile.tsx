@@ -1,20 +1,31 @@
-import { Flex } from "@chakra-ui/react";
-import { json, useLocation, useParams } from "react-router-dom";
+import { Flex, useToast } from "@chakra-ui/react";
+import { useParams } from "react-router-dom";
 import Profile from "src/components/Overview/Profile";
 import RecentGames from "src/components/Overview/RecentGames";
 import Loader from "src/components/Utils/Loader";
 import { useGetUserByUsernameQuery } from "src/features/users/usersApi";
 
-// TODO: later on, get the username url from the useParams hook, and fetch the user data then pass it to the Profile and RecentGames components
 const PlayerProfile = () => {
   const { username } = useParams();
+  const toast = useToast();
   const {
     data: users,
     isLoading,
     isFetching,
+    isError,
   } = useGetUserByUsernameQuery(username, {
     refetchOnMountOrArgChange: true,
   });
+
+  if (isError) {
+    toast({
+      title: "An error occurred.",
+      description: "Unable to fetch user data.",
+      status: "error",
+      duration: 9000,
+      isClosable: true,
+    });
+  }
   return (
     <Flex
       w="full"

@@ -12,11 +12,11 @@ import {
   Switch,
   VStack,
   useDisclosure,
+  useToast,
 } from "@chakra-ui/react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { useToast } from "@chakra-ui/react";
 import { useRef } from "react";
 import { Icon, InputGroup } from "@chakra-ui/react";
 import { FiFile } from "react-icons/fi";
@@ -117,9 +117,7 @@ const Settings = () => {
 
   const handleDisableOTP = async () => {
     try {
-      await disableOTP(currentUser?.id).unwrap(); // refetch currentUser after await onQueryFullfilled to update otp_enabled
-      await triggerGetCurrentUser(currentUser?.id);
-      // TODO: pass the refetch function in the state to update the currentUser
+      await disableOTP(currentUser?.id).unwrap();
       toast({
         title: "2FA disabled.",
         description: "You can now login without 2FA.",
@@ -217,7 +215,6 @@ const Settings = () => {
                   accept="image/*"
                   {...rest}
                   ref={(e) => {
-                    // console.log("e: ", e);
                     ref(e);
                     inputRef.current = e;
                   }}

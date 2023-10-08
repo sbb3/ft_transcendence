@@ -1,13 +1,20 @@
-import React from "react";
 import io from "socket.io-client";
+import { useSelector } from "react-redux";
 
 const useSocket = () => {
-  const socket = io(import.meta.env.VITE_API_URL as string, {
-    reconnectionDelay: 1000,
-    reconnection: true,
+  const accessToken = useSelector((state: any) => state?.auth?.accessToken);
+  console.log("socket.io accessToken: ", accessToken);
+  const socket = io(import.meta.env.VITE_SERVER_SOCKET_URL as string, {
     transports: ["websocket"],
-    upgrade: false,
-    rejectUnauthorized: false,
+    reconnection: false,
+    // reconnection: true,
+    // reconnectionAttempts: 10,
+    // reconnectionDelay: 1000,
+    // upgrade: false,
+    // rejectUnauthorized: false,
+    query: {
+      token: accessToken,
+    },
   });
   return socket;
 };

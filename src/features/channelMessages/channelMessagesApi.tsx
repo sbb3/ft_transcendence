@@ -1,37 +1,14 @@
 import { apiSlice } from "src/app/api/apiSlice";
-import io from "socket.io-client";
 import useSocket from "src/hooks/useSocket";
 import channelsApi from "../channels/channelsApi";
 
 const channelMessagesApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    // getMessagesByChannelId: builder.query({
-    //   query: (channelId) => `/channelMessages?channelId=${channelId}`,
-    //   async onCacheEntryAdded(
-    //     arg,
-    //     { getState, updateCachedData, cacheDataLoaded, cacheEntryRemoved }
-    //   ) {
-    //     const currentUser = getState()?.user?.currentUser?.email;
-    //     const socket = useSocket();
-
-    //     try {
-    //       await cacheDataLoaded;
-    //       socket.on("channelMessages", (data) => {
-    //         console.log("incoming channelMessages: ", data);
-    //         // TODO: later
-    //       });
-    //     } catch (error) {
-    //       console.log("error happened in getMessagesByChannelId : ", error);
-    //       await cacheEntryRemoved;
-    //       socket.disconnect();
-    //     }
-    //   },
-    // }),
     getMessagesByChannelName: builder.query({
       query: (channelName) => `/channelMessages?channelName=${channelName}`,
       async onCacheEntryAdded(
         arg,
-        { getState, updateCachedData, cacheDataLoaded, cacheEntryRemoved }
+        { getState, updateCachedData, cacheDataLoaded, cacheEntryRemoved }: any
       ) {
         const currentUser = getState()?.user?.currentUser;
         const socket = useSocket();
@@ -59,7 +36,7 @@ const channelMessagesApi = apiSlice.injectEndpoints({
         method: "POST",
         body: { ...msgData },
       }),
-      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
+      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }: any) {
         const message = arg;
         const { channelName } = message;
         // optimistic update

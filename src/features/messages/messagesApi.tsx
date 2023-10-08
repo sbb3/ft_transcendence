@@ -1,5 +1,4 @@
 import { apiSlice } from "src/app/api/apiSlice";
-import io from "socket.io-client";
 import useSocket from "src/hooks/useSocket";
 import conversationApi from "../conversations/conversationsApi";
 import notificationsApi from "../notifications/notificationsApi";
@@ -8,10 +7,16 @@ import { v4 as uuidv4 } from "uuid";
 const messagesApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getMessagesByConversationId: builder.query({
-      query: (conversationId) => `/messages?conversationId=${conversationId}`,
+      query: (conversationId) =>
+        `/messages?conversationId=${conversationId}&page=${1}`,
+      // transformResponse: (response: any) => {
+      //   const messages = response?.messages?.reverse();
+      //   const totalPages = response?.totalPages;
+      //   return { messages, totalPages };
+      // },
       async onCacheEntryAdded(
         arg,
-        { getState, updateCachedData, cacheDataLoaded, cacheEntryRemoved }
+        { getState, updateCachedData, cacheDataLoaded, cacheEntryRemoved }: any
       ) {
         const currentUser = getState()?.user?.currentUser?.email;
         const socket = useSocket();
@@ -26,7 +31,7 @@ const messagesApi = apiSlice.injectEndpoints({
               updateCachedData((draft) => {
                 const message = draft?.find((m) => m.id === data?.data?.id);
                 if (!message?.id) {
-                  draft?.push(data?.data);
+                  draft?.unshift(data?.data); // recent message on top
                 }
               });
             }
@@ -38,28 +43,62 @@ const messagesApi = apiSlice.injectEndpoints({
         }
       },
     }),
+    getMoreMessagesByConversationId: builder.query({
+      query: ({ conversationId, page }) =>
+        `/messages?conversationId=${conversationId}&page=${page}`,
+      // transformResponse: (response: any) => {
+      //   const messages = response?.messages?.reverse();
+      //   const totalPages = response?.totalPages;
+      //   return { messages, totalPages };
+      // },
+      async onQueryStarted(
+        arg,
+        { dispatch, getState, updateCachedData, queryFulfilled }: any
+      ) {
+        const { conversationId } = arg;
+        try {
+          const result = await queryFulfilled;
+          const messages = result?.data?.messages;
+          const totalPages = result?.data?.totalPages;
+          if (messages?.length > 0) {
+            dispatch(
+              messagesApi.util.updateQueryData(
+                "getMessagesByConversationId",
+                conversationId,
+                (draft) => {
+                  draft?.messages?.push(...messages); // older messages on bottom
+                  draft.totalPages = Number(totalPages);
+                }
+              )
+            );
+          }
+        } catch (error) {
+          console.log("error: ", error);
+        }
+      },
+    }),
     addMessage: builder.mutation({
       query: (msgData) => ({
         url: `/messages`,
         method: "POST",
         body: { ...msgData },
       }),
-      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
+      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }: any) {
         const messageData = arg;
         const { conversationId, content, lastMessageCreatedAt } = messageData;
         const patchResultMsg = dispatch(
           messagesApi?.util?.updateQueryData(
             "getMessagesByConversationId",
-            conversationId,
+            conversationId.toString(),
             (draft) => {
-              draft?.push(messageData);
+              draft?.messages?.unshift(messageData);
             }
           )
         );
         const patchResultCOnv = dispatch(
           conversationApi?.util?.updateQueryData(
             "getConversations",
-            getState().user.currentUser?.email,
+            getState()?.user?.currentUser?.email,
             (draft) => {
               const conversation = draft?.find((c) => c.id === conversationId);
               if (conversation?.id) {
@@ -113,7 +152,7 @@ const messagesApi = apiSlice.injectEndpoints({
         method: "POST",
         body: { ...msgData },
       }),
-      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
+      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }: any) {
         const messageData = arg;
         const { conversationId } = messageData;
         // optimistic update
@@ -122,7 +161,7 @@ const messagesApi = apiSlice.injectEndpoints({
             "getMessagesByConversationId",
             conversationId,
             (draft) => {
-              draft?.push(messageData);
+              draft?.unshift(messageData);
             }
           )
         );
@@ -142,6 +181,7 @@ export const {
   useGetMessagesByConversationIdQuery,
   useAddMessageMutation,
   useCreateMessageMutation,
+  useGetMoreMessagesByConversationIdQuery,
 } = messagesApi;
 
 export default messagesApi;

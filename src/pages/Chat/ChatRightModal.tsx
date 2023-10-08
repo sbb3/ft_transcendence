@@ -84,34 +84,34 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleProfileDrawer }) => {
   const [triggerGetCurrentUser, { isLoading: isLoadingGetCurrentUser }] =
     usersApi.useLazyGetCurrentUserQuery();
 
-  useEffect(() => {
-    const socket = useSocket();
-    socket.on("friend_accepted", async (data: any) => {
-      // console.log("incoming friend_accepted: ", data);
-      // store.dispatch(setCurrentUser(data?.data));
-      if (data?.data?.id === currentUser?.id) {
-        try {
-          // await prefetchUser(currentUser?.id).then((data) => {
-          //   store.dispatch(setCurrentUser(data?.data));
-          // });
-          await triggerGetCurrentUser(currentUser?.id).unwrap();
-        } catch (error) {
-          console.log("error: ", error);
-          toast({
-            title: "Error",
-            description: "Error happened while accepting friend request",
-            status: "error",
-            duration: 2000,
-            isClosable: true,
-          });
-        }
-      }
-    });
+  // useEffect(() => {
+  //   const socket = useSocket();
+  //   socket.on("friend_accepted", async (data: any) => {
+  //     // console.log("incoming friend_accepted: ", data);
+  //     // store.dispatch(setCurrentUser(data?.data));
+  //     if (data?.data?.id === currentUser?.id) {
+  //       try {
+  //         // await prefetchUser(currentUser?.id).then((data) => {
+  //         //   store.dispatch(setCurrentUser(data?.data));
+  //         // });
+  //         await triggerGetCurrentUser(currentUser?.id).unwrap();
+  //       } catch (error) {
+  //         console.log("error: ", error);
+  //         toast({
+  //           title: "Error",
+  //           description: "Error happened while accepting friend request",
+  //           status: "error",
+  //           duration: 2000,
+  //           isClosable: true,
+  //         });
+  //       }
+  //     }
+  //   });
 
-    return () => {
-      socket.disconnect();
-    };
-  }, []);
+  //   return () => {
+  //     socket.disconnect();
+  //   };
+  // }, []);
 
   const { data: participantUser, isLoading: isLoadingParticipantUser } =
     useGetUserByIdQuery(participantUserId, {

@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import ChatContentFooter from "./ChatContentFooter";
 import ChatContentHeader from "./ChatContentHeader";
 import ChatContentBody from "./ChatContentBody";
-import { useGetMessagesByConversationIdQuery } from "src/features/messages/messagesApi";
 import { useNavigate, useParams } from "react-router-dom";
 import Loader from "src/components/Utils/Loader";
 import { useAddMessageMutation } from "src/features/messages/messagesApi";
@@ -38,8 +37,8 @@ const ConversationContent = () => {
   const {
     data: conversations,
     isLoading: isLoadingConversation,
-    isError: isErrorGettingConversation,
-    error: errorGettingConversation,
+    isFetching: isFetchingConversation,
+    isError: errorGettingConversation,
   } = useGetConversationQuery(id, {
     refetchOnMountOrArgChange: true,
   });
@@ -47,19 +46,13 @@ const ConversationContent = () => {
   const {
     data: receiversData,
     isLoading: isLoadinGetUserByEmail,
-    error: errorGettingReceiver,
+    isFetching: isFetchingGetUserByEmail,
+    isError: errorGettingReceiver,
   } = useGetUserByEmailQuery(receiverEmail, {
     skip,
   });
 
   const [addMessage, { isLoading: isAdding }] = useAddMessageMutation();
-
-  const {
-    data: messages,
-    isLoading: isLoadingMessages,
-    isError: isErrorGettingMessages,
-    error: errorGettingMessages,
-  } = useGetMessagesByConversationIdQuery(id); // add page = 1, limit = 10
 
   useEffect(() => {
     if (conversations?.length > 0) {
@@ -110,7 +103,6 @@ const ConversationContent = () => {
 
   // TODO: loadings and errors
   // TODO: check if user is a member of the conversations, if not, redirect to chat
-
   const onSendMessage = async (data: any) => {
     const { message } = data;
     const receiver = receiversData[0] as IChatReceiver;
@@ -141,7 +133,9 @@ const ConversationContent = () => {
       console.log("error: ", error);
       toast({
         title: "Message not sent.",
-        description: "We've not sent your message to the recipient.",
+        description:
+          error?.data?.message ||
+          "We've not sent your message to the recipient.",
         status: "error",
         duration: 2000,
         isClosable: true,
@@ -158,12 +152,21 @@ const ConversationContent = () => {
       isClosable: true,
     });
   }
+
+  if (errorGettingReceiver) {
+    toast({
+      title: "Receiver not found.",
+      description: "We couldn't find the receiver.",
+      status: "error",
+      duration: 2000,
+      isClosable: true,
+    });
+  }
   return (
     <Flex
       pos="relative"
       alignSelf={"stretch"}
       justify="center"
-      // align="center"
       p={0}
       borderRightRadius={6}
       flex={1}
@@ -173,21 +176,20 @@ const ConversationContent = () => {
       bgImage={`url('src/assets/img/BlackNoise.png')`}
       bgSize="cover"
       bgRepeat="no-repeat"
-      //   gap={6}
     >
       <Stack
         justify="start"
         align="center"
         w={"full"}
-        // h={"1000px"}
         h={"full"}
         borderRightRadius={26}
         spacing={1}
         pl={{ base: 1 }}
       >
-        {isLoadingMessages ||
-        isLoadingConversation ||
-        isLoadinGetUserByEmail ? (
+        {isLoadingConversation ||
+        isFetchingConversation ||
+        isLoadinGetUserByEmail ||
+        isFetchingGetUserByEmail ? (
           <Flex
             justify="center"
             align="center"
@@ -207,9 +209,8 @@ const ConversationContent = () => {
               receiverUser={receiverUser}
             />
             <ChatContentBody
-              messages={messages}
+              conversationId={id}
               toggleProfileDrawer={toggleProfileDrawer}
-              error={errorGettingMessages}
               isProfileDrawerOpen={isProfileDrawerOpen}
               receiverUser={receiverUser}
             />

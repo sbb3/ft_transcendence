@@ -29,7 +29,6 @@ import DeleteConversationAlert from "./DeleteConversationAlert";
 import AddDirectMessage from "src/components/Chat/AddDirectMessage";
 import Loader from "src/components/Utils/Loader";
 dayjs.extend(relativeTime);
-``;
 
 const Conversations = ({}) => {
   const { isOpen: isOpenDM, onToggle: onToggleDM } = useDisclosure();

@@ -1,8 +1,8 @@
-import { Box, Flex, Icon, Stack, Text } from "@chakra-ui/react";
+import { Box, Flex, Icon, Stack, Text, useToast } from "@chakra-ui/react";
 import { MdLeaderboard } from "react-icons/md";
 import * as ScrollArea from "@radix-ui/react-scroll-area";
 import "src/styles/scrollbar.css";
-import { useGetLeaderboardQuery } from "src/features/game/gameApi";
+import { useGetLeaderboardQuery } from "src/features/leaderboard/leaderboardApi";
 import Loader from "../../Utils/Loader";
 import LeaderboardCard from "./LeaderboardCard";
 import TopThreePlayers from "./TopThreePlayers";
@@ -11,18 +11,30 @@ import useSocket from "src/hooks/useSocket";
 
 // TODO: either leaderboard have a separate collection, or we could get all users and sort them by their rank
 const Leaderboard = () => {
+  const toast = useToast();
   const {
     data: leaderboardData,
     isLoading,
     isFetching,
+    isError,
     refetch,
   } = useGetLeaderboardQuery({}, { refetchOnMountOrArgChange: true });
 
   // useEffect(() => {
-  //   // TODO: listening on a socket event, iwill refetch the leaderboard when a game is finished,
-  //   // const socket - useSocket();
+  // TODO: listening on a socket event, iwill refetch the leaderboard when a game is finished,
+  // const socket - useSocket();
   //   // refetch();
   // }, []);
+
+  if (isError) {
+    toast({
+      title: "Error",
+      description: "Error happened during fetching leaderboard.",
+      status: "error",
+      duration: 3000,
+      isClosable: true,
+    });
+  }
 
   return (
     <Stack
@@ -72,7 +84,6 @@ const Leaderboard = () => {
             <ScrollArea.Root className="ScrollAreaRoot">
               <ScrollArea.Viewport className="ScrollAreaViewport">
                 <Stack
-                  // p={2}
                   id="scrollableStack"
                   gap={"12px"}
                   justify="center"

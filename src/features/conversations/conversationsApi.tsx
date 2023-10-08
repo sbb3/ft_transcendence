@@ -1,6 +1,5 @@
 import { apiSlice } from "src/app/api/apiSlice";
 import messagesApi from "../messages/messagesApi";
-import io from "socket.io-client";
 import useSocket from "src/hooks/useSocket";
 import { v4 as uuidv4 } from "uuid";
 import usersApi from "../users/usersApi";
@@ -27,7 +26,8 @@ const conversationApi = apiSlice.injectEndpoints({
         try {
           await cacheDataLoaded;
           socket.on("conversation", (data) => {
-            // TODO: this delete functionality will be removed later, replace it with another socket event for deleting the conversation
+            // TODO: this delete functionality will be removed later, replace it with another socket event for deleting the conversation, or
+            // backend will check if the conversation exists when adding a message, else, throw an error
             if (data.data?.type === "delete") {
               updateCachedData((draft) => {
                 const conversation = draft?.find(
@@ -58,8 +58,6 @@ const conversationApi = apiSlice.injectEndpoints({
                     (c) => c.id === data?.data?.id
                   );
                   if (conversation?.id) {
-                    // TODO: update the conversation content
-
                     conversation.lastMessageContent =
                       data?.data?.lastMessageContent;
                     conversation.lastMessageCreatedAt =
@@ -113,10 +111,8 @@ const conversationApi = apiSlice.injectEndpoints({
         method: "POST",
         body: conversation,
       }),
-      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
-        // optimistic update, update the cache before the request is finished, so the user will see the result immediately9
+      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }: any) {
         const conversation = arg.conversation;
-        // console.log("conversation: ", conversation);
         const receiver = arg.receiver;
         const currentUserEmail = conversation.members[0];
         const patchResult = dispatch(
@@ -124,21 +120,20 @@ const conversationApi = apiSlice.injectEndpoints({
             "getConversations",
             currentUserEmail,
             (draft) => {
-              // console.log("updateQueryData: ", draft);
               draft?.unshift(conversation);
             }
           )
         );
         try {
-          const result = await queryFulfilled;
+          await queryFulfilled;
 
           const messageData = {
             id: uuidv4(),
             conversationId: conversation.id,
             sender: {
-              id: getState().user.currentUser?.id,
-              email: getState().user.currentUser?.email,
-              name: getState().user.currentUser?.name,
+              id: getState()?.user?.currentUser?.id,
+              email: getState()?.user?.currentUser?.email,
+              name: getState()?.user?.currentUser?.name,
             },
             receiver: {
               id: receiver.id,
@@ -148,11 +143,11 @@ const conversationApi = apiSlice.injectEndpoints({
             content: conversation.lastMessageContent,
             lastMessageCreatedAt: conversation.lastMessageCreatedAt,
           };
-          // console.log("messageData: ", messageData);
-          // !!! change addMessage to createMessage
-          dispatch(messagesApi.endpoints.createMessage.initiate(messageData));
+          await dispatch(
+            messagesApi.endpoints.createMessage.initiate(messageData)
+          );
         } catch (error) {
-          console.log("error happended here: ", error);
+          console.log("error : ", error);
           patchResult.undo();
         }
       },
@@ -163,12 +158,12 @@ const conversationApi = apiSlice.injectEndpoints({
         method: "POST",
         body: conversation,
       }),
-      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
+      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }: any) {
         const conversation = arg;
         const patchResult = dispatch(
           conversationApi?.util?.updateQueryData(
             "getConversations",
-            getState().user.currentUser?.email,
+            getState()?.user?.currentUser?.email,
             (draft) => {
               draft?.unshift(conversation);
             }
@@ -177,7 +172,7 @@ const conversationApi = apiSlice.injectEndpoints({
         try {
           await queryFulfilled;
         } catch (error) {
-          console.log("error happended here: ", error);
+          console.log("error : ", error);
           patchResult.undo();
         }
       },
@@ -216,7 +211,7 @@ const conversationApi = apiSlice.injectEndpoints({
         url: `conversations/${id}`,
         method: "DELETE",
       }),
-      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
+      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }: any) {
         // optimistic update
         const patchResult = dispatch(
           conversationApi?.util?.updateQueryData(
@@ -238,7 +233,7 @@ const conversationApi = apiSlice.injectEndpoints({
           await queryFulfilled;
           console.log("deleted");
           conversationApi.endpoints.getConversations.initiate(
-            getState().user.currentUser?.email
+            getState()?.user?.currentUser?.email
           );
 
           conversationApi.endpoints.getConversationByMembersEmails.initiate(

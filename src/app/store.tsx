@@ -1,6 +1,5 @@
 import { configureStore, MiddlewareArray } from "@reduxjs/toolkit";
 import authReducer from "src/features/auth/authSlice";
-import locationReducer from "src/features/locationSlice";
 import conversationsReducer from "src/features/conversations/conversationsSlice";
 import userReducer from "src/features/users/usersSlice";
 import gameReducer from "src/features/game/gameSlice";
@@ -10,7 +9,6 @@ const store = configureStore({
   reducer: {
     [apiSlice.reducerPath]: apiSlice.reducer,
     auth: authReducer,
-    location: locationReducer,
     conversations: conversationsReducer,
     user: userReducer,
     game: gameReducer,

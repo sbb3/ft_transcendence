@@ -1,18 +1,15 @@
-import { SearchIcon } from "@chakra-ui/icons";
+import { useEffect, useState } from "react";
 import {
   Avatar,
   AvatarBadge,
   AvatarGroup,
-  Box,
   Flex,
   Icon,
   IconButton,
-  Image,
   InputGroup,
   InputLeftElement,
   Stack,
   Text,
-  Link,
   useToast,
   FormControl,
   FormLabel,
@@ -20,89 +17,74 @@ import {
   FormErrorMessage,
   Button,
   Select,
-  background,
 } from "@chakra-ui/react";
+import { SearchIcon } from "@chakra-ui/icons";
 import {
   AutoComplete,
   AutoCompleteInput,
   AutoCompleteItem,
   AutoCompleteList,
 } from "@choc-ui/chakra-autocomplete";
-import { useEffect, useState } from "react";
 import { GiThreeFriends } from "react-icons/gi";
 import { HiUserRemove } from "react-icons/hi";
 import { MdBlockFlipped } from "react-icons/md";
-import { useNavigate } from "react-router-dom";
+import { BiMicrophone, BiSolidMicrophoneOff } from "react-icons/bi";
 import * as ScrollArea from "@radix-ui/react-scroll-area";
 import "src/styles/scrollbar.css";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useSelector } from "react-redux";
-import usersApi from "src/features/users/usersApi";
-import { BiMicrophone, BiSolidMicrophoneOff } from "react-icons/bi";
 import channelsApi from "src/features/channels/channelsApi";
-const ROLES = ["member", "admin", "owner"];
+import { useNavigate } from "react-router-dom";
 
 const validationSchema = yup.object().shape({
   username: yup.string().required("Username is required").trim(),
-  permissions: yup.string().required("Permissions is required").trim(),
+  role: yup.string().required("role is required").trim(),
 });
 
 const Members = ({ channel }) => {
   const currentUser = useSelector((state: any) => state.user.currentUser);
-  const [query, setQuery] = useState<string>("");
   const navigate = useNavigate();
   const toast = useToast();
+  const [query, setQuery] = useState<string>("");
 
   const {
     register,
     handleSubmit,
     control,
-    formState: { errors, isSubmitting },
+    formState: { errors },
     reset,
   } = useForm({
     resolver: yupResolver(validationSchema),
   });
 
-  const [trigger, { isLoading: isLoadinGetUserByEmail }] =
-    usersApi.useLazyGetUserByEmailQuery();
+  const [triggerAddUserOrEditMember, { isLoading: isAddingOrEditing }] =
+    channelsApi.useOnAddUserOrEditMemberMutation();
 
   const [muteChannelMember] = channelsApi.useMuteChannelMemberMutation();
   const [unmuteChannelMember] = channelsApi.useUnmuteChannelMemberMutation();
   const [banChannelMember] = channelsApi.useBanChannelMemberMutation();
   const [kickChannelMember] = channelsApi.useKickChannelMemberMutation();
-  const onAddOrEditUser = async (data: any) => {
-    const { username, permissions } = data; // TODO: username or email address
+
+  const onAddUserOrEditMember = async (data: any) => {
+    const { username, role } = data;
     console.log("data: ", data);
     try {
-      if (username === currentUser?.email)
+      if (username === currentUser?.username)
         throw new Error("You can't add yourself to the channel.");
-
-      const users = await trigger(username).unwrap();
-      if (users.length === 0) throw new Error("User not found.");
-      const user = users[0];
-
-      const isUserAleadyExistInChannel = channel?.members?.includes(user?.id);
-      if (isUserAleadyExistInChannel) {
-        console.log("user already exist in channel");
-        // TODO: update user permissions, backend will handle it
-        // check its old permissions and new permissions, if they are the same, do nothing
-        //  else update the user permissions
-      } else {
-        console.log("user not exist in channel");
-        // TODO: add new user to channel based on permissions, backend will handle it
-        // if (permissions === "member") {
-
-        // } else if (permissions === "admin") {
-
-        // }
-      }
-
+      const res = await triggerAddUserOrEditMember({
+        channelId: channel?.id,
+        channelName: channel?.name,
+        data: {
+          username,
+          role,
+        },
+      }).unwrap();
       toast({
-        title: "Member added.",
-        description: "We've added a new member to the channel.",
-        status: "success",
+        title: "Info",
+        description: res?.message,
+        status: "info",
         duration: 2000,
         isClosable: true,
       });
@@ -110,7 +92,7 @@ const Members = ({ channel }) => {
       console.log("error: ", error);
       toast({
         title: "Member not added.",
-        description: error.message,
+        description: error?.message || "Member not added to the channel.",
         status: "error",
         duration: 2000,
         isClosable: true,
@@ -118,11 +100,10 @@ const Members = ({ channel }) => {
     }
     reset({
       username: "",
-      permissions: "member",
+      role: "member",
     });
   };
 
-  // TODO:
   const handleKickMember = async (memberId) => {
     try {
       await kickChannelMember({
@@ -155,7 +136,7 @@ const Members = ({ channel }) => {
         channelId: channel?.id,
         userId: memberId,
         channelName: channel?.name,
-      });
+      }).unwrap();
       toast({
         title: "Member Muted.",
         description: "Member has been muted.",
@@ -181,7 +162,7 @@ const Members = ({ channel }) => {
         channelId: channel?.id,
         userId: memberId,
         channelName: channel?.name,
-      });
+      }).unwrap();
       toast({
         title: "Member UnMuted.",
         description: "Member has been unmuted.",
@@ -242,9 +223,6 @@ const Members = ({ channel }) => {
       bgImage={`url('src/assets/img/BlackNoise.png')`}
       bgSize="cover"
       bgRepeat="no-repeat"
-      // outline="2px solid yellow"
-      // borderRadius={24}
-      //   bg={"yellow"}
     >
       <Flex direction="row" align="center" justify="center" gap={1.5}>
         <Icon boxSize="22px" as={GiThreeFriends} color="white" />
@@ -289,27 +267,25 @@ const Members = ({ channel }) => {
           <Input
             id="username"
             type="text"
-            placeholder="username or email address"
+            placeholder="username"
             {...register("username")}
           />
           <FormErrorMessage>
             {errors.username && errors.username.message}
           </FormErrorMessage>
         </FormControl>
-        <FormControl isInvalid={!!errors.permissions} mt={0} isRequired>
-          <FormLabel htmlFor="permissions" fontSize="lg">
-            Member Permissions
+        <FormControl isInvalid={!!errors.role} mt={0} isRequired>
+          <FormLabel htmlFor="role" fontSize="lg">
+            Member role
           </FormLabel>
           <Controller
-            name="permissions"
+            name="role"
             control={control}
             defaultValue="member"
             render={({ field }) => (
               <Select
                 {...field}
                 onChange={(inputValue) => {
-                  //   console.log("e: ", inputValue);
-                  //   console.log("field: ", field);
                   field.onChange(inputValue);
                 }}
                 bg="pong_bg_secondary"
@@ -320,25 +296,21 @@ const Members = ({ channel }) => {
                 <option style={{ background: "transparent" }} value="admin">
                   Admin
                 </option>
-                {/* <option style={{ background: "transparent" }} value="owner">
-                  Owner
-                </option> */}
               </Select>
             )}
           />
           <FormErrorMessage>
-            {errors.permissions && errors.permissions.message}
+            {errors.role && errors.role.message}
           </FormErrorMessage>
         </FormControl>
         <Button
           colorScheme="orange"
           mt={0}
           w="full"
-          isLoading={isLoadinGetUserByEmail}
-          // isLoading={isFetching}
-          isDisabled={isLoadinGetUserByEmail}
+          isLoading={isAddingOrEditing}
+          isDisabled={isAddingOrEditing}
           cursor="pointer"
-          onClick={handleSubmit(onAddOrEditUser)}
+          onClick={handleSubmit(onAddUserOrEditMember)}
         >
           Add / Manage Member
         </Button>
@@ -350,9 +322,7 @@ const Members = ({ channel }) => {
           align="start"
           justify="start"
           gap={1.5}
-          //   bg={"red.400"}
           h={"420px"}
-          //   pr={2}
         >
           <AutoComplete
             as={Stack}
@@ -372,8 +342,6 @@ const Members = ({ channel }) => {
                 color="white"
                 px={2}
                 py={1}
-                // borderTopLeftRadius="md"
-                // borderBottomLeftRadius="md"
                 border="1px solid var(--white, #FFF)"
                 borderRadius="md"
                 cursor="pointer"
@@ -412,8 +380,6 @@ const Members = ({ channel }) => {
                 position: "absolute",
                 display: "block",
                 marginTop: "8px",
-                // marginRight: "4px",
-                // transform: "translate3d(20px, 40px, 0px)",
               }}
               closeOnSelect={false}
               p={1}
@@ -426,7 +392,6 @@ const Members = ({ channel }) => {
                       key={member?.id}
                       value={member?.name}
                       textTransform="capitalize"
-                      // bg="pong_bg.300"
                       boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.35)"
                       backdropFilter={"blur(20px)"}
                       bgImage={`url('src/assets/img/BlackNoise.png')`}
@@ -438,11 +403,9 @@ const Members = ({ channel }) => {
                         bg: "pong_bg.500",
                       }}
                       _focus={{
-                        // bg: "pong_bg.300",
                         backgroundColor: "transparent",
                       }}
                       _selected={{
-                        // bg: "pong_bg.300",
                         backgroundColor: "transparent",
                       }}
                     >
@@ -457,7 +420,9 @@ const Members = ({ channel }) => {
                           gap="3px"
                           align="center"
                           w={"full"}
-                          // onClick={() => navigate(`/profile/${member.name}`)}
+                          onClick={() =>
+                            navigate(`/profile/${member.username}`)
+                          }
                         >
                           <Avatar
                             size="sm"
@@ -484,21 +449,25 @@ const Members = ({ channel }) => {
                           </Text>
                         </Flex>
                         <Flex direction="row" gap="6px" mr={0}>
-                          {(channel?.owner?.id === currentUser?.id ||
-                            channel?.admins
-                              ?.map((member) => member?.id)
-                              ?.includes(currentUser?.id)) && (
+                          {
+                            // (channel?.ownerId === currentUser?.id ||
+                            //   channel?.members?.find(
+                            //     (m) => m?.id === currentUser?.id
+                            //   )?.role === "admin") && (
                             <>
                               {currentUser?.id !== member?.id &&
-                              (channel?.admins
-                                ?.map((admin) => admin?.id)
-                                ?.includes(currentUser?.id) ||
-                              channel?.owner?.id === currentUser?.id
-                                ? !channel?.admins
-                                    ?.map((member) => member?.id)
-                                    ?.includes(member?.id) ||
-                                  (member.id !== channel.owner.id &&
-                                    channel.owner.id === currentUser.id)
+                              (channel?.members?.find(
+                                (m) => m?.id === currentUser?.id
+                              )?.role === "admin" ||
+                              channel?.ownerId === currentUser?.id
+                                ? !(
+                                    channel?.members?.find(
+                                      (m) => m?.id === member?.id
+                                    )?.role === "admin" ||
+                                    member?.id === channel?.ownerId
+                                  ) ||
+                                  (member.id !== channel.ownerId &&
+                                    channel.ownerId === currentUser?.id)
                                 : false) ? (
                                 <>
                                   <IconButton
@@ -539,9 +508,7 @@ const Members = ({ channel }) => {
                                       }
                                     />
                                   )}
-                                  {channel?.mutedMembers
-                                    // ?.map((member) => member?.id)
-                                    ?.includes(member?.id) ? (
+                                  {member?.isMuted ? (
                                     <IconButton
                                       size="xs"
                                       fontSize="md"
@@ -583,7 +550,8 @@ const Members = ({ channel }) => {
                                 </>
                               ) : null}
                             </>
-                          )}
+                            // )
+                          }
                         </Flex>
                       </Flex>
                     </AutoCompleteItem>

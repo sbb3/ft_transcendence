@@ -79,9 +79,8 @@ const ProfileDetailsFormModal = ({ isOpen, onToggle }: any) => {
       //   id: currentUser?.id,
       //   data: formData,
       // }).unwrap();
-      await checkProfileCompleted(currentUser?.id).unwrap();
-      await triggerGetCurrentUser(currentUser?.id);
-      // onToggle();
+      // await checkProfileCompleted(currentUser?.id).unwrap();
+      onToggle();
       toast({
         title: "Profile updated.",
         description: "Profile updated successfully.",
@@ -112,7 +111,6 @@ const ProfileDetailsFormModal = ({ isOpen, onToggle }: any) => {
     <Modal isOpen={isOpen} onClose={onToggle}>
       <ModalOverlay onClick={onToggle} />
       <ModalContent
-        // mt={4}
         border="1px solid rgba(251, 102, 19, 0.3)"
         boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.35)"
         backdropFilter={"blur(20px)"}
@@ -128,12 +126,7 @@ const ProfileDetailsFormModal = ({ isOpen, onToggle }: any) => {
           bg={"white"}
           onClick={onToggle}
         />
-        <ModalBody
-          // p={2}
-          borderRadius={40}
-          // maxH="350px"
-          // maxW="400px"
-        >
+        <ModalBody borderRadius={40}>
           <Stack
             direction={{ base: "column-reverse", md: "row" }}
             align={{ base: "center", md: "flex-start" }}

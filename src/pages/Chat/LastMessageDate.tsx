@@ -7,7 +7,6 @@ dayjs.extend(relativeTime);
 const LastMessageDate = ({ lastMessageCreatedAt }) => {
   const [updateTime, setUpdateTime] = useState(false);
   useEffect(() => {
-    // console.log("updateTime", updateTime);
     const interval = setInterval(() => {
       setUpdateTime(!updateTime);
     }, 60000); // 1 minute
@@ -26,9 +25,6 @@ const LastMessageDate = ({ lastMessageCreatedAt }) => {
       alignSelf={"stretch"}
       whiteSpace={"nowrap"}
       letterSpacing={1}
-      // _hover={{
-      //   background: "red",
-      // }}
     >
       {dayjs(lastMessageCreatedAt).fromNow()}
     </Text>

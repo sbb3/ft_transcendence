@@ -22,6 +22,7 @@ import {
   Stack,
   Text,
   Textarea,
+  Tooltip,
   VStack,
   useDisclosure,
 } from "@chakra-ui/react";
@@ -33,7 +34,7 @@ import { ReactNode, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCreateChannelMutation } from "src/features/channels/channelsApi";
 import { v4 as uuidv4 } from "uuid";
-import { tr } from "@faker-js/faker";
+import { fa, tr } from "@faker-js/faker";
 import { useSelector } from "react-redux";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -54,7 +55,7 @@ const validationSchema = yup.object().shape({
     .trim(),
   privacy: yup.string().required("Privacy is required"),
   password: yup.string().when("privacy", {
-    is: "private",
+    is: "protected",
     then(schema) {
       return schema
         .required("Password is required")
@@ -73,7 +74,8 @@ const CreateChannel = ({
   onToggleCreateChannel: () => void;
 }) => {
   const currentUser = useSelector((state: any) => state.user.currentUser);
-  const [isPrivate, setIsPrivate] = useState(false);
+  const [isProtected, setIsProtected] = useState(false);
+  const [openTooltip, setOpenTooltip] = useState(""); // [1
   const passRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const toast = useToast();
@@ -81,7 +83,7 @@ const CreateChannel = ({
     register,
     handleSubmit,
     control,
-    formState: { errors, isSubmitting },
+    formState: { errors },
     reset,
   } = useForm({
     resolver: yupResolver(validationSchema),
@@ -89,33 +91,22 @@ const CreateChannel = ({
   const [createChannel, { isLoading: isLoadingCreatingChannel }] =
     useCreateChannelMutation();
 
-  // TODO: check if channel name already exists, if so, show error message
-  // TODO: validations like channel name should be unique
-  const onSubmit = async (data: any) => {
+  const onCreateChannel = async (data: any) => {
     try {
       await createChannel({
         id: uuidv4(),
         ...data,
-        mutedMembers: [],
+        ownerId: currentUser?.id,
         bannedMembers: [],
         members: [
           {
             id: currentUser?.id,
             name: currentUser?.name,
+            username: currentUser?.username,
             avatar: currentUser?.avatar,
+            role: "owner",
           },
         ],
-        admins: [
-          {
-            id: currentUser?.id,
-            name: currentUser?.name,
-            avatar: currentUser?.avatar,
-          },
-        ],
-        owner: {
-          id: currentUser?.id,
-          name: currentUser?.name,
-        },
         createdAt: dayjs().valueOf(),
       }).unwrap();
       reset({
@@ -124,7 +115,7 @@ const CreateChannel = ({
         privacy: "public",
         password: "",
       });
-      if (isPrivate) setIsPrivate(false);
+      if (isProtected) setIsProtected(false);
       onToggleCreateChannel();
       navigate(`/chat/channel/${data.name}`);
       toast({
@@ -138,7 +129,7 @@ const CreateChannel = ({
       console.log("error: ", error);
       toast({
         title: "Channel not created.",
-        description: "Channel has not been created.",
+        description: error?.data?.message || "Channel has not been created.",
         status: "error",
         duration: 2000,
         isClosable: true,
@@ -233,16 +224,66 @@ const CreateChannel = ({
                       //   console.log("e: ", inputValue);
                       //   console.log("field: ", field);
                       field.onChange(inputValue);
-                      setIsPrivate(inputValue === "private");
+                      setIsProtected(inputValue === "protected");
                     }}
                   >
                     <Stack direction="row">
-                      <Radio colorScheme={"orange"} value="public">
-                        Public
-                      </Radio>
-                      <Radio colorScheme={"orange"} value="private">
-                        Private
-                      </Radio>
+                      <Tooltip
+                        label="Anyone can join the channel"
+                        aria-label="A tooltip"
+                        placement="top"
+                        closeOnClick={true}
+                        hasArrow
+                        bg={"#FB6613"}
+                        closeDelay={300}
+                        isOpen={openTooltip === "public"}
+                        closeOnEsc={true}
+                      >
+                        <Radio
+                          colorScheme={"orange"}
+                          value="public"
+                          onClick={() => setOpenTooltip("public")}
+                        >
+                          Public
+                        </Radio>
+                      </Tooltip>
+                      <Tooltip
+                        label="Only people invited by the channel owner or admins can join the channel"
+                        aria-label="A tooltip"
+                        placement="top"
+                        closeOnClick
+                        hasArrow
+                        bg={"#FB6613"}
+                        closeDelay={300}
+                        isOpen={openTooltip === "private"}
+                        closeOnPointerDown={true}
+                      >
+                        <Radio
+                          colorScheme={"orange"}
+                          value="private"
+                          onClick={() => setOpenTooltip("private")}
+                        >
+                          Private
+                        </Radio>
+                      </Tooltip>
+                      <Tooltip
+                        label="Only people with the channel password can join the channel"
+                        aria-label="A tooltip"
+                        placement="top"
+                        closeOnClick
+                        hasArrow
+                        bg={"#FB6613"}
+                        closeDelay={300}
+                        isOpen={openTooltip === "protected"}
+                      >
+                        <Radio
+                          colorScheme={"orange"}
+                          value="protected"
+                          onClick={() => setOpenTooltip("protected")}
+                        >
+                          Protected
+                        </Radio>
+                      </Tooltip>
                     </Stack>
                   </RadioGroup>
                 )}
@@ -254,7 +295,7 @@ const CreateChannel = ({
             <FormControl
               isInvalid={!!errors.password}
               mt={0}
-              display={isPrivate ? "block" : "none"}
+              display={isProtected ? "block" : "none"}
               ref={passRef}
               isRequired
             >
@@ -274,7 +315,7 @@ const CreateChannel = ({
           </Stack>
         </ModalBody>
 
-        <ModalFooter p={3}>
+        <ModalFooter p={3} onClick={() => setOpenTooltip("")}>
           <Button
             bg={"white"}
             color={"orange.500"}
@@ -293,7 +334,7 @@ const CreateChannel = ({
             // isLoading={isFetching}
             isDisabled={isLoadingCreatingChannel}
             cursor="pointer"
-            onClick={handleSubmit(onSubmit)}
+            onClick={handleSubmit(onCreateChannel)}
             _hover={{
               bg: "orange.400",
             }}

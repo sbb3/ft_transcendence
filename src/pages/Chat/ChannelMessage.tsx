@@ -5,6 +5,11 @@ const ChannelMessage = ({
   currentUser,
   setParticipantUserId,
   toggleProfileDrawer,
+}: {
+  message: any;
+  currentUser: any;
+  setParticipantUserId: any;
+  toggleProfileDrawer: any;
 }) => {
   return (
     <Flex

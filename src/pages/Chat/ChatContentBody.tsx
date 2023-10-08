@@ -1,36 +1,123 @@
 import { Box, Flex, Stack, Text } from "@chakra-ui/react";
 import * as ScrollArea from "@radix-ui/react-scroll-area";
 import "src/styles/scrollbarChatBody.css";
-import { useEffect, useRef } from "react";
-import { useSelector } from "react-redux";
+import { useEffect, useRef, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import ConversationMessage from "./ConversationMessage";
+import messagesApi, {
+  useGetMessagesByConversationIdQuery,
+} from "src/features/messages/messagesApi";
+import Loader from "src/components/Utils/Loader";
+import store from "src/app/store";
+import InfiniteScroll from "react-infinite-scroll-component";
+import { Scrollbars } from "rc-scrollbars";
+import ChatRightModal from "./ChatRightModal";
 
 const ChatContentBody = ({
-  messages = [],
+  conversationId,
   toggleProfileDrawer,
-  error,
   isProfileDrawerOpen,
   receiverUser = null,
 }) => {
   const currentUser = useSelector((state: any) => state?.user?.currentUser);
-  const messagesRef = useRef(null);
+  const [page, setPage] = useState(1);
 
-  const scrollToBottom = () => {
-    messagesRef?.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  const {
+    data: { messages = [], totalPages = 0 } = {},
+    isLoading: isLoadingMessages,
+    isFetching: isFetchingMessages,
+    isError,
+    error,
+  } = useGetMessagesByConversationIdQuery(conversationId); // add page = 1, limit = 10
 
   useEffect(() => {
-    if (messagesRef.current) {
-      scrollToBottom();
+    if (page > 1) {
+      store.dispatch(
+        messagesApi.endpoints.getMoreMessagesByConversationId.initiate({
+          conversationId,
+          page,
+        })
+      );
     }
-    return () => {
-      scrollToBottom();
-    };
-  }, [messages]);
+  }, [page, conversationId]);
+
+  let content;
+
+  if (isLoadingMessages || isFetchingMessages) {
+    content = (
+      <Flex
+        justify="center"
+        align="center"
+        h="100%"
+        w="100%"
+        color="white"
+        fontSize="xl"
+        fontWeight="semibold"
+      >
+        <Loader />
+      </Flex>
+    );
+  } else if (isError) {
+    content = (
+      <Flex
+        justify="center"
+        align="center"
+        h="100%"
+        w="100%"
+        color="white"
+        fontSize="xl"
+        fontWeight="semibold"
+      >
+        <Text fontSize="xl" fontWeight="normal" color="white">
+          {error?.data?.message || "Something went wrong 🤷‍♂️"}
+        </Text>
+      </Flex>
+    );
+  } else if (messages?.length > 0) {
+    content = (
+      <InfiniteScroll
+        scrollableTarget="scrollableDiv"
+        dataLength={messages?.length}
+        next={() => setPage((prev) => prev + 1)}
+        hasMore={page < totalPages}
+        loader={<Loader />}
+        inverse={true}
+        style={{ display: "flex", flexDirection: "column-reverse" }}
+      >
+        {messages?.map((message) => (
+          <ConversationMessage
+            message={message}
+            currentUser={currentUser}
+            receiverUser={receiverUser}
+            toggleProfileDrawer={toggleProfileDrawer}
+          />
+        ))}
+      </InfiniteScroll>
+    );
+  } else {
+    content = (
+      <Flex
+        justify="center"
+        align="center"
+        h="100%"
+        w="100%"
+        color="white"
+        fontSize="xl"
+        fontWeight="semibold"
+      >
+        <Text fontSize="xl" fontWeight="normal" color="white">
+          Start the conversation 🚀
+        </Text>
+      </Flex>
+    );
+  }
 
   return (
     <Stack
-      justify={"start"}
+      position="relative"
+      id="scrollableDiv"
+      direction="column-reverse"
+      overflowY="auto"
       w={"full"}
       h={"800px"}
       borderRadius={6}
@@ -43,67 +130,14 @@ const ChatContentBody = ({
       bgSize="cover"
       bgRepeat="no-repeat"
     >
-      {error ? (
-        <Flex
-          justify="center"
-          align="center"
-          h="100%"
-          w="100%"
-          color="white"
-          fontSize="xl"
-          fontWeight="semibold"
-        >
-          <Text fontSize="xl" fontWeight="normal" color="white">
-            This conversation is empty 🤔 or does not exist 🤷‍♂️
-          </Text>
-        </Flex>
-      ) : (
-        <ScrollArea.Root id="ScrollArea.Root" className="ScrollAreaRoot">
-          <ScrollArea.Viewport
-            id="ScrollArea.Viewport"
-            className="ScrollAreaViewport"
-          >
-            {messages?.length > 0 ? (
-              messages?.map((message) => (
-                <ConversationMessage
-                  message={message}
-                  currentUser={currentUser}
-                  receiverUser={receiverUser}
-                  toggleProfileDrawer={toggleProfileDrawer}
-                  isProfileDrawerOpen={isProfileDrawerOpen}
-                />
-              ))
-            ) : (
-              <Flex
-                justify="center"
-                align="center"
-                h="100%"
-                w="100%"
-                color="white"
-                fontSize="xl"
-                fontWeight="semibold"
-              >
-                <Text fontSize="xl" fontWeight="normal" color="white">
-                  Start the conversation 🚀
-                </Text>
-              </Flex>
-            )}
-            <Box ref={messagesRef} />
-          </ScrollArea.Viewport>
-          <ScrollArea.Scrollbar
-            className="ScrollAreaScrollbar"
-            orientation="vertical"
-          >
-            <ScrollArea.Thumb className="ScrollAreaThumb" />
-          </ScrollArea.Scrollbar>
-          <ScrollArea.Scrollbar
-            className="ScrollAreaScrollbar"
-            orientation="horizontal"
-          >
-            <ScrollArea.Thumb className="ScrollAreaThumb" />
-          </ScrollArea.Scrollbar>
-          <ScrollArea.Corner className="ScrollAreaCorner" />
-        </ScrollArea.Root>
+      {content}
+
+      {isProfileDrawerOpen && (
+        <ChatRightModal
+          participantUserId={receiverUser?.id}
+          isOpen={isProfileDrawerOpen}
+          toggleProfileDrawer={toggleProfileDrawer}
+        />
       )}
     </Stack>
   );

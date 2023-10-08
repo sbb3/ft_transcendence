@@ -23,8 +23,8 @@ export default function Signin() {
     })
       .unwrap()
       .then((res) => {
-        console.log(`otp_enabled: `, res?.user?.otp_enabled);
-        console.log(`otp_validated: `, res?.user?.otp_validated);
+        // console.log(`otp_enabled: `, res?.user?.otp_enabled);
+        // console.log(`otp_validated: `, res?.user?.otp_validated);
 
         if (res?.user?.otp_enabled && !res?.user?.otp_validated) {
           onToggle();

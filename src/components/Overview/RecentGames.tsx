@@ -8,7 +8,37 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 dayjs.extend(relativeTime);
 
-const RecentGames = ({ user }) => {
+interface RecentGamesProps {
+  user: {
+    id: number;
+    name: string;
+    username: string;
+    avatar: string;
+    recentGames: {
+      id: number;
+      player: {
+        id: number;
+        name: string;
+        username: string;
+        avatar: string;
+        score: number;
+      };
+      opponent: {
+        id: number;
+        name: string;
+        username: string;
+        avatar: string;
+        score: number;
+      };
+      date: string;
+      status: string;
+      winStatus: string;
+      createdAt: number;
+    }[];
+  };
+}
+
+const RecentGames = ({ user }: RecentGamesProps) => {
   // const { data: recentGames, isLoading, isFetching, isError, error } = useGetUserRecentGamesQuery(currentUser?.id);
   // const { recentGames } = user;
   const navigate = useNavigate();
@@ -58,7 +88,7 @@ const RecentGames = ({ user }) => {
                 user?.recentGames
                   .slice()
                   ?.sort((a, b) =>
-                    dayjs(b?.createdAt).isAfter(dayjs(a?.createdAt))
+                    dayjs(a.createdAt).isBefore(dayjs(b.createdAt)) ? 1 : -1
                   )
                   ?.map(({ id, player, opponent, date, status, winStatus }) => (
                     <>

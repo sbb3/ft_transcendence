@@ -21,12 +21,11 @@ import { Controller, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useToast } from "@chakra-ui/react";
-import { ReactNode, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLottie } from "lottie-react";
 import animationData from "src/assets/animations/animation_fingerprint.json";
-import { useDispatch, useSelector } from "react-redux";
-import usersApi, { useValidateOTPMutation } from "src/features/users/usersApi";
+import { useSelector } from "react-redux";
+import { useValidateOTPMutation } from "src/features/users/usersApi";
 import store from "src/app/store";
 import authApi from "src/features/auth/authApi";
 
@@ -48,13 +47,11 @@ const options = {
   autoplay: true,
   animationData,
 };
-// TODO: View does not get rendered on the first time, it gets rendered on the second time
 const TwoFactorAccessBlocker = ({
   isOTPAccessBlockerOpen,
   onOTPAccessBlockerToggle,
 }) => {
   const userId = useSelector((state: any) => state?.auth?.userId);
-  const dispatch = useDispatch();
   const navigate = useNavigate();
   const { View } = useLottie(options, style);
   const toast = useToast();
@@ -68,15 +65,11 @@ const TwoFactorAccessBlocker = ({
     resolver: yupResolver(pinSchema),
   });
 
-  const [triggerGetCurrentUser, { isLoading: isLoadingGetCurrentUser }] =
-    usersApi.useLazyGetCurrentUserQuery();
-
   const [validateOTP, { isLoading: isValidatingOTP }] =
     useValidateOTPMutation();
 
   const onOTPValidation = async (data: any) => {
-    console.log("PIN: ", data);
-
+    // console.log("PIN: ", data);
     try {
       await validateOTP({
         userId: userId,
@@ -92,9 +85,7 @@ const TwoFactorAccessBlocker = ({
       reset({
         pin: "",
       });
-      // onOTPAccessBlockerToggle();
-      await triggerGetCurrentUser(userId);
-      // TODO: logout user
+      onOTPAccessBlockerToggle();
     } catch (error) {
       console.log("error: ", error);
       toast({
@@ -113,12 +104,10 @@ const TwoFactorAccessBlocker = ({
       closeOnEsc={false}
       closeOnOverlayClick={false}
       isCentered={true}
-      // size="xl"
     >
       <ModalOverlay />{" "}
       <ModalContent
         borderRadius={40}
-        // maxH="350px"
         maxW="400px"
         mt={4}
         border="1px solid rgba(251, 102, 19, 0.3)"
@@ -157,7 +146,6 @@ const TwoFactorAccessBlocker = ({
                   justify="center"
                   align="start"
                   w="full"
-                  // outline="1px solid yellow"
                 >
                   <FormLabel
                     htmlFor="pin"
@@ -208,7 +196,7 @@ const TwoFactorAccessBlocker = ({
               // TODO: uncomment below dispatch later and remove localStorage.clear()
               await store.dispatch(authApi.endpoints.sendLogOut.initiate({}));
               localStorage.clear();
-              // onOTPAccessBlockerToggle();
+              onOTPAccessBlockerToggle();
               navigate("/login", { replace: true });
             }}
             _hover={{

@@ -1,5 +1,5 @@
 import { Outlet } from "react-router-dom";
-import { Box, Flex, useDisclosure } from "@chakra-ui/react";
+import { Box, Flex, Stack, useDisclosure } from "@chakra-ui/react";
 import Header from "./Header";
 import Sidebar from "src/components/Sidebar";
 import { motion } from "framer-motion";
@@ -10,10 +10,10 @@ const MotionBox = motion(Box);
 
 const Layout = () => {
   const currentUser = useSelector((state: any) => state?.user?.currentUser);
-  const { isOpen, onToggle } = useDisclosure();
+  const { onToggle } = useDisclosure();
   return (
     <Flex
-      w={{ base: "full", sm: "460px", md: "740px", lg: 880, xl: 1150 }}
+      w={{ base: "full", sm: "460px", md: 780, lg: 980, xl: 1250 }}
       h="full"
       gap={1}
       borderRadius={24}
@@ -26,7 +26,24 @@ const Layout = () => {
       p={2}
       alignItems={"stretch"}
     >
-      <Sidebar />
+      <Stack
+        w="160px"
+        display={{ base: "none", lg: "flex" }}
+        justify="start"
+        spacing={8}
+        pt={4}
+        pb={6}
+        borderRadius={24}
+        bg="pong_bg_secondary"
+        border="1px solid rgba(251, 102, 19, 0.1)"
+        boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.35)"
+        backdropFilter={"blur(20px)"}
+        bgImage={`url('src/assets/img/BlackNoise.png')`}
+        bgSize="cover"
+        bgRepeat="no-repeat"
+      >
+        <Sidebar />
+      </Stack>
       <Flex
         direction={"column"}
         w="full"

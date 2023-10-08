@@ -1,6 +1,6 @@
 import { Box, Flex, Link, VStack } from "@chakra-ui/react";
 import { motion } from "framer-motion";
-import "/src/styles/loginButton.css";
+import "/src/styles/loginButtonStyles.css";
 
 const MotionBox = motion(Box);
 

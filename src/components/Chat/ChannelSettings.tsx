@@ -34,7 +34,7 @@ const validationSchema = yup.object().shape({
     .trim(),
   privacy: yup.string().required("Privacy is required"),
   password: yup.string().when("privacy", {
-    is: "private",
+    is: "protected",
     then(schema) {
       return schema
         .required("Password is required")
@@ -47,7 +47,7 @@ const validationSchema = yup.object().shape({
 
 const ChannelSettings = ({ channel, onToggleChannelInfo }) => {
   const currentUser = useSelector((state: any) => state.user.currentUser);
-  const [isPrivate, setIsPrivate] = useState(false);
+  const [isProtected, setIsProtected] = useState(false);
   const passRef = useRef<HTMLInputElement>(null);
   const toast = useToast();
   const {
@@ -93,7 +93,7 @@ const ChannelSettings = ({ channel, onToggleChannelInfo }) => {
       password: "",
       privacy: "public",
     });
-    if (isPrivate) setIsPrivate(false);
+    if (isProtected) setIsProtected(false);
     onToggleChannelInfo();
   };
 
@@ -156,7 +156,7 @@ const ChannelSettings = ({ channel, onToggleChannelInfo }) => {
                 //   console.log("e: ", inputValue);
                 //   console.log("field: ", field);
                 field.onChange(inputValue);
-                setIsPrivate(inputValue === "private");
+                setIsProtected(inputValue === "protected");
               }}
             >
               <Stack direction="row">
@@ -165,6 +165,9 @@ const ChannelSettings = ({ channel, onToggleChannelInfo }) => {
                 </Radio>
                 <Radio colorScheme={"orange"} value="private">
                   Private
+                </Radio>
+                <Radio colorScheme={"orange"} value="protected">
+                  Protected
                 </Radio>
               </Stack>
             </RadioGroup>
@@ -177,7 +180,7 @@ const ChannelSettings = ({ channel, onToggleChannelInfo }) => {
       <FormControl
         isInvalid={!!errors.password}
         mt={0}
-        display={isPrivate ? "block" : "none"}
+        display={isProtected ? "block" : "none"}
         ref={passRef}
         isRequired
       >

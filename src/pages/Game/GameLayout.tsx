@@ -12,7 +12,7 @@ const GameLayout = () => {
       p={2}
       borderRadius={26}
     >
-      <Text
+      {/* <Text
         fontSize={"lg"}
         fontWeight={"bold"}
         color={"white"}
@@ -20,7 +20,7 @@ const GameLayout = () => {
         w={"full"}
       >
         Game Layout
-      </Text>
+      </Text> */}
       <Outlet />
     </Stack>
   );

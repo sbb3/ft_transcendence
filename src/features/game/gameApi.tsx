@@ -22,9 +22,6 @@ const gameApi = apiSlice.injectEndpoints({
         body: { ...data },
       }),
     }),
-    getLeaderboard: builder.query({
-      query: () => "leaderboard",
-    }),
     getUserRecentGames: builder.query({
       query: (id) => `users/${id}/recentgames/`,
     }),
@@ -35,7 +32,6 @@ export const {
   useGetGamesQuery,
   useGetGameByIdQuery,
   useAcceptGameChallengeMutation,
-  useGetLeaderboardQuery,
   useGetUserRecentGamesQuery,
 } = gameApi;
 

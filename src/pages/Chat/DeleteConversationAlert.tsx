@@ -6,9 +6,9 @@ import {
   AlertDialogHeader,
   AlertDialogOverlay,
   Button,
+  useToast,
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
-import Loader from "src/components/Utils/Loader";
 import { useDeleteConversationMutation } from "src/features/conversations/conversationsApi";
 
 const DeleteConversationAlert = ({
@@ -19,10 +19,9 @@ const DeleteConversationAlert = ({
   cancelRef,
 }) => {
   const navigate = useNavigate();
-  const [deleteConversation, { isLoading, isError, isSuccess }] =
-    useDeleteConversationMutation();
+  const toast = useToast();
+  const [deleteConversation, { isLoading }] = useDeleteConversationMutation();
 
-  //   TODO: delete messages of the conversation also
   const handleDelete = async () => {
     try {
       await deleteConversation({
@@ -30,20 +29,27 @@ const DeleteConversationAlert = ({
         members: conversation?.members,
       }).unwrap();
       navigate("/chat", { replace: true });
-      console.log("conversation deleted");
+      toast({
+        title: "Conversation deleted.",
+        description: "Conversation deleted successfully.",
+        status: "info",
+        duration: 3000,
+        isClosable: true,
+      });
     } catch (error) {
       console.log("error: ", error);
+      toast({
+        title: "Error",
+        description: "Error happened during deleting conversation.",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
     }
 
     onClose();
     navigate("/chat", { replace: true });
   };
-
-  //   if (isSuccess) {
-  //     onClose();
-  //   }
-
-  //   if (isLoading) return <Loader />;
 
   return (
     <>
@@ -79,7 +85,13 @@ const DeleteConversationAlert = ({
               <Button ref={cancelRef} onClick={onClose}>
                 Cancel
               </Button>
-              <Button colorScheme="red" onClick={handleDelete} ml={3}>
+              <Button
+                colorScheme="red"
+                onClick={handleDelete}
+                ml={3}
+                isLoading={isLoading}
+                isDisabled={isLoading}
+              >
                 Delete
               </Button>
             </AlertDialogFooter>

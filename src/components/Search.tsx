@@ -14,27 +14,12 @@ import {
   AutoCompleteItem,
   AutoCompleteList,
 } from "@choc-ui/chakra-autocomplete";
-import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import * as ScrollArea from "@radix-ui/react-scroll-area";
 import "src/styles/scrollbar.css";
 import { BeatLoader } from "react-spinners";
-import { faker } from "@faker-js/faker";
 import { useGetUsersQuery } from "src/features/users/usersApi";
-
-// const users = [...Array(30)].map(() => ({
-//   id: faker.string.uuid(),
-//   name: faker.person.firstName() + " " + faker.person.lastName(),
-//   username: faker.internet.userName(),
-//   status: faker.helpers.arrayElement(["online", "offline", "in-game"]),
-//   avatar: faker.image.avatar(),
-//   email: faker.internet.email(),
-//   campus: faker.location.city(),
-//   gameWin: faker.number.int(50),
-//   gameLoss: faker.number.int(40),
-//   rank: faker.number.int(100),
-//   level: faker.number.int(50),
-// }));
+import { useState } from "react";
 
 const Search = () => {
   const navigate = useNavigate();
@@ -44,21 +29,26 @@ const Search = () => {
   const {
     data: users,
     isLoading,
+    isFetching,
     isError,
   } = useGetUsersQuery({
     refetchOnMountOrArgChange: true,
   });
 
+  if (isError) {
+    toast({
+      title: "Error",
+      description: "Something went wrong",
+      status: "error",
+      duration: 3000,
+      isClosable: true,
+    });
+  }
+
   return (
-    <Flex
-      direction="row"
-      align="center"
-      justify="center"
-      // gap={2}
-      // outline="2px solid yellow"
-    >
+    <Flex direction="row" align="center" justify="center">
       <AutoComplete
-        isLoading={isLoading}
+        isLoading={isLoading || isFetching}
         openOnFocus
         listAllValuesOnFocus
         closeOnSelect={true}
@@ -72,8 +62,6 @@ const Search = () => {
             color="white"
             px={2}
             py={1}
-            // borderTopLeftRadius="md"
-            // borderBottomLeftRadius="md"
             border="1px solid var(--white, #FFF)"
             borderRadius="50%"
             cursor="pointer"
@@ -101,7 +89,6 @@ const Search = () => {
 
         <AutoCompleteList
           loadingState={<BeatLoader color="#FF8707" />}
-          // style={{ backgroundImage: "url('src/assets/img/BlackNoise.png')" }}
           style={{
             borderRadius: "24px",
             border: "1px solid rgba(251, 102, 19, 0.39)",
@@ -125,69 +112,69 @@ const Search = () => {
             className="ScrollAreaRoot"
           >
             <ScrollArea.Viewport className="ScrollAreaViewport">
-              {users?.map((user, i) => (
-                <AutoCompleteItem
-                  key={i}
-                  value={user.name}
-                  textTransform="capitalize"
-                  bg="transparent"
-                  borderRadius={8}
-                  my={1}
-                  _hover={{
-                    bg: "pong_bg.500",
-                  }}
-                  _focus={{
-                    backgroundColor: "transparent",
-                  }}
-                  _selected={{
-                    backgroundColor: "transparent",
-                  }}
-                >
-                  <Flex
-                    direction="row"
-                    justify="space-between"
-                    align="center"
-                    w="full"
-                    // key={user.id}
+              {users?.length > 0 &&
+                users?.map((user, i) => (
+                  <AutoCompleteItem
+                    key={user?.id}
+                    value={user.name}
+                    textTransform="capitalize"
+                    bg="transparent"
+                    borderRadius={8}
+                    my={1}
+                    _hover={{
+                      bg: "pong_bg.500",
+                    }}
+                    _focus={{
+                      backgroundColor: "transparent",
+                    }}
+                    _selected={{
+                      backgroundColor: "transparent",
+                    }}
                   >
                     <Flex
                       direction="row"
-                      gap="3px"
+                      justify="space-between"
                       align="center"
-                      w={"full"}
-                      onClick={() => {
-                        setQuery("");
-                        navigate(`/profile/${user.name}`, {
-                          state: { user },
-                        });
-                      }}
+                      w="full"
                     >
-                      <Avatar
-                        size="sm"
-                        name={user.name}
-                        src={user.avatar}
-                        borderColor={"green.400"}
-                        borderWidth="2px"
+                      <Flex
+                        direction="row"
+                        gap="3px"
+                        align="center"
+                        w={"full"}
+                        onClick={() => {
+                          setQuery("");
+                          navigate(`/profile/${user.name}`, {
+                            state: { user },
+                          });
+                        }}
                       >
-                        <AvatarBadge
-                          boxSize="0.9em"
-                          border="1px solid white"
-                          bg={"green.400"}
-                        />
-                      </Avatar>
-                      <Text
-                        color="white"
-                        fontSize="14px"
-                        fontWeight="medium"
-                        ml={2}
-                        flex={1}
-                      >
-                        {user.name}
-                      </Text>
+                        <Avatar
+                          size="sm"
+                          name={user.name}
+                          src={user.avatar}
+                          borderColor={"green.400"}
+                          borderWidth="2px"
+                        >
+                          <AvatarBadge
+                            boxSize="0.9em"
+                            border="1px solid white"
+                            bg={"green.400"}
+                          />
+                        </Avatar>
+                        <Text
+                          color="white"
+                          fontSize="14px"
+                          fontWeight="medium"
+                          ml={2}
+                          flex={1}
+                        >
+                          {user.name}
+                        </Text>
+                      </Flex>
                     </Flex>
-                  </Flex>
-                </AutoCompleteItem>
-              ))}
+                  </AutoCompleteItem>
+                ))}
             </ScrollArea.Viewport>
             <ScrollArea.Scrollbar
               className="ScrollAreaScrollbar"

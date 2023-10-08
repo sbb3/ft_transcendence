@@ -6,7 +6,6 @@ import {
   Settings,
   Game,
   Chat,
-  Watch,
   Support,
   Login,
   NotFoundPage,
@@ -20,8 +19,8 @@ import Signin from "./pages/Signin.tsx";
 import Public from "./pages/Public.tsx";
 import Register from "./pages/Register.tsx";
 import PrefetchUsers from "./components/PrefetchUsers.tsx";
-import GameLayout from "./pages/GameLayout.tsx";
-import Play from "./pages/Play.tsx";
+import GameLayout from "./pages/Game/GameLayout.tsx";
+import GameStarted from "./pages/Game/GameStarted.tsx";
 import CheckOTP from "./features/auth/CheckOTP.tsx";
 
 function App() {
@@ -49,14 +48,14 @@ function App() {
       />
       <Route element={<AuthVerification />}>
         <Route element={<PrefetchUsers />}>
-          <Route path="/" element={<CheckOTP />}>
+          <Route element={<CheckOTP />}>
             <Route path="/" element={<Layout />}>
               <Route index element={<Overview />} />
               <Route path="profile/:username" element={<PlayerProfile />} />
               <Route path="settings" element={<Settings />} />
               <Route path="game" element={<GameLayout />}>
                 <Route index element={<Game />} />
-                <Route path=":id" element={<Play />} />
+                <Route path=":id" element={<GameStarted />} />
               </Route>
               <Route path="chat" element={<Chat />}>
                 <Route index element={<ChatSplashScreen />} />
@@ -69,7 +68,6 @@ function App() {
                   element={<ChannelContent />}
                 />
               </Route>
-              <Route path="watch" element={<Watch />} />
               <Route path="support" element={<Support />} />
             </Route>
           </Route>
@@ -81,5 +79,3 @@ function App() {
 }
 
 export default App;
-
-// TODO: handle scrollbars

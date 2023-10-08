@@ -16,15 +16,14 @@ import {
   PinInputField,
   Stack,
   Text,
+  useToast,
 } from "@chakra-ui/react";
 import { Controller, useForm } from "react-hook-form";
 import QRCode from "qrcode";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useToast } from "@chakra-ui/react";
-import { ReactNode, useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import usersApi, {
+import { useEffect, useState } from "react";
+import {
   useGenerateOTPMutation,
   useVerifyOTPMutation,
 } from "src/features/users/usersApi";
@@ -42,22 +41,18 @@ const pinSchema = yup.object().shape({
 const TwoFactorActivation = ({ isOpen, onToggle }) => {
   const currentUser = useSelector((state: any) => state?.user?.currentUser);
   const [qrCodeUrl, setQrCodeUrl] = useState("");
-  const navigate = useNavigate();
   const toast = useToast();
   const {
     register,
     handleSubmit,
     control,
-    formState: { errors, isSubmitting },
+    formState: { errors },
     reset,
   } = useForm({
     resolver: yupResolver(pinSchema),
   });
   const [generateOTP, { isLoading: isGeneratingOTP }] =
     useGenerateOTPMutation();
-
-  const [triggerGetCurrentUser, { isLoading: isLoadingGetCurrentUser }] =
-    usersApi.useLazyGetCurrentUserQuery();
 
   useEffect(() => {
     generateOTP(currentUser?.id)
@@ -81,15 +76,12 @@ const TwoFactorActivation = ({ isOpen, onToggle }) => {
 
   const [verifyOTP, { isLoading: isVerifyingOTP }] = useVerifyOTPMutation();
 
-  const onActivate2FA = async (data: any) => {
-    console.log("data: ", data);
-
+  const onVerifyAndActivate2FA = async (data: any) => {
     try {
       await verifyOTP({
         userId: currentUser?.id,
         userPin: data?.pin,
       }).unwrap();
-      // TODO: pass the refetch function in the state to update the currentUser
       toast({
         title: "2FA activated.",
         description: "You can now login with 2FA.",
@@ -101,8 +93,6 @@ const TwoFactorActivation = ({ isOpen, onToggle }) => {
         pin: "",
       });
       onToggle();
-      await triggerGetCurrentUser(currentUser?.id);
-      // TODO: logout user
     } catch (error) {
       console.log("error: ", error);
       toast({
@@ -125,7 +115,6 @@ const TwoFactorActivation = ({ isOpen, onToggle }) => {
       <ModalOverlay />{" "}
       <ModalContent
         borderRadius={40}
-        // maxH="350px"
         maxW="400px"
         mt={4}
         border="1px solid rgba(251, 102, 19, 0.3)"
@@ -140,7 +129,6 @@ const TwoFactorActivation = ({ isOpen, onToggle }) => {
           <Stack
             mt={0}
             spacing={4}
-            //  w={{ base: "full", sm: "full", md: 620 }}
             align="center"
             borderRadius={40}
             pl={3}
@@ -248,7 +236,7 @@ const TwoFactorActivation = ({ isOpen, onToggle }) => {
             isLoading={isGeneratingOTP || isVerifyingOTP}
             isDisabled={isGeneratingOTP || isVerifyingOTP}
             cursor="pointer"
-            onClick={handleSubmit(onActivate2FA)}
+            onClick={handleSubmit(onVerifyAndActivate2FA)}
           >
             Verify & Activate
           </Button>
