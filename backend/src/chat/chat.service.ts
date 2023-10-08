@@ -53,4 +53,96 @@ export class ChatService extends PrismaClient {
 			throw new InternalServerErrorException('Could not create a new conversation.');
 	}
 
+	async getAllUserConversations(email : string) {
+		const user = await this.user.findUnique({where : {email : email}});
+
+		if (!user)
+			throw new NotFoundException('User with email \'' + email + '\' not found.');
+
+		const allConversations = await this.conversation.findMany({
+			where : {
+				OR : [
+					{
+						firstMember : user.id
+					},
+					{
+						secondMember : user.id
+					}
+				]
+			}
+		});
+		const userIds = allConversations.map(conversation => conversation.firstMember == user.id
+			? conversation.secondMember
+			: conversation.firstMember);
+		const all = await this.user.findMany({
+			where : {
+				id : {
+					in : userIds
+				}
+			}
+		});
+
+		const formattedData = allConversations.map(conversation => {
+			const first = conversation.firstMember == user.id ? user : all.find(member => member.id == conversation.firstMember);
+			const second = conversation.secondMember == user.id ? user : all.find(member => member.id == conversation.secondMember);
+			const name = [first.name, second.name];
+			const members = [first.email, second.email];
+			const avatar = [{
+				id : first.id,
+				avatar : first.avatar
+			}, {
+				id : second.id,
+				avatar : second.avatar
+			}];
+
+			return {
+				id : conversation.id,
+				name,
+				members,
+				avatar,
+				lastMessageContent : conversation.lastMessageContent,
+				lastMessageCreatedAt : conversation.lastMessageCreatedAt
+			};
+		});
+
+		return formattedData;
+	}
+
+	async getConversation(conversationId : number) {
+		const conversation = await this.conversation.findUnique({
+			where : {
+				id : conversationId,
+			}
+		});
+
+		if (!conversation)
+			throw new NotFoundException('Conversation not found.');
+
+		const usersDming = await this.user.findMany({
+			where : {
+				id : {
+					in : [conversation.firstMember, conversation.secondMember]
+				}
+			}
+		});
+
+		if (usersDming.length != 2)
+			throw new NotFoundException('User in conversation not found.');
+		return [{
+			id : conversation.id,
+			name : [usersDming[0].name, usersDming[1].name],
+			avatar : [
+				{
+					id : usersDming[0].id,
+					avatar : usersDming[0].avatar
+				},
+				{
+					id : usersDming[1].id,
+					avatar : usersDming[1].avatar
+				}],
+			members : [usersDming[0].email, usersDming[1].email],
+			lastMessageCreatedAt : conversation.lastMessageCreatedAt,
+			lastMessageContent : conversation.lastMessageContent
+		}];
+	}
 }

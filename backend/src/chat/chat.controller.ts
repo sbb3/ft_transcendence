@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, ParseIntPipe, Post, Query, Res, UseGuards } from '@nestjs/common';
 import { ApiBody, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { response, Response } from 'express';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
@@ -46,4 +46,35 @@ export class ChatController {
 		}
 	}
 
+	@Get('conversations')
+	@UseGuards(JwtGuard)
+	@ApiQuery({name : 'email'})
+	async getConversations(@Res() response : Response, @Query() emailQuery : EmailQueryDto) {
+		try {
+			const data = await this.chatService.getAllUserConversations(emailQuery.email);
+			
+			return response.status(200).json(data);
+		}
+		catch (error) {
+			if (error.status)
+				return response.status(error.status).json(error);
+			return response.status(500).json(error);
+		}
+	}
+
+	@Get('conversation')
+	@UseGuards(JwtGuard)
+	@ApiQuery({name : 'id'})
+	async getConversation(@Res() response : Response, @Query('id', ParseIntPipe) conversationId : number) {
+		try {
+			const data = await this.chatService.getConversation(conversationId);
+
+			return response.status(200).json(data);
+		}
+		catch (error) {
+			if (error.status)
+				return response.status(error.status).json(error);
+			return response.status(500).json(error);
+		}
+	}
 }
