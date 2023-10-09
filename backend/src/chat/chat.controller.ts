@@ -1,11 +1,11 @@
-import { Body, Controller, Get, ParseIntPipe, Post, Query, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, ParseIntPipe, Patch, Post, Query, Res, UseGuards } from '@nestjs/common';
 import { ApiBody, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { response, Response } from 'express';
+import { Response } from 'express';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import { ChatService } from './chat.service';
 import { CreateConversationDto } from './dto/create-conversation.dto';
 import { CreateMessageDataDto } from './dto/create-message-data.dto';
-import { EmailQueryDto } from './dto/email-query.dto';
+import { EmailQueryDto, MembersQueryDto } from './dto/email-query.dto';
 
 @ApiTags('chat')
 @Controller('chat')
@@ -76,5 +76,22 @@ export class ChatController {
 				return response.status(error.status).json(error);
 			return response.status(500).json(error);
 		}
+	}
+
+	@Get('conversationByEmails')
+	@UseGuards(JwtGuard)
+	@ApiQuery({name : 'member1'})
+	@ApiQuery({name : 'member2'})
+	async getConversationByEmail(@Query() queryDto : MembersQueryDto, @Res() response : Response) {
+			try {
+				const data = await this.chatService.findConversationByEmails(queryDto.member1, queryDto.member2);
+
+				return response.status(200).json(data)
+			}
+			catch (error) {
+				if (error.status)
+					return response.status(error.status).json(error);
+				return response.status(500).json(error);
+			}
 	}
 }

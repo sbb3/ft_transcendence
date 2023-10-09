@@ -145,4 +145,49 @@ export class ChatService extends PrismaClient {
 			lastMessageContent : conversation.lastMessageContent
 		}];
 	}
+
+	async findConversationByEmails(firstEmail : string, secondEmail : string) {
+		const firstUser = await this.user.findUnique({where : { email : firstEmail }});
+		const secondUser = await this.user.findUnique({where : { email : secondEmail }});
+
+		if (!firstUser || !secondUser)
+			throw new NotFoundException(!firstUser
+				? 'User with email \'' + firstEmail + '\' not found.'
+				: 'User with email \'' + secondEmail + '\' not found.');
+		const conversation = await this.conversation.findMany({
+			where : {
+				OR : [
+					{
+						firstMember : firstUser.id,
+						secondMember : secondUser.id
+					},
+					{
+						firstMember : secondUser.id,
+						secondMember : firstUser.id
+					}
+				]
+			}
+		});
+
+		if (conversation.length == 0)
+			throw new NotFoundException('Conversation not found.');
+
+		return {
+			id : conversation[0].id,
+			name : [firstUser.name, secondUser.name],
+			avatar : [
+				{
+					id : firstUser.id,
+					avatar : firstUser.avatar
+				},
+				{
+					id : secondUser.id,
+					avatar : secondUser.avatar
+				}
+			],
+			members : [firstUser.email, secondUser.email],
+			lastMessageContent : conversation[0].lastMessageContent,
+			lastMessageCreatedAt : conversation[0].lastMessageCreatedAt
+		}
+	}
 }
