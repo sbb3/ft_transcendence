@@ -137,4 +137,19 @@ export class ChatController {
 		}
 	}
 	
+	@Get('messages')
+	@UseGuards(JwtGuard)
+	@ApiOperation({summary : 'Get messages by conversation id.'})
+	async getMessages(@Query('conversationId', ParseIntPipe) conversationId : number,
+		@Query('page', ParseIntPipe) page : number, @Res() response : Response) {
+		try {
+			const data = await this.chatService.getMessagesByConversationId(conversationId, page);
+			return response.status(200).json(data);
+		}
+		catch (error) {
+			if (error.status)
+				return response.status(error.status).json(error);
+			return response.status(500).json(error);
+		}
+	}
 }

@@ -9,11 +9,11 @@ export class CreateMessageDataDto {
 
 	@IsNumber()
 	@ApiProperty({example : 1})
-	senderId : number;
+	sender : number;
 
 	@IsNumber()
 	@ApiProperty({example : 1})
-	receiverId : number;
+	receiver : number;
 
 	@IsString()
 	@ApiProperty({example : "Message content."})

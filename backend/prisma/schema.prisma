@@ -84,8 +84,8 @@ model channelMessage {
 model messageData {
 	id						Int @id @default(autoincrement())
 	conversationId			Int
-	senderId        Int
-	receiverId				Int
+	sender        Int
+	receiver				Int
 	content					String
 	lastMessageCreatedAt	DateTime @default(now())
 }

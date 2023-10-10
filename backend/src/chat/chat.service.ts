@@ -8,11 +8,11 @@ import UpdateConversationDto from './dto/update-conversation.dto';
 export class ChatService extends PrismaClient {
 
 	async createMessageData(messageDto : CreateMessageDataDto) {
-		const sender = await this.user.findUnique({where : {id : messageDto.senderId}});
-		const receiver = await this.user.findUnique({where : {id : messageDto.receiverId}});
+		const sender = await this.user.findUnique({where : {id : messageDto.sender}});
+		const receiver = await this.user.findUnique({where : {id : messageDto.receiver}});
 		const conversation = await this.conversation.findUnique({where : {id : messageDto.conversationId}});
 
-		if (messageDto.receiverId == messageDto.senderId)
+		if (messageDto.receiver == messageDto.sender)
 			throw new BadRequestException('Receiver and sender must have different ids.');
 		if (!sender || !receiver)
 			throw new NotFoundException(!sender ? ('Sender not found.') : ('Receiver not found.'));
@@ -236,5 +236,50 @@ export class ChatService extends PrismaClient {
 			},
 			data : updateDto
 		})
+	}
+
+	async getMessagesByConversationId(conversationId : number, page : number) {
+		const count = await this.messageData.count();
+		const messages = await this.messageData.findMany({
+			where : {
+				conversationId : conversationId
+			},
+			skip : (page - 1) * 10,
+			take : 10,
+			orderBy : {
+				lastMessageCreatedAt : 'desc' 
+			}
+		});
+
+		if (messages.length == 0)
+			return {totalPages : Math.ceil(count / 10), messages};
+		const sender = await this.user.findUnique({
+			where : {
+				id : messages[0]?.sender,
+			}
+		});
+		const receiver = await this.user.findUnique({
+			where : {
+				id : messages[0]?.receiver,
+			},
+		});
+
+		return messages.map(message => {
+			return {
+				sender : {
+					id : sender.id,
+					email : sender.email,
+					name : sender.name
+				},
+				receiver : {
+					id : receiver.id,
+					email : receiver.email,
+					name : receiver.name
+				},
+				content : message.content,
+				lastMessageCreatedAt : message.lastMessageCreatedAt,
+				conversationId : message.conversationId
+			}
+		});
 	}
 }
