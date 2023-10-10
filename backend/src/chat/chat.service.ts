@@ -1,7 +1,8 @@
-import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ConsoleLogger, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import { CreateConversationDto } from './dto/create-conversation.dto';
 import { CreateMessageDataDto } from './dto/create-message-data.dto';
+import UpdateConversationDto from './dto/update-conversation.dto';
 
 @Injectable()
 export class ChatService extends PrismaClient {
@@ -189,5 +190,51 @@ export class ChatService extends PrismaClient {
 			lastMessageContent : conversation[0].lastMessageContent,
 			lastMessageCreatedAt : conversation[0].lastMessageCreatedAt
 		}
+	}
+
+	async deleteConversation(conversationId : number) {
+		const conversation = await this.conversation.findUnique({
+			where : {
+				id : conversationId,
+			}
+		});
+		
+		const messages = await this.messageData.findMany({
+			where : {
+				conversationId : conversationId
+			}
+		});
+	
+		if (messages)
+			await this.messageData.deleteMany({
+				where : {
+					conversationId : conversationId
+				}
+			});	
+		if (!conversation)
+			throw new NotFoundException('Conversation not found.');
+
+		await this.conversation.delete({
+			where : {
+				id : conversationId,
+			}
+		});
+	}
+
+	async updateConversation(conversationId : number, updateDto : UpdateConversationDto) {
+		const conversation = await this.conversation.findUnique({
+			where : {
+				id : conversationId
+			}
+		});
+
+		if (!conversation)
+			throw new NotFoundException('Conversation not found.');
+		await this.conversation.update({
+			where : {
+				id : conversationId
+			},
+			data : updateDto
+		})
 	}
 }
