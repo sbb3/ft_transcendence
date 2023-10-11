@@ -13,7 +13,7 @@ EXPOSE 3000
 # RUN npx prisma db push
 # RUN chmod 777 prisma_script.sh
 
-# CMD [ "npm", "run", "start:dev" ]
+CMD [ "npm", "run", "start:dev" ]
 
-CMD [ "npm", "start" ]
+# CMD [ "npm", "start" ]
 # ENTRYPOINT [ "./prisma_script.sh" ]

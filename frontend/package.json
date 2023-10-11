@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "start": "vite --host",
+    "start": "vite",
     "build": "tsc && vite build",
     "json-server": "json-server --watch db.json --port 5001",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
@@ -59,6 +59,6 @@
     "json-server": "^0.17.3",
     "prettier": "^2.8.8",
     "typescript": "^5.2.2",
-    "vite": "^4.4.5"
+    "vite": "^4.4.11"
   }
 }

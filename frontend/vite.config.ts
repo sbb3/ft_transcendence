@@ -9,7 +9,7 @@ export default defineConfig({
       src: "/src",
     },
   },
-  // server: {
-	// // host: true,
-	// },
+  server: {
+	host: true,
+	},
 })
