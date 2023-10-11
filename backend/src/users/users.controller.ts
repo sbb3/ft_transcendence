@@ -82,7 +82,6 @@ export class UsersController {
 
   @Get('username/:username')
   async getUserByUsername(@Param('username') username: string) {
-    this.logger.log('\nusername\n');
     const user = await this.usersService.findByUsername(username);
     return user;
   }
