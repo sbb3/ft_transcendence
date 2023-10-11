@@ -110,16 +110,8 @@ const ConversationContent = () => {
       const msgData = {
         id: uuidv4(),
         conversationId: id,
-        sender: {
-          id: currentUser?.id,
-          email: currentUser?.email,
-          name: currentUser?.name,
-        },
-        receiver: {
-          id: receiver.id,
-          email: receiver.email,
-          name: receiver.name,
-        },
+        sender: currentUser?.id,
+        receiver: receiver?.id,
         content: message,
         lastMessageCreatedAt: dayjs().valueOf(),
       };

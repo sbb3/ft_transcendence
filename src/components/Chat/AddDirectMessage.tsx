@@ -120,18 +120,8 @@ const AddDirectMessage = ({ isOpenDM, onToggleDM }) => {
         const newConversationData = {
           conversation: {
             id: uuidv4(),
-            name: [currentUser?.name, to?.name],
-            avatar: [
-              {
-                id: currentUser?.id,
-                avatar: currentUser?.avatar,
-              },
-              {
-                id: to.id,
-                avatar: to.avatar,
-              },
-            ],
-            members: [currentUser?.email, receiverEmail],
+            firstMember: currentUser?.id,
+            secondMember: to?.id,
             lastMessageContent: message,
             lastMessageCreatedAt: dayjs().valueOf(),
           },

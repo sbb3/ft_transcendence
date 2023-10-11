@@ -117,7 +117,7 @@ const channelsApi = apiSlice.injectEndpoints({
     }),
     editChannelInfo: builder.mutation({
       query: ({ id, data }: { id: number; data: any }) => ({
-        url: `/channels/${id}`,
+        url: `/channels/${id}/update`,
         method: "PATCH",
         body: { ...data },
       }),
@@ -388,7 +388,7 @@ const channelsApi = apiSlice.injectEndpoints({
     }),
     joinChannel: builder.mutation({
       query: ({ channelId, data }) => ({
-        url: `channels/${channelId}/join`,
+        url: `channels/${channelId}/join?username=${data?.username}`,
         method: "PATCH",
         body: { ...data },
       }),

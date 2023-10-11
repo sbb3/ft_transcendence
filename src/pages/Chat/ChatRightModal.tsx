@@ -147,16 +147,11 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleProfileDrawer }) => {
       if (conversations?.length > 0) {
         const conversation = conversations[0];
         id = conversation.id;
-        console.log("id->: ", id);
       } else {
         const conversation = {
           id: uuidv4(),
-          name: [currentUser?.name, participantUser?.name],
-          avatar: [
-            { id: currentUser?.id, avatar: currentUser?.avatar },
-            { id: participantUser?.id, avatar: participantUser?.avatar },
-          ],
-          members: [currentUser?.email, participantUser?.email],
+          firstMember: currentUser?.id,
+          secondMember: participantUser?.id,
           lastMessageContent: "",
           lastMessageCreatedAt: dayjs().valueOf(),
         };

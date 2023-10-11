@@ -78,7 +78,7 @@ const conversationApi = apiSlice.injectEndpoints({
       },
     }),
     getConversation: builder.query({
-      query: (conversationId) => `/conversations?id=${conversationId}`,
+      query: (conversationId) => `/conversation?id=${conversationId}`,
       async onCacheEntryAdded(
         arg,
         { dispatch, updateCachedData, cacheDataLoaded, cacheEntryRemoved }
@@ -103,7 +103,7 @@ const conversationApi = apiSlice.injectEndpoints({
     }),
     getConversationByMembersEmails: builder.query({
       query: (membersEmails: string[]) =>
-        `/conversations?members_like=${membersEmails[0]},${membersEmails[1]}&members_like=${membersEmails[1]},${membersEmails[0]}`,
+        `/conversations?member1=${membersEmails[0]}}&member2=${membersEmails[0]}`,
     }),
     createConversation: builder.mutation({
       query: ({ conversation, receiver }) => ({

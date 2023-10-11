@@ -79,19 +79,17 @@ const SearchForChannel = ({
   };
   const handleJoinChannel = async (channel) => {
     try {
-      // await checkChannelPassword({
-      //   channelId: channel?.id,
-      //   data: {
-      //     userId: currentUser?.id,
-      //     password: password,
-      //   },
-      // }).unwrap();
-      await joinChannel({
+      await checkChannelPassword({
         channelId: channel?.id,
         data: {
           userId: currentUser?.id,
-          name: currentUser?.name,
-          avatar: currentUser?.avatar,
+          password: password,
+        },
+      }).unwrap();
+      await joinChannel({
+        channelId: channel?.id,
+        data: {
+          username: currentUser?.username,
         },
       }).unwrap();
 

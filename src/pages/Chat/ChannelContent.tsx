@@ -74,14 +74,7 @@ const ChannelContent = () => {
     const msg = {
       id: uuidv4(),
       channelId: channel.id,
-      channelName: channelname,
-      sender: {
-        id: currentUser?.id,
-        username: currentUser?.username,
-        name: currentUser?.name,
-        avatar: currentUser?.avatar,
-      },
-      receivers: [...channel.members],
+      senderId: currentUser?.id,
       content: message,
       lastMessageCreatedAt: dayjs().valueOf(),
     };
