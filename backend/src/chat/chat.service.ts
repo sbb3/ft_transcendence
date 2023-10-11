@@ -221,10 +221,10 @@ export class ChatService extends PrismaClient {
 		});
 	}
 
-	async updateConversation(conversationId : number, updateDto : UpdateConversationDto) {
+	async updateConversation(updateDto : UpdateConversationDto) {
 		const conversation = await this.conversation.findUnique({
 			where : {
-				id : conversationId
+				id : updateDto.id
 			}
 		});
 
@@ -232,9 +232,9 @@ export class ChatService extends PrismaClient {
 			throw new NotFoundException('Conversation not found.');
 		await this.conversation.update({
 			where : {
-				id : conversationId
+				id : updateDto.id
 			},
-			data : updateDto
+			data : updateDto.message
 		})
 	}
 

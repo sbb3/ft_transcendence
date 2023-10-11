@@ -417,12 +417,15 @@ export class ChannelsService extends PrismaClient {
 			throw new InternalServerErrorException('Could not create message.')
 	}
 
-	async getAllChannelMessages(channelId : number) {
-		const channel : any = await this.findUniqueChannel({id : channelId}, null);
+	async getAllChannelMessages(channelName : string) {
+		const channel : any = await this.findUniqueChannel({name : channelName}, null);
+
+		if (!channel)
+			throw new NotFoundException('Channel not found.');
 
 		const allChannelMessages = await this.channelMessage.findMany({
 			where : {
-				channelId : channelId,
+				channelId : channel.id,
 			}
 		});
 

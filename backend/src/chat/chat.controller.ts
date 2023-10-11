@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, Param, ParseArrayPipe, ParseIntPipe, Patch, Post, Query, Res, UseGuards } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiProperty, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { response, Response } from 'express';
+import { Response } from 'express';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import { ChatService } from './chat.service';
 import { CreateConversationDto } from './dto/create-conversation.dto';
@@ -85,8 +85,8 @@ export class ChatController {
 
 	@Get('conversationByEmails')
 	@UseGuards(JwtGuard)
-	@ApiQuery({name : 'member1'})
-	@ApiQuery({name : 'member2'})
+	@ApiQuery({name : 'member1', example : 'member1@gmail.com'})
+	@ApiQuery({name : 'member2', example : 'member2@gmail.com'})
 	@ApiOperation({summary : 'Get a single conversation by 2 emails.'})
 	async getConversationByEmail(@Query() queryDto : MembersQueryDto, @Res() response : Response) {
 			try {
@@ -118,15 +118,13 @@ export class ChatController {
 		}
 	}
 
-	@Patch('conversation/:conversationId')
+	@Patch('conversation')
 	@UseGuards(JwtGuard)
-	@ApiProperty({name : 'conversationId'})
 	@ApiOperation({summary : 'Update a conversation by id.'})
 	@ApiBody({type : UpdateConversationDto})
-	async updateConversation(@Param('conversationId', ParseIntPipe) id : number, @Res() response : Response,
-		@Body() updateDto : UpdateConversationDto) {
+	async updateConversation(@Res() response : Response, @Body() updateDto : UpdateConversationDto) {
 		try {
-			await this.chatService.updateConversation(id, updateDto);
+			await this.chatService.updateConversation(updateDto);
 
 			return response.status(200).json({message : 'Success'});
 		}
@@ -137,6 +135,7 @@ export class ChatController {
 		}
 	}
 	
+
 	@Get('messages')
 	@UseGuards(JwtGuard)
 	@ApiOperation({summary : 'Get messages by conversation id.'})

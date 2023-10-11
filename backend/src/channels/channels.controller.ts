@@ -310,12 +310,12 @@ export class ChannelsController {
 		}
 	}
 
-	@Get(':channelId/messages')
-	@ApiParam({name : 'channelId'})
+	@Get('messages')
+	@ApiQuery({name : 'channelName'})
 	@UseGuards(JwtGuard)
-	async getAllChannelMessages(@Param('channelId', ParseIntPipe) channelId : number, @Res() response : Response) {
+	async getAllChannelMessages(@Query('channelName') channelName : string, @Res() response : Response) {
 		try {
-			const allMessages = await this.channelsService.getAllChannelMessages(channelId);
+			const allMessages = await this.channelsService.getAllChannelMessages(channelName);
 
 			return response.status(200).json(allMessages);
 		}
@@ -327,11 +327,10 @@ export class ChannelsController {
 	}
 
 	private readonly channelSelectionOptions = {
+					ownerId : true,
 					name : true,
 					privacy : true, 
 					description : true,
 					members : true
 				};
 }
-
-// Confirm message validation with front.

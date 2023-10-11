@@ -1,11 +1,30 @@
-import { IsDate, IsNotEmpty, IsString } from "class-validator";
+import { ApiProperty } from "@nestjs/swagger";
+import { Transform, Type } from "class-transformer";
+import { IsDate, IsNotEmpty, IsNotEmptyObject, IsNumber, IsString, ValidateNested } from "class-validator";
+
+class MessageDto {
+	
+	@IsString()
+	@IsNotEmpty()
+	@ApiProperty({name : 'lastMessageContent'})
+	lastMessageContent : string
+
+	@IsNotEmpty()
+	@Transform(({ value }) => new Date(value))
+	@IsDate()
+	@ApiProperty({name : 'lastMessageCreatedAt'})
+	lastMessageCreatedAt : Date
+}
 
 export default class UpdateConversationDto {
 
-	@IsString()
-	@IsNotEmpty()
-	lastMessage : string
+	@ApiProperty({example : '1'})
+	@IsNumber()
+	id : number;
 
-	@IsDate()
-	lastMessageCreatedAt : Date
+	@ValidateNested()
+	@IsNotEmptyObject()
+	@Type(() => MessageDto)
+	@ApiProperty({type : MessageDto})
+	message : MessageDto;
 }
