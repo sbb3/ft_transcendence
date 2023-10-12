@@ -316,8 +316,8 @@ export class ChannelsController {
 		try {
 			if (!req['user']?.id)
 				throw new BadRequestException('Request must contain the owner id.');
-			await this.channelsService.createChannelMessage(createMessageDto, req['user'].id);
-			return response.status(201).json({message : 'Message created successfully.'})
+			const message = await this.channelsService.createChannelMessage(createMessageDto, req['user'].id);
+			return response.status(201).json({message : message});
 		}
 		catch (error) {
 			if (error.status)

@@ -6,11 +6,12 @@ import { ChatModule } from './chat/chat.module';
 import { AuthModule } from './auth/auth.module';
 import { OtpModule } from './otp/otp.module';
 import { ChannelsModule } from './channels/channels.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [UserModule, AuthModule, PrismaModule, ConfigModule.forRoot({
     isGlobal : true,
-  }), ChatModule, OtpModule, ChannelsModule],
+  }), ChatModule, OtpModule, ChannelsModule, UsersModule],
   controllers: [],
   providers: [],
 })

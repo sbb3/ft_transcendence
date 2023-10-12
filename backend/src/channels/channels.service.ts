@@ -454,7 +454,18 @@ export class ChannelsService extends PrismaClient {
 		if (!sender)
 			throw new NotFoundException('Member not found in channel.');
 		if (isBanned)
-			throw new UnauthorizedException('Member banned from this channel.');
+			throw new ConflictException('Banned from this channel.');
+		const member = await this.channelMember.findMany({
+			where : {
+				userId : senderIdFromJwt,
+				channelId : channel.id
+			}
+		});
+		
+		if (member.length == 0)
+			throw new NotFoundException('Member not found in channel.');
+		if (member[0].isMuted)
+			return 'Muted from this channel.';
 		createMessageDto.receivers = channel.members.filter(member => member.userId != sender.userId).map(member => member.userId);
 		const createdMessage = await this.channelMessage.create({
 			data : createMessageDto
@@ -474,6 +485,7 @@ export class ChannelsService extends PrismaClient {
 		this.webSocketGateway.sendChannelMessage(messageToEmit);
 		if (!createdMessage)
 			throw new InternalServerErrorException('Could not create message.')
+		return 'Message created successfully.';
 	}
 
 	async getAllChannelMessages(channelName : string) {

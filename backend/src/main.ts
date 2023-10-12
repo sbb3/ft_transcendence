@@ -12,7 +12,7 @@ async function bootstrap() {
 		credentials : true,
 		origin : process.env.FRONT_URL,
 		allowedHeaders : 'Authorization, Content-Type, Content-Length',
-		methods : 'GET, PUT, DELETE, POST'
+		methods : 'GET, PUT, DELETE, POST, PATCH'
 	});
 	app.use(cookieParser());
 	app.use(morgan('dev'));
