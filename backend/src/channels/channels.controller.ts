@@ -128,6 +128,23 @@ export class ChannelsController {
 		}
 	}
 
+	@Get('members/:memberId')
+	@UseGuards(JwtGuard)
+	@ApiOperation({summary : 'Get all channels of a specified member.'})
+	@ApiParam({name : 'memberId'})
+	async getChannelsOfAMember(@Param('memberId', ParseIntPipe) memberId : number, @Res() response : Response) {
+		try {
+			const allChannels = await this.channelsService.getAllJoinedChannels(memberId, this.channelSelectionOptions);
+
+			return response.status(200).json(allChannels);
+		}
+		catch (error) {
+			if (error?.status)
+				return response.status(error.status).json(error);
+			return response.status(500).json(error);
+		}
+	}
+
 	@Patch(':channelId/members/:userId/mute')
 	@UseGuards(JwtGuard)
 	@ApiParam({name : 'channelId'})

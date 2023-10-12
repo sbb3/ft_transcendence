@@ -43,5 +43,4 @@ export class CreateChannelDto {
 	description : string;
 
 	ownerId : number
-	roomName : string
 }

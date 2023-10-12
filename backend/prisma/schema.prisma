@@ -56,7 +56,6 @@ model channel {
   password		String?
   description	String
   banned		Int[]
-  roomName		String @unique
 
   members		channelMember[] @relation("channelMembers")
 }
