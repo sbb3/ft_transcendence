@@ -269,12 +269,14 @@ export class ChatService extends PrismaClient {
 				sender : {
 					id : sender.id,
 					email : sender.email,
-					name : sender.name
+					name : sender.name,
+					avatar : sender.avatar
 				},
 				receiver : {
 					id : receiver.id,
 					email : receiver.email,
-					name : receiver.name
+					name : receiver.name,
+					avatar : sender.avatar
 				},
 				content : message.content,
 				lastMessageCreatedAt : message.lastMessageCreatedAt,

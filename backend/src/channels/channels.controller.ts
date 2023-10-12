@@ -310,7 +310,7 @@ export class ChannelsController {
 		}
 	}
 
-	@Post('message')
+	@Post('addmessage')
 	@UseGuards(JwtGuard)
 	async createMessage(@Body() createMessageDto : CreateChannelMessageDto, @Res() response : Response, @Req() req : Request) {
 		try {

@@ -151,7 +151,7 @@ export class ChannelsService extends PrismaClient {
 
 			return {...user, isMuted, role};
 		});
-		return channel;
+		return [channel];
 	}
 
 	async getAvailableChannels(selectOptions : any) {
@@ -454,7 +454,7 @@ export class ChannelsService extends PrismaClient {
 			throw new NotFoundException('Member not found in channel.');
 		if (isBanned)
 			throw new UnauthorizedException('Member banned from this channel.');
-		createMessageDto.receivers = channel.members.map(member => member.id);
+		createMessageDto.receivers = channel.members.map(member => member.userId);
 		const createdMessage = await this.channelMessage.create({
 			data : createMessageDto
 		});
@@ -497,7 +497,7 @@ export class ChannelsService extends PrismaClient {
 			const createdAt = message.createdAt;
 
 			delete message.createdAt;
-			return {user : user, ...message, lastMessageCreatedAt : createdAt, channelName : channel.name};
+			return {sender : user, ...message, lastMessageCreatedAt : createdAt, channelName : channel.name};
 		});
 
 		return formattedMessages;

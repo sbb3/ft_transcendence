@@ -134,7 +134,6 @@ export class ChatController {
 			return response.status(500).json(error);
 		}
 	}
-	
 
 	@Get('messages')
 	@UseGuards(JwtGuard)
