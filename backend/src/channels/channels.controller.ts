@@ -337,14 +337,15 @@ export class ChannelsController {
         ),
       });
     } catch (error) {
-      console.log(JSON.stringify(error));
-      if (error.status) return response.status(error.status).json(error);
+      console.log(JSON.stringify(error.message));
+      //   if (error.status) return response.status(error.status).json(error);
       if (
-        error === 'Banned from this channel.' ||
-        error === 'Already a member of this channel.'
+        error.message === 'Banned from this channel.' ||
+        error.message === 'Already a member of this channel.'
       ) {
-        console.log(error);
-        return response.status(403).json({ message: error });
+        console.log('hererer');
+        console.log(JSON.stringify(error));
+        return response.status(500).json(error);
       }
 
       return response.status(500).json(error);

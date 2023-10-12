@@ -89,10 +89,10 @@ const Members = ({ channel }) => {
         isClosable: true,
       });
     } catch (error) {
-      console.log("error: ", error);
+      console.log("error22: ", error);
       toast({
         title: "Member not added.",
-        description: error?.message || "Member not added to the channel.",
+        description: error?.data?.message || "Member not added to the channel.",
         status: "error",
         duration: 2000,
         isClosable: true,

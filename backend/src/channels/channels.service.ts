@@ -495,18 +495,17 @@ export class ChannelsService extends PrismaClient {
       return 'Role of member has been edited.';
     }
 
-	return this.joinChannel(
-        channelId,
-        userToEdit.id,
-        [],
-        false,
-        channel.banned,
-        editDto.role,
-      ).catch((err) => {
-		throw new InternalServerErrorException(err);
-	  }
-	
-    }
+    return this.joinChannel(
+      channelId,
+      userToEdit.id,
+      [],
+      false,
+      channel.banned,
+      editDto.role,
+    ).catch((err) => {
+      throw new InternalServerErrorException(err);
+    });
+
     // return "New member with role '" + editDto.role + "' has been created.";
   }
 
