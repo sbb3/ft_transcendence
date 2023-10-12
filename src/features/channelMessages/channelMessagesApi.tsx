@@ -5,7 +5,7 @@ import channelsApi from "../channels/channelsApi";
 const channelMessagesApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getMessagesByChannelName: builder.query({
-      query: (channelName) => `/channelMessages?channelName=${channelName}`,
+      query: (channelName) => `/channels/messages?channelName=${channelName}`,
       async onCacheEntryAdded(
         arg,
         { getState, updateCachedData, cacheDataLoaded, cacheEntryRemoved }: any

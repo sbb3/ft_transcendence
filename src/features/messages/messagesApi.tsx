@@ -8,7 +8,7 @@ const messagesApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getMessagesByConversationId: builder.query({
       query: (conversationId) =>
-        `/messages?conversationId=${conversationId}&page=${1}`,
+        `messages?conversationId=${conversationId}&page=${1}`,
       // transformResponse: (response: any) => {
       //   const messages = response?.messages?.reverse();
       //   const totalPages = response?.totalPages;
@@ -45,7 +45,7 @@ const messagesApi = apiSlice.injectEndpoints({
     }),
     getMoreMessagesByConversationId: builder.query({
       query: ({ conversationId, page }) =>
-        `/messages?conversationId=${conversationId}&page=${page}`,
+        `messages?conversationId=${conversationId}&page=${page}`,
       // transformResponse: (response: any) => {
       //   const messages = response?.messages?.reverse();
       //   const totalPages = response?.totalPages;
@@ -79,7 +79,7 @@ const messagesApi = apiSlice.injectEndpoints({
     }),
     addMessage: builder.mutation({
       query: (msgData) => ({
-        url: `/messages`,
+        url: `messages`,
         method: "POST",
         body: { ...msgData },
       }),
