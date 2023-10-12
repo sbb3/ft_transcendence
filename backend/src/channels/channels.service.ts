@@ -20,7 +20,6 @@ export class ChannelsService extends PrismaClient {
 		await this.checkIfChannelExists(channelDto.name);
 
 		channelDto.ownerId = creatorId;
-		channelDto.roomName = uuidv4();
 		if (channelDto.privacy === 'protected')
 			channelDto.password = await bcrypt.hash(channelDto.password, 10);
 
@@ -317,8 +316,21 @@ export class ChannelsService extends PrismaClient {
 		});
 	}
 
-	private canControl(roleOfEditor : string, roleOfUserToEdit : string) {
-		return (roleOfEditor == 'owner' || (roleOfEditor == 'admin' && roleOfUserToEdit == 'member'));
+	async getAllJoinedChannels(memberId : number, selectOptions : any) {
+		const member = await this.channelMember.findMany({
+			where : {
+				userId : memberId
+			}
+		});
+
+		return await this.channel.findMany({
+			where : {
+				id : {
+					in : member.map(member => member.channelId)
+				}
+			},
+			select : selectOptions
+		});
 	}
 
 	async editMemberRole(channelId : number, editorId : number, editDto : EditRoleDto) {
@@ -484,5 +496,9 @@ export class ChannelsService extends PrismaClient {
 
 		if (channel)
 			throw new ConflictException("Channel name \'" + name + "\' is already taken");
+	}
+
+	private canControl(roleOfEditor : string, roleOfUserToEdit : string) {
+		return (roleOfEditor == 'owner' || (roleOfEditor == 'admin' && roleOfUserToEdit == 'member'));
 	}
 }
