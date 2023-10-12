@@ -343,10 +343,12 @@ export class ChannelsController {
 	}
 
 	private readonly channelSelectionOptions = {
+					id: true,
 					ownerId : true,
 					name : true,
 					privacy : true, 
 					description : true,
-					members : true
+					members : true,
+					banned : true
 				};
 }

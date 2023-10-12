@@ -323,7 +323,7 @@ export class ChannelsService extends PrismaClient {
 			}
 		});
 
-		return await this.channel.findMany({
+		let allChannels =  await this.channel.findMany({
 			where : {
 				id : {
 					in : member.map(member => member.channelId)
@@ -331,6 +331,35 @@ export class ChannelsService extends PrismaClient {
 			},
 			select : selectOptions
 		});
+
+		const allUsers = await this.user.findMany({
+			where : {
+				id : {
+					in : (Array.from(new Set([].concat(...allChannels.map(channel => {
+							return channel.members.map(member => member.userId);
+						})))))
+				}
+			}
+		})
+
+		allChannels = allChannels.map(channel => {
+			const members = channel.members.map(member => {
+				const newMember = member;
+				const userAsMember = allUsers.find(user => user.id == member.userId);
+
+				newMember.id = member.userId;
+				delete newMember.userId;
+				return {
+					...newMember,
+					avatar : userAsMember.avatar,
+					name : userAsMember.name,
+				};
+			});
+			channel.members = members;
+			return channel;
+		});
+
+		return allChannels;
 	}
 
 	async editMemberRole(channelId : number, editorId : number, editDto : EditRoleDto) {
