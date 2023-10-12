@@ -1,21 +1,18 @@
-import { WebSocketGateway, SubscribeMessage, MessageBody } from '@nestjs/websockets';
-import { ChatService } from './chat.service';
+import { WebSocketGateway } from '@nestjs/websockets';
 import { WebSocketServer } from '@nestjs/websockets';
-import { Server, Socket } from 'socket.io';
+import { Server } from 'socket.io';
 
 @WebSocketGateway({ namespace : '/chat', cors : true })
 export class ChatGateway {
-	constructor(private readonly chatService: ChatService) {}
+	constructor() {}
 
-	@WebSocketServer() server : Server;
+	@WebSocketServer() private server : Server;
 
-	@SubscribeMessage('channelMessage')
-	sendChannelMessage(client : Socket, data : any) {
-		this.server.emit('channelMessage', data);
+	sendChannelMessage(dataToSend : any) {
+		this.server.emit('channelMessage', dataToSend);
 	}
 
-	@SubscribeMessage('conversationMessage')
-	sendConversationMessage(client : Socket, data : any) {
-		this.server.emit('conversationMessage', data);
+	sendConversationMessage(dataToSend : any) {
+		this.server.emit('conversationMessage', dataToSend);
 	}
 }

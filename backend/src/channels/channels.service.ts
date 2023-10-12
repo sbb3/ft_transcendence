@@ -8,11 +8,12 @@ import { CheckPasswordDto } from './dto/check-password.dto';
 import { EditRoleDto } from './dto/edit-role.dto';
 import {v4 as uuidv4 } from 'uuid'
 import { CreateChannelMessageDto } from './dto/create-channel-message.dto';
+import { ChatGateway } from 'src/chat/chat.gateway';
 
 @Injectable()
 export class ChannelsService extends PrismaClient {
 
-	constructor() {
+	constructor(private webSocketGateway : ChatGateway ) {
 		super();
 	}
 
@@ -444,7 +445,7 @@ export class ChannelsService extends PrismaClient {
 	}
 
 	async createChannelMessage(createMessageDto : CreateChannelMessageDto, senderIdFromJwt : number) {
-		const channel : any = await this.findUniqueChannel({id : createMessageDto.channelId}, {members : true, banned : true});
+		const channel : any = await this.findUniqueChannel({id : createMessageDto.channelId}, {members : true, banned : true, name : true});
 		const sender = channel.members.find(member => member.userId == createMessageDto.senderId);
 		const isBanned = channel.banned.find(banned => banned == createMessageDto.senderId);
 
@@ -454,11 +455,23 @@ export class ChannelsService extends PrismaClient {
 			throw new NotFoundException('Member not found in channel.');
 		if (isBanned)
 			throw new UnauthorizedException('Member banned from this channel.');
-		createMessageDto.receivers = channel.members.map(member => member.userId);
+		createMessageDto.receivers = channel.members.filter(member => member.userId != sender.userId).map(member => member.userId);
 		const createdMessage = await this.channelMessage.create({
 			data : createMessageDto
 		});
+		const {id, name, username, email, avatar, campus, status} = await this.user.findUnique({
+			where : {
+				id : sender.userId,
+			}
+		});
+		const lastMessageCreatedAt = createdMessage.createdAt;
 
+		createdMessage['lastMessageCreatedAt'] = lastMessageCreatedAt;
+		createdMessage['channelName'] = channel.name;
+		delete createdMessage.createdAt;
+		const messageToEmit =  {sender : {id, name, username, avatar, campus, status, email}, ...createdMessage} ;
+
+		this.webSocketGateway.sendChannelMessage(messageToEmit);
 		if (!createdMessage)
 			throw new InternalServerErrorException('Could not create message.')
 	}
