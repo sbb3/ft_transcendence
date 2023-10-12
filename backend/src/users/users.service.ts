@@ -151,4 +151,29 @@ export class UsersService {
     // });
     return currentUser;
   }
+  async deleteFriend(id: number, friendId: number) {
+    const user = await this.prismaService.user.findUnique({
+      where: { id },
+    });
+    const friend = await this.prismaService.user.findUnique({
+      where: { id: friendId },
+    });
+    if (!user || !friend) {
+      throw new NotFoundException(`User or friend not found`);
+    }
+    const currentUser = await this.prismaService.user.update({
+      where: { id },
+      data: {
+        friends: user.friends.filter((id) => id !== friendId),
+      },
+    });
+    await this.prismaService.user.update({
+      where: { id: friendId },
+      data: {
+        friends: friend.friends.filter((id) => id !== id),
+      },
+    });
+
+    return currentUser;
+  }
 }

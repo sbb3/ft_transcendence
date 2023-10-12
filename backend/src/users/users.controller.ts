@@ -119,8 +119,9 @@ export class UsersController {
     return this.usersService.addFriend(userId, friendId);
   }
 
-  // @Delete(':id/friends')
-  // deleteFriend(@Param('id') id: number, @Body('friendId') friendId: number) {
-  //   // return this.usersService.deleteFriend(id, friendId);
-  // }
+  @Delete(':id/friends')
+  deleteFriend(@Param('id') id: number, @Body('friendId') friendId: number) {
+    const userId = Number(id);
+    return this.usersService.deleteFriend(userId, friendId);
+  }
 }
