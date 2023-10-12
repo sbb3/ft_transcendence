@@ -8,13 +8,13 @@ import { CreateMessageDataDto } from './dto/create-message-data.dto';
 import { EmailQueryDto, MembersQueryDto } from './dto/email-query.dto';
 import UpdateConversationDto from './dto/update-conversation.dto';
 
-@ApiTags('chat')
-@Controller('chat')
+@ApiTags('conversation')
+@Controller('conversations')
 export class ChatController {
 
 	constructor(private chatService : ChatService) { }
 
-	@Post('messageData')
+	@Post('message')
 	@UseGuards(JwtGuard)
 	@ApiBody({type : CreateMessageDataDto})
 	@ApiOperation({summary : 'Create a new message.'})
@@ -31,7 +31,7 @@ export class ChatController {
 		}
 	}
 
-	@Post('conversation')
+	@Post()
 	@UseGuards(JwtGuard)
 	@ApiOperation({summary : 'Create a new conversation.'})
 	@ApiBody({type : CreateConversationDto})
@@ -49,7 +49,7 @@ export class ChatController {
 		}
 	}
 
-	@Get('conversations')
+	@Get()
 	@UseGuards(JwtGuard)
 	@ApiQuery({name : 'email'})
 	@ApiOperation({summary : 'Get conversations with a specified email.'})
@@ -101,7 +101,7 @@ export class ChatController {
 			}
 	}
 
-	@Delete('conversation/:conversationId')
+	@Delete(':conversationId')
 	@UseGuards(JwtGuard)
 	@ApiProperty({name : 'conversationId'})
 	@ApiOperation({summary : 'Delete a conversation by id.'})
@@ -118,7 +118,7 @@ export class ChatController {
 		}
 	}
 
-	@Patch('conversation')
+	@Patch()
 	@UseGuards(JwtGuard)
 	@ApiOperation({summary : 'Update a conversation by id.'})
 	@ApiBody({type : UpdateConversationDto})
