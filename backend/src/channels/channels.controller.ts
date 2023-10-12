@@ -83,7 +83,6 @@ export class ChannelsController {
 			if (!request['user']?.id)
 				throw new BadRequestException("Request must contain the owner id");
 			await this.channelsService.deleteChannel(channelId, request['user']?.id);
-			// Also delete messages that are related to that channel
 			return response.status(200).json({message : "Channel has been deleted."})
 		}
 		catch (error) {

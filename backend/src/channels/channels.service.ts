@@ -236,6 +236,11 @@ export class ChannelsService extends PrismaClient {
 			throw new UnauthorizedException("Only the owner can delete his channel.")
 		if (!await this.channel.delete({where : { id : channelId }}))
 			throw new InternalServerErrorException();
+		await this.channelMessage.deleteMany({
+			where : {
+				channelId : channelId
+			}
+		});
 	}
 
 	async ban(channelId : number, memberToBanId : number, editorId : number) {
