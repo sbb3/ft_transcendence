@@ -41,8 +41,8 @@ model user {
   avatar               String
   campus               String
   status               String
-  is_profile_completed Boolean  @default(false)
   is_otp_enabled       Boolean  @default(false)
+  is_profile_completed Boolean  @default(false)
   is_otp_validated     Boolean  @default(false)
   otp_secret           String?
 }
