@@ -23,9 +23,6 @@ export class GameGateway implements OnGatewayInit,  OnGatewayConnection, OnGatew
     this.logger.log(`Client disconnected: ${client.id}`);
   }
 
-
-
-
   b: Ball = {
     x: 512,
     y: 288,

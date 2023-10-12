@@ -12,13 +12,11 @@ services :
     volumes:
       - postgres:/var/lib/postgresql/data
 
-
   adminer:
     image: adminer
     restart: always
     ports:
       - "8080:8080"
-
 
   frontend:
     build:
@@ -28,9 +26,10 @@ services :
       - "5173:5173"
     volumes:
       - ./frontend:/app
+      - /app/node_modules
     depends_on:
       - db
-  
+
   backend:
     build:
       dockerfile: backend/Dockerfile
@@ -39,9 +38,9 @@ services :
       - "3000:3000"
     volumes:
       - ./backend:/app
+      - /app/node_modules
     depends_on:
       - db
-
 
 volumes:
   postgres:

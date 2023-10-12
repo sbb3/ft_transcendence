@@ -10,21 +10,21 @@ import { date } from "yup";
 // import Messages from "./messages";
 
 const Game = () => {
-  const [socket , setSocket] = useState<Socket>()
+  // const [socket , setSocket] = useState<Socket>()
   useTitle("Gamee");
   // const [messages, setMessages] = useState<string[]>([])
   
-  useEffect(() => {
-    setSocket (io("http://localhost:3000/play"));
+  // useEffect(() => {
+  //   setSocket (io("http://localhost:3000/play"));
 
-    // return () => socket.disconnect();
-  }, [])
-  // const socket = io("http://localhost:3000/play");
+  //   // return () => socket.disconnect();
+  // }, [])
+  const socket = io("http://localhost:3000/play");
 
   const [mPaddlee, setMPaddle] = useState<mPaddle>();
   const [hPaddle, setHPaddle] = useState(null);
 
- 
+
 
   const [ball, setBall] = useState(null);
 
