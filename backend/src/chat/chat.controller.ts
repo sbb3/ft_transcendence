@@ -4,7 +4,6 @@ import {
   Delete,
   Get,
   Param,
-  ParseArrayPipe,
   ParseIntPipe,
   Patch,
   Post,
@@ -27,7 +26,7 @@ import { CreateMessageDataDto } from './dto/create-message-data.dto';
 import { EmailQueryDto, MembersQueryDto } from './dto/email-query.dto';
 import UpdateConversationDto from './dto/update-conversation.dto';
 
-@ApiTags('conversation')
+@ApiTags('conversations')
 @Controller('conversations')
 export class ChatController {
   constructor(private chatService: ChatService) {}

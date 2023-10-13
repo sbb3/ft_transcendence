@@ -40,7 +40,7 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/routes', app, document);
 
-  app.useGlobalFilters(new GlobalExceptionFilter());
+  // app.useGlobalFilters(new GlobalExceptionFilter());
 
   await app.listen(3000);
 }

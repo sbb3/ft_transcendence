@@ -3,9 +3,14 @@ import { PrismaClient } from '@prisma/client';
 import { CreateConversationDto } from './dto/create-conversation.dto';
 import { CreateMessageDataDto } from './dto/create-message-data.dto';
 import UpdateConversationDto from './dto/update-conversation.dto';
+import { ChatGateway } from './chat.gateway';
 
 @Injectable()
 export class ChatService extends PrismaClient {
+
+	constructor(private webSocketGateway : ChatGateway) {
+		super();
+	}
 
 	async createMessageData(messageDto : CreateMessageDataDto) {
 		const sender = await this.user.findUnique({where : {id : messageDto.sender}});
@@ -22,6 +27,25 @@ export class ChatService extends PrismaClient {
 
 		if (!newMessage)
 			throw new InternalServerErrorException('Could not create a new message.');
+
+		this.webSocketGateway.sendConversationMessage({
+				sender : {
+					id : sender.id,
+					email : sender.email,
+					name : sender.name,
+					avatar : sender.avatar
+				},
+				receiver : {
+					id : receiver.id,
+					email : receiver.email,
+					name : receiver.name,
+					avatar : receiver.avatar
+				},
+				content : newMessage.content,
+				lastMessageCreatedAt : newMessage.lastMessageCreatedAt,
+				conversationId : newMessage.conversationId
+			}
+		);
 	}
 
 	async createConversation(createConversationDto : CreateConversationDto) {
