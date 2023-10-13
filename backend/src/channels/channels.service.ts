@@ -198,9 +198,9 @@ export class ChannelsService extends PrismaClient {
 
 	async joinChannel(channelId : number, userId : number, members : any, shouldCheck : boolean, banned : number[], role : string) {
 		if (banned.find(bannedUserId => bannedUserId == userId))
-			throw new UnauthorizedException('Banned from this channel.');
+			return 'Banned from this channel.';
 		if (shouldCheck && members?.find(member => member.userId == userId && channelId == channelId))
-				throw new ConflictException('Already a member of this channel.')
+			return 'Already a member of this channel.';
 
 		const newMember = await this.channelMember.create({
 			data : {
@@ -211,7 +211,7 @@ export class ChannelsService extends PrismaClient {
 
 		if (!newMember)
 			throw new InternalServerErrorException();
-		const updatedChannel = await this.channel.update({
+		await this.channel.update({
 			where : {
 				id : channelId,
 			},
@@ -222,9 +222,9 @@ export class ChannelsService extends PrismaClient {
 					}
 				}
 			}
-			})
-		if (!updatedChannel)
-			throw new InternalServerErrorException();
+		})
+
+		return 'New member with role \'' + role+ '\' has been created.';
 	}
 
 	async deleteChannel(channelId : number, userId : number) {
@@ -387,8 +387,7 @@ export class ChannelsService extends PrismaClient {
 			});
 			return 'Role of member has been edited.';
 		}
-		await this.joinChannel(channelId, userToEdit.id, [], false, channel.banned, editDto.role);
-		return 'New member with role \'' + editDto.role+ '\' has been created.';
+		return await this.joinChannel(channelId, userToEdit.id, [], false, channel.banned, editDto.role);
 	}
 
 	async removeMember(channelId : number, userToLeaveId : number, action : string, kickerId : number) {
