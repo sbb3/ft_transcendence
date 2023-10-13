@@ -1,10 +1,10 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import { CreateChannelDto } from './dto/create-channel.dto';
@@ -12,7 +12,6 @@ import * as bcrypt from 'bcrypt';
 import { UpdateChannelDto } from './dto/update-channel.dto';
 import { CheckPasswordDto } from './dto/check-password.dto';
 import { EditRoleDto } from './dto/edit-role.dto';
-import { v4 as uuidv4 } from 'uuid';
 import { CreateChannelMessageDto } from './dto/create-channel-message.dto';
 import { ChatGateway } from 'src/chat/chat.gateway';
 
@@ -33,7 +32,7 @@ export class ChannelsService extends PrismaClient {
       data: channelDto,
     });
 
-    await this.joinChannel(newChannel.id, creatorId, null, false, [], 'owner');
+    await this.joinChannel(newChannel.id, creatorId, null, false, [], 'owner', false);
   }
 
   async validateChannelPassword(
@@ -49,13 +48,13 @@ export class ChannelsService extends PrismaClient {
     });
 
     if (!user)
-      throw new NotFoundException('User to join the channel not found.');
+      throw new NotFoundException('User not found.');
     if (channel.privacy == 'public' || channel.privacy == 'private')
       throw new ConflictException(
         'This channel does not require any password.',
       );
     if (!(await bcrypt.compare(passwordDto.password, channel.password)))
-      throw new UnauthorizedException('Invalid password.');
+      throw new BadRequestException('Invalid password.');
 
     await this.joinChannel(
       channelId,
@@ -64,6 +63,7 @@ export class ChannelsService extends PrismaClient {
       true,
       channel.banned,
       'member',
+	  false
     );
   }
 
@@ -78,16 +78,12 @@ export class ChannelsService extends PrismaClient {
       },
     });
 
-    if (Object.keys(channelDto).length === 0)
-      throw new BadRequestException('No data found in body.');
+    if (Object.keys(channelDto).length === 0 || userId != oldChannel.ownerId)
+      throw new BadRequestException(userId == oldChannel.ownerId ? 'No data found in body.' : 'Only the owner can update the channel\'s general infos.');
     if (!oldChannel)
       throw new NotFoundException('Channel to update not found.');
-    if (userId != oldChannel.ownerId)
-      throw new UnauthorizedException(
-        "Only the owner can update the channel's general infos.",
-      );
-    if (channelDto.name) await this.checkIfChannelExists(channelDto.name);
-
+    if (channelDto.name)
+		await this.checkIfChannelExists(channelDto.name);
     await this.checkNewPassword(channelDto);
 
     const updatedChannel = await this.channel.update({
@@ -156,7 +152,7 @@ export class ChannelsService extends PrismaClient {
     selectOptions: any,
     channelId: number,
   ) {
-    const channel: any = channelName
+    let channel: any = channelName
       ? await this.findUniqueChannel({ name: channelName }, selectOptions)
       : await this.findUniqueChannel({ id: channelId }, selectOptions);
 
@@ -241,16 +237,17 @@ export class ChannelsService extends PrismaClient {
     shouldCheck: boolean,
     banned: number[],
     role: string,
+	shouldEmit: boolean
   ) {
     if (banned.find((bannedUserId) => bannedUserId == userId))
-      throw new Error('Banned from this channel.');
+      throw new BadRequestException('Banned from this channel.');
     if (
       shouldCheck &&
       members?.find(
         (member) => member.userId == userId && channelId == channelId,
       )
     )
-      throw new Error('Already a member of this channel.');
+      throw new BadRequestException('Already a member of this channel.');
 
     const newMember = await this.channelMember.create({
       data: {
@@ -260,7 +257,7 @@ export class ChannelsService extends PrismaClient {
     });
 
     if (!newMember) throw new InternalServerErrorException();
-    const updatedChannel = await this.channel.update({
+	let updatedChannel = await this.channel.update({
       where: {
         id: channelId,
       },
@@ -271,9 +268,57 @@ export class ChannelsService extends PrismaClient {
           },
         },
       },
+	  select : {
+		members : true,
+		id : true, 
+		banned : true, 
+		description : true, 
+		privacy : true,
+		name : true,
+		ownerId : true
+	  }
     });
-    return "New member with role '" + role + "' has been created.";
-    // if (!updatedChannel) throw new InternalServerErrorException();
+
+	if (!shouldEmit)
+		return ;
+   let membersAsUser = await this.user.findMany({
+      where: {
+        id: {
+          in: updatedChannel.members.map(
+            (member: { userId: number }) => member.userId,
+          ),
+        },
+      },
+      select: {
+        id: true,
+        avatar: true,
+        name: true,
+        createdAt: true,
+        email: true,
+        username: true,
+      },
+    });
+
+    let formattedMembers = membersAsUser.map((user) => {
+      const member = updatedChannel.members.find(
+        (member: { userId: number }) => member.userId == user.id,
+      );
+      const { isMuted, role } = member;
+
+      return { ...user, isMuted, role };
+    });
+	delete updatedChannel.members;
+	const toEmit = {
+		id : updatedChannel.id,
+		name : updatedChannel.name,
+		ownerId : updatedChannel.ownerId,
+		privacy : updatedChannel.privacy,
+		description : updatedChannel.description,
+		banned : updatedChannel.banned,
+		members : [...formattedMembers]
+	};
+
+	this.webSocketGateway.sendNewMemberData(toEmit);
   }
 
   async deleteChannel(channelId: number, userId: number) {
@@ -284,7 +329,7 @@ export class ChannelsService extends PrismaClient {
     if (!channelToDelete)
       throw new NotFoundException('Channel to delete not found.');
     if (userId != channelToDelete.ownerId)
-      throw new UnauthorizedException('Only the owner can delete his channel.');
+      throw new BadRequestException('Only the owner can delete his channel.');
     if (!(await this.channel.delete({ where: { id: channelId } })))
       throw new InternalServerErrorException();
     await this.channelMessage.deleteMany({
@@ -292,6 +337,11 @@ export class ChannelsService extends PrismaClient {
         channelId: channelId,
       },
     });
+	await this.channelMember.deleteMany({
+		where : {
+			channelId : channelId,
+		}
+	})
   }
 
   async ban(channelId: number, memberToBanId: number, editorId: number) {
@@ -313,11 +363,11 @@ export class ChannelsService extends PrismaClient {
           : 'Member that wants to ban not found.',
       );
     if (toBan.userId === editor.userId)
-      throw new UnauthorizedException(
+      throw new ForbiddenException(
         "Member that wants to ban can't ban himself.",
       );
     if (!this.canControl(editor.role, toBan.role))
-      throw new UnauthorizedException('No privileges to ban this member.');
+      throw new ForbiddenException('No privileges to ban this member.');
     const banned = [...channel.banned, memberToBanId];
 
     await this.channelMember.deleteMany({
@@ -353,7 +403,7 @@ export class ChannelsService extends PrismaClient {
           : 'User to unban not found in the banned list.',
       );
     if (editor.role == 'member')
-      throw new UnauthorizedException(
+      throw new ForbiddenException(
         'Only the owner and admins can unban users.',
       );
     let updatedArrayOfBannedUsers = channel.banned.filter(
@@ -392,7 +442,7 @@ export class ChannelsService extends PrismaClient {
     if (toMute.id == muter.id)
       throw new ConflictException("Muter can't mute/unmute himself.");
     if (!this.canControl(muter.role, toMute.role))
-      throw new UnauthorizedException('No privileges to mute this member.');
+      throw new ForbiddenException('No privileges to mute this member.');
     await this.channelMember.updateMany({
       where: {
         channelId: channelId,
@@ -494,18 +544,16 @@ export class ChannelsService extends PrismaClient {
       return 'Role of member has been edited.';
     }
 
-    return this.joinChannel(
+	await this.joinChannel(
       channelId,
       userToEdit.id,
       [],
       false,
       channel.banned,
       editDto.role,
-    ).catch((err) => {
-      throw new InternalServerErrorException(err);
-    });
-
-    // return "New member with role '" + editDto.role + "' has been created.";
+	  true
+    );
+	return 'New member with role \'' + editDto.role + '\' has been created.'
   }
 
   async removeMember(
@@ -533,13 +581,13 @@ export class ChannelsService extends PrismaClient {
           : 'Member to leave not found.',
       );
     if (memberToLeave.role == 'owner')
-      throw new UnauthorizedException(
+      throw new ForbiddenException(
         "The owner can't leave or be kicked from this channel.",
       );
     if (action == 'kick') {
       if (!kicker) throw new NotFoundException('Kicker not found.');
       else if (!this.canControl(kicker.role, memberToLeave.role))
-        throw new UnauthorizedException('No provileges to kick this member.');
+        throw new ForbiddenException('No provileges to kick this member.');
       else if (kicker.userId == memberToLeave.userId)
         throw new ConflictException("The kicker can't kick himself.");
     }
@@ -568,10 +616,9 @@ export class ChannelsService extends PrismaClient {
       },
     });
 
-    if (!channel) throw new NotFoundException('Channel not found.');
+    if (!channel || !user) throw new NotFoundException(!channel ? 'Channel not found.' : 'User not found.');
     if (channel.privacy == 'protected')
       throw new BadRequestException('This channel requires a password.');
-    if (!user) throw new NotFoundException('User not found.');
 
     await this.joinChannel(
       channelId,
@@ -580,6 +627,7 @@ export class ChannelsService extends PrismaClient {
       true,
       channel.banned,
       'member',
+	  false
     );
   }
 
@@ -599,7 +647,7 @@ export class ChannelsService extends PrismaClient {
     );
 
     if (senderIdFromJwt != createMessageDto.senderId)
-      throw new UnauthorizedException(
+      throw new ForbiddenException(
         'Sender id is different from the id provided.',
       );
     if (!sender) throw new NotFoundException('Member not found in channel.');
@@ -614,7 +662,11 @@ export class ChannelsService extends PrismaClient {
     if (member.length == 0)
       throw new NotFoundException('Member not found in channel.');
     if (member[0].isMuted) return 'Muted from this channel.';
+	this.formatMessageAndEmit(createMessageDto, channel, sender);
+    return 'Message created successfully.';
+  }
 
+  private async formatMessageAndEmit(createMessageDto : CreateChannelMessageDto, channel : any, sender : any) {
     createMessageDto.receivers = channel.members
       .filter((member) => member.userId != sender.userId)
       .map((member) => member.userId);
@@ -640,9 +692,7 @@ export class ChannelsService extends PrismaClient {
     this.webSocketGateway.sendChannelMessage(messageToEmit);
     if (!createdMessage)
       throw new InternalServerErrorException('Could not create message.');
-
-    return 'Message created successfully.';
-  }
+	}
 
   async getAllChannelMessages(channelName: string) {
     const channel: any = await this.findUniqueChannel(

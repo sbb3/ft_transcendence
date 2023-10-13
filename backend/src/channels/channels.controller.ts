@@ -329,26 +329,17 @@ export class ChannelsController {
     try {
       if (!request['user']?.id)
         throw new BadRequestException('Request must contain the owner id.');
-
-      return response.status(200).json({
-        message: await this.channelsService.editMemberRole(
+      const message = await this.channelsService.editMemberRole(
           channelId,
           request['user'].id,
           roleDto,
-        ),
+        )
+      return response.status(200).json({
+        message : message
       });
     } catch (error) {
-      console.log(JSON.stringify(error.message));
-      //   if (error.status) return response.status(error.status).json(error);
-      if (
-        error.message === 'Banned from this channel.' ||
-        error.message === 'Already a member of this channel.'
-      ) {
-        console.log('hererer');
-        console.log(JSON.stringify(error));
-        return response.status(500).json(error);
-      }
-
+      if (error?.status)
+        return response.status(error.status).json(error);
       return response.status(500).json(error);
     }
   }
