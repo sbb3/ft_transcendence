@@ -21,12 +21,10 @@ export class ChatGateway {
   }
 
   sendConversationMessage(dataToSend: any) {
-    const data = { data: dataToSend };
-    this.server.emit('conversationMessage', data);
+    this.server.emit('conversationMessage', {data: dataToSend});
   }
 
   sendNewMemberData(dataToSend : any) {
-    const data = { data: dataToSend };
-    this.server.emit('channel', data);
+    this.server.emit('channel', {data: dataToSend});
   }
 }
