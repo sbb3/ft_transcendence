@@ -31,7 +31,7 @@ const channelsApi = apiSlice.injectEndpoints({
           socket.on("channel", (data) => {
             console.log("incoming channel: ", data);
             const isDataBelongToThisUser = data.data.members.find(
-              (id) => id === getState()?.user?.currentUser?.id
+              (m) => m.id === getState()?.user?.currentUser?.id
             );
             if (isDataBelongToThisUser) {
               updateCachedData((draft) => {
@@ -53,14 +53,20 @@ const channelsApi = apiSlice.injectEndpoints({
       query: (currentUserId) => `/channels/members/${currentUserId}`,
       async onCacheEntryAdded(
         arg,
-        { dispatch, updateCachedData, cacheDataLoaded, cacheEntryRemoved }
+        {
+          dispatch,
+          getState,
+          updateCachedData,
+          cacheDataLoaded,
+          cacheEntryRemoved,
+        }: any
       ) {
         const socket = createSocketClient();
         try {
           await cacheDataLoaded;
           socket.on("channel", (data) => {
             const isDataBelongToThisUser = data.data.members.find(
-              (id) => id === arg
+              (m) => m.id === getState()?.user?.currentUser?.id
             );
             if (isDataBelongToThisUser) {
               updateCachedData((draft) => {

@@ -50,8 +50,8 @@ function App() {
         <Route element={<PrefetchUsers />}>
           {/* <Route element={<CheckOTP />}> */}
           <Route path="/" element={<Layout />}>
-            {/* <Route index element={<Overview />} /> */}
-            {/* <Route path="profile/:username" element={<PlayerProfile />} /> */}
+            <Route index element={<Overview />} />
+            <Route path="profile/:username" element={<PlayerProfile />} />
             {/* <Route path="settings" element={<Settings />} /> */}
             <Route path="game" element={<GameLayout />}>
               <Route index element={<Game />} />
@@ -79,3 +79,5 @@ export default App;
 
 // TODO: socket jwt valid
 // TODO: prisma client error when sign in an existing user
+// fix clouadinary random name
+//  channel event methods expressjs

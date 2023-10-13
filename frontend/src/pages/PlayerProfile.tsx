@@ -9,7 +9,7 @@ const PlayerProfile = () => {
   const { username } = useParams();
   const toast = useToast();
   const {
-    data: users,
+    data: user,
     isLoading,
     isFetching,
     isError,
@@ -40,10 +40,10 @@ const PlayerProfile = () => {
     >
       {isLoading || isFetching ? (
         <Loader />
-      ) : users?.length > 0 ? (
+      ) : user ? (
         <Flex direction={{ base: "column", xl: "row" }} gap={4}>
-          <Profile user={users[0]} />
-          <RecentGames user={users[0]} />
+          <Profile user={user} />
+          <RecentGames user={user} />
         </Flex>
       ) : (
         <Flex

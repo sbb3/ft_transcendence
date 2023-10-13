@@ -1,38 +1,3 @@
-// import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-// import { UsersService } from './users.service';
-// import { CreateUserDto } from './dto/create-user.dto';
-// import { UpdateUserDto } from './dto/update-user.dto';
-
-// @Controller('users')
-// export class UsersController {
-//   constructor(private readonly usersService: UsersService) {}
-
-//   @Post()
-//   create(@Body() createUserDto: CreateUserDto) {
-//     return this.usersService.create(createUserDto);
-//   }
-
-//   @Get()
-//   findAll() {
-//     return this.usersService.findAll();
-//   }
-
-//   @Get(':id')
-//   findOne(@Param('id') id: string) {
-//     return this.usersService.findOne(+id);
-//   }
-
-//   @Patch(':id')
-//   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-//     return this.usersService.update(+id, updateUserDto);
-//   }
-
-//   @Delete(':id')
-//   remove(@Param('id') id: string) {
-//     return this.usersService.remove(+id);
-//   }
-// }
-
 import {
   Controller,
   Get,
@@ -57,6 +22,7 @@ import { User } from './entities/user.entity';
 import { Request } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Express } from 'express';
+import { cp } from 'fs';
 
 @Controller('users')
 export class UsersController {
@@ -82,8 +48,7 @@ export class UsersController {
 
   @Get('username/:username')
   async getUserByUsername(@Param('username') username: string) {
-    const user = await this.usersService.findByUsername(username);
-    return user;
+    return await this.usersService.findByUsername(username);
   }
 
   @Get('email/:email')
@@ -122,6 +87,7 @@ export class UsersController {
   @Delete(':id/friends')
   deleteFriend(@Param('id') id: number, @Body('friendId') friendId: number) {
     const userId = Number(id);
-    return this.usersService.deleteFriend(userId, friendId);
+    const friendIdNumber = Number(friendId);
+    return this.usersService.deleteFriend(userId, friendIdNumber);
   }
 }

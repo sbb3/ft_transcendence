@@ -46,15 +46,15 @@ export class UsersService {
     return user;
   }
 
-  async findByUsername(usernames: string) {
+  async findByUsername(username: string) {
     const user = await this.prismaService.user.findUnique({
       where: {
-        username: usernames,
+        username,
       },
     });
 
     if (!user) {
-      throw new Error('user not found by username');
+      throw new NotFoundException('user not found by username');
     }
     return user;
   }
@@ -161,6 +161,7 @@ export class UsersService {
     if (!user || !friend) {
       throw new NotFoundException(`User or friend not found`);
     }
+
     const currentUser = await this.prismaService.user.update({
       where: { id },
       data: {
