@@ -35,7 +35,6 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
-import useSocket from "src/hooks/useSocket";
 import store from "src/app/store";
 import notificationsApi from "src/features/notifications/notificationsApi";
 dayjs.extend(relativeTime);
@@ -85,7 +84,7 @@ const Profile = ({ user }: ProfileProps) => {
   //   usersApi.useLazyGetCurrentUserQuery();
 
   // useEffect(() => {
-  //   const socket = useSocket();
+  //   const socket = ClientSocket();
   //   socket.on("friend_accepted", async (data: any) => {
   //     // console.log("incoming friend_accepted: ", data);
   //     // store.dispatch(setCurrentUser(data?.data));

@@ -1,5 +1,5 @@
 import { apiSlice } from "src/app/api/apiSlice";
-import useSocket from "src/hooks/useSocket";
+import { createSocketClient } from "src/app/socket/client";
 import conversationApi from "../conversations/conversationsApi";
 import notificationsApi from "../notifications/notificationsApi";
 import { v4 as uuidv4 } from "uuid";
@@ -19,7 +19,7 @@ const messagesApi = apiSlice.injectEndpoints({
         { getState, updateCachedData, cacheDataLoaded, cacheEntryRemoved }: any
       ) {
         const currentUser = getState()?.user?.currentUser?.email;
-        const socket = useSocket();
+        const socket = createSocketClient();
 
         try {
           await cacheDataLoaded;

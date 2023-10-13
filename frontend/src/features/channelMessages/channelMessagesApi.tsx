@@ -1,7 +1,7 @@
 import { apiSlice } from "src/app/api/apiSlice";
-import useSocket from "src/hooks/useSocket";
 import channelsApi from "../channels/channelsApi";
 import { io } from "socket.io-client";
+import { createSocketClient } from "src/app/socket/client";
 
 const channelMessagesApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
@@ -12,16 +12,16 @@ const channelMessagesApi = apiSlice.injectEndpoints({
         { getState, updateCachedData, cacheDataLoaded, cacheEntryRemoved }: any
       ) {
         const currentUser = getState()?.user?.currentUser;
-        // const socket = useSocket();
-        const socket = io(import.meta.env.VITE_SERVER_SOCKET_URL as string, {
-          transports: ["websocket"],
-          reconnection: false,
-          // reconnection: true,
-          // reconnectionAttempts: 10,
-          // reconnectionDelay: 1000,
-          // upgrade: false,
-          // rejectUnauthorized: false,
-        });
+        const socket = createSocketClient();
+        // const socket = io(import.meta.env.VITE_SERVER_SOCKET_URL as string, {
+        //   transports: ["websocket"],
+        //   reconnection: false,
+        //   // reconnection: true,
+        //   // reconnectionAttempts: 10,
+        //   // reconnectionDelay: 1000,
+        //   // upgrade: false,
+        //   // rejectUnauthorized: false,
+        // });
         try {
           await cacheDataLoaded;
           socket.on("channelMessage", (data) => {

@@ -14,7 +14,6 @@ import {
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import useTitle from "src/hooks/useTitle";
-import useSocket from "src/hooks/useSocket";
 import { useNavigate } from "react-router-dom";
 import { setMatchmakingLoading } from "src/features/game/gameSlice";
 import { Controller, useForm } from "react-hook-form";
@@ -33,10 +32,10 @@ const Game = () => {
   //   formState: { errors },
   //   reset,
   // } = useForm({});
-  // // const socket = useSocket();
+  // // const socket = ClientSocket();
   // useEffect(() => {
   //   console.log("game page");
-  //   const socket = useSocket();
+  //   const socket = ClientSocket();
 
   //   socket.on("found_opponent", (data) => {
   //     console.log("socket connected found_opponent : ", socket?.id);
@@ -57,8 +56,8 @@ const Game = () => {
   // const handleMatchmaking = async (data: any) => {
   //   console.log("matchmaking data: ", data);
   //   dispatch(setMatchmakingLoading(true));
-  //   // socket = useSocket();
-  //   const socket = useSocket();
+  //   // socket = ClientSocket();
+  //   const socket = ClientSocket();
   //   socket.on("connect", () => {
   //     socket.on("disconnect", () => {
   //       console.log("socket disconnected join_queue");

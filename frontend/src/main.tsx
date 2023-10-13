@@ -9,26 +9,17 @@ import "@fontsource/montserrat";
 import theme from "./theme";
 import store from "./app/store";
 import BeatLoader from "react-spinners/BeatLoader";
+import App from "./App";
 
-const App = lazy(() => import("./App"));
+// const App = lazy(() => import("./App"));
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <Provider store={store}>
     <Router>
       <ChakraProvider theme={theme}>
-        {/* <Flex style={{
-          justifyContent: 'center',
-          alignItems: 'start',
-          minHeight: 'full',
-          minWidth: 'full',
-          background: 'red',
-
-        }} > */}
-
-        <Suspense fallback={<BeatLoader color="#FF8707" />}>
-          <App />
-        </Suspense>
-        {/* </Flex> */}
+        {/* <Suspense fallback={<BeatLoader color="#FF8707" />}> */}
+        <App />
+        {/* </Suspense> */}
       </ChakraProvider>
     </Router>
   </Provider>

@@ -1,6 +1,6 @@
 import { apiSlice } from "src/app/api/apiSlice";
-import useSocket from "src/hooks/useSocket";
 import { setCurrentUser } from "./usersSlice";
+import { createSocketClient } from "src/app/socket/client";
 
 interface Friend {
   id: number;
@@ -22,7 +22,7 @@ const usersApi = apiSlice.injectEndpoints({
         arg: any,
         { dispatch, updateCachedData, cacheDataLoaded, cacheEntryRemoved }: any
       ) {
-        const socket = useSocket();
+        const socket = createSocketClient();
         try {
           await cacheDataLoaded;
           socket.on("newuser", (data: any) => {

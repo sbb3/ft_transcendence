@@ -1,6 +1,6 @@
 import { apiSlice } from "src/app/api/apiSlice";
 import io from "socket.io-client";
-import useSocket from "src/hooks/useSocket";
+import { createSocketClient } from "src/app/socket/client";
 import { useLocation } from "react-router-dom";
 
 const notificationsApi = apiSlice.injectEndpoints({
@@ -17,7 +17,7 @@ const notificationsApi = apiSlice.injectEndpoints({
           cacheEntryRemoved,
         }
       ) {
-        const socket = useSocket();
+        const socket = createSocketClient();
         // const location = useLocation();
 
         try {

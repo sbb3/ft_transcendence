@@ -35,7 +35,6 @@ import notificationsApi from "src/features/notifications/notificationsApi";
 import store from "src/app/store";
 import { setCurrentUser } from "src/features/users/usersSlice";
 import { useEffect, useReducer } from "react";
-import useSocket from "src/hooks/useSocket";
 import { CgUnblock } from "react-icons/cg";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -85,7 +84,7 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleProfileDrawer }) => {
     usersApi.useLazyGetCurrentUserQuery();
 
   // useEffect(() => {
-  //   const socket = useSocket();
+  //   const socket = ClientSocket();
   //   socket.on("friend_accepted", async (data: any) => {
   //     // console.log("incoming friend_accepted: ", data);
   //     // store.dispatch(setCurrentUser(data?.data));

@@ -71,21 +71,12 @@ const SearchForChannel = ({
   const [joinChannel, { isLoading: isJoininChannel }] =
     channelsApi.useJoinChannelMutation();
 
-  const [checkChannelPassword] = channelsApi.useCheckChannelPasswordMutation();
-
   const clearStates = () => {
     setPassword("");
     setShowPasswordInput("");
   };
   const handleJoinChannel = async (channel) => {
     try {
-      await checkChannelPassword({
-        channelId: channel?.id,
-        data: {
-          userId: currentUser?.id,
-          password: password,
-        },
-      }).unwrap();
       await joinChannel({
         channelId: channel?.id,
         data: {

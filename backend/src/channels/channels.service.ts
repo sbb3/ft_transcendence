@@ -442,7 +442,7 @@ export class ChannelsService extends PrismaClient {
         const userAsMember = allUsers.find((user) => user.id == member.userId);
 
         newMember.id = member.userId;
-        delete newMember.userId;
+        // delete newMember.userId;
         return {
           ...newMember,
           avatar: userAsMember.avatar,
@@ -452,7 +452,6 @@ export class ChannelsService extends PrismaClient {
       channel.members = members;
       return channel;
     });
-
     return allChannels;
   }
 

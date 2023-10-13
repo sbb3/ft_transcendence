@@ -78,3 +78,4 @@ function App() {
 export default App;
 
 // TODO: socket jwt valid
+// TODO: prisma client error when sign in an existing user

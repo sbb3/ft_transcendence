@@ -7,7 +7,6 @@ import Loader from "../../Utils/Loader";
 import LeaderboardCard from "./LeaderboardCard";
 import TopThreePlayers from "./TopThreePlayers";
 import { useEffect } from "react";
-import useSocket from "src/hooks/useSocket";
 
 // TODO: either leaderboard have a separate collection, or we could get all users and sort them by their rank
 const Leaderboard = () => {
@@ -22,7 +21,7 @@ const Leaderboard = () => {
 
   // useEffect(() => {
   // TODO: listening on a socket event, iwill refetch the leaderboard when a game is finished,
-  // const socket - useSocket();
+  // const socket - ClientSocket();
   //   // refetch();
   // }, []);
 

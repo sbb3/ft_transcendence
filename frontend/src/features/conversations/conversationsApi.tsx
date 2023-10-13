@@ -1,6 +1,6 @@
 import { apiSlice } from "src/app/api/apiSlice";
 import messagesApi from "../messages/messagesApi";
-import useSocket from "src/hooks/useSocket";
+import { createSocketClient } from "src/app/socket/client";
 import { v4 as uuidv4 } from "uuid";
 import usersApi from "../users/usersApi";
 
@@ -21,7 +21,7 @@ const conversationApi = apiSlice.injectEndpoints({
         arg,
         { dispatch, updateCachedData, cacheDataLoaded, cacheEntryRemoved }
       ) {
-        const socket = useSocket();
+        const socket = createSocketClient();
 
         try {
           await cacheDataLoaded;
@@ -84,7 +84,7 @@ const conversationApi = apiSlice.injectEndpoints({
         arg,
         { dispatch, updateCachedData, cacheDataLoaded, cacheEntryRemoved }
       ) {
-        const socket = useSocket();
+        const socket = createSocketClient();
 
         try {
           await cacheDataLoaded;

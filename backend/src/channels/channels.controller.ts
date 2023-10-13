@@ -192,6 +192,7 @@ export class ChannelsController {
     @Res() response: Response,
   ) {
     try {
+      console.log(`memberId: ${memberId}`);
       const allChannels = await this.channelsService.getAllJoinedChannels(
         memberId,
         this.channelSelectionOptions,

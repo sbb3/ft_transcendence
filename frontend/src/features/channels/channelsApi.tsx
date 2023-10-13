@@ -1,5 +1,5 @@
 import { apiSlice } from "src/app/api/apiSlice";
-import useSocket from "src/hooks/useSocket";
+import { createSocketClient } from "src/app/socket/client";
 import channelMessagesApi from "../channelMessages/channelMessagesApi";
 
 const channelsApi = apiSlice.injectEndpoints({
@@ -25,7 +25,7 @@ const channelsApi = apiSlice.injectEndpoints({
           cacheEntryRemoved,
         }: any
       ) {
-        const socket = useSocket();
+        const socket = createSocketClient();
         try {
           await cacheDataLoaded;
           socket.on("channel", (data) => {
@@ -55,7 +55,7 @@ const channelsApi = apiSlice.injectEndpoints({
         arg,
         { dispatch, updateCachedData, cacheDataLoaded, cacheEntryRemoved }
       ) {
-        const socket = useSocket();
+        const socket = createSocketClient();
         try {
           await cacheDataLoaded;
           socket.on("channel", (data) => {
