@@ -2,6 +2,8 @@ import { Injectable , OnModuleInit} from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
 
+// import { userwhereuniqueinput } from '@prisma/client'; // Import UserWhereUniqueInput from '@prisma/client'
+
 @Injectable()
 export class PrismaService extends PrismaClient {
 	private readonly prisma: PrismaClient;
@@ -20,6 +22,9 @@ export class PrismaService extends PrismaClient {
             where : data
         });
     }
+
+    
+
 
     async createUser(userData : any) {
         return await this.user.create({data : userData});

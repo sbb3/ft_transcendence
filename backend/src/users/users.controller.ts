@@ -106,19 +106,22 @@ export class UsersController {
   ) {
     return this.usersService.updateUserDetails(userId, username, file);
   }
+
+  @Get(':id/friends')
+  async getFriends(@Param('id') id: string) {
+    const userId = Number(id);
+    return this.usersService.getFriends(userId);
+  }
+
+  @Post(':id/friends')
+  addFriend(@Param('id') id: string, @Body('friendId') friendId: number) {
+    const userId = Number(id);
+    return this.usersService.addFriend(userId, friendId);
+  }
+
+  @Delete(':id/friends')
+  deleteFriend(@Param('id') id: number, @Body('friendId') friendId: number) {
+    const userId = Number(id);
+    return this.usersService.deleteFriend(userId, friendId);
+  }
 }
-
-// @Get(':id/friends')
-// getFriends(@Param('id') id: string) {
-//   // Implement logic to get a user's friends
-// }
-
-// @Post(':id/friends')
-// addFriend(@Param('id') id: string, @Query('currentUserId') currentUserId: string) {
-//   // Implement logic to add a friend for a user
-// }
-
-// @Delete(':id/friends/:friendId')
-// deleteFriend(@Param('id') id: string, @Param('friendId') friendId: string) {
-//   // Implement logic to delete a friend
-// }

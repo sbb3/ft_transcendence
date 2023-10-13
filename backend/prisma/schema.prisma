@@ -32,8 +32,10 @@ model user {
 
 
 
-
-
+  id             Int            @id @default(autoincrement())
+  createdAt      DateTime       @default(now())
+  level          String?
+  friends      Int[] 
   // Here auth/chat user infos
   email                String   @unique
   username             String   @unique

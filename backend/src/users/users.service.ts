@@ -17,7 +17,7 @@ const cld = new Cloudinary({ cloud: { cloudName: 'dtsihtgwx' } });
 export class UsersService {
   // cloudinaryService: any;
   // prisma: any;
-  // websocketService: any;
+  websocketService: any;
   // constructor(private readonly prismaService: PrismaService) {}
   private readonly logger = new Logger(Controller.name);
 
@@ -99,5 +99,81 @@ export class UsersService {
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+  }
+  async getFriends(userId: number) {
+    const user = await this.prismaService.user.findUnique({
+      where: { id: userId },
+    });
+    if (!user) {
+      throw new NotFoundException(`User with id ${userId} not found`);
+    }
+    const friendsIds = user.friends;
+    const friends = await this.prismaService.user.findMany({
+      where: {
+        id: {
+          in: friendsIds,
+        },
+      },
+    });
+    return friends;
+  }
+
+  async addFriend(_id: number, _friendId: number) {
+    const id = parseInt(_id.toString(), 10);
+    const friendId = parseInt(_friendId.toString(), 10);
+
+    const user = await this.prismaService.user.findUnique({
+      where: { id },
+    });
+    const friend = await this.prismaService.user.findUnique({
+      where: { id: friendId },
+    });
+    if (!user || !friend) {
+      throw new NotFoundException(`User or friend not found`);
+    }
+
+    const currentUser = await this.prismaService.user.update({
+      where: { id },
+      data: {
+        friends: [...user.friends, friendId],
+      },
+    });
+    await this.prismaService.user.update({
+      where: { id: friendId },
+      data: {
+        friends: [...friend.friends, id],
+      },
+    });
+    // TODO: emit event to friend in order to update his friends list
+    // this.websocketService.emit('friend_accepted', {
+    //   id: friendId,
+    //   userId: id,
+    // });
+    return currentUser;
+  }
+  async deleteFriend(id: number, friendId: number) {
+    const user = await this.prismaService.user.findUnique({
+      where: { id },
+    });
+    const friend = await this.prismaService.user.findUnique({
+      where: { id: friendId },
+    });
+    if (!user || !friend) {
+      throw new NotFoundException(`User or friend not found`);
+    }
+    const currentUser = await this.prismaService.user.update({
+      where: { id },
+      data: {
+        friends: user.friends.filter((id) => id !== friendId),
+      },
+    });
+    await this.prismaService.user.update({
+      where: { id: friendId },
+      data: {
+        friends: friend.friends.filter((id) => id !== id),
+      },
+    });
+
+    return currentUser;
   }
 }
