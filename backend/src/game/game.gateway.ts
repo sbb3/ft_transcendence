@@ -2,7 +2,7 @@ import { Logger } from '@nestjs/common';
 import { MessageBody, OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer, WsResponse } from '@nestjs/websockets';
 import path from 'path';
 import { Server, Socket } from 'socket.io';
-import {Paddle, Ball} from "./game.interface";
+import {Paddle, Ball, Gol} from "./game.interface";
 
 @WebSocketGateway( {
   namespace : 'play',
@@ -23,6 +23,22 @@ export class GameGateway implements OnGatewayInit,  OnGatewayConnection, OnGatew
     this.logger.log(`Client disconnected: ${client.id}`);
   }
 
+  mGol: Gol = {
+    num: "5",
+    x: 256,
+    y: 40,
+    color: "white"
+
+  };
+
+
+  hGol: Gol = {
+    num: "0",
+    x: 768,
+    y: 40,
+    color: "white"
+  };
+
   b: Ball = {
     x: 512,
     y: 288,
@@ -30,7 +46,7 @@ export class GameGateway implements OnGatewayInit,  OnGatewayConnection, OnGatew
     speed: 5,
     velocityX: 5,
     velocityY: 5,
-    color : "WHITE"
+    color : "white"
   };
 
   myP: Paddle = {
@@ -42,7 +58,7 @@ export class GameGateway implements OnGatewayInit,  OnGatewayConnection, OnGatew
     score:0
   };
 
-  htP: Paddle = {
+  herP: Paddle = {
     x: 984,
     y: 140,
     widthe: 20,
@@ -56,29 +72,30 @@ export class GameGateway implements OnGatewayInit,  OnGatewayConnection, OnGatew
     this.logger.log(`Client connected: ${client.id}`);
   }
 
-
-
-  // initHerP(client: Socket){
-
-  // }
-  
-  // initBall(client: Socket){
-
-  // }
-
   afterInit(server: Server) {
     this.logger.log('Initialized');
   }
 
 
 
-  @SubscribeMessage('start')
-  initMyP(client: Socket, data: Paddle):void{
+  @SubscribeMessage('initMyP')
+  initMyPa(client: Socket):void{
     // this.logger.log('initMyP');
     // p == this.myP;
     // return (event : 'initMyP', p: this.myP);
-    client.emit('initMyP', this.myP);
-    console.log(this.myP);
+    // client.broadcast.emit('initMyP', this.myP);
+    this.wss.emit('herP', this.herP);
+    this.wss.emit('myP', this.myP);
+    this.wss.emit('myGol', this.mGol);
+    this.wss.emit('herGol', this.hGol);
+    
+    // console.log(this.b);
+  }
+
+
+  @SubscribeMessage('ballMv')
+  generateBallMv(client :Socket) {
+    this.wss.emit('bal', this.b);
   }
 
   // @SubscribeMessage('msgToServer')

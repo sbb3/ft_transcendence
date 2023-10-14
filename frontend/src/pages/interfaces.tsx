@@ -32,6 +32,13 @@ export interface allE {
     mP: mPaddle;
 }
 
+export interface Gol {
+    num: string;
+    x: number;
+    y: number;
+    color: string;
+}
+
 // export interface Ball {
 //     x: 512;
 //     y: 288;

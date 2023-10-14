@@ -28,6 +28,14 @@ export interface Ball {
 }
 
 
+export interface Gol {
+    num: string;
+    x: number;
+    y: number;
+    color: string;
+}
+
+
 // export interface ball {
 //     x: 512;
 //     y: 288;
