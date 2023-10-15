@@ -57,15 +57,7 @@ export class ChannelsService extends PrismaClient {
     const updatedChannel = await this.channel.update({
       where: { id: channelId },
       data: channelDto,
-      select : {
-        members : true,
-        id : true,
-        name : true,
-        banned : true,
-        description : true,
-        privacy : true,
-        ownerId : true
-      }
+      select : this.channelSelectOptions
     });
     await this.formatChannelMembers(updatedChannel);
     this.webSocketGateway.sendChannelData(updatedChannel);
@@ -127,25 +119,24 @@ export class ChannelsService extends PrismaClient {
 
   async getChannelWithMembers(
     channelName: string,
-    selectOptions: any,
     channelId: number,
   ) {
     let channel: any = channelName
-      ? await this.findUniqueChannel({ name: channelName }, selectOptions)
-      : await this.findUniqueChannel({ id: channelId }, selectOptions);
+      ? await this.findUniqueChannel({ name: channelName }, this.channelSelectOptions)
+      : await this.findUniqueChannel({ id: channelId }, this.channelSelectOptions);
 
     await this.formatChannelMembers(channel);
     return [channel];
   }
 
-  async getAvailableChannels(selectOptions: any) {
+  async getAvailableChannels() {
     const allChannels = await this.channel.findMany({
       where: {
         privacy: {
           in: ['public', 'protected'],
         },
       },
-      select: selectOptions,
+      select: this.channelSelectOptions,
     });
 
     const formattedChannels = await Promise.all(
@@ -221,15 +212,7 @@ export class ChannelsService extends PrismaClient {
           },
         },
       },
-	  select : {
-		members : true,
-		id : true, 
-		banned : true, 
-		description : true, 
-		privacy : true,
-		name : true,
-		ownerId : true
-	  }
+	  select : this.channelSelectOptions
     });
 
 	if (!shouldEmit)
@@ -373,7 +356,7 @@ export class ChannelsService extends PrismaClient {
     });
   }
 
-  async getAllJoinedChannels(memberId: number, selectOptions: any) {
+  async getAllJoinedChannels(memberId: number) {
     const member = await this.channelMember.findMany({
       where: {
         userId: memberId,
@@ -386,7 +369,7 @@ export class ChannelsService extends PrismaClient {
           in: member.map((member) => member.channelId),
         },
       },
-      select: selectOptions,
+      select: this.channelSelectOptions,
     });
 
     const allUsers = await this.user.findMany({
@@ -726,4 +709,14 @@ export class ChannelsService extends PrismaClient {
           return { ...user, isMuted, role };
         });
       }
+
+    private channelSelectOptions = {
+	  	members : true,
+      id : true, 
+      banned : true, 
+      description : true, 
+      privacy : true,
+      name : true,
+      ownerId : true
+    }
 }

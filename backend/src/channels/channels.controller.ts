@@ -27,7 +27,6 @@ import { CreateChannelDto } from './dto/create-channel.dto';
 import { UpdateChannelDto } from './dto/update-channel.dto';
 import { QueryDto } from './dto/query.dto';
 import { CheckPasswordDto } from './dto/check-password.dto';
-import { UsernameQueryDto } from './dto/username-query-dto';
 import { EditRoleDto } from './dto/edit-role.dto';
 import { CreateChannelMessageDto } from './dto/create-channel-message.dto';
 
@@ -124,12 +123,9 @@ export class ChannelsController {
       const data = queryDto.name
         ? await this.channelsService.getChannelWithMembers(
             queryDto.name,
-            this.channelSelectionOptions,
             -1,
           )
-        : await this.channelsService.getAvailableChannels(
-            this.channelSelectionOptions,
-          );
+        : await this.channelsService.getAvailableChannels();
 
       return response.status(200).json(data);
     } catch (error) {
@@ -167,8 +163,7 @@ export class ChannelsController {
   ) {
     try {
       const allChannels = await this.channelsService.getAllJoinedChannels(
-        memberId,
-        this.channelSelectionOptions,
+        memberId
       );
 
       return response.status(200).json(allChannels);
@@ -401,16 +396,6 @@ export class ChannelsController {
       return response.status(500).json(error);
     }
   }
-
-  private readonly channelSelectionOptions = {
-    id: true,
-    ownerId: true,
-    name: true,
-    privacy: true,
-    description: true,
-    members: true,
-    banned: true,
-  };
 }
 
 // Optional : if the owner of a channel leaves, the ownership goes the admin.
