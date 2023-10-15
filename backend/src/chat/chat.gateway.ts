@@ -1,6 +1,6 @@
 import { WebSocketGateway } from '@nestjs/websockets';
 import { WebSocketServer } from '@nestjs/websockets';
-import { Server, Socket } from 'socket.io';
+import { Server } from 'socket.io';
 
 @WebSocketGateway({
   namespace: 'chat',
@@ -23,7 +23,10 @@ export class ChatGateway {
   }
 
   sendChannelData(dataToSend: any) {
-    console.log(`channel dta: `, JSON.stringify(dataToSend));
     this.server.emit('channel', { data: dataToSend });
+  }
+
+  sendConversationData(dataToSend : any) {
+    this.server.emit('conversation', {data: dataToSend});
   }
 }
