@@ -50,7 +50,7 @@ const channelsApi = apiSlice.injectEndpoints({
       },
     }),
     getChannelsByMemberId: builder.query({
-      query: (currentUserId) => `/channels/members/${currentUserId}`,
+      query: (currentUserId) => `channels/members/${currentUserId}`,
       async onCacheEntryAdded(
         arg,
         {
@@ -171,8 +171,8 @@ const channelsApi = apiSlice.injectEndpoints({
       },
     }),
     checkChannelPassword: builder.mutation({
-      query: ({ id, data }) => ({
-        url: `/channels/${id}/checkpassword`,
+      query: ({ channelId, data }) => ({
+        url: `channels/${channelId}/checkpassword`,
         method: "POST",
         body: { ...data },
       }),

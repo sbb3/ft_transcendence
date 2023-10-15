@@ -71,6 +71,9 @@ const SearchForChannel = ({
   const [joinChannel, { isLoading: isJoininChannel }] =
     channelsApi.useJoinChannelMutation();
 
+  const [checkChannelPassword, { isLoading: isCheckingChannelPassword }] =
+    channelsApi.useCheckChannelPasswordMutation();
+
   const clearStates = () => {
     setPassword("");
     setShowPasswordInput("");
@@ -81,6 +84,7 @@ const SearchForChannel = ({
         channelId: channel?.id,
         data: {
           username: currentUser?.username,
+          password: password,
         },
       }).unwrap();
 
@@ -287,12 +291,12 @@ const SearchForChannel = ({
                                           if (channel.privacy === "public") {
                                             handleJoinChannel(channel);
                                           } else if (
-                                            channel.privacy === "private" &&
+                                            channel.privacy === "protected" &&
                                             password === ""
                                           ) {
                                             setShowPasswordInput(channel.id);
                                           } else if (
-                                            channel.privacy === "private" &&
+                                            channel.privacy === "protected" &&
                                             password !== ""
                                           ) {
                                             handleJoinChannel(channel);
@@ -305,16 +309,16 @@ const SearchForChannel = ({
                                   <Box
                                     w="full"
                                     display={
-                                      channel.privacy === "private" &&
+                                      channel.privacy === "protected" &&
                                       showPasswordInput === channel.id
                                         ? "block"
                                         : "none"
                                     }
                                   >
                                     <Input
-                                      id="passowrd"
-                                      type="passowrd"
-                                      placeholder="Private channel password"
+                                      id="password"
+                                      type="password"
+                                      placeholder="Protected channel password"
                                       onChange={(e) =>
                                         setPassword(e.target.value)
                                       }
