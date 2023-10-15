@@ -24,7 +24,7 @@ export class ChatGateway {
     this.server.emit('conversationMessage', {data: dataToSend});
   }
 
-  sendNewMemberData(dataToSend : any) {
+  sendChannelData(dataToSend : any) {
     this.server.emit('channel', {data: dataToSend});
   }
 }

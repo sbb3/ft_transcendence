@@ -87,7 +87,6 @@ export class UsersService {
   }
 
   async getCurrentUser(userId: number) {
-    console.log(`userId: ${userId} `);
     try {
       const user = await this.prismaService.user.findUnique({
         where: { id: parseInt(userId.toString(), 10) },
