@@ -1,6 +1,4 @@
-import {
-  WebSocketGateway
-} from '@nestjs/websockets';
+import { WebSocketGateway } from '@nestjs/websockets';
 import { WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 
@@ -21,10 +19,11 @@ export class ChatGateway {
   }
 
   sendConversationMessage(dataToSend: any) {
-    this.server.emit('conversationMessage', {data: dataToSend});
+    this.server.emit('conversationMessage', { data: dataToSend });
   }
 
-  sendChannelData(dataToSend : any) {
-    this.server.emit('channel', {data: dataToSend});
+  sendChannelData(dataToSend: any) {
+    console.log(`channel dta: `, JSON.stringify(dataToSend));
+    this.server.emit('channel', { data: dataToSend });
   }
 }

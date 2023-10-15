@@ -83,7 +83,7 @@ const SearchForChannel = ({
       await joinChannel({
         channelId: channel?.id,
         data: {
-          username: currentUser?.username,
+          userId: currentUser?.id,
           password: password,
         },
       }).unwrap();

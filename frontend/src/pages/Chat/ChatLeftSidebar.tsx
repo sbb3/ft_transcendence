@@ -27,11 +27,11 @@ const ChatLeftSidebar = ({}) => {
         Chat
       </Text>
       <Divider color="orange" />
-      <SearchDMsChannels />
-      <Divider color="orange" />
-      <Channels />
+      {/* <SearchDMsChannels /> */}
+      {/* <Divider color="orange" /> */}
+      {/* <Channels /> */}
       <Divider mt={4} color="orange" />
-      {/* <Conversations /> */}
+      <Conversations />
     </Flex>
   );
 };

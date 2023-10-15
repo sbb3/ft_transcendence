@@ -15,8 +15,7 @@ interface Conversation {
 const conversationApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getConversations: builder.query({
-      query: (currentUserEmail) =>
-        `/conversations?members_like=${currentUserEmail}`,
+      query: (currentUserEmail) => `/conversations?email=${currentUserEmail}`,
       async onCacheEntryAdded(
         arg,
         { dispatch, updateCachedData, cacheDataLoaded, cacheEntryRemoved }
@@ -104,13 +103,13 @@ const conversationApi = apiSlice.injectEndpoints({
     }),
     getConversationByMembersEmails: builder.query({
       query: (membersEmails: string[]) =>
-        `/conversations/conversationByEmails?member1=${membersEmails[0]}}&member2=${membersEmails[0]}`,
+        `/conversations/conversationByEmails?member1=${membersEmails[0]}&member2=${membersEmails[0]}`,
     }),
     createConversation: builder.mutation({
       query: ({ conversation, receiver }) => ({
         url: `conversations`,
         method: "POST",
-        body: conversation,
+        body: { ...conversation },
       }),
       async onQueryStarted(arg, { dispatch, getState, queryFulfilled }: any) {
         const conversation = arg.conversation;

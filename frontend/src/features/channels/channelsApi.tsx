@@ -65,6 +65,7 @@ const channelsApi = apiSlice.injectEndpoints({
         try {
           await cacheDataLoaded;
           socket.on("channel", (data) => {
+            console.log("incoming channel data: ", data);
             const isDataBelongToThisUser = data.data.members.find(
               (m) => m.id === getState()?.user?.currentUser?.id
             );
@@ -72,6 +73,7 @@ const channelsApi = apiSlice.injectEndpoints({
               updateCachedData((draft) => {
                 const channel = draft?.find((c) => c.id === data?.data?.id);
                 if (!channel?.id) {
+                  // TODO: channel data updated, member got kicked or banned
                   draft?.unshift(data?.data);
                 }
               });
@@ -215,15 +217,15 @@ const channelsApi = apiSlice.injectEndpoints({
         try {
           await queryFulfilled;
           // TODO: test again this
-          // await dispatch(
-          //   channelMessagesApi.util.prefetch(
-          //     "getMessagesByChannelName",
-          //     arg?.name,
-          //     {
-          //       force: true,
-          //     }
-          //   )
-          // );
+          await dispatch(
+            channelMessagesApi.util.prefetch(
+              "getMessagesByChannelName",
+              arg?.name,
+              {
+                force: true,
+              }
+            )
+          );
 
           await dispatch(
             channelMessagesApi.endpoints.getMessagesByChannelName.initiate(
@@ -394,8 +396,8 @@ const channelsApi = apiSlice.injectEndpoints({
     }),
     joinChannel: builder.mutation({
       query: ({ channelId, data }) => ({
-        url: `channels/${channelId}/join?username=${data?.username}`,
-        method: "PATCH",
+        url: `channels/${channelId}/join`,
+        method: "POST",
         body: { ...data },
       }),
       async onQueryStarted(arg, { dispatch, getState, queryFulfilled }: any) {

@@ -44,7 +44,7 @@ const ChannelAbout = ({ channel }) => {
   // TODO: invalidate the cache
   const handleDeleteChannel = async () => {
     try {
-      await deleteChannel({ id: channel?.id });
+      await deleteChannel({ id: channel?.id, name: channel?.name }).unwrap();
       navigate("/chat", { replace: true });
       console.log("channel got deleted");
     } catch (error) {

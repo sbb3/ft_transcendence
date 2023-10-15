@@ -94,7 +94,7 @@ const AddDirectMessage = ({ isOpenDM, onToggleDM }) => {
       const conversations = await triggerGetConversationByMembersEmails([
         currentUser?.email,
         receiverEmail,
-      ]).unwrap();
+      ]);
 
       if (conversations?.length > 0) {
         const conversation = conversations[0];
@@ -121,7 +121,7 @@ const AddDirectMessage = ({ isOpenDM, onToggleDM }) => {
           conversation: {
             id: uuidv4(),
             firstMember: currentUser?.id,
-            secondMember: to?.id,
+            secondMember: 25,
             lastMessageContent: message,
             lastMessageCreatedAt: dayjs().valueOf(),
           },
