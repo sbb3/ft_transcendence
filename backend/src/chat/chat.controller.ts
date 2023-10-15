@@ -76,7 +76,6 @@ export class ChatController {
     @Query() emailQuery: EmailQueryDto,
   ) {
     try {
-      console.log(emailQuery.email);
       const data = await this.chatService.getAllUserConversations(
         emailQuery.email,
       );

@@ -10,7 +10,6 @@ const env = cleanEnv(process.env, {
 export const CloudinaryProvider = {
   provide: 'CLOUDINARY',
   useFactory: () => {
-    console.log(`\n env.CLOUDINARY_NAME : `, env.CLOUDINARY_NAME, `\n`);
 
     return v2.config({
       cloud_name: env.CLOUDINARY_NAME,

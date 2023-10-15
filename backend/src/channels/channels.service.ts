@@ -91,6 +91,8 @@ export class ChannelsService extends PrismaClient {
       data: channelDto,
     });
 
+    delete updatedChannel.password;
+    this.webSocketGateway.sendChannelData(updatedChannel);
     if (!updatedChannel) throw new InternalServerErrorException();
   }
 
@@ -104,7 +106,7 @@ export class ChannelsService extends PrismaClient {
           where: data,
         });
 
-    if (!channel) throw new NotFoundException('Channel not found');
+    if (!channel) throw new NotFoundException('Channel not found.');
     return channel;
   }
 
@@ -318,30 +320,30 @@ export class ChannelsService extends PrismaClient {
 		members : [...formattedMembers]
 	};
 
-	this.webSocketGateway.sendNewMemberData(toEmit);
+	this.webSocketGateway.sendChannelData(toEmit);
   }
 
   async deleteChannel(channelId: number, userId: number) {
-    const channelToDelete = await this.channel.findUnique({
-      where: { id: channelId },
-    });
+    const channelToDelete = await this.findUniqueChannel({id : channelId}, null);
+  	const members = await this.channelMember.deleteMany({
+		  where : {
+			  channelId : channelId,
+		  }
+	  })
 
-    if (!channelToDelete)
-      throw new NotFoundException('Channel to delete not found.');
+    if (members.count >= 0)
+    {
+      const deletedChannel = await this.channel.delete({ where: { id: channelId } });
+      if (!deletedChannel)
+        throw new InternalServerErrorException();
+    }
     if (userId != channelToDelete.ownerId)
       throw new BadRequestException('Only the owner can delete his channel.');
-    if (!(await this.channel.delete({ where: { id: channelId } })))
-      throw new InternalServerErrorException();
     await this.channelMessage.deleteMany({
       where: {
         channelId: channelId,
       },
     });
-	await this.channelMember.deleteMany({
-		where : {
-			channelId : channelId,
-		}
-	})
   }
 
   async ban(channelId: number, memberToBanId: number, editorId: number) {
@@ -460,7 +462,6 @@ export class ChannelsService extends PrismaClient {
         userId: memberId,
       },
     });
-    console.log('here1');
 
     let allChannels = await this.channel.findMany({
       where: {
@@ -503,7 +504,6 @@ export class ChannelsService extends PrismaClient {
       channel.members = members;
       return channel;
     });
-    console.log('here');
     return allChannels;
   }
 
