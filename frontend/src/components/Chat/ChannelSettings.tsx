@@ -67,6 +67,7 @@ const ChannelSettings = ({ channel, onToggleChannelInfo }) => {
     try {
       await editChannelInfo({
         id: channel.id,
+        channelName: channel.name,
         data: {
           ...data,
         },

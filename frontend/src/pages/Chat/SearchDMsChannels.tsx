@@ -1,4 +1,10 @@
-import { Flex, InputGroup, InputRightElement, Text } from "@chakra-ui/react";
+import {
+  Flex,
+  InputGroup,
+  InputRightElement,
+  Text,
+  useToast,
+} from "@chakra-ui/react";
 import {
   AutoComplete,
   AutoCompleteGroup,
@@ -19,6 +25,7 @@ import { useSelector } from "react-redux";
 const SearchDMsChannels = () => {
   const currentUser = useSelector((state: any) => state.user.currentUser);
   const navigate = useNavigate();
+  const toast = useToast();
 
   const {
     data: channels = [],
@@ -33,9 +40,29 @@ const SearchDMsChannels = () => {
     data: conversations = [],
     isLoading: isLoadingConversations,
     isFetching: isFetchingConversations,
+    error: errorConversations,
   } = useGetConversationsQuery(currentUser?.email, {
     refetchOnMountOrArgChange: true,
   });
+
+  if (errorChannels) {
+    toast({
+      title: "An error occurred.",
+      description: "Unable to fetch channels.",
+      status: "error",
+      duration: 5000,
+      isClosable: true,
+    });
+  }
+  if (errorConversations) {
+    toast({
+      title: "An error occurred.",
+      description: "Unable to fetch conversations.",
+      status: "error",
+      duration: 5000,
+      isClosable: true,
+    });
+  }
 
   return (
     <Flex direction="row" align="center" justify="center">

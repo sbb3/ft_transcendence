@@ -122,7 +122,7 @@ const channelsApi = apiSlice.injectEndpoints({
       }),
     }),
     editChannelInfo: builder.mutation({
-      query: ({ id, data }: { id: number; data: any }) => ({
+      query: ({ id, channelName, data }) => ({
         url: `/channels/${id}/update`,
         method: "PATCH",
         body: { ...data },
@@ -132,7 +132,7 @@ const channelsApi = apiSlice.injectEndpoints({
         const patchResult = dispatch(
           channelsApi.util.updateQueryData(
             "getSingleChannelByName",
-            arg?.data?.name,
+            arg?.channelName,
             (draft) => {
               const index = draft?.findIndex((c) => c.id === channelId);
               if (channelId && index !== -1) {
@@ -179,7 +179,7 @@ const channelsApi = apiSlice.injectEndpoints({
     }),
     deleteChannel: builder.mutation({
       query: ({ id }) => ({
-        url: `/channels/${id}`,
+        url: `/channels/${id}/delete`,
         method: "DELETE",
       }),
       async onQueryStarted(arg, { dispatch, getState, queryFulfilled }: any) {

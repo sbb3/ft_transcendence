@@ -97,7 +97,10 @@ const ChannelContent = () => {
         duration: 2000,
         isClosable: true,
       });
-      if (error?.data?.message === "Member not found in channel.") {
+      if (
+        error?.data?.message === "Member not found in channel." ||
+        error?.data?.message === "Channel not found."
+      ) {
         navigate("/chat", { replace: true });
       }
     }
