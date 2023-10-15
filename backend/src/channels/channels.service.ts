@@ -35,38 +35,6 @@ export class ChannelsService extends PrismaClient {
     await this.joinChannel(newChannel.id, creatorId, null, false, [], 'owner', false);
   }
 
-  async validateChannelPassword(
-    channelId: number,
-    passwordDto: CheckPasswordDto,
-  ) {
-    const channel: any = await this.findUniqueChannel(
-      { id: channelId },
-      { password: true, privacy: true, members: true, banned: true },
-    );
-    const user = await this.user.findUnique({
-      where: { id: passwordDto.userId },
-    });
-
-    if (!user)
-      throw new NotFoundException('User not found.');
-    if (channel.privacy == 'public' || channel.privacy == 'private')
-      throw new ConflictException(
-        'This channel does not require any password.',
-      );
-    if (!(await bcrypt.compare(passwordDto.password, channel.password)))
-      throw new BadRequestException('Invalid password.');
-
-    await this.joinChannel(
-      channelId,
-      user.id,
-      channel.members,
-      true,
-      channel.banned,
-      'member',
-	  false
-    );
-  }
-
   async updateChannel(
     channelDto: UpdateChannelDto,
     userId: number,
@@ -89,9 +57,17 @@ export class ChannelsService extends PrismaClient {
     const updatedChannel = await this.channel.update({
       where: { id: channelId },
       data: channelDto,
+      select : {
+        members : true,
+        id : true,
+        name : true,
+        banned : true,
+        description : true,
+        privacy : true,
+        ownerId : true
+      }
     });
-
-    delete updatedChannel.password;
+    await this.formatChannelMembers(updatedChannel);
     this.webSocketGateway.sendChannelData(updatedChannel);
     if (!updatedChannel) throw new InternalServerErrorException();
   }
@@ -158,32 +134,7 @@ export class ChannelsService extends PrismaClient {
       ? await this.findUniqueChannel({ name: channelName }, selectOptions)
       : await this.findUniqueChannel({ id: channelId }, selectOptions);
 
-    const members = await this.user.findMany({
-      where: {
-        id: {
-          in: channel.members.map(
-            (member: { userId: number }) => member.userId,
-          ),
-        },
-      },
-      select: {
-        id: true,
-        avatar: true,
-        name: true,
-        createdAt: true,
-        email: true,
-        username: true,
-      },
-    });
-
-    channel.members = members.map((user) => {
-      const member = channel.members.find(
-        (member: { userId: number }) => member.userId == user.id,
-      );
-      const { isMuted, role } = member;
-
-      return { ...user, isMuted, role };
-    });
+    await this.formatChannelMembers(channel);
     return [channel];
   }
 
@@ -388,40 +339,6 @@ export class ChannelsService extends PrismaClient {
     });
   }
 
-  async unban(channelId: number, memberToUnbanId: number, editorId: number) {
-    const channel: any = await this.findUniqueChannel(
-      { id: channelId },
-      { members: true, banned: true },
-    );
-    const editor = channel.members.find((member) => member.userId === editorId);
-    const bannedMember = channel.banned.find(
-      (bannedId) => bannedId === memberToUnbanId,
-    );
-
-    if (!bannedMember || !editor)
-      throw new NotFoundException(
-        !editor
-          ? 'Member that wants to unban not found.'
-          : 'User to unban not found in the banned list.',
-      );
-    if (editor.role == 'member')
-      throw new ForbiddenException(
-        'Only the owner and admins can unban users.',
-      );
-    let updatedArrayOfBannedUsers = channel.banned.filter(
-      (banned) => banned != memberToUnbanId,
-    );
-
-    await this.channel.update({
-      where: {
-        id: channelId,
-      },
-      data: {
-        banned: updatedArrayOfBannedUsers,
-      },
-    });
-  }
-
   async muteOrUnmute(
     isMuted: boolean,
     channelId: number,
@@ -591,7 +508,7 @@ export class ChannelsService extends PrismaClient {
       else if (!this.canControl(kicker.role, memberToLeave.role))
         throw new ForbiddenException('No provileges to kick this member.');
       else if (kicker.userId == memberToLeave.userId)
-        throw new ConflictException("The kicker can't kick himself.");
+        throw new ConflictException('The kicker can\'t kick himself.');
     }
     await this.channelMember.deleteMany({
       where: {
@@ -601,27 +518,20 @@ export class ChannelsService extends PrismaClient {
     });
   }
 
-  async validateAndJoinChannel(channelId: number, username: string) {
-    const channel = await this.channel.findUnique({
-      where: {
-        id: channelId,
-      },
-      select: {
-        privacy: true,
-        members: true,
-        banned: true,
-      },
-    });
+  async validateAndJoinChannel(channelId: number, checkPasswordDto: CheckPasswordDto) {
+    const channel : any = await this.findUniqueChannel({id : channelId}, {members : true, banned : true, privacy : true, password : true});
     const user = await this.user.findUnique({
       where: {
-        username: username,
+        id: checkPasswordDto.userId,
       },
     });
 
-    if (!channel || !user) throw new NotFoundException(!channel ? 'Channel not found.' : 'User not found.');
-    if (channel.privacy == 'protected')
-      throw new BadRequestException('This channel requires a password.');
-
+    if (channel.privacy == 'protected' && !checkPasswordDto.password)
+      throw new BadRequestException('Password must not be empty.');
+    if (!user)
+      throw new NotFoundException('User to join not found.');
+    if (channel.privacy == 'protected' && !(await bcrypt.compare(checkPasswordDto.password, channel.password)))
+      throw new BadRequestException('Invalid password.');
     await this.joinChannel(
       channelId,
       user.id,
@@ -663,8 +573,9 @@ export class ChannelsService extends PrismaClient {
 
     if (member.length == 0)
       throw new NotFoundException('Member not found in channel.');
-    if (member[0].isMuted) return 'Muted from this channel.';
-	this.formatMessageAndEmit(createMessageDto, channel, sender);
+    if (member[0].isMuted)
+      throw new ForbiddenException('Muted from this channel.');
+	  this.formatMessageAndEmit(createMessageDto, channel, sender);
     return 'Message created successfully.';
   }
 
@@ -786,4 +697,33 @@ export class ChannelsService extends PrismaClient {
       (roleOfEditor == 'admin' && roleOfUserToEdit == 'member')
     );
   }
+
+  private async formatChannelMembers(channel : any) {
+    const members = await this.user.findMany({
+          where: {
+            id: {
+              in: channel.members.map(
+                (member: { userId: number }) => member.userId,
+              ),
+            },
+          },
+          select: {
+            id: true,
+            avatar: true,
+            name: true,
+            createdAt: true,
+            email: true,
+            username: true,
+          },
+        });
+
+        channel.members = members.map((user) => {
+          const member = channel.members.find(
+            (member: { userId: number }) => member.userId == user.id,
+          );
+          const { isMuted, role } = member;
+
+          return { ...user, isMuted, role };
+        });
+      }
 }

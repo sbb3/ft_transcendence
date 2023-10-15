@@ -60,32 +60,6 @@ export class ChannelsController {
     }
   }
 
-  @Post(':id/checkPassword')
-  @UseGuards(JwtGuard)
-  @ApiParam({ name: 'id', required: false })
-  @ApiBody({ type: CheckPasswordDto })
-  @ApiOperation({
-    summary: 'Validate input password and join a protected channel.',
-  })
-  async validateAndJoin(
-    @Param('id', ParseIntPipe) channelId: number,
-    @Res() response: Response,
-    @Body() checkPasswordDto: CheckPasswordDto,
-  ) {
-    try {
-      await this.channelsService.validateChannelPassword(
-        channelId,
-        checkPasswordDto,
-      );
-      return response
-        .status(200)
-        .json({ message: 'User has joined this channel succesfully.' });
-    } catch (error) {
-      if (error?.status) return response.status(error.status).json(error);
-      return response.status(500).json(error);
-    }
-  }
-
   @Patch(':id/update')
   @UseGuards(JwtGuard)
   @ApiOperation({
@@ -368,50 +342,21 @@ export class ChannelsController {
     }
   }
 
-  @Patch(':channelId/members/:memberId/unban')
-  @UseGuards(JwtGuard)
-  @ApiParam({ name: 'channelId' })
-  @ApiParam({ name: 'memberId' })
-  @ApiOperation({ summary: 'Ban a player from a channel.' })
-  async unbanMember(
-    @Req() request: Request,
-    @Param('channelId', ParseIntPipe) channelId: number,
-    @Param('memberId', ParseIntPipe) userId: number,
-    @Res() response: Response,
-  ) {
-    try {
-      if (!request['user']?.id)
-        throw new BadRequestException('Request must contain the owner id.');
-
-      await this.channelsService.unban(channelId, userId, request['user'].id);
-      return response
-        .status(200)
-        .json({ message: 'User has been unbanned from this channel' });
-    } catch (error) {
-      if (error.status) return response.status(error.status).json(error);
-      return response.status(500).json(error);
-    }
-  }
-
-  @Patch(':channelId/join')
+  @Post(':channelId/join')
   @UseGuards(JwtGuard)
   @ApiOperation({ summary: 'Join a specific private or public channel.' })
   @ApiParam({ name: 'channelId' })
-  @ApiQuery({ name: 'username', required: true })
   async joinAChannel(
     @Param('channelId', ParseIntPipe) channelId: number,
-    @Query() usernameQuery: UsernameQueryDto,
-    @Res() response: Response,
+    @Res() response: Response, @Body() checkPasswordDto : CheckPasswordDto
   ) {
     try {
       await this.channelsService.validateAndJoinChannel(
         channelId,
-        usernameQuery.username,
+        checkPasswordDto
       );
 
-      return response
-        .status(200)
-        .json({ message: 'User has joined the channel.' });
+      return response.status(200).json({ message : 'User has joined the channel.' });
     } catch (error) {
       if (error.status) return response.status(error.status).json(error);
       return response.status(500).json(error);
@@ -467,3 +412,5 @@ export class ChannelsController {
     banned: true,
   };
 }
+
+// Optional : if the owner of a channel leaves, the ownership goes the admin.
