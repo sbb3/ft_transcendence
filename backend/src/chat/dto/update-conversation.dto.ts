@@ -19,8 +19,9 @@ class MessageDto {
 export default class UpdateConversationDto {
 
 	@ApiProperty({example : '1'})
-	@IsNumber()
-	id : number;
+	@IsNotEmpty()
+	@IsString()
+	id : string;
 
 	@ValidateNested()
 	@IsNotEmptyObject()

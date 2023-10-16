@@ -59,7 +59,7 @@ model channelMessage {
 
 model messageData {
 	id						Int @id @default(autoincrement())
-	conversationId			Int
+	conversationId			String
 	sender        Int
 	receiver				Int
 	content					String
@@ -67,9 +67,9 @@ model messageData {
 }
 
 model conversation {
-	id						Int @id @default(autoincrement())
-	firstMember				Int
-	secondMember			Int
+	id						        String @unique
+	firstMember				    Int
+	secondMember			    Int
 	lastMessageContent		String?
 	lastMessageCreatedAt	DateTime?
 }
