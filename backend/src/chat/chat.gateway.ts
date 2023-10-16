@@ -19,6 +19,7 @@ export class ChatGateway {
   }
 
   sendConversationMessage(dataToSend: any) {
+    // console.log('conversationMessage: ', JSON.stringify(dataToSend));
     this.server.emit('conversationMessage', { data: dataToSend });
   }
 
@@ -26,7 +27,7 @@ export class ChatGateway {
     this.server.emit('channel', { data: dataToSend });
   }
 
-  sendConversationData(dataToSend : any) {
-    this.server.emit('conversation', {data: dataToSend});
+  sendConversationData(dataToSend: any) {
+    this.server.emit('conversation', { data: dataToSend });
   }
 }

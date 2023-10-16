@@ -23,6 +23,7 @@ const ChatContentHeader = ({
     useDisclosure();
   return (
     <Flex
+      id="chat-content-header"
       w={"full"}
       height={"full"}
       justify="start"

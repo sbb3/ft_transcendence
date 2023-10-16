@@ -212,7 +212,7 @@ const Profile = ({ user }: ProfileProps) => {
       if (conversations?.length > 0) {
         const conversation = conversations[0];
         id = conversation.id;
-        console.log("id->: ", id);
+        // console.log("id->: ", id);
       } else {
         const conversation = {
           id: uuidv4(),

@@ -25,48 +25,24 @@ const conversationApi = apiSlice.injectEndpoints({
         try {
           await cacheDataLoaded;
           socket.on("conversation", (data) => {
-            // TODO: this delete functionality will be removed later, replace it with another socket event for deleting the conversation, or
-            // backend will check if the conversation exists when adding a message, else, throw an error
-            if (data.data?.type === "delete") {
+            const isDataBelongToThisUser = data.data.members.find(
+              (email) => email === arg
+            );
+            if (isDataBelongToThisUser) {
               updateCachedData((draft) => {
                 const conversation = draft?.find(
                   (c) => c.id === data?.data?.id
                 );
                 if (conversation?.id) {
-                  const index = draft?.findIndex(
-                    (c) => c.id === data?.data?.id
-                  );
-                  if (index !== -1) {
-                    draft?.splice(index, 1);
-                  }
-                  // TODO: later, delete the messages of the conversation also
-                  dispatch(
-                    conversationApi.endpoints.getConversation.initiate(
-                      conversation.id
-                    )
-                  );
+                  conversation.lastMessageContent =
+                    data?.data?.lastMessageContent;
+                  conversation.lastMessageCreatedAt =
+                    data?.data?.lastMessageCreatedAt;
+                  draft = { ...draft, ...conversation };
+                } else {
+                  draft?.unshift(data?.data);
                 }
               });
-            } else {
-              const isDataBelongToThisUser = data.data.members.find(
-                (email) => email === arg
-              );
-              if (isDataBelongToThisUser) {
-                updateCachedData((draft) => {
-                  const conversation = draft?.find(
-                    (c) => c.id === data?.data?.id
-                  );
-                  if (conversation?.id) {
-                    conversation.lastMessageContent =
-                      data?.data?.lastMessageContent;
-                    conversation.lastMessageCreatedAt =
-                      data?.data?.lastMessageCreatedAt;
-                    draft = { ...draft, ...conversation };
-                  } else {
-                    draft?.unshift(data?.data);
-                  }
-                });
-              }
             }
           });
         } catch (error) {
@@ -177,8 +153,8 @@ const conversationApi = apiSlice.injectEndpoints({
       },
     }),
     updateConversation: builder.mutation({
-      query: ({ id, data }: { id: number; data: any }) => ({
-        url: `conversations/${id}`,
+      query: ({ data }: { id: number; data: any }) => ({
+        url: `conversations`,
         method: "PATCH",
         body: { ...data },
       }),

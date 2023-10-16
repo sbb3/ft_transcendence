@@ -58,7 +58,7 @@ model channelMessage {
 }
 
 model messageData {
-	id						Int @id @default(autoincrement())
+	id						String @unique
 	conversationId			String
 	sender        Int
 	receiver				Int

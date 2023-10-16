@@ -8,7 +8,7 @@ const messagesApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getMessagesByConversationId: builder.query({
       query: (conversationId) =>
-        `messages?conversationId=${conversationId}&page=${1}`,
+        `conversations/messages?conversationId=${conversationId}&page=${1}`,
       // transformResponse: (response: any) => {
       //   const messages = response?.messages?.reverse();
       //   const totalPages = response?.totalPages;
@@ -18,20 +18,21 @@ const messagesApi = apiSlice.injectEndpoints({
         arg,
         { getState, updateCachedData, cacheDataLoaded, cacheEntryRemoved }: any
       ) {
-        const currentUser = getState()?.user?.currentUser?.email;
+        const currentUser = getState()?.user?.currentUser?.id;
         const socket = createSocketClient();
 
         try {
           await cacheDataLoaded;
-          socket.on("message", (data) => {
-            const sender = data.data.sender.email;
-            const receiver = data.data.receiver.email;
+          socket.on("conversationMessage", (data) => {
+            const sender = data.data.sender;
+            const receiver = data.data.receiver;
             if (currentUser === sender || currentUser === receiver) {
-              // console.log("incoming message: ", data);
               updateCachedData((draft) => {
-                const message = draft?.find((m) => m.id === data?.data?.id);
+                const message = draft?.messages?.find(
+                  (m) => m.id === data?.data?.id
+                );
                 if (!message?.id) {
-                  draft?.unshift(data?.data); // recent message on top
+                  draft?.messages?.unshift(data?.data); // recent message on top
                 }
               });
             }
@@ -45,7 +46,7 @@ const messagesApi = apiSlice.injectEndpoints({
     }),
     getMoreMessagesByConversationId: builder.query({
       query: ({ conversationId, page }) =>
-        `messages?conversationId=${conversationId}&page=${page}`,
+        `conversations/messages?conversationId=${conversationId}&page=${page}`,
       // transformResponse: (response: any) => {
       //   const messages = response?.messages?.reverse();
       //   const totalPages = response?.totalPages;
@@ -85,6 +86,7 @@ const messagesApi = apiSlice.injectEndpoints({
       }),
       async onQueryStarted(arg, { dispatch, getState, queryFulfilled }: any) {
         const messageData = arg;
+        console.log("messageData id : ", messageData.id);
         const { conversationId, content, lastMessageCreatedAt } = messageData;
         const patchResultMsg = dispatch(
           messagesApi?.util?.updateQueryData(
@@ -113,10 +115,12 @@ const messagesApi = apiSlice.injectEndpoints({
           await queryFulfilled;
           dispatch(
             conversationApi.endpoints.updateConversation.initiate({
-              id: conversationId,
               data: {
-                lastMessageContent: content,
-                lastMessageCreatedAt: lastMessageCreatedAt,
+                id: conversationId,
+                message: {
+                  lastMessageContent: content,
+                  lastMessageCreatedAt: lastMessageCreatedAt,
+                },
               },
             })
           );
@@ -148,7 +152,7 @@ const messagesApi = apiSlice.injectEndpoints({
     }),
     createMessage: builder.mutation({
       query: (msgData) => ({
-        url: `/conversations/addmessage`,
+        url: `conversations/addmessage`,
         method: "POST",
         body: {
           conversationId: msgData.conversationId,

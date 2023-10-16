@@ -1,5 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { Transform } from 'class-transformer';
+import {
+  IsDate,
+  IsNotEmpty,
+  IsNumber,
+  IsString,
+  isDate,
+} from 'class-validator';
 
 export class CreateMessageDataDto {
   @IsNotEmpty()
@@ -20,7 +27,13 @@ export class CreateMessageDataDto {
   @IsNotEmpty()
   content: string;
 
-  @IsNumber()
+  @Transform(({ value }) => new Date(value))
+  @IsDate()
   @ApiProperty({ example: 1 })
-  lastMessageCreatedAt: number;
+  lastMessageCreatedAt: Date;
+
+  @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440000' })
+  @IsNotEmpty()
+  @IsString()
+  id: string;
 }

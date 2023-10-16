@@ -18,7 +18,7 @@ const ConversationMessage = ({
       borderRadius={6}
       p={1}
     >
-      {message?.sender.email !== currentUser?.email && (
+      {message?.sender !== currentUser?.id && (
         <Avatar
           name={receiverUser?.name}
           src={receiverUser?.avatar}
@@ -31,24 +31,18 @@ const ConversationMessage = ({
       <Flex
         w="full"
         align="center"
-        justify={message?.sender.email === currentUser?.email ? "end" : "start"}
+        justify={message?.sender === currentUser?.id ? "end" : "start"}
       >
         <Text
           fontSize="12px"
           fontWeight="medium"
           color="whiteAlpha.900"
-          bg={
-            message?.sender.email === currentUser?.email
-              ? "gray.700"
-              : "gray.800"
-          }
+          bg={message?.sender === currentUser?.id ? "gray.700" : "gray.800"}
           maxW={"300px"}
           p={2}
           px={2}
           mx={1}
-          textAlign={
-            message?.sender.email === currentUser?.email ? "right" : "left"
-          }
+          textAlign={message?.sender === currentUser?.id ? "right" : "left"}
           borderRadius={6}
         >
           {message?.content}

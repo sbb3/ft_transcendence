@@ -24,7 +24,7 @@ interface IChatReceiver {
 
 const ConversationContent = () => {
   const dispatch = useDispatch();
-  const [receiverUser, setReceiverUser] = useState(null);
+  const [receiver, setReceiver] = useState(null);
   const [receiverEmail, setReceiverEmail] = useState("");
   const [skip, setSkip] = useState(true);
   const currentUser = useSelector((state: any) => state.user.currentUser);
@@ -32,7 +32,7 @@ const ConversationContent = () => {
   const { isOpen: isProfileDrawerOpen, onToggle: toggleProfileDrawer } =
     useDisclosure();
   const toast = useToast();
-  let { id } = useParams();
+  const { id } = useParams();
 
   const {
     data: conversations,
@@ -44,7 +44,7 @@ const ConversationContent = () => {
   });
 
   const {
-    data: receiversData,
+    data: receiverUser = {},
     isLoading: isLoadinGetUserByEmail,
     isFetching: isFetchingGetUserByEmail,
     isError: errorGettingReceiver,
@@ -62,7 +62,7 @@ const ConversationContent = () => {
     return () => {
       dispatch(setCurrentConversationId(""));
     };
-  }, [conversations]);
+  }, [conversations, dispatch]);
 
   useEffect(() => {
     if (conversations?.length > 0) {
@@ -96,16 +96,16 @@ const ConversationContent = () => {
   }, [conversations]);
 
   useEffect(() => {
-    if (receiversData?.length > 0) {
-      setReceiverUser(receiversData[0]);
+    if (receiverUser) {
+      setReceiver(receiverUser);
     }
-  }, [receiversData]);
+  }, [receiverUser]);
 
   // TODO: loadings and errors
   // TODO: check if user is a member of the conversations, if not, redirect to chat
   const onSendMessage = async (data: any) => {
     const { message } = data;
-    const receiver = receiversData[0] as IChatReceiver;
+    const receiver = receiverUser;
     try {
       const msgData = {
         id: uuidv4(),
@@ -132,6 +132,7 @@ const ConversationContent = () => {
         duration: 2000,
         isClosable: true,
       });
+      navigate("/chat", { replace: true });
     }
   };
 
@@ -198,13 +199,13 @@ const ConversationContent = () => {
             <ChatContentHeader
               toggleProfileDrawer={toggleProfileDrawer}
               type={"DM"}
-              receiverUser={receiverUser}
+              receiverUser={receiver}
             />
             <ChatContentBody
               conversationId={id}
               toggleProfileDrawer={toggleProfileDrawer}
               isProfileDrawerOpen={isProfileDrawerOpen}
-              receiverUser={receiverUser}
+              receiverUser={receiver}
             />
             <ChatContentFooter
               onSendMessage={onSendMessage}
