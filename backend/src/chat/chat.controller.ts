@@ -25,6 +25,7 @@ import { CreateConversationDto } from './dto/create-conversation.dto';
 import { CreateMessageDataDto } from './dto/create-message-data.dto';
 import { EmailQueryDto, MembersQueryDto } from './dto/email-query.dto';
 import UpdateConversationDto from './dto/update-conversation.dto';
+import { IdQueryDto } from './dto/id-query.dto';
 
 @ApiTags('conversations')
 @Controller('conversations')
@@ -93,10 +94,10 @@ export class ChatController {
   @ApiOperation({ summary: 'Get a single conversation by id.' })
   async getConversation(
     @Res() response: Response,
-    @Query('id', ParseIntPipe) conversationId: number,
+    @Query() conversationId: IdQueryDto,
   ) {
     try {
-      const data = await this.chatService.getConversation(conversationId);
+      const data = await this.chatService.getConversation(conversationId.id);
 
       return response.status(200).json(data);
     } catch (error) {
@@ -132,7 +133,7 @@ export class ChatController {
   @ApiProperty({ name: 'conversationId' })
   @ApiOperation({ summary: 'Delete a conversation by id.' })
   async deleteConversation(
-    @Param('conversationId', ParseIntPipe) id: number,
+    @Param('conversationId') id: string,
     @Res() response: Response,
   ) {
     try {
@@ -160,7 +161,7 @@ export class ChatController {
     try {
       await this.chatService.updateConversation(updateDto);
 
-      return response.status(200).json({ message: 'Success' });
+      return response.status(200).json({ message: 'Message updated.' });
     } catch (error) {
       if (error.status) return response.status(error.status).json(error);
       return response.status(500).json(error);
@@ -171,7 +172,7 @@ export class ChatController {
   @UseGuards(JwtGuard)
   @ApiOperation({ summary: 'Get messages by conversation id.' })
   async getMessages(
-    @Query('conversationId', ParseIntPipe) conversationId: number,
+    @Query('conversationId') conversationId: string,
     @Query('page', ParseIntPipe) page: number,
     @Res() response: Response,
   ) {

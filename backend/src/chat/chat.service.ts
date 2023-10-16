@@ -19,14 +19,13 @@ export class ChatService extends PrismaClient {
 		if (messageDto.receiver == messageDto.sender)
 			throw new BadRequestException('Receiver and sender must have different ids.');
 		if (!sender || !receiver)
-			throw new NotFoundException(!sender ? ('Sender not found.') : ('Receiver not found.'));
+			throw new NotFoundException(!sender ? 'Sender not found.' : 'Receiver not found.');
 		if (!conversation)
 			throw new NotFoundException('Conversation not found.');
 		const newMessage = await this.messageData.create({data : messageDto});
 
 		if (!newMessage)
 			throw new InternalServerErrorException('Could not create a new message.');
-
 		this.webSocketGateway.sendConversationMessage({
 				sender : {
 					id : sender.id,
@@ -82,7 +81,6 @@ export class ChatService extends PrismaClient {
 
 		if (!user)
 			throw new NotFoundException('User with email \'' + email + '\' not found.');
-
 		const allConversations = await this.conversation.findMany({
 			where : {
 				OR : [
@@ -109,30 +107,13 @@ export class ChatService extends PrismaClient {
 		const formattedData = allConversations.map(conversation => {
 			const first = conversation.firstMember == user.id ? user : all.find(member => member.id == conversation.firstMember);
 			const second = conversation.secondMember == user.id ? user : all.find(member => member.id == conversation.secondMember);
-			const name = [first.name, second.name];
-			const members = [first.email, second.email];
-			const avatar = [{
-				id : first.id,
-				avatar : first.avatar
-			}, {
-				id : second.id,
-				avatar : second.avatar
-			}];
-
-			return {
-				id : conversation.id,
-				name,
-				members,
-				avatar,
-				lastMessageContent : conversation.lastMessageContent,
-				lastMessageCreatedAt : conversation.lastMessageCreatedAt
-			};
+			return this.formatConversation(conversation, first, second);
 		});
 
 		return formattedData;
 	}
 
-	async getConversation(conversationId : number) {
+	async getConversation(conversationId : string) {
 		const conversation = await this.conversation.findUnique({
 			where : {
 				id : conversationId,
@@ -141,7 +122,6 @@ export class ChatService extends PrismaClient {
 
 		if (!conversation)
 			throw new NotFoundException('Conversation not found.');
-
 		const usersDming = await this.user.findMany({
 			where : {
 				id : {
@@ -183,13 +163,12 @@ export class ChatService extends PrismaClient {
 		return this.formatConversation(conversation[0], firstUser, secondUser);
 	}
 
-	async deleteConversation(conversationId : number) {
+	async deleteConversation(conversationId : string) {
 		const conversation = await this.conversation.findUnique({
 			where : {
 				id : conversationId,
 			}
 		});
-		
 		const messages = await this.messageData.findMany({
 			where : {
 				conversationId : conversationId
@@ -229,7 +208,7 @@ export class ChatService extends PrismaClient {
 		})
 	}
 
-	async getMessagesByConversationId(conversationId : number, page : number) {
+	async getMessagesByConversationId(conversationId : string, page : number) {
 		const count = await this.messageData.count();
 		const messages = await this.messageData.findMany({
 			where : {
@@ -275,6 +254,7 @@ export class ChatService extends PrismaClient {
 			}
 		});
 	}
+
 	private formatConversation(conversation : conversation, firstMember : user, secondMember : user) {
 		return {
 			id : conversation.id,

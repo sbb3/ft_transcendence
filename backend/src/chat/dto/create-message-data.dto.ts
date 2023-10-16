@@ -3,9 +3,10 @@ import { IsNotEmpty, IsNumber, IsString } from "class-validator";
 
 export class CreateMessageDataDto {
 
-	@IsNumber()
-	@ApiProperty({example : 1})
-	conversationId : number;
+	@IsNotEmpty()
+	@IsString()
+	@ApiProperty({example : "550e8400-e29b-41d4-a716-446655440000"})
+	conversationId : string;
 
 	@IsNumber()
 	@ApiProperty({example : 1})
