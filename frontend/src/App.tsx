@@ -59,10 +59,10 @@ function App() {
             </Route>
             <Route path="chat" element={<Chat />}>
               <Route index element={<ChatSplashScreen />} />
-              {/* <Route
+              <Route
                 path="conversation/:id"
                 element={<ConversationContent />}
-              /> */}
+              />
               <Route path="channel/:channelname" element={<ChannelContent />} />
             </Route>
             {/* <Route path="support" element={<Support />} /> */}

@@ -79,7 +79,7 @@ const messagesApi = apiSlice.injectEndpoints({
     }),
     addMessage: builder.mutation({
       query: (msgData) => ({
-        url: `messages`,
+        url: `conversations/addmessage`,
         method: "POST",
         body: { ...msgData },
       }),
@@ -148,9 +148,15 @@ const messagesApi = apiSlice.injectEndpoints({
     }),
     createMessage: builder.mutation({
       query: (msgData) => ({
-        url: `/messages`,
+        url: `/conversations/addmessage`,
         method: "POST",
-        body: { ...msgData },
+        body: {
+          conversationId: msgData.conversationId,
+          sender: msgData.sender.id,
+          receiver: msgData.receiver.id,
+          content: msgData.content,
+          lastMessageCreatedAt: msgData.lastMessageCreatedAt,
+        },
       }),
       async onQueryStarted(arg, { dispatch, getState, queryFulfilled }: any) {
         const messageData = arg;

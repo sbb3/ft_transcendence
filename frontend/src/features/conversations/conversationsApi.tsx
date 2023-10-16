@@ -155,7 +155,7 @@ const conversationApi = apiSlice.injectEndpoints({
       query: (conversation) => ({
         url: `/conversations`,
         method: "POST",
-        body: conversation,
+        body: { ...conversation },
       }),
       async onQueryStarted(arg, { dispatch, getState, queryFulfilled }: any) {
         const conversation = arg;

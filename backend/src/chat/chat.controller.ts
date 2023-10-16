@@ -32,7 +32,7 @@ import { IdQueryDto } from './dto/id-query.dto';
 export class ChatController {
   constructor(private chatService: ChatService) {}
 
-  @Post('message')
+  @Post('addmessage')
   @UseGuards(JwtGuard)
   @ApiBody({ type: CreateMessageDataDto })
   @ApiOperation({ summary: 'Create a new message.' })
@@ -139,11 +139,9 @@ export class ChatController {
     try {
       await this.chatService.deleteConversation(id);
 
-      return response
-        .status(200)
-        .json({
-          message: 'Conversation and related messages deleted successfully.',
-        });
+      return response.status(200).json({
+        message: 'Conversation and related messages deleted successfully.',
+      });
     } catch (error) {
       if (error.status) return response.status(error.status).json(error);
       return response.status(500).json(error);
