@@ -65,7 +65,7 @@ const AddDirectMessage = ({ isOpenDM, onToggleDM }) => {
     resolver: yupResolver(validationSchema),
   });
 
-  const [trigger, { isLoading: isLoadinGetUserByEmail }] =
+  const [getUserByEmail, { isLoading: isLoadinGetUserByEmail }] =
     usersApi.endpoints.getUserByEmail.useLazyQuery();
 
   const [
@@ -85,11 +85,7 @@ const AddDirectMessage = ({ isOpenDM, onToggleDM }) => {
       if (receiverEmail === currentUser?.email)
         throw new Error("You can't send message to yourself");
 
-      const users = await trigger(receiverEmail).unwrap();
-
-      if (users?.length === 0) throw new Error("user not found");
-
-      const to = users[0];
+      const to = await getUserByEmail(receiverEmail).unwrap();
 
       const conversations = await triggerGetConversationByMembersEmails([
         currentUser?.email,
@@ -117,11 +113,13 @@ const AddDirectMessage = ({ isOpenDM, onToggleDM }) => {
         };
         store.dispatch(messagesApi.endpoints.addMessage.initiate(msgData));
       } else {
+        console.log("create new conversation");
+        console.log("to: ", to);
         const newConversationData = {
           conversation: {
             id: uuidv4(),
             firstMember: currentUser?.id,
-            secondMember: 25,
+            secondMember: to.id,
             lastMessageContent: message,
             lastMessageCreatedAt: dayjs().valueOf(),
           },

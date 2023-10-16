@@ -103,7 +103,7 @@ const conversationApi = apiSlice.injectEndpoints({
     }),
     getConversationByMembersEmails: builder.query({
       query: (membersEmails: string[]) =>
-        `/conversations/conversationByEmails?member1=${membersEmails[0]}&member2=${membersEmails[0]}`,
+        `/conversations/conversationByEmails?member1=${membersEmails[0]}&member2=${membersEmails[1]}`,
     }),
     createConversation: builder.mutation({
       query: ({ conversation, receiver }) => ({
@@ -114,11 +114,10 @@ const conversationApi = apiSlice.injectEndpoints({
       async onQueryStarted(arg, { dispatch, getState, queryFulfilled }: any) {
         const conversation = arg.conversation;
         const receiver = arg.receiver;
-        const currentUserEmail = conversation.members[0];
         const patchResult = dispatch(
           conversationApi?.util?.updateQueryData(
             "getConversations",
-            currentUserEmail,
+            getState()?.user?.currentUser?.email,
             (draft) => {
               draft?.unshift(conversation);
             }
@@ -213,6 +212,7 @@ const conversationApi = apiSlice.injectEndpoints({
       }),
       async onQueryStarted(arg, { dispatch, getState, queryFulfilled }: any) {
         // optimistic update
+        console.log("arg: ", arg);
         const patchResult = dispatch(
           conversationApi?.util?.updateQueryData(
             "getConversations",
