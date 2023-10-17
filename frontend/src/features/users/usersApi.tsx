@@ -49,6 +49,13 @@ const usersApi = apiSlice.injectEndpoints({
     }),
     getUserByUsername: builder.query({
       query: (username: string) => `users/username/${username}`,
+      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+        } catch (error) {
+          console.log("error: ", error);
+        }
+      },
     }),
     getUserByEmail: builder.query({
       query: (email: string) => `users/email/${email}`,

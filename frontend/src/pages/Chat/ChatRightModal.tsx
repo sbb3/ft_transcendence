@@ -112,10 +112,13 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleProfileDrawer }) => {
   //   };
   // }, []);
 
-  const { data: participantUser, isLoading: isLoadingParticipantUser } =
-    useGetUserByIdQuery(participantUserId, {
-      refetchOnMountOrArgChange: true,
-    });
+  const {
+    data: participantUser = {} as any,
+    isLoading: isLoadingParticipantUser,
+    isFetching: isFetchingParticipantUser,
+  } = useGetUserByIdQuery(participantUserId, {
+    refetchOnMountOrArgChange: true,
+  });
 
   const [
     triggerGetConversationByMembersEmails,
@@ -131,17 +134,17 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleProfileDrawer }) => {
 
   const [unblockUser] = usersApi.useUnblockUserMutation();
 
-  if (isLoadingParticipantUser) return <Loader />;
+  if (isLoadingParticipantUser || isFetchingParticipantUser) return <Loader />;
 
   // console.log("participantUser: ", participantUser);
   // console.log("currentUser: ", currentUser);
 
   const handleSendDirectMessage = async () => {
     try {
-      const conversations = await triggerGetConversationByMembersEmails([
-        currentUser?.email,
-        participantUser?.email,
-      ]).unwrap();
+      const conversations = await triggerGetConversationByMembersEmails({
+        firstMemberEmail: currentUser?.email,
+        secondMemberEmail: participantUser?.email,
+      }).unwrap();
       let id;
       if (conversations?.length > 0) {
         const conversation = conversations[0];
@@ -149,6 +152,18 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleProfileDrawer }) => {
       } else {
         const conversation = {
           id: uuidv4(),
+          name: [currentUser?.name, participantUser?.name],
+          avatar: [
+            {
+              id: currentUser?.id,
+              avatar: currentUser?.avatar,
+            },
+            {
+              id: participantUser?.id,
+              avatar: participantUser?.avatar,
+            },
+          ],
+          members: [currentUser?.email, participantUser?.email],
           firstMember: currentUser?.id,
           secondMember: participantUser?.id,
           lastMessageContent: "",
@@ -200,9 +215,9 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleProfileDrawer }) => {
         },
         createdAt: dayjs().valueOf(),
       };
-      store.dispatch(
-        await notificationsApi.endpoints.sendNotification.initiate(notification)
-      );
+      // store.dispatch(
+      //   await notificationsApi.endpoints.sendNotification.initiate(notification)
+      // );
       toast({
         title: "Friend request sent",
         description: "Friend request sent successfully",
@@ -245,9 +260,9 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleProfileDrawer }) => {
         },
         createdAt: dayjs().valueOf(),
       };
-      store.dispatch(
-        await notificationsApi.endpoints.sendNotification.initiate(notification)
-      );
+      // store.dispatch(
+      //   await notificationsApi.endpoints.sendNotification.initiate(notification)
+      // );
       toast({
         title: "Game request sent",
         description: "Game request sent successfully",
@@ -467,7 +482,7 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleProfileDrawer }) => {
             _hover={{ bg: "white", color: "pong_cl_primary" }}
             onClick={() => {
               toggleProfileDrawer();
-              navigate(`/profile/${participantUser?.username}`); // TODO: change to id or username
+              navigate(`/profile/${participantUser?.username}`);
             }}
           />
           {!participantUser?.friends.includes(currentUser?.id) && (
@@ -508,7 +523,7 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleProfileDrawer }) => {
               toggleProfileDrawer();
             }}
           />
-          {currentUser?.blockedUsers.includes(participantUser?.id) ? (
+          {currentUser?.blocked.includes(participantUser?.id) ? (
             <IconButton
               size="sm"
               fontSize="lg"
@@ -544,7 +559,7 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleProfileDrawer }) => {
                 Login 42
               </Text>
               <Text fontSize="12px" fontWeight="medium" color="whiteAlpha.400">
-                adouib
+                {participantUser?.username}
               </Text>
             </Flex>
             <Flex direction={"column"} gap={1}>
@@ -553,7 +568,7 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleProfileDrawer }) => {
               </Text>
               <Link
                 as={RouterLink}
-                to="https://profile.intra.42.fr/users/adouib"
+                to={`https://profile.intra.42.fr/users/${participantUser?.username}`}
                 isExternal
                 fontSize="12px"
                 fontWeight="medium"
@@ -567,7 +582,7 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleProfileDrawer }) => {
                 Campus
               </Text>
               <Text fontSize="12px" fontWeight="medium" color="whiteAlpha.400">
-                1337 BenGuerir
+                {participantUser?.campus}
               </Text>
             </Flex>
           </Stack>

@@ -1,12 +1,10 @@
 import { apiSlice } from "src/app/api/apiSlice";
 import io from "socket.io-client";
-import { createSocketClient } from "src/app/socket/client";
-import { useLocation } from "react-router-dom";
 
 const notificationsApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getNotifications: builder.query({
-      query: () => `/notifications`,
+      query: () => `notification`,
       async onCacheEntryAdded(
         arg,
         {
@@ -17,13 +15,19 @@ const notificationsApi = apiSlice.injectEndpoints({
           cacheEntryRemoved,
         }
       ) {
-        const socket = createSocketClient();
-        // const location = useLocation();
+        const socket = io(import.meta.env.VITE_SERVER_SOCKET_URL as string, {
+          transports: ["websocket"],
+          reconnection: false,
+          // reconnection: true,
+          // reconnectionAttempts: 10,
+          // reconnectionDelay: 1000,
+          // upgrade: false,
+          // rejectUnauthorized: false,
+        });
 
         try {
           await cacheDataLoaded;
           console.log("cacheDataLoaded");
-          //   TODO: change message to notification, then check its type, either message, friend request, or game request
           socket.on("notification", (data) => {
             const currentUserId = getState()?.user?.currentUser?.id;
             // console.log("location pathname: ", location);
@@ -78,7 +82,7 @@ const notificationsApi = apiSlice.injectEndpoints({
     }),
     sendNotification: builder.mutation({
       query: (data) => ({
-        url: `/notifications`,
+        url: `notification`,
         method: "POST",
         body: { ...data },
       }),
@@ -93,7 +97,7 @@ const notificationsApi = apiSlice.injectEndpoints({
     }),
     deleteNotification: builder.mutation({
       query: (id) => ({
-        url: `/notifications/${id}`,
+        url: `notification/${id}`,
         method: "DELETE",
       }),
       async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
@@ -115,3 +119,23 @@ export const {
 } = notificationsApi;
 
 export default notificationsApi;
+
+/*
+{
+              id: uuidv4(),
+              conversationId: messageData.conversationId,
+              type: "message",
+              sender: {
+                id: messageData.sender.id,
+                email: messageData.sender.email,
+                name: messageData.sender.name,
+              },
+              receiver: {
+                id: messageData.receiver.id,
+                email: messageData.receiver.email,
+                name: messageData.receiver.name,
+              },
+              content: messageData.content,
+              createdAt: messageData.lastMessageCreatedAt,
+            }
+*/

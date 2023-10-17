@@ -58,7 +58,6 @@ const TwoFactorActivation = ({ isOpen, onToggle }) => {
     generateOTP(currentUser?.id)
       .unwrap()
       .then((data) => {
-        // console.log("data: ", data);
         QRCode.toDataURL(data?.otpauthUrl)
           .then(setQrCodeUrl)
           .catch((err) => {

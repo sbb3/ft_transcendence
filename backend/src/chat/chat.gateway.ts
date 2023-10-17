@@ -30,4 +30,8 @@ export class ChatGateway {
   sendConversationData(dataToSend: any) {
     this.server.emit('conversation', { data: dataToSend });
   }
+
+  sendDeleteConversationData(dataToSend: any) {
+    this.server.emit('deleteConversation', { data: dataToSend });
+  }
 }

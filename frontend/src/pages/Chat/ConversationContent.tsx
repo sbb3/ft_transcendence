@@ -6,11 +6,14 @@ import ChatContentBody from "./ChatContentBody";
 import { useNavigate, useParams } from "react-router-dom";
 import Loader from "src/components/Utils/Loader";
 import { useAddMessageMutation } from "src/features/messages/messagesApi";
-import { useGetConversationQuery } from "src/features/conversations/conversationsApi";
+import conversationApi, {
+  useGetConversationQuery,
+} from "src/features/conversations/conversationsApi";
 import { useGetUserByEmailQuery } from "src/features/users/usersApi";
 import { useDispatch, useSelector } from "react-redux";
 import { v4 as uuidv4 } from "uuid";
 import { setCurrentConversationId } from "src/features/conversations/conversationsSlice";
+import store from "src/app/store";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 dayjs.extend(relativeTime);
@@ -24,7 +27,7 @@ interface IChatReceiver {
 
 const ConversationContent = () => {
   const dispatch = useDispatch();
-  const [receiver, setReceiver] = useState(null);
+  // const [receiver, setReceiver] = useState(null);
   const [receiverEmail, setReceiverEmail] = useState("");
   const [skip, setSkip] = useState(true);
   const currentUser = useSelector((state: any) => state.user.currentUser);
@@ -44,7 +47,7 @@ const ConversationContent = () => {
   });
 
   const {
-    data: receiverUser = {},
+    data: receiverUser = {} as any,
     isLoading: isLoadinGetUserByEmail,
     isFetching: isFetchingGetUserByEmail,
     isError: errorGettingReceiver,
@@ -95,28 +98,26 @@ const ConversationContent = () => {
     }
   }, [conversations]);
 
-  useEffect(() => {
-    if (receiverUser) {
-      setReceiver(receiverUser);
-    }
-  }, [receiverUser]);
+  // useEffect(() => {
+  //   if (receiverUser) {
+  //     setReceiver(receiverUser);
+  //   }
+  // }, [receiverUser]);
 
-  // TODO: loadings and errors
-  // TODO: check if user is a member of the conversations, if not, redirect to chat
   const onSendMessage = async (data: any) => {
     const { message } = data;
-    const receiver = receiverUser;
+    // const receiver = receiverUser;
     try {
       const msgData = {
         id: uuidv4(),
         conversationId: id,
         sender: currentUser?.id,
-        receiver: receiver?.id,
+        receiver: receiverUser?.id,
         content: message,
         lastMessageCreatedAt: dayjs().valueOf(),
       };
-      const conversationData = conversations[0];
-      if (conversationData.id) {
+      const conversation = conversations[0];
+      if (conversation.id) {
         await addMessage(msgData).unwrap();
       } else {
         navigate("/chat", { replace: true });
@@ -199,13 +200,13 @@ const ConversationContent = () => {
             <ChatContentHeader
               toggleProfileDrawer={toggleProfileDrawer}
               type={"DM"}
-              receiverUser={receiver}
+              receiverUser={receiverUser}
             />
             <ChatContentBody
               conversationId={id}
               toggleProfileDrawer={toggleProfileDrawer}
               isProfileDrawerOpen={isProfileDrawerOpen}
-              receiverUser={receiver}
+              receiverUser={receiverUser}
             />
             <ChatContentFooter
               onSendMessage={onSendMessage}

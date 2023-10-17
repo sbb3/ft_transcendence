@@ -8,11 +8,12 @@ import {
   Button,
   useToast,
 } from "@chakra-ui/react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDeleteConversationMutation } from "src/features/conversations/conversationsApi";
 
 const DeleteConversationAlert = ({
-  conversation,
+  conversationId,
   isOpen,
   onOpen,
   onClose,
@@ -24,10 +25,7 @@ const DeleteConversationAlert = ({
 
   const handleDelete = async () => {
     try {
-      await deleteConversation({
-        id: conversation?.id,
-        members: conversation?.members,
-      }).unwrap();
+      await deleteConversation(conversationId).unwrap();
       navigate("/chat", { replace: true });
       toast({
         title: "Conversation deleted.",

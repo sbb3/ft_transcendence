@@ -69,7 +69,6 @@ const Members = ({ channel }) => {
 
   const onAddUserOrEditMember = async (data: any) => {
     const { username, role } = data;
-    console.log("data: ", data);
     try {
       if (username === currentUser?.username)
         throw new Error("You can't add yourself to the channel.");

@@ -59,9 +59,11 @@ export class ChatController {
     @Res() response: Response,
   ) {
     try {
-      await this.chatService.createConversation(createConversationDto);
+      const conversation = await this.chatService.createConversation(
+        createConversationDto,
+      );
 
-      return response.status(201).json({ message: 'Conversation created.' });
+      return response.status(200).json([conversation]);
     } catch (error) {
       if (error.status) return response.status(error.status).json(error);
       return response.status(500).json(error);
@@ -120,7 +122,6 @@ export class ChatController {
         queryDto.member1,
         queryDto.member2,
       );
-
       return response.status(200).json(data);
     } catch (error) {
       if (error.status) return response.status(error.status).json(error);
@@ -137,10 +138,10 @@ export class ChatController {
     @Res() response: Response,
   ) {
     try {
-      await this.chatService.deleteConversation(id);
+      const message = await this.chatService.deleteConversation(id);
 
       return response.status(200).json({
-        message: 'Conversation and related messages deleted successfully.',
+        message,
       });
     } catch (error) {
       if (error.status) return response.status(error.status).json(error);

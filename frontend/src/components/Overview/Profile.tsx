@@ -54,7 +54,7 @@ interface ProfileProps {
     campus: string;
     recentGames: object[];
     friends: object[];
-    blockedUsers: number[];
+    blocked: number[];
     otp_enabled: boolean;
     otp_validated: boolean;
     otp_secret: string;
@@ -180,9 +180,9 @@ const Profile = ({ user }: ProfileProps) => {
         },
         createdAt: dayjs().valueOf(),
       };
-      store.dispatch(
-        await notificationsApi.endpoints.sendNotification.initiate(notification)
-      );
+      // store.dispatch(
+      //   await notificationsApi.endpoints.sendNotification.initiate(notification)
+      // );
       toast({
         title: "Friend request sent",
         description: "Friend request sent successfully",
@@ -204,10 +204,10 @@ const Profile = ({ user }: ProfileProps) => {
   };
   const handleSendDirectMessage = async () => {
     try {
-      const conversations = await triggerGetConversationByMembersEmails([
-        currentUser?.email,
-        user?.email,
-      ]).unwrap();
+      const conversations = await triggerGetConversationByMembersEmails({
+        firstMemberEmail: currentUser?.email,
+        secondMemberEmail: user?.email,
+      }).unwrap();
       let id;
       if (conversations?.length > 0) {
         const conversation = conversations[0];
@@ -218,10 +218,18 @@ const Profile = ({ user }: ProfileProps) => {
           id: uuidv4(),
           name: [currentUser?.name, user?.name],
           avatar: [
-            { id: currentUser?.id, avatar: currentUser?.avatar },
-            { id: user?.id, avatar: user?.avatar },
+            {
+              id: currentUser?.id,
+              avatar: currentUser?.avatar,
+            },
+            {
+              id: user?.id,
+              avatar: user?.avatar,
+            },
           ],
           members: [currentUser?.email, user?.email],
+          firstMember: currentUser?.id,
+          secondMember: user?.id,
           lastMessageContent: "",
           lastMessageCreatedAt: dayjs().valueOf(),
         };

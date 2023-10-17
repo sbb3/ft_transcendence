@@ -17,7 +17,7 @@ const ChatContentBody = ({
   conversationId,
   toggleProfileDrawer,
   isProfileDrawerOpen,
-  receiverUser = null,
+  receiverUser = {} as any,
 }) => {
   const currentUser = useSelector((state: any) => state?.user?.currentUser);
   const [page, setPage] = useState(1);

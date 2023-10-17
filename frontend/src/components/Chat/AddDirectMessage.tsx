@@ -76,8 +76,7 @@ const AddDirectMessage = ({ isOpenDM, onToggleDM }) => {
   const [createConversation, { isLoading: isCreatingConversation }] =
     useCreateConversationMutation();
 
-  const onSubmit = async (data: any) => {
-    console.log("data: ", data);
+  const onSendDirectMessage = async (data: any) => {
     let conversationId;
     const { message, email: receiverEmail } = data;
 
@@ -86,46 +85,43 @@ const AddDirectMessage = ({ isOpenDM, onToggleDM }) => {
         throw new Error("You can't send message to yourself");
 
       const to = await getUserByEmail(receiverEmail).unwrap();
-
-      const conversations = await triggerGetConversationByMembersEmails([
-        currentUser?.email,
-        receiverEmail,
-      ]);
-
+      const conversations = await triggerGetConversationByMembersEmails({
+        firstMemberEmail: currentUser?.email,
+        secondMemberEmail: receiverEmail,
+      }).unwrap();
       if (conversations?.length > 0) {
         const conversation = conversations[0];
         conversationId = conversation.id;
         const msgData = {
           id: uuidv4(),
           conversationId: conversation.id,
-          sender: {
-            id: currentUser?.id,
-            email: currentUser?.email,
-            name: currentUser?.name,
-          },
-          receiver: {
-            id: to.id,
-            email: to.email,
-            name: to.name,
-          },
+          sender: currentUser?.id,
+          receiver: to.id,
           content: message,
           lastMessageCreatedAt: dayjs().valueOf(),
         };
         store.dispatch(messagesApi.endpoints.addMessage.initiate(msgData));
       } else {
-        console.log("create new conversation");
-        console.log("to: ", to);
         const newConversationData = {
-          conversation: {
-            id: uuidv4(),
-            firstMember: currentUser?.id,
-            secondMember: to.id,
-            lastMessageContent: message,
-            lastMessageCreatedAt: dayjs().valueOf(),
-          },
-          receiver: to,
+          id: uuidv4(),
+          name: [currentUser?.name, to.name],
+          avatar: [
+            {
+              id: currentUser?.id,
+              avatar: currentUser?.avatar,
+            },
+            {
+              id: to.id,
+              avatar: to.avatar,
+            },
+          ],
+          members: [currentUser?.email, to.email],
+          firstMember: currentUser?.id,
+          secondMember: to?.id,
+          lastMessageContent: message,
+          lastMessageCreatedAt: dayjs().valueOf(),
         };
-        conversationId = newConversationData?.conversation.id;
+        conversationId = newConversationData?.id;
         await createConversation(newConversationData).unwrap();
       }
 
@@ -277,7 +273,7 @@ const AddDirectMessage = ({ isOpenDM, onToggleDM }) => {
                     {...register("message")}
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
-                        handleSubmit(onSubmit)();
+                        handleSubmit(onSendDirectMessage)();
                       }
                     }}
                     borderColor={"pong_cl_primary"}
@@ -296,7 +292,7 @@ const AddDirectMessage = ({ isOpenDM, onToggleDM }) => {
                       isCreatingConversation ||
                       isLoadingGetConversationByMembersEmails
                     }
-                    onClick={handleSubmit(onSubmit)}
+                    onClick={handleSubmit(onSendDirectMessage)}
                     icon={<Icon as={MdSend} />}
                     _hover={{
                       bg: "white",

@@ -115,12 +115,10 @@ const messagesApi = apiSlice.injectEndpoints({
           await queryFulfilled;
           dispatch(
             conversationApi.endpoints.updateConversation.initiate({
-              data: {
-                id: conversationId,
-                message: {
-                  lastMessageContent: content,
-                  lastMessageCreatedAt: lastMessageCreatedAt,
-                },
+              id: conversationId,
+              message: {
+                lastMessageContent: content,
+                lastMessageCreatedAt: lastMessageCreatedAt,
               },
             })
           );
@@ -129,16 +127,8 @@ const messagesApi = apiSlice.injectEndpoints({
               id: uuidv4(),
               conversationId: messageData.conversationId,
               type: "message",
-              sender: {
-                id: messageData.sender.id,
-                email: messageData.sender.email,
-                name: messageData.sender.name,
-              },
-              receiver: {
-                id: messageData.receiver.id,
-                email: messageData.receiver.email,
-                name: messageData.receiver.name,
-              },
+              senderId: messageData.sender.id,
+              receiverId: messageData.receiver.id,
               content: messageData.content,
               createdAt: messageData.lastMessageCreatedAt,
             })
@@ -151,16 +141,10 @@ const messagesApi = apiSlice.injectEndpoints({
       },
     }),
     createMessage: builder.mutation({
-      query: (msgData) => ({
+      query: (data) => ({
         url: `conversations/addmessage`,
         method: "POST",
-        body: {
-          conversationId: msgData.conversationId,
-          sender: msgData.sender.id,
-          receiver: msgData.receiver.id,
-          content: msgData.content,
-          lastMessageCreatedAt: msgData.lastMessageCreatedAt,
-        },
+        body: { ...data },
       }),
       async onQueryStarted(arg, { dispatch, getState, queryFulfilled }: any) {
         const messageData = arg;
@@ -171,7 +155,7 @@ const messagesApi = apiSlice.injectEndpoints({
             "getMessagesByConversationId",
             conversationId,
             (draft) => {
-              draft?.unshift(messageData);
+              draft?.messages?.unshift(messageData);
             }
           )
         );

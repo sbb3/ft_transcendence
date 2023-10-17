@@ -75,31 +75,31 @@ const Game = () => {
   //   });
   // };
 
-  const handlelOpez = async (data: any) => {
-    console.log("loopez: ");
-    const socket = io(import.meta.env.VITE_SERVER_SOCKET_URL as string, {
-      transports: ["websocket"],
-      reconnection: false,
-      // reconnection: true,
-      // reconnectionAttempts: 10,
-      // reconnectionDelay: 1000,
-      // upgrade: false,
-      // rejectUnauthorized: false,
-    });
-    socket.on("connect", () => {
-      console.log("connected");
-      socket.on("disconnect", () => {
-        console.log("socket disconnected join_queue");
-      });
-      socket.emit("test", {
-        data: "lopez",
-      });
-    });
-    // socket.disconnect();
-    // reset({
-    //   gameMode: "normal",
-    // });
-  };
+  // const handlelOpez = async (data: any) => {
+  //   console.log("loopez: ");
+  //   const socket = io(import.meta.env as string, {
+  //     transports: ["websocket"],
+  //     reconnection: false,
+  //     // reconnection: true,
+  //     // reconnectionAttempts: 10,
+  //     // reconnectionDelay: 1000,
+  //     // upgrade: false,
+  //     // rejectUnauthorized: false,
+  //   });
+  //   socket.on("connect", () => {
+  //     console.log("connected");
+  //     socket.on("disconnect", () => {
+  //       console.log("socket disconnected join_queue");
+  //     });
+  //     socket.emit("test", {
+  //       data: "lopez",
+  //     });
+  //   });
+  //   // socket.disconnect();
+  //   // reset({
+  //   //   gameMode: "normal",
+  //   // });
+  // };
 
   return (
     <Flex

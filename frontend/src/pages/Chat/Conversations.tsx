@@ -19,18 +19,26 @@ import "src/styles/scrollbar.css";
 import { ChevronDownIcon, ChevronRightIcon } from "@chakra-ui/icons";
 import { FiPlus } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
-import { useGetConversationsQuery } from "src/features/conversations/conversationsApi";
+import conversationApi, {
+  useGetConversationsQuery,
+} from "src/features/conversations/conversationsApi";
 import { useSelector } from "react-redux";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import LastMessageDate from "./LastMessageDate";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import DeleteConversationAlert from "./DeleteConversationAlert";
 import AddDirectMessage from "src/components/Chat/AddDirectMessage";
 import Loader from "src/components/Utils/Loader";
+import { createSocketClient } from "src/app/socket/client";
+import store from "src/app/store";
+import { apiSlice } from "src/app/api/apiSlice";
 dayjs.extend(relativeTime);
 
 const Conversations = ({}) => {
+  const currentUser = useSelector((state: any) => state.user.currentUser);
+  const navigate = useNavigate();
+  const [conversationIdToDelete, setConversationIdToDelete] = useState("");
   const { isOpen: isOpenDM, onToggle: onToggleDM } = useDisclosure();
   const {
     isOpen: isAlertDialogOpen,
@@ -39,15 +47,27 @@ const Conversations = ({}) => {
   } = useDisclosure();
   const cancelRef = useRef();
 
-  const currentUser = useSelector((state: any) => state.user.currentUser);
-  const navigate = useNavigate();
   const {
     data: conversations,
     isLoading: isLoadingConversations,
     isFetching: isFetchingConversations,
+    refetch: refetchConversations,
   } = useGetConversationsQuery(currentUser?.email, {
     refetchOnMountOrArgChange: true,
   });
+
+  useEffect(() => {
+    const socket = createSocketClient();
+    socket.on("deleteConversation", (data = {} as any) => {
+      if (conversations?.map((c) => c.id).includes(data?.data?.id)) {
+        console.log("inside deleteConversation: ", data);
+        refetchConversations();
+      }
+    });
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
 
   if (isLoadingConversations || isFetchingConversations)
     return <Loader size="md" />;
@@ -253,19 +273,13 @@ const Conversations = ({}) => {
                                   </Stack>
                                 </Flex>
                                 <CloseButton
-                                  onClick={onOpenAlertDialog}
+                                  onClick={() => {
+                                    setConversationIdToDelete(conversation.id);
+                                    onOpenAlertDialog();
+                                  }}
                                   size="sm"
                                   color="white"
                                 />
-                                {isAlertDialogOpen && (
-                                  <DeleteConversationAlert
-                                    conversation={conversation}
-                                    isOpen={isAlertDialogOpen}
-                                    onOpen={onOpenAlertDialog}
-                                    onClose={onCloseAlertDialog}
-                                    cancelRef={cancelRef}
-                                  />
-                                )}
                               </Flex>
                             </MenuItem>
                           ))
@@ -321,6 +335,15 @@ const Conversations = ({}) => {
             onClick={onToggleDM}
           />
         </Flex>
+        {isAlertDialogOpen && (
+          <DeleteConversationAlert
+            conversationId={conversationIdToDelete}
+            isOpen={isAlertDialogOpen}
+            onOpen={onOpenAlertDialog}
+            onClose={onCloseAlertDialog}
+            cancelRef={cancelRef}
+          />
+        )}
       </Flex>
       <Box
         w="full"

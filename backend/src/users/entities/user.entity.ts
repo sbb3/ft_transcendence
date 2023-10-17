@@ -26,6 +26,7 @@ export class User implements Prisma.userCreateInput {
   is_otp_validated?: boolean;
   otp_secret?: string;
   friends: number[];
+  blocked: number[];
 
   constructor(data: User) {
     this.id = data.id;
@@ -42,5 +43,6 @@ export class User implements Prisma.userCreateInput {
     this.is_otp_validated = data.is_otp_validated;
     this.otp_secret = data.otp_secret;
     this.friends = data.friends;
+    this.blocked = data.blocked;
   }
 }

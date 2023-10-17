@@ -24,12 +24,12 @@ const ChannelMessage = ({
       borderRadius={6}
       p={1}
       // display={
-      //   currentUser?.blockedUsers?.includes(message?.sender?.id)
+      //   currentUser?.blocked?.includes(message?.sender?.id)
       //     ? "none"
       //     : "flex"
       // }
       filter={
-        currentUser?.blockedUsers?.includes(message?.sender?.id)
+        currentUser?.blocked?.includes(message?.sender?.id)
           ? "blur(6px)"
           : "none"
       }

@@ -16,8 +16,8 @@ import ChannelInfoAbout from "src/components/Chat/ChannelInfoAbout";
 const ChatContentHeader = ({
   toggleProfileDrawer,
   type,
-  receiverUser = null,
-  channel = null,
+  receiverUser = {} as any,
+  channel = {} as any,
 }) => {
   const { isOpen: isOpenChannelInfo, onToggle: onToggleChannelInfo } =
     useDisclosure();

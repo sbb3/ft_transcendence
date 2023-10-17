@@ -8,6 +8,7 @@ import { OtpModule } from './otp/otp.module';
 import { ChannelsModule } from './channels/channels.module';
 import { UsersModule } from './users/users.module';
 import { ChatGateway } from './chat/chat.gateway';
+import { NotificationModule } from './notifications/notification.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { ChatGateway } from './chat/chat.gateway';
     ChannelsModule,
     UsersModule,
     ChatGateway,
+    NotificationModule,
   ],
   controllers: [],
   providers: [],
