@@ -6,13 +6,13 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { PrismaService } from '../prismaFolder/prisma.service'; // Import your Prisma service
 import { User } from './entities/user.entity';
 import { Cloudinary } from '@cloudinary/url-gen';
 import { Request } from 'express';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { user, PrismaClient } from '@prisma/client';
 @Injectable()
+export class UsersService extends PrismaClient {
 export class UsersService extends PrismaClient {
   // cloudinaryService: any;
   // prisma: any;
@@ -31,12 +31,12 @@ export class UsersService extends PrismaClient {
   };
 
   async findAllUsers() {
-    const users = await this.prismaService.user.findMany();
+    const users = await this.user.findMany();
     return users;
   }
 
   async findOneById(id: string) {
-    const user = await this.prismaService.user.findUnique({
+    const user = await this.user.findUnique({
       where: { id: parseInt(id, 10) }, // Assuming your ID is an integer
     });
 
@@ -48,7 +48,7 @@ export class UsersService extends PrismaClient {
   }
 
   async findByUsername(username: string) {
-    const user = await this.prismaService.user.findUnique({
+    const user = await this.user.findUnique({
       where: {
         username,
       },
@@ -61,7 +61,7 @@ export class UsersService extends PrismaClient {
   }
 
   async findByEmail(emails: string) {
-    const user = await this.prismaService.user.findUnique({
+    const user = await this.user.findUnique({
       where: {
         email: emails,
       },
@@ -124,6 +124,7 @@ export class UsersService extends PrismaClient {
   async getCurrentUser(userId: number) {
     try {
       const user = await this.user.findUnique({
+      const user = await this.user.findUnique({
         where: { id: parseInt(userId.toString(), 10) },
       });
       if (!user) {
@@ -135,14 +136,14 @@ export class UsersService extends PrismaClient {
     }
   }
   async getFriends(userId: number) {
-    const user = await this.prismaService.user.findUnique({
+    const user = await this.user.findUnique({
       where: { id: userId },
     });
     if (!user) {
       throw new NotFoundException(`User with id ${userId} not found`);
     }
     const friendsIds = user.friends;
-    const friends = await this.prismaService.user.findMany({
+    const friends = await this.user.findMany({
       where: {
         id: {
           in: friendsIds,
@@ -156,23 +157,23 @@ export class UsersService extends PrismaClient {
     const id = parseInt(_id.toString(), 10);
     const friendId = parseInt(_friendId.toString(), 10);
 
-    const user = await this.prismaService.user.findUnique({
+    const user = await this.user.findUnique({
       where: { id },
     });
-    const friend = await this.prismaService.user.findUnique({
+    const friend = await this.user.findUnique({
       where: { id: friendId },
     });
     if (!user || !friend) {
       throw new NotFoundException(`User or friend not found`);
     }
 
-    const currentUser = await this.prismaService.user.update({
+    const currentUser = await this.user.update({
       where: { id },
       data: {
         friends: [...user.friends, friendId],
       },
     });
-    await this.prismaService.user.update({
+    await this.user.update({
       where: { id: friendId },
       data: {
         friends: [...friend.friends, id],
@@ -186,23 +187,23 @@ export class UsersService extends PrismaClient {
     return currentUser;
   }
   async deleteFriend(id: number, friendId: number) {
-    const user = await this.prismaService.user.findUnique({
+    const user = await this.user.findUnique({
       where: { id },
     });
-    const friend = await this.prismaService.user.findUnique({
+    const friend = await this.user.findUnique({
       where: { id: friendId },
     });
     if (!user || !friend) {
       throw new NotFoundException(`User or friend not found`);
     }
 
-    const currentUser = await this.prismaService.user.update({
+    const currentUser = await this.user.update({
       where: { id },
       data: {
         friends: user.friends.filter((id) => id !== friendId),
       },
     });
-    await this.prismaService.user.update({
+    await this.user.update({
       where: { id: friendId },
       data: {
         friends: friend.friends.filter((id) => id !== id),

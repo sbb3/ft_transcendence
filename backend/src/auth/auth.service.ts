@@ -2,19 +2,20 @@ import {
   Injectable,
   NotFoundException,
   Res,
-  Response,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { jwtConstants } from './auth.constants';
-import { PrismaService } from 'src/prismaFolder/prisma.service';
+import { Request, Response } from 'express';
+import { PrismaClient } from '@prisma/client';
 
 @Injectable()
-export class AuthService {
+export class AuthService extends PrismaClient {
   constructor(
-    private jwtService: JwtService,
-    private prismaService: PrismaService,
-  ) {}
+    private jwtService: JwtService
+  ) {
+    super();
+  }
 
   async generateAccessToken(payload: any) {
     return await this.jwtService.signAsync(payload, {
@@ -30,26 +31,43 @@ export class AuthService {
     });
   }
 
-  async isTokenValid(token: string, secretKey: string): Promise<any> {
+  async isTokenValid(token: string, secretKey: string) {
     try {
       await this.jwtService.verifyAsync(token, { secret: secretKey });
-      return;
+      const decodedToken = this.decodeToken(token);
+      const user = decodedToken?.id ? await this.user.findUnique({
+        where : {
+          id : decodedToken.id
+        }
+      }) : null;
+
+      if (!user)
+        throw new UnauthorizedException();
     } catch {
       throw new UnauthorizedException();
     }
   }
 
-  async createUserIfNotFound(user: any): Promise<any> {
-    let dbUser = await this.prismaService.findUser(user);
-
-    if (!dbUser) dbUser = await this.prismaService.createUser(user);
-    return dbUser;
+  async createUserIfNotFound(user: any) {
+    let dbUser = await this.user.findUnique({
+      where : {
+        username : user.username
+      }
+    });
+ 
+    return !dbUser ? await this.user.create({
+        data : user
+      }) : dbUser;
   }
 
   async updateUserData(whichUser: any, toUpdate: any) {
-    const user = await this.prismaService.updateUserData(whichUser, toUpdate);
+    const user = await this.user.update({
+      where : whichUser,
+      data : toUpdate
+    });
 
-    if (!user) throw new NotFoundException();
+    if (!user)
+      throw new NotFoundException('User not found.');
     return user;
   }
 
@@ -57,7 +75,7 @@ export class AuthService {
     key: string,
     value: string,
     parameters: any,
-    @Response() resp: any,
+    @Res() resp: any,
   ) {
     resp.cookie(key, value, parameters);
   }
@@ -66,7 +84,22 @@ export class AuthService {
     return this.jwtService.decode(token);
   }
 
-  removeCookie(@Res() response: any, cookieName: string, params: any) {
+  removeCookie(@Res() response: Response, cookieName: string, params: any) {
     response.cookie(cookieName, '', params);
   }
+
+	async signInLogic(request : Request, response : Response) {
+			const allInfos = request['user'];
+			allInfos.status = 'online';
+			const dbUser = await this.createUserIfNotFound(allInfos);
+			const refreshToken = await this.generateRefreshToken({id : dbUser.id});
+
+			this.initCookie('refresh_token', refreshToken, {
+				maxAge: 24 * 15 * 60 * 60 * 1000, // 15 days
+				httpOnly : true,
+				secure : true,
+				sameSite : 'none'
+			}, response);
+			return response.redirect(process.env.FRONT_URL + '');
+	}
 }

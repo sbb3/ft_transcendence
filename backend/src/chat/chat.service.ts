@@ -18,7 +18,6 @@ export class ChatService extends PrismaClient {
   }
 
   async createMessageData(messageDto: CreateMessageDataDto) {
-    // console.log('messageDto: ', JSON.stringify(messageDto));
     const sender = await this.user.findUnique({
       where: { id: messageDto.sender },
     });
@@ -39,7 +38,6 @@ export class ChatService extends PrismaClient {
       );
     if (!conversation) throw new NotFoundException('Conversation not found.');
     const newMessage = await this.messageData.create({ data: messageDto });
-    // console.log('newMessage id: ', newMessage.id);
     if (!newMessage)
       throw new InternalServerErrorException('Could not create a new message.');
     this.webSocketGateway.sendConversationMessage({
