@@ -6,14 +6,10 @@ import {
 import { PrismaClient } from '@prisma/client';
 import { CreateNotificationDto } from './dto/createNotificationDto';
 import { NotificationGateway } from './notification.gateway';
-import { PrismaService } from 'src/prismaFolder/prisma.service';
 
 @Injectable()
 export class NotificationService extends PrismaClient {
-  constructor(
-    private webSocketGateway: NotificationGateway,
-    private prisma: PrismaService,
-  ) {
+  constructor(private webSocketGateway: NotificationGateway) {
     super();
   }
 
