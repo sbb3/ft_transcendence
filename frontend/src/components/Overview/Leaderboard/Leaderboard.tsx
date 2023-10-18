@@ -20,7 +20,7 @@ const Leaderboard = () => {
   } = useGetLeaderboardQuery({}, { refetchOnMountOrArgChange: true });
 
   // useEffect(() => {
-  // TODO: listening on a socket event, iwill refetch the leaderboard when a game is finished,
+  // TODO: listening on a socket event, iwill refetch the leaderboard when a game is finished, or update the leaderboard in real time
   // const socket - ClientSocket();
   //   // refetch();
   // }, []);

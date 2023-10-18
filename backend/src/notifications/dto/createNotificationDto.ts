@@ -1,27 +1,23 @@
 // import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty, IsNumber, IsString, IsOptional } from 'class-validator';
 
 export class CreateNotificationDto {
+  @IsNotEmpty()
+  @IsString()
   id: string;
 
+  @IsString()
+  @IsOptional()
   conversationId: string;
 
+  @IsString()
   type: string;
 
-  sender: {
-    id: number;
-    email: string;
-    name: string;
-  };
+  @IsNumber()
+  senderId: number;
 
-  receiver: {
-    id: number;
-    email: string;
-    name: string;
-  };
-
-  content: string;
-
-  createdAt: number;
+  @IsNumber()
+  receiverId: number;
 }
 
 /*

@@ -27,7 +27,7 @@ const Search = () => {
   const [query, setQuery] = useState("");
 
   const {
-    data: users,
+    data: users = [] as any,
     isLoading,
     isFetching,
     isError,
@@ -97,7 +97,8 @@ const Search = () => {
             backgroundImage: "url('src/assets/img/BlackNoise.png')",
             bgSize: "cover",
             bgRepeat: "no-repeat",
-            backgroundColor: "transparent",
+            backgroundColor: "#FF7F00",
+            backgroundBlendMode: "normal",
           }}
           closeOnSelect={false}
           p={1}
@@ -122,7 +123,7 @@ const Search = () => {
                     borderRadius={8}
                     my={1}
                     _hover={{
-                      bg: "pong_bg.500",
+                      bg: "pong_bg.400",
                     }}
                     _focus={{
                       backgroundColor: "transparent",
@@ -144,7 +145,7 @@ const Search = () => {
                         w={"full"}
                         onClick={() => {
                           setQuery("");
-                          navigate(`/profile/${user.name}`, {
+                          navigate(`/profile/${user.username}`, {
                             state: { user },
                           });
                         }}

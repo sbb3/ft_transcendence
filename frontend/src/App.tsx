@@ -48,26 +48,29 @@ function App() {
       /> */}
       <Route element={<AuthVerification />}>
         <Route element={<PrefetchUsers />}>
-          {/* <Route element={<CheckOTP />}> */}
-          <Route path="/" element={<Layout />}>
-            <Route index element={<Overview />} />
-            <Route path="profile/:username" element={<PlayerProfile />} />
-            {/* <Route path="settings" element={<Settings />} /> */}
-            <Route path="game" element={<GameLayout />}>
-              <Route index element={<Game />} />
-              {/* <Route path=":id" element={<GameStarted />} /> */}
+          <Route element={<CheckOTP />}>
+            <Route path="/" element={<Layout />}>
+              <Route index element={<Overview />} />
+              <Route path="profile/:username" element={<PlayerProfile />} />
+              <Route path="settings" element={<Settings />} />
+              <Route path="game" element={<GameLayout />}>
+                <Route index element={<Game />} />
+                {/* <Route path=":id" element={<GameStarted />} /> */}
+              </Route>
+              <Route path="chat" element={<Chat />}>
+                <Route index element={<ChatSplashScreen />} />
+                <Route
+                  path="conversation/:id"
+                  element={<ConversationContent />}
+                />
+                <Route
+                  path="channel/:channelname"
+                  element={<ChannelContent />}
+                />
+              </Route>
+              <Route path="support" element={<Support />} />
             </Route>
-            <Route path="chat" element={<Chat />}>
-              <Route index element={<ChatSplashScreen />} />
-              <Route
-                path="conversation/:id"
-                element={<ConversationContent />}
-              />
-              <Route path="channel/:channelname" element={<ChannelContent />} />
-            </Route>
-            {/* <Route path="support" element={<Support />} /> */}
           </Route>
-          {/* </Route> */}
         </Route>
       </Route>
       <Route path="*" element={<NotFoundPage />} />

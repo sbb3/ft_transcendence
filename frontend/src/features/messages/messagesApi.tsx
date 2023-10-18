@@ -86,7 +86,6 @@ const messagesApi = apiSlice.injectEndpoints({
       }),
       async onQueryStarted(arg, { dispatch, getState, queryFulfilled }: any) {
         const messageData = arg;
-        console.log("messageData id : ", messageData.id);
         const { conversationId, content, lastMessageCreatedAt } = messageData;
         const patchResultMsg = dispatch(
           messagesApi?.util?.updateQueryData(
@@ -127,10 +126,8 @@ const messagesApi = apiSlice.injectEndpoints({
               id: uuidv4(),
               conversationId: messageData.conversationId,
               type: "message",
-              senderId: messageData.sender.id,
-              receiverId: messageData.receiver.id,
-              content: messageData.content,
-              createdAt: messageData.lastMessageCreatedAt,
+              senderId: messageData.sender,
+              receiverId: messageData.receiver,
             })
           );
         } catch (error) {

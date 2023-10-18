@@ -7,7 +7,9 @@ import {
   Delete,
   Put,
   UseGuards,
+  Res,
 } from '@nestjs/common';
+import { Response } from 'express';
 import { NotificationService } from './notification.service';
 import { CreateNotificationDto } from './dto/createNotificationDto';
 import { ApiTags, ApiOperation, ApiBody, ApiParam } from '@nestjs/swagger';
@@ -21,22 +23,47 @@ export class NotificationController {
   @Post()
   @ApiOperation({ summary: 'Create a new notification.' })
   @UseGuards(JwtGuard)
-  createNotification(@Body() createNotificationDto: CreateNotificationDto) {
-    return this.notificationService.create(createNotificationDto);
+  async createNotification(
+    @Body() createNotificationDto: CreateNotificationDto,
+    @Res() res: Response,
+  ) {
+    // try {
+    return res
+      .status(200)
+      .json(
+        await this.notificationService.createNotification(
+          createNotificationDto,
+        ),
+      );
+    // } catch (error) {
+    //   return res.status(500).json(error);
+    // }
   }
 
   @Get()
   @ApiOperation({ summary: 'Get all notifications.' })
   @UseGuards(JwtGuard)
-  getNotifications() {
-    return this.notificationService.getNotifications();
+  async getNotifications(@Res() res: Response) {
+    try {
+      return res
+        .status(200)
+        .json(await this.notificationService.getNotifications());
+    } catch (error) {
+      return res.status(500).json(error);
+    }
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a notification by id.' })
   @ApiParam({ name: 'id', type: String })
   @UseGuards(JwtGuard)
-  deleteNotification(@Param('id') id: string) {
-    return this.notificationService.remove(+id);
+  async deleteNotification(@Param('id') id: string, @Res() res: Response) {
+    try {
+      return res
+        .status(200)
+        .json(await this.notificationService.deleteNotification(id));
+    } catch (error) {
+      return res.status(500).json(error);
+    }
   }
 }

@@ -203,21 +203,12 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleProfileDrawer }) => {
       const notification = {
         id: uuidv4(),
         type: "friendRequest",
-        sender: {
-          id: currentUser?.id,
-          email: currentUser?.email,
-          name: currentUser?.name,
-        },
-        receiver: {
-          id: participantUser?.id,
-          email: participantUser?.email,
-          name: participantUser?.name,
-        },
-        createdAt: dayjs().valueOf(),
+        senderId: currentUser?.id,
+        receiverId: participantUser?.id,
       };
-      // store.dispatch(
-      //   await notificationsApi.endpoints.sendNotification.initiate(notification)
-      // );
+      store.dispatch(
+        await notificationsApi.endpoints.sendNotification.initiate(notification)
+      );
       toast({
         title: "Friend request sent",
         description: "Friend request sent successfully",
@@ -248,21 +239,12 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleProfileDrawer }) => {
       const notification = {
         id: uuidv4(),
         type: "gameRequest",
-        sender: {
-          id: currentUser?.id,
-          email: currentUser?.email,
-          name: currentUser?.name,
-        },
-        receiver: {
-          id: participantUser?.id,
-          email: participantUser?.email,
-          name: participantUser?.name,
-        },
-        createdAt: dayjs().valueOf(),
+        senderId: currentUser?.id,
+        receiverId: participantUser?.id,
       };
-      // store.dispatch(
-      //   await notificationsApi.endpoints.sendNotification.initiate(notification)
-      // );
+      store.dispatch(
+        await notificationsApi.endpoints.sendNotification.initiate(notification)
+      );
       toast({
         title: "Game request sent",
         description: "Game request sent successfully",

@@ -84,10 +84,10 @@ const usersApi = apiSlice.injectEndpoints({
       },
     }),
     updateUserSettings: builder.mutation({
-      query: ({ id, data }: { id: number; data: any }) => ({
+      query: ({ id, formData }) => ({
         url: `users/${id}/settings`,
         method: "PATCH",
-        body: { ...data },
+        body: { ...formData },
       }),
       async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
         try {

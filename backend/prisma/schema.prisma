@@ -75,11 +75,21 @@ model conversation {
 }
 
 model notification {
-  id			Int	@id @default(autoincrement())
-  conversationId	String
+  id			String @unique
+  conversationId	String? @default("")
   type		String
   senderId	Int
   receiverId	Int
-  content	String
-  createdAt	Int
+  createdAt	DateTime @default(now())
+}
+
+model leaderboard {
+  id			Int	@id @unique @default(autoincrement())
+  userId		Int
+  name		String
+  username	String
+  avatar	String
+  level		String
+  rank		Int
+  createdAt	DateTime @default(now())
 }

@@ -16,6 +16,7 @@ import {
   Res,
   UploadedFile,
   UseInterceptors,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { User } from './entities/user.entity';
@@ -63,13 +64,22 @@ export class UsersController {
   }
 
   @Patch(':id/settings')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('avatar'))
   async updateUserDetails(
-    @Param('id') userId: number,
+    @Param('id', ParseIntPipe) userId: number,
     @Body('username') username: string,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() avatar: Express.Multer.File,
   ) {
-    return this.usersService.updateUserDetails(userId, username, file);
+    try {
+      const user = await this.usersService.updateUserDetails(
+        userId,
+        username,
+        avatar,
+      );
+      return user;
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
 
   @Get(':id/friends')
@@ -84,8 +94,8 @@ export class UsersController {
     return this.usersService.addFriend(userId, friendId);
   }
 
-  @Delete(':id/friends')
-  deleteFriend(@Param('id') id: number, @Body('friendId') friendId: number) {
+  @Delete(':id/friends/:friendId')
+  deleteFriend(@Param('id') id: number, @Param('friendId') friendId: number) {
     const userId = Number(id);
     const friendIdNumber = Number(friendId);
     return this.usersService.deleteFriend(userId, friendIdNumber);

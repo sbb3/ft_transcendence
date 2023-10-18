@@ -9,6 +9,7 @@ import { ChannelsModule } from './channels/channels.module';
 import { UsersModule } from './users/users.module';
 import { ChatGateway } from './chat/chat.gateway';
 import { NotificationModule } from './notifications/notification.module';
+import { NotificationGateway } from './notifications/notification.gateway';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { NotificationModule } from './notifications/notification.module';
     UsersModule,
     ChatGateway,
     NotificationModule,
+    NotificationGateway,
   ],
   controllers: [],
   providers: [],

@@ -28,32 +28,34 @@ import usersApi, {
   useDisableOTPMutation,
 } from "src/features/users/usersApi";
 
-const validationSchema = yup.object().shape({
-  username: yup
-    .string()
-    .required("Username is required")
-    .min(3, "Minimum length should be 3")
-    .max(20, "Maximum length should be 20")
-    .trim(),
-  avatar: yup
-    .mixed()
-    .required("Avatar is required")
-    .test("fileRequired", "File is required", (files) => {
-      console.log("files: ", files);
-      return files && files?.length > 0;
-    })
-    .test("fileSize", "Max file size is 3mb!", (files) => {
-      return files && files[0]?.size <= 3000000; // 3mb
-    })
-    .test("fileFormat", "Only jpg, jpeg, png are accepted", (value) => {
-      return (
-        value &&
-        (value[0]?.type === "image/jpg" ||
-          value[0]?.type === "image/jpeg" ||
-          value[0]?.type === "image/png")
-      );
-    }),
-});
+// const validationSchema = yup.object().shape({
+//   username: yup
+//     .string()
+//     // .trim()
+//     .when("username", {
+//       is: (val) => !!val,,
+//       then: yup.string().notRequired(),
+//       // otherwise: yup
+//       //   .string()
+//       //   .min(3, "Minimum length should be 3")
+//       //   .max(20, "Maximum length should be 20")
+//       //   .trim(),
+//     }),
+//   // avatar: yup
+//   //   .mixed()
+//   //   .optional()
+//   //   .test("fileSize", "Max file size is 3mb!", (files) => {
+//   //     return files && files[0]?.size <= 3000000; // 3mb
+//   //   })
+//   //   .test("fileFormat", "Only jpg, jpeg, png are accepted", (value) => {
+//   //     return (
+//   //       value &&
+//   //       (value[0]?.type === "image/jpg" ||
+//   //         value[0]?.type === "image/jpeg" ||
+//   //         value[0]?.type === "image/png")
+//   //     );
+//   //   }),
+// });
 
 const Settings = () => {
   useTitle("Settings");
@@ -68,7 +70,10 @@ const Settings = () => {
     formState: { errors },
     reset,
   } = useForm({
-    resolver: yupResolver(validationSchema),
+    defaultValues: {
+      username: "",
+      avatar: undefined,
+    },
   });
 
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -84,13 +89,14 @@ const Settings = () => {
   const [disableOTP, { isLoading: isDisablingOTP }] = useDisableOTPMutation();
 
   const onUpdateSettings = async (data: any) => {
+    console.log("username: ", data.username);
     const formData = new FormData();
     formData.append("username", data.username);
     formData.append("avatar", data.avatar[0]);
     try {
       await updateUserSettings({
         id: currentUser?.id,
-        data: formData,
+        formData,
       }).unwrap();
       toast({
         title: "Settings updated.",
@@ -179,7 +185,7 @@ const Settings = () => {
             />
           )}
           <VStack spacing={4} w={"full"}>
-            <FormControl isInvalid={!!errors.username} mt={6} isRequired>
+            <FormControl isInvalid={!!errors.username} mt={6}>
               <FormLabel htmlFor="username" fontSize="lg">
                 Username
               </FormLabel>
@@ -188,14 +194,12 @@ const Settings = () => {
                 type="text"
                 placeholder="username"
                 {...register("username", {
-                  required: "This is required",
-                  minLength: {
-                    value: 3,
-                    message: "Minimum length should be 3",
-                  },
-                  maxLength: {
-                    value: 20,
-                    message: "Maximum length should be 20",
+                  validate: (value) => {
+                    if (value) {
+                      console.log("value: ", value);
+                      return value.length >= 3 && value.length <= 20;
+                    }
+                    return true;
                   },
                 })}
               />
@@ -203,7 +207,7 @@ const Settings = () => {
                 {errors.username && errors.username.message}
               </FormErrorMessage>
             </FormControl>
-            <FormControl isInvalid={!!errors.avatar} isRequired>
+            <FormControl isInvalid={!!errors.avatar}>
               <FormLabel htmlFor="avatar" fontSize="lg">
                 Avatar
               </FormLabel>

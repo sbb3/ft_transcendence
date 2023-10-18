@@ -11,10 +11,9 @@ import { User } from './entities/user.entity';
 import { Cloudinary } from '@cloudinary/url-gen';
 import { Request } from 'express';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
-const cld = new Cloudinary({ cloud: { cloudName: 'dtsihtgwx' } });
-
+import { user, PrismaClient } from '@prisma/client';
 @Injectable()
-export class UsersService {
+export class UsersService extends PrismaClient {
   // cloudinaryService: any;
   // prisma: any;
   websocketService: any;
@@ -24,7 +23,9 @@ export class UsersService {
   constructor(
     private prismaService: PrismaService,
     private cloudinaryService: CloudinaryService,
-  ) {}
+  ) {
+    super();
+  }
   isUserExist = (user: User | null): user is User => {
     return user !== null;
   };
@@ -73,22 +74,56 @@ export class UsersService {
   async updateUserDetails(
     userId: number,
     username: string,
-    file: Express.Multer.File,
-  ): Promise<void> {
-    const rest = await this.cloudinaryService.uploadImage(file);
-    const avatarUrl = rest.secure_url;
-    await this.prismaService.user.update({
-      where: { id: parseInt(userId.toString(), 10) },
-      data: {
-        username: username,
-        avatar: avatarUrl,
-      },
+    avatar: Express.Multer.File,
+  ) {
+    if (!username && !avatar) {
+      throw new HttpException(
+        'You must provide either username or avatar',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    if (username) {
+      const userWithUsername = await this.prismaService.user.findUnique({
+        where: { username },
+      });
+      if (userWithUsername) {
+        throw new HttpException(
+          'Username already exist',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      const user = await this.prismaService.user.update({
+        where: { id: userId },
+        data: {
+          username,
+        },
+      });
+      if (!user) {
+        throw new NotFoundException(`User with id ${userId} not found`);
+      }
+    }
+    if (avatar) {
+      const rest = await this.cloudinaryService.uploadImage(avatar);
+      const avatarUrl = rest.secure_url;
+      const user = await this.prismaService.user.update({
+        where: { id: userId },
+        data: {
+          avatar: avatarUrl,
+        },
+      });
+      if (!user) {
+        throw new NotFoundException(`User with id ${userId} not found`);
+      }
+    }
+    const user = await this.prismaService.user.findUnique({
+      where: { id: userId },
     });
+    return user;
   }
 
   async getCurrentUser(userId: number) {
     try {
-      const user = await this.prismaService.user.findUnique({
+      const user = await this.user.findUnique({
         where: { id: parseInt(userId.toString(), 10) },
       });
       if (!user) {

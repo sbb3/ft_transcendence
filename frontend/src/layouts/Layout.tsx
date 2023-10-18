@@ -5,12 +5,15 @@ import Sidebar from "src/components/Sidebar";
 import { motion } from "framer-motion";
 import { useSelector } from "react-redux";
 import ProfileDetailsFormModal from "src/components/DetailsFormModal";
+import { useEffect } from "react";
+import { io } from "socket.io-client";
 
 const MotionBox = motion(Box);
 
 const Layout = () => {
   const currentUser = useSelector((state: any) => state?.user?.currentUser);
   const { onToggle } = useDisclosure();
+
   return (
     <Flex
       w={{ base: "full", sm: "460px", md: 780, lg: 980, xl: 1250 }}

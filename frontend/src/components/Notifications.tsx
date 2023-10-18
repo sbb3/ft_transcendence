@@ -1,11 +1,8 @@
 import {
   Box,
-  Button,
-  Divider,
   Flex,
   Icon,
   IconButton,
-  Image,
   Menu,
   MenuButton,
   MenuItem,
@@ -16,26 +13,19 @@ import {
 } from "@chakra-ui/react";
 import { css } from "@emotion/react";
 import { FaBell, FaCheck } from "react-icons/fa";
-import notificationsApi, {
-  useGetNotificationsQuery,
-} from "src/features/notifications/notificationsApi";
+import { useGetNotificationsQuery } from "src/features/notifications/notificationsApi";
 import Loader from "./Utils/Loader";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { useLocation, useNavigate } from "react-router-dom";
-import store from "src/app/store";
 import { useDeleteNotificationMutation } from "src/features/notifications/notificationsApi";
 import { CloseIcon } from "@chakra-ui/icons";
 import usersApi, { useAddFriendMutation } from "src/features/users/usersApi";
 import { useAcceptGameChallengeMutation } from "src/features/game/gameApi";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  setCurrentUser,
-  updateCurrentUser,
-} from "src/features/users/usersSlice";
+
 dayjs.extend(relativeTime);
 
-// TODO: backend should dispatch the notification to the user that is receiving the notification only not everyone
 function Notifications() {
   const currentUser = useSelector((state: any) => state.user.currentUser);
   const dispatch = useDispatch();
@@ -44,8 +34,9 @@ function Notifications() {
   const location = useLocation();
   // console.log("location: ", location);
   const {
-    data: notifications,
-    isLoading,
+    data: notifications = [],
+    isLoading: isNotificationsLoading,
+    isFetching: isNotificationsFetching,
     refetch,
   } = useGetNotificationsQuery({
     subscribe: true,
@@ -78,19 +69,8 @@ function Notifications() {
       console.log("error deleting notification: ", error);
     }
   };
-  // TODO: check IN THE BACK if the user is already a friend,
-  // TODO: handle other checks and cases
+
   const handleAcceptFriendRequest = async ({ id, sender }) => {
-    if (currentUser?.friends.includes(sender?.id)) {
-      toast({
-        title: "Info",
-        description: "He is already your friend",
-        status: "info",
-        duration: 3000,
-        isClosable: true,
-      });
-      return;
-    }
     try {
       await deleteNotification(id).unwrap();
       await addFriend({
@@ -210,7 +190,7 @@ function Notifications() {
                 {
                   notifications?.filter(
                     (notification) =>
-                      notification?.receiver?.id === currentUser?.id
+                      notification?.receiverId === currentUser?.id
                   ).length
                 }
               </Box>
@@ -226,15 +206,13 @@ function Notifications() {
           }}
         />
         <MenuList
-          // bg={"pong_cl.200"}
-          bg={"transparent"}
+          bg={"pong_cl.600"}
+          // bg={"transparent"}
           opacity={0}
           color={"whiteAlpha.900"}
-          // fontSize={"md"}
-          // fontWeight={"medium"}
           border={"1px solid rgba(251, 102, 19, 0.2)"}
         >
-          {isLoading ? (
+          {isNotificationsLoading || isNotificationsFetching ? (
             <MenuItem minH="40px" bg={"transparent"}>
               <Loader size="sm" />
             </MenuItem>
@@ -244,7 +222,7 @@ function Notifications() {
               .sort((a, b) => dayjs(b?.createdAt).diff(dayjs(a?.createdAt))) // in descending order from the newest to the oldest
               .map((notification) =>
                 notification?.type === "message" &&
-                notification?.receiver?.id === currentUser?.id ? (
+                notification?.receiverId === currentUser?.id ? (
                   <MenuItem
                     key={notification?.id}
                     as={Flex}
@@ -302,7 +280,7 @@ function Notifications() {
                     />
                   </MenuItem>
                 ) : notification?.type === "friendRequest" &&
-                  notification?.receiver?.id === currentUser?.id ? (
+                  notification?.receiverId === currentUser?.id ? (
                   <MenuItem
                     key={notification?.id}
                     as={Flex}
@@ -310,8 +288,8 @@ function Notifications() {
                     align={"center"}
                     gap={4}
                     minH="40px"
-                    // bg={"transparent"}
-                    bg={"pong_bg.100"}
+                    bg={"transparent"}
+                    // bg={"pong_bg.400"}
                     cursor={"pointer"}
                     borderBottom={"1px solid rgba(255, 255, 255, 0.1)"}
                   >
@@ -342,7 +320,7 @@ function Notifications() {
                       <IconButton
                         aria-label={"Reject friend request"}
                         isRound
-                        bg={"red.400"}
+                        bg={"red.500"}
                         fontSize={"2rem"}
                         size={"md"}
                         color={"white"}
@@ -387,7 +365,7 @@ function Notifications() {
                     </Flex>
                   </MenuItem>
                 ) : notification?.type === "gameRequest" &&
-                  notification?.receiver?.id === currentUser?.id ? (
+                  notification?.receiverId === currentUser?.id ? (
                   <MenuItem
                     key={notification?.id}
                     as={Flex}

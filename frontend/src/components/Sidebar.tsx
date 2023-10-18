@@ -56,8 +56,8 @@ const NavigationPanel = [
 
 const Sidebar = () => {
   const currentUser = useSelector((state: any) => state?.user?.currentUser);
+  const onlineUsers = useSelector((state: any) => state?.user?.onlineUsers);
   const navigate = useNavigate();
-  const players_online = 10;
   const player_lvl = 2;
 
   return (
@@ -114,7 +114,7 @@ const Sidebar = () => {
             color={"green.400"}
           />
           <Text fontSize="10px" fontWeight="light" color="whiteAlpha.900">
-            {players_online} {"   "} players online
+            {onlineUsers} {"   "} players online
           </Text>
         </Flex>
       </Stack>

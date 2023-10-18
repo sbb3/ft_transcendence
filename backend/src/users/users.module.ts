@@ -1,5 +1,3 @@
-
-
 import { Module } from '@nestjs/common';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
@@ -7,6 +5,7 @@ import { CloudinaryProvider } from 'src/cloudinary/cloudinary.controller';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { CloudinaryModule } from '../cloudinary/cloudinary.module';
 import { ConfigModule } from '@nestjs/config';
+import { UserGateway } from './users.gateway';
 
 @Module({
   imports: [
@@ -16,10 +15,9 @@ import { ConfigModule } from '@nestjs/config';
     }),
   ],
   controllers: [UsersController],
-  providers: [UsersService ,CloudinaryProvider, CloudinaryService ],
+  providers: [UsersService, CloudinaryProvider, CloudinaryService, UserGateway],
 })
 export class UsersModule {}
-
 
 // mport { Module } from '@nestjs/common';
 // import { CloudinaryProvider } from './cloudinary.provider';

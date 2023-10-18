@@ -75,6 +75,8 @@ const Profile = ({ user }: ProfileProps) => {
   const [triggerGetCurrentUser, { isLoading: isLoadingGetCurrentUser }] =
     usersApi.useLazyGetCurrentUserQuery();
 
+  const [sendNotification] = notificationsApi.useSendNotificationMutation();
+
   const gameWonRate =
     (parseInt(user?.gameWin) /
       (parseInt(user?.gameWin) + parseInt(user?.gameLoss))) *
@@ -124,7 +126,10 @@ const Profile = ({ user }: ProfileProps) => {
 
   const handleDeleteFriend = async (friendId) => {
     try {
-      await deleteFriend({ currentUserId: currentUser?.id, friendId });
+      await deleteFriend({
+        currentUserId: currentUser?.id,
+        friendId,
+      }).unwrap();
       await triggerGetCurrentUser(currentUser?.id);
       // dispatch(
       //   setCurrentUser({
@@ -135,8 +140,8 @@ const Profile = ({ user }: ProfileProps) => {
       //   })
       // );
       toast({
-        title: "Suceess",
-        description: "Friend deleted",
+        title: "Success",
+        description: "Friend has been deleted.",
         status: "success",
         duration: 2000,
         isClosable: true,
@@ -168,21 +173,11 @@ const Profile = ({ user }: ProfileProps) => {
       const notification = {
         id: uuidv4(),
         type: "friendRequest",
-        sender: {
-          id: currentUser?.id,
-          email: currentUser?.email,
-          name: currentUser?.name,
-        },
-        receiver: {
-          id: user?.id,
-          email: user?.email,
-          name: user?.name,
-        },
-        createdAt: dayjs().valueOf(),
+        senderId: currentUser?.id,
+        receiverId: user?.id,
       };
-      // store.dispatch(
-      //   await notificationsApi.endpoints.sendNotification.initiate(notification)
-      // );
+      await sendNotification(notification).unwrap();
+
       toast({
         title: "Friend request sent",
         description: "Friend request sent successfully",
@@ -192,7 +187,6 @@ const Profile = ({ user }: ProfileProps) => {
       });
     } catch (error) {
       console.log("error accepting friend request: ", error);
-      console.log("error: ", error);
       toast({
         title: "Error",
         description: error?.data?.message || "Error happened",
@@ -272,7 +266,7 @@ const Profile = ({ user }: ProfileProps) => {
             name={user?.name}
             src={user?.avatar}
             borderColor={
-              status === "online"
+              user?.status === "online"
                 ? "green.400"
                 : user?.status === "offline"
                 ? "gray.300"
