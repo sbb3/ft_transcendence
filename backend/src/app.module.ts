@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { UserModule } from './user/user.module';
-import { PrismaModule } from './prismaFolder/prisma.module';
 import { ConfigModule } from '@nestjs/config';
 import { ChatModule } from './chat/chat.module';
 import { AuthModule } from './auth/auth.module';
@@ -14,7 +13,6 @@ import { NotificationModule } from './notifications/notification.module';
   imports: [
     UserModule,
     AuthModule,
-    PrismaModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),

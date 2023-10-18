@@ -1,7 +1,9 @@
-import { Controller, Get, UseGuards, Req, UnauthorizedException, Res,
+import { Controller, Get, UseGuards, Req, Res,
 	Post, 
 	Body,
-	ParseIntPipe} from '@nestjs/common';
+	ParseIntPipe,
+	UnauthorizedException,
+	NotFoundException} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { FtGuard } from './guards/ft.guard';
 import { Request, Response } from 'express';
@@ -27,8 +29,17 @@ export class AuthController {
 	@ApiExcludeEndpoint()
 	@Get('signin')
 	@UseGuards(FtGuard)
-	async generateTokens(@Req() req : any, @Res() response : Response) {
-		this.signInLogic(req, response);
+	async generateTokens(@Req() req : Request, @Res() response : Response) {
+		try {
+			if (!req['user'])
+				throw new UnauthorizedException();
+			await this.authService.signInLogic(req, response);
+		}
+		catch (error) {
+			if (error?.status)
+				return response.status(error.status).json(error);
+			return response.status(500).json(error);
+		}
 	}
 
 	@ApiOperation({summary : "Get a new access token."})
@@ -46,7 +57,9 @@ export class AuthController {
 			return res.json( { accessToken : newAccessToken, user : { id } } );
 		}
 		catch (error) {
-			return res.status(401).json(error);
+			if (error?.status)
+				return res.status(error.status).json(error);
+			return res.status(500).json(error);
 		}
 	}
 
@@ -56,41 +69,22 @@ export class AuthController {
 	@UseGuards(JwtGuard)
 	async logout(@Req() request : Request, @Res() response : Response, @Body('userId', ParseIntPipe) userId : number) {
 		try {
-			await this.authService.updateUserData({id : userId}, {
+			const updatedUser = await this.authService.updateUserData({id : userId}, {
 				is_otp_validated : false,
 				status : 'offline',
 			})
 
+			if (!updatedUser)
+				throw new NotFoundException('User to update not found.');
 			if (request?.cookies?.refresh_token)
 				this.authService.removeCookie(response, 'refresh_token', {expires: new Date(0), sameSite : 'none', secure : true});
 			return response.json({is_otp_validated : false});
 		}
 		catch (error) {
-			return response.status(404).json(error);
+			if (error?.status)
+				return response.status(error.status).json(error);
+			return response.status(500).json(error);
 		}
 	}
 
-	private async signInLogic(request : any, response : Response) {
-		try {
-			if (!request.user)
-				throw new UnauthorizedException();
-			const allInfos = request.user;
-			allInfos.status = 'online';
-			const dbUser = await this.authService.createUserIfNotFound(allInfos);
-			const profileId = dbUser.id;
-			const refreshToken = await this.authService.generateRefreshToken({id : profileId});
-
-			this.authService.initCookie('refresh_token', refreshToken, {
-				maxAge: 24 * 15 * 60 * 60 * 1000, // 15 days
-				httpOnly : true,
-				secure : true,
-				sameSite : 'none'
-			}, response);
-
-			return response.redirect(process.env.FRONT_URL + '');
-		}
-		catch (error) {
-			return response.status(401).json(error);
-		}
-	}
 }

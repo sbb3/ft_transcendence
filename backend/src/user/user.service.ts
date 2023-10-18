@@ -1,16 +1,18 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
-import { PrismaService } from 'src/prismaFolder/prisma.service';
 
 @Injectable()
 export class UserService extends PrismaClient {
     
-    constructor(private prismaService : PrismaService) {
+    constructor() {
         super();
     }
 
 	async updateUserData(whichUser : any, toUpdate : any) {
-		const user = await this.prismaService.updateUserData(whichUser, toUpdate);
+		const user = await this.user.update({
+			where : whichUser,
+			data : toUpdate
+		});
 
 		if (!user)
 			throw new NotFoundException();
