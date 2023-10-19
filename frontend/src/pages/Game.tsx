@@ -1,305 +1,214 @@
 // import { Flex } from "@chakra-ui/react";
 import useTitle from "src/hooks/useTitle";
-import { useState, useRef, useEffect } from "react";
-import { mPaddle, Ball, Gol} from "./interfaces";
+import { useState, useRef, useEffect , React} from "react";
+import { Paddle, Ball, Gol, canvaState} from "./interfaces";
 import io, {Socket} from "socket.io-client"
 import { allFakers } from "@faker-js/faker";
 import { date } from "yup";
 
-// import MessageInput from "./Messageinput";
-// import Messages from "./messages";
 
 const Game = () => {
-  const [socket , setSocket] = useState<Socket>()
-  useTitle("Gamee");
-  // const [messages, setMessages] = useState<string[]>([])
+  useTitle("Game");
+
+  const canvasRef = useRef(null);
   
-  useEffect(() => {
+  // const ctx = ;
+  
+  
+  const [socket , setSocket] = useState<Socket>()
+  const [mPaddle, setMPaddle] = useState<Paddle>();
+  const [hPaddle, setHPaddle] = useState<Paddle>();
+  const [mGol, setmGole] = useState<Gol>();
+  const [hGol, sethGole] = useState<Gol>();
+  const [ball, setBall] = useState<Ball>();
+  const [canvaS, setCanvaS] = useState<canvaState>();
+  // const [ctx, setCtx] = useState();
+  // setCtx(canvas.getContext("2d"));
+
+
+  function drawRect(ctx, rec) {
+    ctx.fillStyle = rec?.color;
+    ctx.fillRect(rec?.x, rec?.y, rec?.widthe, rec?.height);
+  }
+  
+  function drawCircle(ctx, cir : Ball){
+    // ctx.clearRect(0, 0, canvaS.width, canvaS.height);
+    ctx.fillStyle = cir?.color;
+    ctx.beginPath();
+    ctx.arc(cir?.x,cir?.y,cir?.radius,0,Math.PI*2,false);
+    ctx.closePath();
+    ctx.fill();
+  }
+  
+  function drawtext(ctx,num, x, y, color){
+    ctx.fillStyle = color;
+    ctx.font = "40px fantasy";
+    ctx.fillText(num,x,y);
+  }
+                          
+  function drawLine(ctx,a,b,c,d,e,f,color){
+    ctx.setLineDash([a, b]);
+    ctx.strokeStyle = color;
+    ctx.strokeRect(c,d,e,f);
+  }
+
+
+
+  // const v = useRef(mPaddle.current, hPaddle.current, ball.current)
+  function draw() {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, 600, 400)
+
+    drawCircle(ctx, ball);
+    drawRect(ctx, mPaddle);
+    drawRect(ctx, hPaddle);
+    drawLine(ctx,4,8,canvaS?.width/2,0,0,576,"white");
+    drawtext(ctx,mPaddle?.score,canvaS?.width/4, canvaS?.height/5, "white");
+    drawtext(ctx,hPaddle?.score,3*canvaS?.width/4, canvaS?.height/5, "white");
+    // requestAnimationFrame(draw)
+  }
+  // draw();
+
+  // const creatSocket = (newsocket : Socket) => {
+  //   setSocket (newsocket);
+  // }
+
+  
+  useEffect (() => {
     const newsocket = io("http://localhost:3000/play", {
       reconnection: false
     });
     setSocket (newsocket);
-
-  //   // return () => socket.disconnect();
+    // const canvas = canvasRef.current;
+    // const ctx = canvas.getContext("2d");
+    // return () => {
+    //   socket?.close();
+    // };
   }, [])
-  // const socket = io("http://localhost:3000/play", {
-  //   reconnection: false
-  // });
 
-  const [mPaddle, setMPaddle] = useState<mPaddle>();
-  const [hPaddle, setHPaddle] = useState<mPaddle>();
-  const [mGol, setmGole] = useState<Gol>();
-  const [hGol, sethGole] = useState<Gol>();
-  const [ball, setBall] = useState<Ball>();
 
-  const canvasRef = useRef(null); 
+  useEffect(() => {
+    // const canvas = canvasRef.current;
+    // const ctx = canvas.getContext("2d");
 
-  // const Paddlee = (e) : mPaddle  => {
 
-  // }
-  // setMPaddle(Paddlee);
-  // window.addEventListener('keydown', mPaddlee);
+    // socket?.emit('ballMv');
+    // socket?.on('bal', (bl) => {
+    //   setBall(bl);
+    // })
+    // drawCircle(ctx, ball);
  
-  // const send = (value: string) => {
-  //   socket?.emit("msgToServer", value)
-  // }
-
-  // const myP = (mp: mPaddle) => {
-  //   setMPaddle(mp)
-  // }
-    
-
-  // const messageListener = (message: string) => {
-  //   setMessages([...messages, message])
-  // }
-
-  // socket.on("connect", () => {
-  //   console.log(socket.id);
-  // });
-
-  
-
-  // console.log("innnnnnnnnnnnnnnnnnnnn");
-  // socket.on("update", (p: mPaddle) =>{
-  //   setMPaddle(p);
-  // })
-
-
-  // socket.emit('initMyp');
-
-  // const inp = (p: mPaddle) => {
-  //   console.log("innnnnnnnnnnnnnnnnnnnn");
-  //   setMPaddle(p);
-  // }
-
-  // socket.on('initMyp', (data) => {
-  //   console.log (data);
-  //   setMPaddle(data);
-  // })
-  // }
-useEffect(() => {
     socket?.emit('initMyP');
+    socket?.on('canvaState', (cvS) => {
+      setCanvaS(cvS);
+    })
     socket?.on('myP', (mp) => {
-      // console.log (data);
-      
       setMPaddle(mp);
     })
     socket?.on('herP', (hp) => {
-      // console.log("innnnnnnnnnnnnnnnnnnnn");
       setHPaddle(hp);
     })
-    
     socket?.on('myGol', (mg) => {
-      // console.log("innnnnnnnnnnnnnnnnnnnn");
       setmGole(mg);
     })
     
     socket?.on('herGol', (hg) => {
-      // console.log("innnnnnnnnnnnnnnnnnnnn");
       sethGole(hg);
     })
-    
-    // socket?.emit('ballMv');
-    // socket?.on('bal', (bl) => {
-    //   // console.log("innnnnnnnnnnnnnnnnnnnn");
-    //   setBall(bl);
-    // })
-}, [])
 
-useEffect(() => {
-    socket?.emit('ballMv');
-    socket?.on('bal', (bl) => {
-      // console.log("innnnnnnnnnnnnnnnnnnnn");
+
+    draw();
+    // socket?.emit('mvBall');
+    socket?.on('intBall',(bl : Ball) => {
       setBall(bl);
     })
-}, [ball])
-
-function drawRect(ctx, rec) {
-  ctx.fillStyle = rec?.color;
-  ctx.fillRect(rec?.x, rec?.y, rec?.widthe, rec?.hweight);
-}
-
-function drawCircle(ctx, cir : Ball){
-  ctx.beginPath();
-  ctx.fillStyle = cir?.color;
-  ctx.arc(cir?.x,cir?.y,cir?.radius,0,Math.PI*2,false);
-  ctx.fill();
-  ctx.closePath();
-}
-
-function drawtext(ctx,gol){
-  ctx.fillStyle = gol?.color;
-  ctx.font = "50px serif";
-  ctx.fillText(gol?.num,gol?.x,gol?.y);
-}
-                        
-function drawLine(ctx,a,b,c,d,e,f,color){
-  ctx.setLineDash([a, b]);
-  ctx.strokeStyle = color;
-  ctx.strokeRect(c,d,e,f);
-}
-
-  // useEffect(() => {
-
-  //   const canvas = canvasRef.current;
-  //   const ctx = canvas.getContext("2d");
-  //   ctx.beginPath();
-  //   console.log(ball);
-  //   ctx.fillStyle = ball?.color;
-  //   ctx.arc(ball?.x,ball?.y,ball?.radius,0,Math.PI*2,false);
-  //   ctx.closePath();
-  // //   drawCircle(ctx, ball);
-
-  // }, [ball])
-
-
-                  useEffect(() => {
-    // if (!socket)
-    // {
-    //   console.log("not connected ");
-    // }
-    // else{
-
-    // console.log(mPaddlee);
-                    const canvas = canvasRef.current;
-                    const ctx = canvas.getContext("2d");
-
-                    drawRect(ctx, mPaddle);
-                    drawRect(ctx, hPaddle);
-                    drawCircle(ctx, ball);
-                    drawLine(ctx,4,8,512,0,0,576,"white");
-                    drawtext(ctx,mGol);
-                    drawtext(ctx,hGol);
-                    // console.log(ball);
-                    // ctx.beginPath();
-                    // ctx.fillStyle = ball.color;
-                    // ctx.arc(ball.x,ball.y,ball.radius,0,Math.PI*2,false);
-                    // ctx.closePath();
-                    // ctx.fill();
-                    // drawCircle(ctx, ball);
-                    // ctx.fillStyle = "orange";
-                    // ctx.fillRect(20, 300, 20, 90);
-
-                    // ctx.beginPath();
-                    // console.log(ball);
-                    // ctx.fillStyle = ball?.color;
-                    // ctx.arc(ball?.x,ball?.y,ball?.radius,0,Math.PI*2,false);
-                    // ctx.closePath();
-
-
-                    // ctx.fillStyle = mPaddle?.color;
-                    // ctx.fillRect(mPaddle?.x, mPaddle?.y, mPaddle?.widthe, mPaddle?.hweight);
-
-                    // ctx.fillStyle = hPaddle?.color;
-                    // ctx.fillRect(hPaddle?.x, hPaddle?.y, hPaddle?.widthe, hPaddle?.hweight);
-                    // ctx.fillStyle = mPaddlee?.color;
-                    // ctx.fillRect(mPaddlee?.x, mPaddlee?.y, mPaddlee?.widthe, mPaddlee?.hweight);
-                  }, [mPaddle, hPaddle, ball, hGol, mGol])
-
-
-
-  // function handlKeyUp(){
-  //   // if (event.key == "w") {
-      // socket.emit("upMyP", mPaddlee);
-      // console.log ("keeeeyyyyyyyyyyy");
-    // }
-      // socket.emit("upMyP", mPaddlee);
-  // }
-
-  // socket?.on("afterInit", () => {
-  // // 	const canvas = canvasRef.current;
+    // draw();
+    // socket?.on('bootPaddel', mvBootPaddle)
+    // drawRect(ctx, hPaddle);
     
-	// // 	const mPaddle = canvas.getContext("2d");
-  // console.log ("keeeeyyyyyyyyyyy");
-  //   console.log(socket.id); 
-  // });
-  // afterInit
+    // drawCircle(ctx, ball);
+    // drawRect(ctx, mPaddle);
+    // drawRect(ctx, hPaddle);
+    // drawLine(ctx,4,8,canvaS?.width/2,0,0,576,"white");
+    // drawtext(ctx,mPaddle?.score,canvaS?.width/4, canvaS?.height/5, "white");
+    // drawtext(ctx,hPaddle?.score,3*canvaS?.width/4, canvaS?.height/5, "white");
+    // return () => {
+    //   socket?.off("mvBall", mvball);
+    //   socket?.off("bootPaddel", mvBootPaddle);
+    // };
+  }, [])
+
   // useEffect(() => {
-  //   socket?.on("message", messageListener)
-  //   return () => {
-  //     socket?.off("message", messageListener)
-  //   }
-  // }, [messageListener])
+  //   draw();
+  // }, [ball, mPaddle, hPaddle])
 
-  //  useEffect(() => {
-  //   socket?.on("mvMP", myP)
-  //   return () => {
-  //     socket?.off("mvMP", myP)
-  //   }
-  // }, [myP])
+  const mvball = (bl : Ball) => {
+    setBall(bl);
+  }
 
-  //   function drawRect(ctx, x, y, w, h, color) {
-  //   ctx.fillStyle = color;
-  //   ctx.fillRect(x, y, w, h);
-  //   ctx.fillStyle = color;
-  //   ctx.fillRect(x, y, w, h);
-  // }
+  const mvBootPaddle = (paddle : Paddle) => {
+    setHPaddle(paddle);
+  }
 
-  // function drawCircle(ctx, x, y, r, color){
-  //   ctx.beginPath();
-  //   ctx.fillStyle = color;
-  //   ctx.arc(x,y,r,0,Math.PI*2,false);
-  //   ctx.closePath();
-  //   ctx.fill();
-  // }
-
-
-
-  // const B = Ball;
-  // const Rm = mPaddle;
-  // const Rh = mPaddle;
-
-  // socket.on("onKlickOne", all)
-
-	// useEffect(() => {
-	// 	const canvas = canvasRef.current;
-  //   const ctx = canvas.getContext("2d");
-
-  //   drawLine(ctx,4,8,512,0,0,576,"white")
-  //   drawRect(ctx, 20, 300, 20, 90, "orange")
-  //   drawRect(ctx, 984, 140, 20, 90, "green")
-  //   drawCircle(ctx, 512, 288, 10, "white")
-  //   // drawRect(ctx, myP);
-  //   // drawRect(ctx,Rh);
-  //   // drawCircle(ctx,B);
-  //   drawtext(ctx,"3",256,40,"white");
-  //   drawtext(ctx,"0",768,40,"white");
-
-  //   // setBall(ball);
-  //   // setMPaddle(mPaddle);
-  //   // setHPaddle(hPaddle);
-	// }, []);
-
-		// const canvas = canvasRef.current;
+  useEffect(() => {
+    // const canvas = canvasRef.current;
     // const ctx = canvas.getContext("2d");
+    // ctx.clearRect(0, 0, 600, 400)
+    // drawLine(ctx,4,8,canvaS?.width/2,0,0,576,"white");
+    // drawtext(ctx,mPaddle?.score,canvaS?.width/4, canvaS?.height/5, "white");
+    // drawtext(ctx,hPaddle?.score,3*canvaS?.width/4, canvaS?.height/5, "white");
+    socket?.emit('mvBall');
+    socket?.on('mvBall', mvball);
+    // drawCircle(ctx, ball);
+    socket?.on('bootPaddel', mvBootPaddle);
+    // drawRect(ctx, hPaddle);
+    draw();
+    return () => {
+      socket?.off("mvBall", mvball);
+      socket?.off("bootPaddel", mvBootPaddle);
+    };
+
+  }, [ball])
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, 600, 400)
+    canvas.addEventListener('mvMouse', (event) => {
+      console.log("hfddfdfs",event.clientX);
+      socket?.emit('mvPaddle', event.clientX);
+      socket?.on('mvPaddle', (paddle : Paddle) => {
+        setMPaddle(paddle);
+      })
+      draw();
+      // drawRect(ctx, mPaddle);
+    });
+  }, [mPaddle])
+
+
+  useEffect(() => {
+
+
+
+  }, [mPaddle, hPaddle, ball, hGol, mGol])
+
+
   return (
-    // <>
-    // {" "}
-    // <MessageInput send={send} />
-    // <Messages messages={messages}/>
-    // </>
+    <>
     <div>
       <canvas ref={canvasRef}
-            width="1024"
-            height="576"
+            width="600"
+            height="400"
             style={{ border: "2px solid blue" }}
             onClick={e => {
               alert(e.clientX)
             }}
-            // onKeyUp={handlKeyUp}
             />
     </div>
+    </>
+
   );
 };
 
 export default Game;
-/*
-destructing
-usestate
-useref
-useEffect
-
-let i = 0
-const [name, setName] = useState("");
-
-*/

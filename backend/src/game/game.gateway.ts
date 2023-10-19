@@ -2,7 +2,8 @@ import { Logger } from '@nestjs/common';
 import { MessageBody, OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer, WsResponse } from '@nestjs/websockets';
 import path from 'path';
 import { Server, Socket } from 'socket.io';
-import {Paddle, Ball, Gol} from "./game.interface";
+import {Paddle, Ball, Gol, canvaState} from "./game.interface";
+import {update, mouvePaddle} from "./game.update";
 
 @WebSocketGateway( {
   namespace : 'play',
@@ -23,6 +24,11 @@ export class GameGateway implements OnGatewayInit,  OnGatewayConnection, OnGatew
     this.logger.log(`Client disconnected: ${client.id}`);
   }
 
+  canvaS : canvaState = {
+    width : 600,
+    height: 400
+  }
+
   mGol: Gol = {
     num: "5",
     x: 256,
@@ -39,33 +45,34 @@ export class GameGateway implements OnGatewayInit,  OnGatewayConnection, OnGatew
     color: "white"
   };
 
-  b: Ball = {
-    x: 512,
-    y: 288,
+  ball: Ball = {
+    x: this.canvaS.width/2,
+    y: this.canvaS.height/2,
     radius: 10,
-    speed: 5,
-    velocityX: 5,
-    velocityY: 5,
+    speed: 2,
+    velocityX: 2,
+    velocityY: 2,
     color : "white"
   };
 
   myP: Paddle = {
-    x: 20,
-    y: 300,
-    widthe: 20,
-    hweight: 90,
+    x: 0,
+    y: this.canvaS.height/2 - 100/2,
+    widthe: 10,
+    height: 100,
     color: "orange",
     score:0
   };
 
   herP: Paddle = {
-    x: 984,
-    y: 140,
-    widthe: 20,
-    hweight: 90,
+    x: this.canvaS.width - 10,
+    y: this.canvaS.height/2 - 100/2,
+    widthe: 10,
+    height: 100,
     color: "green",
     score:0
   };
+
 
   handleConnection(client: Socket, ...args: any[]) {
     // client.emit('initMyP', this.myP);
@@ -73,6 +80,7 @@ export class GameGateway implements OnGatewayInit,  OnGatewayConnection, OnGatew
   }
 
   afterInit(server: Server) {
+    
     this.logger.log('Initialized');
   }
 
@@ -80,10 +88,8 @@ export class GameGateway implements OnGatewayInit,  OnGatewayConnection, OnGatew
 
   @SubscribeMessage('initMyP')
   initMyPa(client: Socket):void{
-    // this.logger.log('initMyP');
-    // p == this.myP;
-    // return (event : 'initMyP', p: this.myP);
-    // client.broadcast.emit('initMyP', this.myP);
+    this.wss.emit('canvaState', this.canvaS);
+    this.wss.emit('intBall', this.ball)
     this.wss.emit('herP', this.herP);
     this.wss.emit('myP', this.myP);
     this.wss.emit('myGol', this.mGol);
@@ -93,9 +99,23 @@ export class GameGateway implements OnGatewayInit,  OnGatewayConnection, OnGatew
   }
 
 
+  @SubscribeMessage('mvBall')
+  mvBall(client : Socket) {
+    this.ball = update(this.ball, this.canvaS, this.myP, this.herP);
+    this.herP.y += this.ball.y - (this.herP.y + this.herP.height / 2);
+    this.wss.emit('mvBall', this.ball);
+    this.wss.emit('bootPaddel', this.herP);
+  }
+
+  @SubscribeMessage('mvPaddle') 
+  mvPaddel(client :Socket, mouseY) {
+    this.myP = mouvePaddle(this.myP, mouseY)
+    this.wss.emit('paddle', this.myP);
+  }
+
   @SubscribeMessage('ballMv')
   generateBallMv(client :Socket) {
-    this.wss.emit('bal', this.b);
+    this.wss.emit('bal', this.ball);
   }
 
   // @SubscribeMessage('msgToServer')

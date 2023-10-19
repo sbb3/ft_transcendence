@@ -3,7 +3,7 @@ export interface Paddle {
     x: number;
     y: number;
     widthe: number;
-    hweight: number;
+    height: number;
     color: string;
     score:number;
 }
@@ -12,7 +12,7 @@ export interface Paddle {
 //     x: number;
 //     y: number;
 //     widthe: number;
-//     hweight: number;
+//     height: number;
 //     color: string;
 //     score:number;
 // }
@@ -27,6 +27,10 @@ export interface Ball {
     color : string;
 }
 
+export interface canvaState {
+    width : number;
+    height : number;
+}
 
 export interface Gol {
     num: string;
@@ -50,7 +54,7 @@ export interface Gol {
 //     x: 984;
 //     y: 140;
 //     widthe: 20;
-//     hweight: 90;
+//     height: 90;
 //     color: "green";
 //     score:0;
 // }
@@ -59,7 +63,7 @@ export interface Gol {
 //     x: 20;
 //     y: 300;
 //     widthe: 20;
-//     hweight: 90;
+//     height: 90;
 //     color: "orange";
 //     score:0;
 // }
