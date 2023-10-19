@@ -9,8 +9,6 @@ import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { PrismaClient } from '@prisma/client';
 @Injectable()
 export class UsersService extends PrismaClient {
-  // constructor(private readonly prismaService: PrismaService) {}
-
   constructor(private cloudinaryService: CloudinaryService) {
     super();
   }
