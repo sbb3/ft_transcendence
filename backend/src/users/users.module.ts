@@ -18,14 +18,3 @@ import { UserGateway } from './users.gateway';
   providers: [UsersService, CloudinaryProvider, CloudinaryService, UserGateway],
 })
 export class UsersModule {}
-
-// mport { Module } from '@nestjs/common';
-// import { CloudinaryProvider } from './cloudinary.provider';
-// import { CloudinaryService } from './cloudinary.service';
-// import { UserService } from './user.service';
-// import { PrismaService } from './prisma.service';
-
-// @Module({
-//   providers: [CloudinaryProvider, CloudinaryService, UserService, PrismaService],
-// })
-// export class UserModule {}

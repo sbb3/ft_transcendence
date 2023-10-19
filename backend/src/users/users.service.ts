@@ -197,4 +197,16 @@ export class UsersService extends PrismaClient {
 
     return currentUser;
   }
+
+  async updateUserData(userId: number) {
+    const user = await this.user.update({
+      where: { id: userId },
+      data: {
+        is_profile_completed: true,
+      },
+    });
+
+    if (!user) throw new NotFoundException();
+    return user;
+  }
 }

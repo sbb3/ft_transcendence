@@ -87,7 +87,7 @@ const usersApi = apiSlice.injectEndpoints({
       query: ({ id, formData }) => ({
         url: `users/${id}/settings`,
         method: "PATCH",
-        body: { ...formData },
+        body: formData,
       }),
       async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
         try {
@@ -201,13 +201,14 @@ const usersApi = apiSlice.injectEndpoints({
     }),
     checkProfileCompleted: builder.mutation({
       query: (userId) => ({
-        url: `profile-check-completed`,
+        url: `users/profile-check-completed`,
         method: "POST",
         body: { userId },
       }),
       async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
         try {
           const result = await queryFulfilled;
+          console.log("result: ", result);
           const user = result?.data;
           await dispatch(setCurrentUser(user));
         } catch (error) {

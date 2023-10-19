@@ -27,9 +27,9 @@ const ChatLeftSidebar = ({}) => {
         Chat
       </Text>
       <Divider color="orange" />
-      {/* <SearchDMsChannels /> */}
-      {/* <Divider color="orange" /> */}
-      {/* <Channels /> */}
+      <SearchDMsChannels />
+      <Divider color="orange" />
+      <Channels />
       <Divider mt={4} color="orange" />
       <Conversations />
     </Flex>
@@ -37,3 +37,6 @@ const ChatLeftSidebar = ({}) => {
 };
 
 export default ChatLeftSidebar;
+
+// TODO: leaderboard, recent games, player rank ...
+// TODO: emit event to friend in order to update his friends list

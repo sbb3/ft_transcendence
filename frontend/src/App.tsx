@@ -15,9 +15,6 @@ import Layout from "./layouts/Layout.tsx";
 import ConversationContent from "./pages/Chat/ConversationContent.tsx";
 import ChannelContent from "./pages/Chat/ChannelContent.tsx";
 import ChatSplashScreen from "./pages/Chat/ChatSplashScreen.tsx";
-import Signin from "./pages/Signin.tsx";
-import Public from "./pages/Public.tsx";
-import Register from "./pages/Register.tsx";
 import PrefetchUsers from "./components/PrefetchUsers.tsx";
 import GameLayout from "./pages/Game/GameLayout.tsx";
 import GameStarted from "./pages/Game/GameStarted.tsx";
@@ -29,23 +26,6 @@ function App() {
       <Route path="/login" element={<StayLoggedIn />}>
         <Route index element={<Login />} />
       </Route>
-
-      {/* <Route
-        path="/login"
-        element={
-          <Public>
-            <Signin />
-          </Public>
-        }
-      />
-      <Route
-        path="/register"
-        element={
-          <Public>
-            <Register />
-          </Public>
-        }
-      /> */}
       <Route element={<AuthVerification />}>
         <Route element={<PrefetchUsers />}>
           <Route element={<CheckOTP />}>
@@ -79,8 +59,3 @@ function App() {
 }
 
 export default App;
-
-// TODO: socket jwt valid
-// TODO: prisma client error when sign in an existing user
-// fix clouadinary random name
-//  channel event methods expressjs

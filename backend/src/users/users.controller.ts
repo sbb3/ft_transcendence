@@ -3,33 +3,30 @@ import {
   Get,
   Patch,
   Param,
-  Query,
   Post,
   Delete,
-  UsePipes,
-  ValidationPipe,
   BadRequestException,
   Logger,
-  Req,
   Body,
-  UploadedFiles,
   Res,
   UploadedFile,
   UseInterceptors,
   ParseIntPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { User } from './entities/user.entity';
-import { Request } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { Express } from 'express';
-import { cp } from 'fs';
+import { Express, Response } from 'express';
+import { ApiBody, ApiOperation } from '@nestjs/swagger';
+import { userIdDto } from './dto/creatuserDto';
+import { JwtGuard } from 'src/auth/guards/jwt.guard';
+import { PrismaClient } from '@prisma/client';
 
 @Controller('users')
-export class UsersController {
-  cloudinaryConfigService: any;
-  cloudinaryService: any;
-  constructor(private readonly usersService: UsersService) {}
+export class UsersController extends PrismaClient {
+  constructor(private readonly usersService: UsersService) {
+    super();
+  }
 
   //for debug
   private readonly logger = new Logger(Controller.name);
@@ -70,6 +67,8 @@ export class UsersController {
     @Body('username') username: string,
     @UploadedFile() avatar: Express.Multer.File,
   ) {
+    console.log('userId', userId);
+    console.log('username', username);
     try {
       const user = await this.usersService.updateUserDetails(
         userId,
@@ -99,5 +98,22 @@ export class UsersController {
     const userId = Number(id);
     const friendIdNumber = Number(friendId);
     return this.usersService.deleteFriend(userId, friendIdNumber);
+  }
+
+  @ApiBody({ type: userIdDto })
+  @ApiOperation({ summary: "Set 'is_profile_completed' to true." })
+  @Post('profile-check-completed')
+  @UseGuards(JwtGuard)
+  async updateProfileCheck(
+    @Body('userId', ParseIntPipe) userId: number,
+    @Res() response: Response,
+  ) {
+    try {
+      const user = await this.usersService.updateUserData(userId);
+
+      return response.status(200).json(user);
+    } catch (error) {
+      return response.status(404).json(error);
+    }
   }
 }

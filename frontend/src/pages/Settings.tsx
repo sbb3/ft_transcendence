@@ -15,47 +15,16 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import { useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
 import { useRef } from "react";
 import { Icon, InputGroup } from "@chakra-ui/react";
 import { FiFile } from "react-icons/fi";
 import useTitle from "src/hooks/useTitle";
 import TwoFactorActivation from "src/components/Modals/TwoFactorActivation";
 import { useSelector } from "react-redux";
-import usersApi, {
+import {
   useUpdateUserSettingsMutation,
   useDisableOTPMutation,
 } from "src/features/users/usersApi";
-
-// const validationSchema = yup.object().shape({
-//   username: yup
-//     .string()
-//     // .trim()
-//     .when("username", {
-//       is: (val) => !!val,,
-//       then: yup.string().notRequired(),
-//       // otherwise: yup
-//       //   .string()
-//       //   .min(3, "Minimum length should be 3")
-//       //   .max(20, "Maximum length should be 20")
-//       //   .trim(),
-//     }),
-//   // avatar: yup
-//   //   .mixed()
-//   //   .optional()
-//   //   .test("fileSize", "Max file size is 3mb!", (files) => {
-//   //     return files && files[0]?.size <= 3000000; // 3mb
-//   //   })
-//   //   .test("fileFormat", "Only jpg, jpeg, png are accepted", (value) => {
-//   //     return (
-//   //       value &&
-//   //       (value[0]?.type === "image/jpg" ||
-//   //         value[0]?.type === "image/jpeg" ||
-//   //         value[0]?.type === "image/png")
-//   //     );
-//   //   }),
-// });
 
 const Settings = () => {
   useTitle("Settings");
@@ -78,10 +47,23 @@ const Settings = () => {
 
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  const { ref, ...rest } = register("avatar");
-
-  const [triggerGetCurrentUser, { isLoading: isLoadingGetCurrentUser }] =
-    usersApi.useLazyGetCurrentUserQuery();
+  const { ref, ...rest } = register("avatar", {
+    validate: (value) => {
+      if (value?.length > 0) {
+        if (value[0]?.size > 3000000) {
+          return "Max file size is 3mb!";
+        }
+        if (
+          value[0]?.type !== "image/jpg" &&
+          value[0]?.type !== "image/jpeg" &&
+          value[0]?.type !== "image/png"
+        ) {
+          return "Only jpg, jpeg, png are accepted";
+        }
+      }
+      return true;
+    },
+  });
 
   const [updateUserSettings, { isLoading: isUpdating }] =
     useUpdateUserSettingsMutation();
@@ -89,7 +71,19 @@ const Settings = () => {
   const [disableOTP, { isLoading: isDisablingOTP }] = useDisableOTPMutation();
 
   const onUpdateSettings = async (data: any) => {
-    console.log("username: ", data.username);
+    if (
+      (data.avatar.length === 0 && data.username === "") ||
+      data.username === currentUser?.username
+    ) {
+      toast({
+        title: "Nothing to update.",
+        description: "Please update at least one field.",
+        status: "info",
+        duration: 2000,
+        isClosable: true,
+      });
+      return;
+    }
     const formData = new FormData();
     formData.append("username", data.username);
     formData.append("avatar", data.avatar[0]);
@@ -184,70 +178,79 @@ const Settings = () => {
               onToggle={onToggle2FAModal}
             />
           )}
-          <VStack spacing={4} w={"full"}>
-            <FormControl isInvalid={!!errors.username} mt={6}>
-              <FormLabel htmlFor="username" fontSize="lg">
-                Username
-              </FormLabel>
-              <Input
-                id="username"
-                type="text"
-                placeholder="username"
-                {...register("username", {
-                  validate: (value) => {
-                    if (value) {
-                      console.log("value: ", value);
-                      return value.length >= 3 && value.length <= 20;
-                    }
-                    return true;
-                  },
-                })}
-              />
-              <FormErrorMessage>
-                {errors.username && errors.username.message}
-              </FormErrorMessage>
-            </FormControl>
-            <FormControl isInvalid={!!errors.avatar}>
-              <FormLabel htmlFor="avatar" fontSize="lg">
-                Avatar
-              </FormLabel>
-              <InputGroup onClick={() => inputRef.current?.click()}>
+          <form
+            onSubmit={handleSubmit(onUpdateSettings)}
+            encType="multipart/form-data"
+          >
+            <VStack spacing={4} w={"full"}>
+              <FormControl isInvalid={!!errors.username} mt={6}>
+                <FormLabel htmlFor="username" fontSize="lg">
+                  Username
+                </FormLabel>
                 <Input
-                  id="avatar"
-                  type="file"
-                  hidden
-                  accept="image/*"
-                  {...rest}
-                  ref={(e) => {
-                    ref(e);
-                    inputRef.current = e;
-                  }}
+                  id="username"
+                  type="text"
+                  placeholder="username"
+                  {...register("username", {
+                    validate: (value) => {
+                      if (value) {
+                        if (value.length < 3) {
+                          return "Minimum length should be 3";
+                        }
+                        if (value.length > 20) {
+                          return "Maximum length should be 20";
+                        }
+                        if (value.includes(" ")) {
+                          return "Username should not contain spaces";
+                        }
+                      }
+                      return true;
+                    },
+                  })}
                 />
-                <Button leftIcon={<Icon as={FiFile} />}>Upload</Button>
-              </InputGroup>
+                <FormErrorMessage>
+                  {errors.username && errors.username.message}
+                </FormErrorMessage>
+              </FormControl>
+              <FormControl isInvalid={!!errors.avatar}>
+                <FormLabel htmlFor="avatar" fontSize="lg">
+                  Avatar
+                </FormLabel>
+                <InputGroup onClick={() => inputRef.current?.click()}>
+                  <Input
+                    id="avatar"
+                    type="file"
+                    hidden
+                    accept="image/*"
+                    {...rest}
+                    ref={(e) => {
+                      ref(e);
+                      inputRef.current = e;
+                    }}
+                  />
+                  <Button leftIcon={<Icon as={FiFile} />}>Upload</Button>
+                </InputGroup>
 
-              <FormErrorMessage>
-                {errors.avatar && errors?.avatar.message}
-              </FormErrorMessage>
-            </FormControl>
-          </VStack>
-          <Flex w={"full"} justify={"flex-end"} align={"center"} mt={8}>
-            <Button
-              colorScheme="orange"
-              mr={3}
-              px={8}
-              isLoading={
-                isUpdating || isDisablingOTP || isLoadingGetCurrentUser
-              }
-              isDisabled={
-                isUpdating || isDisablingOTP || isLoadingGetCurrentUser
-              }
-              cursor="pointer"
-              onClick={handleSubmit(onUpdateSettings)}
-            >
-              Save
-            </Button>
-          </Flex>
+                <FormErrorMessage>
+                  {errors.avatar && errors?.avatar.message}
+                </FormErrorMessage>
+              </FormControl>
+            </VStack>
+
+            <Flex w={"full"} justify={"flex-end"} align={"center"} mt={8}>
+              <Button
+                colorScheme="orange"
+                mr={3}
+                px={8}
+                isLoading={isUpdating || isDisablingOTP}
+                isDisabled={isUpdating || isDisablingOTP}
+                cursor="pointer"
+                type="submit"
+              >
+                Save
+              </Button>
+            </Flex>
+          </form>
         </Flex>
       </Flex>
       <Box>
