@@ -19,9 +19,7 @@ import "src/styles/scrollbar.css";
 import { ChevronDownIcon, ChevronRightIcon } from "@chakra-ui/icons";
 import { FiPlus } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
-import conversationApi, {
-  useGetConversationsQuery,
-} from "src/features/conversations/conversationsApi";
+import { useGetConversationsQuery } from "src/features/conversations/conversationsApi";
 import { useSelector } from "react-redux";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -31,8 +29,6 @@ import DeleteConversationAlert from "./DeleteConversationAlert";
 import AddDirectMessage from "src/components/Chat/AddDirectMessage";
 import Loader from "src/components/Utils/Loader";
 import { createSocketClient } from "src/app/socket/client";
-import store from "src/app/store";
-import { apiSlice } from "src/app/api/apiSlice";
 dayjs.extend(relativeTime);
 
 const Conversations = ({}) => {

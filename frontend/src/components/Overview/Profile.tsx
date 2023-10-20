@@ -5,11 +5,9 @@ import {
   CircularProgress,
   CircularProgressLabel,
   Flex,
-  Heading,
   Icon,
   IconButton,
   Image,
-  Progress,
   Stack,
   Text,
   useToast,
@@ -34,8 +32,6 @@ import { v4 as uuidv4 } from "uuid";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
-import store from "src/app/store";
 import notificationsApi from "src/features/notifications/notificationsApi";
 dayjs.extend(relativeTime);
 
@@ -66,7 +62,6 @@ interface ProfileProps {
 const Profile = ({ user }: ProfileProps) => {
   const currentUser = useSelector((state: any) => state?.user?.currentUser);
   const toast = useToast();
-  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const [deleteFriend, { isLoading: isDeletingFriend }] =
@@ -81,38 +76,6 @@ const Profile = ({ user }: ProfileProps) => {
     (parseInt(user?.gameWin) /
       (parseInt(user?.gameWin) + parseInt(user?.gameLoss))) *
     100;
-
-  // const [triggerGetCurrentUser, { isLoading: isLoadingGetCurrentUser }] =
-  //   usersApi.useLazyGetCurrentUserQuery();
-
-  // useEffect(() => {
-  //   const socket = ClientSocket();
-  //   socket.on("friend_accepted", async (data: any) => {
-  //     // console.log("incoming friend_accepted: ", data);
-  //     // store.dispatch(setCurrentUser(data?.data));
-  //     if (data?.data?.id === currentUser?.id) {
-  //       try {
-  //         // await prefetchUser(currentUser?.id).then((data) => {
-  //         //   store.dispatch(setCurrentUser(data?.data));
-  //         // });
-  //         await triggerGetCurrentUser(currentUser?.id).unwrap();
-  //       } catch (error) {
-  //         console.log("error: ", error);
-  //         toast({
-  //           title: "Error",
-  //           description: "Error happened while accepting friend request",
-  //           status: "error",
-  //           duration: 2000,
-  //           isClosable: true,
-  //         });
-  //       }
-  //     }
-  //   });
-
-  //   return () => {
-  //     socket.disconnect();
-  //   };
-  // }, []);
 
   const [
     triggerGetConversationByMembersEmails,
@@ -131,14 +94,7 @@ const Profile = ({ user }: ProfileProps) => {
         friendId,
       }).unwrap();
       await triggerGetCurrentUser(currentUser?.id);
-      // dispatch(
-      //   setCurrentUser({
-      //     ...currentUser,
-      //     friends: currentUser?.friends?.filter(
-      //       (friend) => friend !== friendId
-      //     ),
-      //   })
-      // );
+
       toast({
         title: "Success",
         description: "Friend has been deleted.",

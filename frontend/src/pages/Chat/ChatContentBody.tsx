@@ -3,7 +3,7 @@ import * as ScrollArea from "@radix-ui/react-scroll-area";
 import "src/styles/scrollbarChatBody.css";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import ConversationMessage from "./ConversationMessage";
+import ConversationMessage from "./Conversation/ConversationMessage";
 import messagesApi, {
   useGetMessagesByConversationIdQuery,
 } from "src/features/messages/messagesApi";

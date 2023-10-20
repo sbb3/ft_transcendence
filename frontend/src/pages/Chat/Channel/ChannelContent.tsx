@@ -1,6 +1,6 @@
 import { Flex, Stack, Text, useDisclosure, useToast } from "@chakra-ui/react";
-import ChatContentFooter from "./ChatContentFooter";
-import ChatContentHeader from "./ChatContentHeader";
+import ChatContentFooter from "../ChatContentFooter";
+import ChatContentHeader from "../ChatContentHeader";
 import { useNavigate, useParams } from "react-router-dom";
 import Loader from "src/components/Utils/Loader";
 import { useSelector } from "react-redux";

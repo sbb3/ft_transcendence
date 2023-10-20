@@ -17,21 +17,20 @@ import { useGetNotificationsQuery } from "src/features/notifications/notificatio
 import Loader from "./Utils/Loader";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useDeleteNotificationMutation } from "src/features/notifications/notificationsApi";
 import { CloseIcon } from "@chakra-ui/icons";
 import usersApi, { useAddFriendMutation } from "src/features/users/usersApi";
 import { useAcceptGameChallengeMutation } from "src/features/game/gameApi";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 
 dayjs.extend(relativeTime);
 
 function Notifications() {
   const currentUser = useSelector((state: any) => state.user.currentUser);
-  const dispatch = useDispatch();
   const toast = useToast();
   const navigate = useNavigate();
-  const location = useLocation();
+  // const location = useLocation();
   // console.log("location: ", location);
   const {
     data: notifications = [],
@@ -449,8 +448,16 @@ function Notifications() {
                         size={"md"}
                         color={"white"}
                         icon={<Icon as={FaCheck} />}
-                        isLoading={isDeleting || isLoadingGetCurrentUser}
-                        isDisabled={isDeleting || isLoadingGetCurrentUser}
+                        isLoading={
+                          isDeleting ||
+                          isLoadingGetCurrentUser ||
+                          isAcceptingGameChallenge
+                        }
+                        isDisabled={
+                          isDeleting ||
+                          isLoadingGetCurrentUser ||
+                          isAcceptingGameChallenge
+                        }
                         _hover={{
                           bg: "white",
                           color: "green.500",

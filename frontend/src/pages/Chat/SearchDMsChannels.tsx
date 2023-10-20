@@ -119,7 +119,7 @@ const SearchDMsChannels = () => {
               backgroundImage: "url('src/assets/img/BlackNoise.png')",
               bgSize: "cover",
               bgRepeat: "no-repeat",
-              backgroundColor: "transparent",
+              backgroundColor: "#FF7F00",
             }}
             closeOnSelect={false}
             p={1}

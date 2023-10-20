@@ -1,6 +1,5 @@
 import { Routes, Route } from "react-router-dom";
-import AuthVerification from "./features/auth/AuthVerification";
-import StayLoggedIn from "./features/auth/StayLoggedIn.tsx";
+
 import {
   Overview,
   Settings,
@@ -10,15 +9,17 @@ import {
   Login,
   NotFoundPage,
   PlayerProfile,
-} from "./pages";
-import Layout from "./layouts/Layout.tsx";
-import ConversationContent from "./pages/Chat/ConversationContent.tsx";
-import ChannelContent from "./pages/Chat/ChannelContent.tsx";
-import ChatSplashScreen from "./pages/Chat/ChatSplashScreen.tsx";
-import PrefetchUsers from "./components/PrefetchUsers.tsx";
-import GameLayout from "./pages/Game/GameLayout.tsx";
-import GameStarted from "./pages/Game/GameStarted.tsx";
-import CheckOTP from "./features/auth/CheckOTP.tsx";
+  ConversationContent,
+  ChannelContent,
+  ChatSplashScreen,
+  Layout,
+  PrefetchUsers,
+  GameLayout,
+  GameStarted,
+  CheckOTP,
+  AuthVerification,
+  StayLoggedIn,
+} from ".";
 
 function App() {
   return (
@@ -59,3 +60,5 @@ function App() {
 }
 
 export default App;
+
+// TODO: leaderboard, recent games, player rank ...

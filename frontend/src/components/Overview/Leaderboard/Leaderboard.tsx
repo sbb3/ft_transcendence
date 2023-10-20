@@ -6,7 +6,6 @@ import { useGetLeaderboardQuery } from "src/features/leaderboard/leaderboardApi"
 import Loader from "../../Utils/Loader";
 import LeaderboardCard from "./LeaderboardCard";
 import TopThreePlayers from "./TopThreePlayers";
-import { useEffect } from "react";
 
 // TODO: either leaderboard have a separate collection, or we could get all users and sort them by their rank
 const Leaderboard = () => {

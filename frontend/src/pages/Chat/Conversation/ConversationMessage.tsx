@@ -1,5 +1,5 @@
 import { Avatar, Flex, Text } from "@chakra-ui/react";
-import ChatRightModal from "./ChatRightModal";
+import ChatRightModal from "../ChatRightModal";
 
 const ConversationMessage = ({
   message,

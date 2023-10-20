@@ -3,7 +3,7 @@ import * as ScrollArea from "@radix-ui/react-scroll-area";
 import "src/styles/scrollbarChatBody.css";
 import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
-import ChatRightModal from "./ChatRightModal";
+import ChatRightModal from "../ChatRightModal";
 import usersApi from "src/features/users/usersApi";
 import ChannelMessage from "./ChannelMessage";
 

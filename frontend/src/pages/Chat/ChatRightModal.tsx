@@ -22,7 +22,6 @@ import { FiMessageSquare } from "react-icons/fi";
 import { AiOutlineUserAdd } from "react-icons/ai";
 import { IoGameControllerOutline } from "react-icons/io5";
 import { MdBlockFlipped } from "react-icons/md";
-import { GoEye } from "react-icons/go";
 import { ExternalLinkIcon } from "@chakra-ui/icons";
 import usersApi, { useGetUserByIdQuery } from "src/features/users/usersApi";
 import Loader from "src/components/Utils/Loader";
@@ -30,45 +29,12 @@ import conversationApi from "src/features/conversations/conversationsApi";
 import { v4 as uuidv4 } from "uuid";
 import { useCreateConversationWithoutMessageMutation } from "src/features/conversations/conversationsApi";
 import { useSelector } from "react-redux";
-
 import notificationsApi from "src/features/notifications/notificationsApi";
 import store from "src/app/store";
-import { setCurrentUser } from "src/features/users/usersSlice";
-import { useEffect, useReducer } from "react";
 import { CgUnblock } from "react-icons/cg";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import channelsApi from "src/features/channels/channelsApi";
 dayjs.extend(relativeTime);
-
-// const iconButtonStyles = [
-//   {
-//     label: "Send a message",
-//     icon: <FiMessageSquare />,
-//     to: "/chat/conversation",
-//   },
-//   {
-//     label: "View profile",
-//     icon: <HiOutlineUserCircle />,
-//     to: "/profile",
-//   },
-//   {
-//     label: "Send friend request",
-//     icon: <AiOutlineUserAdd />,
-//   },
-//   {
-//     label: "Send game request",
-//     icon: <IoGameControllerOutline />,
-//   },
-//   {
-//     label: "Spectacle",
-//     icon: <GoEye />,
-//   },
-//   {
-//     label: "Block",
-//     icon: <MdBlockFlipped />,
-//   },
-// ];
 
 const ChatRightModal = ({ participantUserId, isOpen, toggleProfileDrawer }) => {
   console.log("participantUserId: ", participantUserId);
@@ -76,41 +42,8 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleProfileDrawer }) => {
   const prefetchUser = usersApi.usePrefetch("getCurrentUser", {
     force: true,
   });
-  const [, forceUpdate] = useReducer((x) => x + 1, 0);
   const navigate = useNavigate();
   const toast = useToast();
-
-  const [triggerGetCurrentUser, { isLoading: isLoadingGetCurrentUser }] =
-    usersApi.useLazyGetCurrentUserQuery();
-
-  // useEffect(() => {
-  //   const socket = ClientSocket();
-  //   socket.on("friend_accepted", async (data: any) => {
-  //     // console.log("incoming friend_accepted: ", data);
-  //     // store.dispatch(setCurrentUser(data?.data));
-  //     if (data?.data?.id === currentUser?.id) {
-  //       try {
-  //         // await prefetchUser(currentUser?.id).then((data) => {
-  //         //   store.dispatch(setCurrentUser(data?.data));
-  //         // });
-  //         await triggerGetCurrentUser(currentUser?.id).unwrap();
-  //       } catch (error) {
-  //         console.log("error: ", error);
-  //         toast({
-  //           title: "Error",
-  //           description: "Error happened while accepting friend request",
-  //           status: "error",
-  //           duration: 2000,
-  //           isClosable: true,
-  //         });
-  //       }
-  //     }
-  //   });
-
-  //   return () => {
-  //     socket.disconnect();
-  //   };
-  // }, []);
 
   const {
     data: participantUser = {} as any,
@@ -119,6 +52,9 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleProfileDrawer }) => {
   } = useGetUserByIdQuery(participantUserId, {
     refetchOnMountOrArgChange: true,
   });
+
+  const [triggerGetCurrentUser, { isLoading: isLoadingGetCurrentUser }] =
+    usersApi.useLazyGetCurrentUserQuery();
 
   const [
     triggerGetConversationByMembersEmails,
@@ -135,9 +71,6 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleProfileDrawer }) => {
   const [unblockUser] = usersApi.useUnblockUserMutation();
 
   if (isLoadingParticipantUser || isFetchingParticipantUser) return <Loader />;
-
-  // console.log("participantUser: ", participantUser);
-  // console.log("currentUser: ", currentUser);
 
   const handleSendDirectMessage = async () => {
     try {
@@ -359,8 +292,8 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleProfileDrawer }) => {
         <Flex justify="center" align="center" w="full">
           <Avatar
             boxSize={"160px"}
-            name="Anas Douib"
-            src="https://images.unsplash.com/photo-1601933973783-43cf8a7d4c5f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+            name={participantUser?.name}
+            src={participantUser?.avatar}
             borderColor="green.400"
             borderWidth="3px"
           />
@@ -384,8 +317,7 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleProfileDrawer }) => {
               color={"green.400"}
             />
             <Text fontSize="12px" fontWeight="light" color="whiteAlpha.900">
-              {/* {participantUser?.status} */}
-              online
+              {participantUser?.status}
             </Text>
           </Flex>
         </Flex>
@@ -430,16 +362,13 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleProfileDrawer }) => {
           // wrap={"wrap"}
         >
           <IconButton
-            // key={label}
             size="sm"
             fontSize="lg"
             bg={"pong_cl_primary"}
             color={"white"}
             borderRadius={8}
             aria-label="Send a message"
-            // aria-label={label}
             icon={<FiMessageSquare />}
-            // icon={icon}
             _hover={{ bg: "white", color: "pong_cl_primary" }}
             onClick={handleSendDirectMessage}
             isLoading={
@@ -490,20 +419,6 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleProfileDrawer }) => {
             icon={<IoGameControllerOutline />}
             _hover={{ bg: "white", color: "pong_cl_primary" }}
             onClick={handleSendGameChallengeNotification}
-          />
-          <IconButton
-            size="sm"
-            fontSize="lg"
-            bg={"pong_cl_primary"}
-            color={"white"}
-            borderRadius={8}
-            aria-label="Spectacle"
-            icon={<GoEye />}
-            _hover={{ bg: "white", color: "pong_cl_primary" }}
-            onClick={() => {
-              // TODO: Spectacle
-              toggleProfileDrawer();
-            }}
           />
           {currentUser?.blocked.includes(participantUser?.id) ? (
             <IconButton

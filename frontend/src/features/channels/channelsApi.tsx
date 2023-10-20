@@ -38,6 +38,13 @@ const channelsApi = apiSlice.injectEndpoints({
                 const channel = draft?.find((c) => c.id === data?.data?.id);
                 if (!channel?.id) {
                   draft?.unshift(data?.data);
+                } else {
+                  const channelIndex = draft?.findIndex(
+                    (c) => c.id === data?.data?.id
+                  );
+                  if (channelIndex !== -1) {
+                    draft[channelIndex] = data?.data;
+                  }
                 }
               });
             }
@@ -65,7 +72,7 @@ const channelsApi = apiSlice.injectEndpoints({
         try {
           await cacheDataLoaded;
           socket.on("channel", (data) => {
-            console.log("incoming channel data: ", data);
+            // console.log("incoming channel data: ", data);
             const isDataBelongToThisUser = data.data.members.find(
               (m) => m.id === getState()?.user?.currentUser?.id
             );
@@ -73,8 +80,14 @@ const channelsApi = apiSlice.injectEndpoints({
               updateCachedData((draft) => {
                 const channel = draft?.find((c) => c.id === data?.data?.id);
                 if (!channel?.id) {
-                  // TODO: channel data updated, member got kicked or banned
                   draft?.unshift(data?.data);
+                } else {
+                  const channelIndex = draft?.findIndex(
+                    (c) => c.id === data?.data?.id
+                  );
+                  if (channelIndex !== -1) {
+                    draft[channelIndex] = data?.data;
+                  }
                 }
               });
             }
@@ -212,11 +225,8 @@ const channelsApi = apiSlice.injectEndpoints({
           )
         );
 
-        // TODO: invalidates the messages cache and remove the messages from the channel also in the db
-
         try {
           await queryFulfilled;
-          // TODO: test again this
           await dispatch(
             channelMessagesApi.util.prefetch(
               "getMessagesByChannelName",

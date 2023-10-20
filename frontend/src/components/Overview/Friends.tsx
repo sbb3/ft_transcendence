@@ -6,13 +6,10 @@ import {
   Box,
   Flex,
   Icon,
-  IconButton,
   InputGroup,
   InputLeftElement,
   Stack,
   Text,
-  Link,
-  useToast,
 } from "@chakra-ui/react";
 import {
   AutoComplete,

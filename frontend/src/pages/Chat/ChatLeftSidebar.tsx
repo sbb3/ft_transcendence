@@ -2,8 +2,8 @@ import { Flex, Text } from "@chakra-ui/react";
 import "src/styles/scrollbar.css";
 import SearchDMsChannels from "./SearchDMsChannels";
 import Divider from "src/components/Divider";
-import Channels from "./Channels";
-import Conversations from "./Conversations";
+import Channels from "./Channel/Channels";
+import Conversations from "./Conversation/Conversations";
 
 const ChatLeftSidebar = ({}) => {
   return (
@@ -37,6 +37,3 @@ const ChatLeftSidebar = ({}) => {
 };
 
 export default ChatLeftSidebar;
-
-// TODO: leaderboard, recent games, player rank ...
-// TODO: emit event to friend in order to update his friends list

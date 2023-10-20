@@ -1,8 +1,8 @@
 import { Flex, Stack, Text, useDisclosure, useToast } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
-import ChatContentFooter from "./ChatContentFooter";
-import ChatContentHeader from "./ChatContentHeader";
-import ChatContentBody from "./ChatContentBody";
+import ChatContentFooter from "../ChatContentFooter";
+import ChatContentHeader from "../ChatContentHeader";
+import ChatContentBody from "../ChatContentBody";
 import { useNavigate, useParams } from "react-router-dom";
 import Loader from "src/components/Utils/Loader";
 import { useAddMessageMutation } from "src/features/messages/messagesApi";
