@@ -1,6 +1,6 @@
 import { Routes, Route } from "react-router-dom";
-import AuthVerification from "./features/auth/AuthVerification.tsx";
-import StayLoggedIn from "./features/auth/StayLoggedIn.tsx";
+// import AuthVerification from "./features/auth/AuthVerification.tsx";
+// import StayLoggedIn from "./features/auth/StayLoggedIn.tsx";
 import {
   Overview,
   Settings,
@@ -13,11 +13,11 @@ import {
   PlayerProfile,
 } from "./pages/index.tsx";
 import Layout from "./layouts/Layout.tsx";
-import ChatContent from "./pages/Chat/ChatContent.tsx";
-import ChatSplashScreen from "./pages/Chat/ChatSplashScreen.tsx";
-import Signin from "./pages/Signin.tsx";
-import Public from "./pages/Public.tsx";
-import Register from "./pages/Register.tsx";
+// import ChatContent from "./pages/Chat/ChatContent.tsx";
+// import ChatSplashScreen from "./pages/Chat/ChatSplashScreen.tsx";
+// import Signin from "./pages/Signin.tsx";
+// import Public from "./pages/Public.tsx";
+// import Register from "./pages/Register.tsx";
 
 function App() {
   return (

@@ -4,6 +4,7 @@ import path from 'path';
 import { Server, Socket } from 'socket.io';
 import {Paddle, Ball, Gol, canvaState} from "./game.interface";
 import {update, mouvePaddle} from "./game.update";
+import { interval } from 'rxjs';
 
 @WebSocketGateway( {
   namespace : 'play',
@@ -49,9 +50,9 @@ export class GameGateway implements OnGatewayInit,  OnGatewayConnection, OnGatew
     x: this.canvaS.width/2,
     y: this.canvaS.height/2,
     radius: 10,
-    speed: 2,
-    velocityX: 2,
-    velocityY: 2,
+    speed: 5,
+    velocityX: 5,
+    velocityY: 5,
     color : "white"
   };
 
@@ -88,35 +89,49 @@ export class GameGateway implements OnGatewayInit,  OnGatewayConnection, OnGatew
 
   @SubscribeMessage('initMyP')
   initMyPa(client: Socket):void{
-    this.wss.emit('canvaState', this.canvaS);
-    this.wss.emit('intBall', this.ball)
-    this.wss.emit('herP', this.herP);
-    this.wss.emit('myP', this.myP);
-    this.wss.emit('myGol', this.mGol);
-    this.wss.emit('herGol', this.hGol);
-    
-    // console.log(this.b);
+    console.log('initMyPa called');
+    console.log('this.canvaS:', this.canvaS);
+  
+    if (this.canvaS) {
+      this.wss.emit('canvaState', this.canvaS, this.myP, this.herP);
+    } else {
+      console.log('this.canvaS is not defined or empty.');
+    }
   }
 
 
+  
+
+  // @Interval(1000/16)
+  // handleInterval() {
+
+  // }
+
+  
+
   @SubscribeMessage('mvBall')
-  mvBall(client : Socket) {
-    this.ball = update(this.ball, this.canvaS, this.myP, this.herP);
-    this.herP.y += this.ball.y - (this.herP.y + this.herP.height / 2);
-    this.wss.emit('mvBall', this.ball);
-    this.wss.emit('bootPaddel', this.herP);
+  handlemvBall(client : Socket) 
+  {
+    // const intrval = interval(16.6).subscribe(() => {
+      this.ball = update(this.ball, this.canvaS, this.myP, this.herP);
+      this.herP.y += this.ball.y - (this.herP.y + this.herP.height / 2);
+      this.wss.emit('mvBall', this.ball, this.herP);
+      // this.wss.emit('bootPaddel', this.herP);
+    // })
   }
 
   @SubscribeMessage('mvPaddle') 
-  mvPaddel(client :Socket, mouseY) {
-    this.myP = mouvePaddle(this.myP, mouseY)
-    this.wss.emit('paddle', this.myP);
+  mvPaddel(client :Socket, num) {
+    this.myP = mouvePaddle(this.myP, num, this.canvaS)
+    // this.logger.log('mouseY : ', mouseY, 'paddleY : ', this.myP.y);
+    // this.myP.y = mouseY;
+    this.wss.emit('mvPaddle', this.myP);
   }
 
-  @SubscribeMessage('ballMv')
-  generateBallMv(client :Socket) {
-    this.wss.emit('bal', this.ball);
-  }
+  // @SubscribeMessage('ballMv')
+  // generateBallMv(client :Socket) {
+  //   this.wss.emit('bal', this.ball);
+  // }
 
   // @SubscribeMessage('msgToServer')
   // handleMessage(client: Socket, message: string): void {
@@ -134,3 +149,7 @@ export class GameGateway implements OnGatewayInit,  OnGatewayConnection, OnGatew
   //   // this.wss.emit('message', message);
   // }
 }
+// function Interval(arg0: number): (target: GameGateway, propertyKey: "handleInterval", descriptor: TypedPropertyDescriptor<() => void>) => void | TypedPropertyDescriptor<() => void> {
+//   throw new Error('Function not implemented.');
+// }
+

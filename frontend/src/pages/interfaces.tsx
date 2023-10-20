@@ -1,3 +1,10 @@
+// import { useState, useRef, useEffect , React} from "react";
+
+
+// const canvasRef = useRef(null);
+// export const canvas = canvasRef.current;
+// export const ctx = canvas.getContext("2d");
+
 export interface Paddle {
     x: number;
     y: number;
