@@ -1,6 +1,5 @@
 import {
   Box,
-  Button,
   Flex,
   FormControl,
   FormErrorMessage,
@@ -43,14 +42,13 @@ function Support() {
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
     reset,
   } = useForm<FormData>();
 
   const { submit } = useWeb3forms({
     apikey: import.meta.env.VITE_WEB3FORMS_API_KEY,
     onSuccess(successMessage, data) {
-      // console.log({ data: { name: 'name', email: 'email@gmail.com', msg: 'eeee' }, message: "Email sent successfully!", success: true });
       toast({
         title: "Message sent.",
         description: successMessage,
@@ -72,11 +70,14 @@ function Support() {
 
   const onSubmit = async (data: any) => {
     console.log(data);
-    await submit(data);
-    reset();
+    try {
+      await submit(data);
+      reset();
+    } catch (error) {
+      console.log("error: ", error);
+    }
   };
 
-  //   style={{ border: "2px solid", borderColor: "green" }}
   return (
     <Flex
       pos="relative"
@@ -93,7 +94,6 @@ function Support() {
           <Text
             fontSize="3xl"
             style={{
-              // color: "white",
               color: "white",
               fontWeight: "bold",
               letterSpacing: 1,

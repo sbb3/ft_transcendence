@@ -1,40 +1,41 @@
 import { apiSlice } from "src/app/api/apiSlice";
-import io from "socket.io-client";
-import useSocket from "src/hooks/useSocket";
+import { createSocketClient } from "src/app/socket/client";
+import conversationApi from "../conversations/conversationsApi";
+import notificationsApi from "../notifications/notificationsApi";
+import { v4 as uuidv4 } from "uuid";
 
 const messagesApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getMessagesByConversationId: builder.query({
-      query: (conversationId) => `/messages?conversationId=${conversationId}`,
+      query: (conversationId) =>
+        `conversations/messages?conversationId=${conversationId}&page=${1}`,
+      // transformResponse: (response: any) => {
+      //   const messages = response?.messages?.reverse();
+      //   const totalPages = response?.totalPages;
+      //   return { messages, totalPages };
+      // },
       async onCacheEntryAdded(
         arg,
-        { updateCachedData, cacheDataLoaded, cacheEntryRemoved }
+        { getState, updateCachedData, cacheDataLoaded, cacheEntryRemoved }: any
       ) {
-        // const socket = useSocket();
-        const socket = io(import.meta.env.VITE_API_URL as string, {
-          reconnectionDelay: 1000,
-          reconnection: true,
-          transports: ["websocket"],
-          upgrade: false,
-          rejectUnauthorized: false,
-        });
+        const currentUser = getState()?.user?.currentUser?.id;
+        const socket = createSocketClient();
+
         try {
           await cacheDataLoaded;
-          socket.on("message", (data) => {
-            console.log("data: ", data);
-            updateCachedData((draft) => {
-              // console.log("before updateCachedData draft: ", draft);
-              const message = draft?.find((m) => m.id === data?.data?.id);
-              if (message?.id) {
-                // console.log("do nothing, ", message);
-                console.log("message already exist in the cache: ", message);
-              } else {
-                // console.log("message not in the cache, inserting it ", message);
-                draft?.push(data?.data);
-              }
-              // console.log("socket data: ", data?.data);
-              // console.log("after updateCachedData draft?.data: ", draft);
-            });
+          socket.on("conversationMessage", (data) => {
+            const sender = data.data.sender;
+            const receiver = data.data.receiver;
+            if (currentUser === sender || currentUser === receiver) {
+              updateCachedData((draft) => {
+                const message = draft?.messages?.find(
+                  (m) => m.id === data?.data?.id
+                );
+                if (!message?.id) {
+                  draft?.messages?.unshift(data?.data); // recent message on top
+                }
+              });
+            }
           });
         } catch (error) {
           console.log("error: ", error);
@@ -43,54 +44,135 @@ const messagesApi = apiSlice.injectEndpoints({
         }
       },
     }),
+    getMoreMessagesByConversationId: builder.query({
+      query: ({ conversationId, page }) =>
+        `conversations/messages?conversationId=${conversationId}&page=${page}`,
+      // transformResponse: (response: any) => {
+      //   const messages = response?.messages?.reverse();
+      //   const totalPages = response?.totalPages;
+      //   return { messages, totalPages };
+      // },
+      async onQueryStarted(
+        arg,
+        { dispatch, getState, updateCachedData, queryFulfilled }: any
+      ) {
+        const { conversationId } = arg;
+        try {
+          const result = await queryFulfilled;
+          const messages = result?.data?.messages;
+          const totalPages = result?.data?.totalPages;
+          if (messages?.length > 0) {
+            dispatch(
+              messagesApi.util.updateQueryData(
+                "getMessagesByConversationId",
+                conversationId,
+                (draft) => {
+                  draft?.messages?.push(...messages); // older messages on bottom
+                  draft.totalPages = Number(totalPages);
+                }
+              )
+            );
+          }
+        } catch (error) {
+          console.log("error: ", error);
+        }
+      },
+    }),
     addMessage: builder.mutation({
-      query: (body) => ({
-        url: `/messages`,
+      query: (msgData) => ({
+        url: `conversations/addmessage`,
         method: "POST",
-        body
+        body: { ...msgData },
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
-        // console.log("body: ", arg);
-        // for optimistic updates, for me
+      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }: any) {
         const messageData = arg;
-        const { conversationId } = messageData;
-        // console.log('messageData: ', messageData);
-        // console.log("conversationId: ", conversationId);
-        const patchResult = dispatch(
+        const { conversationId, content, lastMessageCreatedAt } = messageData;
+        const patchResultMsg = dispatch(
           messagesApi?.util?.updateQueryData(
             "getMessagesByConversationId",
-            conversationId,
+            conversationId.toString(),
             (draft) => {
-              console.log("updateQueryData: ", draft);
-              draft?.push(messageData);
+              draft?.messages?.unshift(messageData);
+            }
+          )
+        );
+        const patchResultCOnv = dispatch(
+          conversationApi?.util?.updateQueryData(
+            "getConversations",
+            getState()?.user?.currentUser?.email,
+            (draft) => {
+              const conversation = draft?.find((c) => c.id === conversationId);
+              if (conversation?.id) {
+                conversation.lastMessageContent = content;
+                conversation.lastMessageCreatedAt = lastMessageCreatedAt;
+                draft = { ...draft, ...conversation };
+              }
             }
           )
         );
         try {
-          const result = await queryFulfilled;
-          console.log("result: ", result);
-          // const conversationId = arg?.conversationId;
-          // dispatch(
-          //   messagesApi.endpoints.getMessagesByConversationId.initiate(
-          //     conversationId,
-          //     {
-          //       // subscribe: (result) => {
-          //       //   console.log("result: ", result);
-          //       // },
-          //       forceRefetch: true,
-          //     }
-          //   )
-          // );
+          await queryFulfilled;
+          dispatch(
+            conversationApi.endpoints.updateConversation.initiate({
+              id: conversationId,
+              message: {
+                lastMessageContent: content,
+                lastMessageCreatedAt: lastMessageCreatedAt,
+              },
+            })
+          );
+          dispatch(
+            notificationsApi.endpoints.sendNotification.initiate({
+              id: uuidv4(),
+              conversationId: messageData.conversationId,
+              type: "message",
+              senderId: messageData.sender,
+              receiverId: messageData.receiver,
+            })
+          );
         } catch (error) {
           console.log("error : ", error);
-          patchResult.undo();
+          patchResultMsg.undo();
+          patchResultCOnv.undo();
+        }
+      },
+    }),
+    createMessage: builder.mutation({
+      query: (data) => ({
+        url: `conversations/addmessage`,
+        method: "POST",
+        body: { ...data },
+      }),
+      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }: any) {
+        const messageData = arg;
+        const { conversationId } = messageData;
+        // optimistic update
+        const patchResultMsg = dispatch(
+          messagesApi?.util?.updateQueryData(
+            "getMessagesByConversationId",
+            conversationId,
+            (draft) => {
+              draft?.messages?.unshift(messageData);
+            }
+          )
+        );
+
+        try {
+          await queryFulfilled;
+        } catch (error) {
+          console.log("error : ", error);
+          patchResultMsg.undo();
         }
       },
     }),
   }),
 });
 
-export const { useGetMessagesByConversationIdQuery, useAddMessageMutation } =
-  messagesApi;
+export const {
+  useGetMessagesByConversationIdQuery,
+  useAddMessageMutation,
+  useCreateMessageMutation,
+  useGetMoreMessagesByConversationIdQuery,
+} = messagesApi;
 
 export default messagesApi;

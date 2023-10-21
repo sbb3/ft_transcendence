@@ -3,8 +3,6 @@ import { Box, Flex, Image, Stack, Text } from "@chakra-ui/react";
 const ChatSplashScreen = () => {
   return (
     <Flex
-      //   direction="row"
-      // bg={"pong_bg_secondary"}
       pos="relative"
       alignSelf={"stretch"}
       justify="center"
@@ -18,16 +16,12 @@ const ChatSplashScreen = () => {
       bgImage={`url('src/assets/img/BlackNoise.png')`}
       bgSize="cover"
       bgRepeat="no-repeat"
-      //   gap={6}
     >
       <Stack
-        // ml={2}
-        // bg={"gray.400"}
         justify="center"
         align="center"
         w={"full"}
         h={"full"}
-        // borderRadius={20}
         borderRightRadius={20}
         spacing={6}
         p={{ base: 2, sm: 4, md: 8, lg: 12 }}
@@ -37,8 +31,6 @@ const ChatSplashScreen = () => {
             src="src/assets/svgs/messaging_girl.svg"
             alt="Messaging girl"
             borderRadius={20}
-            // w="320px"
-            // h="300px"
           />
         </Flex>
         <Stack spacing={2} align={"start"} justify={"center"}>

@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,94 +8,84 @@ datasource db {
 }
 
 model user {
-  id Int    @id @default(autoincrement())
-  createdAt   DateTime  @default(now())
-  player_name String @unique
-  status String
-  max_score Int
-  level String
-  otp_enavled Boolean @default(false)
-  otp_secrect_tocken String
-  is_profile_has_been_set Boolean @default(false)
-  fr_user friend_user[]
-  bq_user blocked_user[]
+  id             Int            @id @default(autoincrement())
+  createdAt      DateTime       @default(now())
+  level          String?
+  friends      Int[] 
+  blocked     Int[]
+  email                String   @unique
+  username             String   @unique
+  name                 String
+  avatar               String
+  campus               String
+  status               String
+  is_otp_enabled       Boolean  @default(false)
+  is_profile_completed Boolean  @default(false)
+  is_otp_validated     Boolean  @default(false)
+  otp_secret           String?
   not_req request[] @relation(name: "user")
-  send_req request[] @relation(name: "user_send")
-  not_info notification[] @relation(name: "user")
-  send_info notification[] @relation(name: "user_send")
   player_one game[] @relation(name: "player_one")
   player_two game[] @relation(name: "player_two")
-  email String  @unique
-  login String  @unique
-  campus String  
-  avatar String
-  achievements achievement[] 
-  // achievement achievement? @relation("user", fields: [achievement_id], references: [id])
-  achievement_id Int
-  msg_send message[]
-  member membership[]
-  // send_req request[]
+  send_req request[] @relation(name: "user_send")
+
 }
 
-model achievement {
-  id Int    @id @default(autoincrement())
-  notification_send notification[]
-  level_for_get_it Int
-  title String
-  achevement_image String
-  users user[]
-  // user user? @relation("achievement", fields: [user_id], references: [id])
-  user_id Int
+model channel {
+  id			Int	@id @default(autoincrement())
+  createdAt		DateTime @default(now())
+  ownerId		Int
+  name			String @unique
+  privacy		String
+  password		String?
+  description	String
+  banned		Int[]
+
+  members		channelMember[] @relation("channelMembers")
 }
 
-model friend_user {
-  id Int    @id @default(autoincrement())
-  user       user     @relation(fields: [userId], references: [id])
-  userId     Int
-  is_mute    Boolean @default(false)
-  unfriend   Boolean @default(false)
-  message_reseve message[]
+model channelMember {
+  id		Int @id @default(autoincrement())
+  role		String
+  userId	Int
+  isMuted	Boolean @default(false)
+
+  channelId	Int?
+  inChannel	channel? @relation("channelMembers", fields: [channelId], references: [id])
 }
 
-model blocked_user {
-  id Int    @id @default(autoincrement())
-  user       user     @relation(fields: [userId], references: [id])
-  userId     Int
-  unblock    Boolean @default(false)
+model channelMessage {
+	id			Int	@id @default(autoincrement())
+	createdAt	DateTime @default(now())
+	channelId	Int
+	content		String
+	senderId	Int
+	receivers	Int[]
 }
 
-// model user_achievements {
-//   id Int    @id @default(autoincrement())
-// }
+model messageData {
+	id						String @unique
+	conversationId			String
+	sender        Int
+	receiver				Int
+	content					String
+	lastMessageCreatedAt	DateTime @default(now())
+}
+
+model conversation {
+	id						        String @unique
+	firstMember				    Int
+	secondMember			    Int
+	lastMessageContent		String?
+	lastMessageCreatedAt	DateTime?
+}
 
 model notification {
-  id Int    @id @default(autoincrement())
-  user       user     @relation(fields: [userId], references: [id], name: "user")
-  userId     Int
-  is_req_fr_acc Boolean @default(false)
-  id_user_send user   @relation(fields:  [user_snd], references: [id], name: "user_send")
-  user_snd Int
-  type String
-  content String
-  is_seen Boolean @default(false)
-  is_delete Boolean @default(false)
-  id_achevement achievement @relation(fields: [achievement_get], references: [id])
-  achievement_get Int
-}
-
-model request {
-  id Int    @id @default(autoincrement())
-  user       user     @relation(fields: [userId], references: [id], name: "user")
-  userId     Int
-  is_req_fr_acc Boolean @default(false)
-  id_user_send user   @relation(fields:  [user_snd], references: [id], name: "user_send")
-  user_snd Int
-  id_game_send game   @relation(fields: [id_game], references: [id])
-  id_game Int
-  time_exper   DateTime @default(dbgenerated("NOW() + interval '1 year'"))
-  is_exper  Boolean @default(false)
-  is_seen  Boolean @default(false)
-  is_delete  Boolean @default(false)
+  id			String @unique
+  conversationId	String? @default("")
+  type		String
+  senderId	Int
+  receiverId	Int
+  createdAt	DateTime @default(now())
 }
 
 model game {
@@ -116,40 +103,18 @@ model game {
   createdAt   DateTime  @default(now())
 }
 
-model channel {
+
+model request {
   id Int    @id @default(autoincrement())
-  name String @unique
-  is_private Boolean
-  password String
-  channel_owner Int
-  description String
-  msg message[]
-  createdAt   DateTime  @default(now())
-  member membership[]
-}
-
-model message {
-  createdAt   DateTime  @default(now())
-  id_send user @relation(fields: [user_id], references: [id])
-  user_id Int
-  id_channel channel @relation(fields: [channel_id], references: [id])
-  channel_id Int
-  id_friend friend_user @relation(fields: [reseve_id], references: [id])
-  reseve_id Int
-  cont String
-  @@id([user_id, channel_id, reseve_id])
-}
-
-model membership {
-  // id Int    @id @default(autoincrement())
-  id_send user @relation(fields: [user_id], references: [id])
-  user_id Int
-  id_channel channel @relation(fields: [channel_id], references: [id])
-  channel_id Int
-  is_admine Boolean @default(false)
-  is_muted Boolean @default(false)
-  is_banned Boolean @default(false)
-
-  @@id([user_id, channel_id])
-
+  user       user     @relation(fields: [userId], references: [id], name: "user")
+  userId     Int
+  is_req_fr_acc Boolean @default(false)
+  id_user_send user   @relation(fields:  [user_snd], references: [id], name: "user_send")
+  user_snd Int
+  id_game_send game   @relation(fields: [id_game], references: [id])
+  id_game Int
+  time_exper   DateTime @default(dbgenerated("NOW() + interval '1 year'"))
+  is_exper  Boolean @default(false)
+  is_seen  Boolean @default(false)
+  is_delete  Boolean @default(false)
 }

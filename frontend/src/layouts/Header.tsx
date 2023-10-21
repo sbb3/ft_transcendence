@@ -1,24 +1,11 @@
-import {
-  Box,
-  Drawer,
-  DrawerBody,
-  DrawerCloseButton,
-  DrawerContent,
-  DrawerHeader,
-  DrawerOverlay,
-  Flex,
-  IconButton,
-  useDisclosure,
-} from "@chakra-ui/react";
+import { Flex, IconButton, useDisclosure } from "@chakra-ui/react";
 import Search from "src/components/Search";
 import Notifications from "src/components/Notifications";
 import { CloseIcon, HamburgerIcon } from "@chakra-ui/icons";
-import Sidebar from "src/components/Sidebar";
-import React from "react";
 import MobileSidebar from "src/components/Modals/MobileSidebar";
 
 const Header = () => {
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isOpen, onToggle: onToggleMobileSidebar } = useDisclosure();
   return (
     <Flex
       direction="row"
@@ -43,7 +30,7 @@ const Header = () => {
       <Flex direction="row" gap={3} ml={10}>
         <IconButton
           display={{ base: "1", lg: "none" }}
-          onClick={onOpen}
+          onClick={onToggleMobileSidebar}
           size="md"
           fontSize="md"
           bg={"pong_cl_primary"}
@@ -52,7 +39,7 @@ const Header = () => {
           aria-label="Open Sidebar Menu"
           icon={isOpen ? <CloseIcon /> : <HamburgerIcon />}
         />
-        {isOpen && <MobileSidebar isOpen onClose={onClose} />}
+        {isOpen && <MobileSidebar isOpen onToggle={onToggleMobileSidebar} />}
 
         <Notifications />
       </Flex>

@@ -26,7 +26,7 @@
 }
 
 .ScrollAreaScrollbar {
-  display: flex;
+  /* display: flex; */
   /* flex-direction: column-reverse; */
 
   /* ensures no selection */

@@ -1,18 +1,33 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { UserModule } from './user/user.module';
-import { PrismaModule } from './prisma.module';
 import { ConfigModule } from '@nestjs/config';
+import { ChatModule } from './chat/chat.module';
+import { AuthModule } from './auth/auth.module';
+import { OtpModule } from './otp/otp.module';
+import { ChannelsModule } from './channels/channels.module';
+import { UsersModule } from './users/users.module';
+import { ChatGateway } from './chat/chat.gateway';
+import { NotificationModule } from './notifications/notification.module';
+import { NotificationGateway } from './notifications/notification.gateway';
 import { GameGateway } from './game/game.gateway';
 import { GameModule } from './game/game.module';
 
-
 @Module({
-  imports: [UserModule, PrismaModule, ConfigModule.forRoot({
-    isGlobal : true,
-  }), GameModule],
-  controllers: [AppController],
-  providers: [AppService, GameGateway],
+  imports: [
+    AuthModule,
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    ChatModule,
+    OtpModule,
+    ChannelsModule,
+    UsersModule,
+    ChatGateway,
+    NotificationModule,
+    NotificationGateway,
+    GameModule,
+    GameGateway,
+  ],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}

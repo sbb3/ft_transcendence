@@ -5,34 +5,29 @@ import {
   FormControl,
   FormErrorMessage,
   FormLabel,
-  HStack,
   Heading,
-  Image,
-  Input,
   Modal,
   ModalBody,
-  ModalCloseButton,
   ModalContent,
   ModalFooter,
-  ModalHeader,
   ModalOverlay,
   PinInput,
   PinInputField,
   Stack,
   Text,
   VStack,
-  useDisclosure,
 } from "@chakra-ui/react";
 import { Controller, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useToast } from "@chakra-ui/react";
-import { ReactNode, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLottie } from "lottie-react";
 import animationData from "src/assets/animations/animation_fingerprint.json";
-import { useDispatch, useSelector } from "react-redux";
-import { setLogout } from "src/features/auth/authSlice";
+import { useSelector } from "react-redux";
+import { useValidateOTPMutation } from "src/features/users/usersApi";
+import store from "src/app/store";
+import authApi from "src/features/auth/authApi";
 
 const pinSchema = yup.object().shape({
   pin: yup
@@ -52,10 +47,11 @@ const options = {
   autoplay: true,
   animationData,
 };
-// TODO: View does not get rendered on the first time, it gets rendered on the second time
-const TwoFactorAccessBlocker = ({ isOpen, onClose, onOpen }) => {
-  const accessToken = useSelector((state: any) => state.auth.accessToken);
-  const dispatch = useDispatch();
+const TwoFactorAccessBlocker = ({
+  isOTPAccessBlockerOpen,
+  onOTPAccessBlockerToggle,
+}) => {
+  const userId = useSelector((state: any) => state?.auth?.userId);
   const navigate = useNavigate();
   const { View } = useLottie(options, style);
   const toast = useToast();
@@ -63,52 +59,55 @@ const TwoFactorAccessBlocker = ({ isOpen, onClose, onOpen }) => {
     register,
     handleSubmit,
     control,
-    formState: { errors, isSubmitting },
+    formState: { errors },
     reset,
   } = useForm({
     resolver: yupResolver(pinSchema),
   });
 
-  useEffect(() => {
-    // setTimeout(() => {
-    //   onOpen();
-    // }, 1000);
-    // onOpen();
-  }, [onOpen]);
+  const [validateOTP, { isLoading: isValidatingOTP }] =
+    useValidateOTPMutation();
 
-  const onSubmit = (data: any) => {
-    // TODO: send the pin to the server for verification, if correct, redirect close modal, else show error
-    console.log("data: ", data);
-    toast({
-      title: "2FA has been verified.",
-      description: "You can now login to your account.",
-      status: "success",
-      duration: 2000,
-      isClosable: true,
-    });
-    reset({
-      pin: "",
-    });
-    // closeModal(false);
-    // // TODO: set user profile_complete to true
-    // onClose();
+  const onOTPValidation = async (data: any) => {
+    // console.log("PIN: ", data);
+    try {
+      await validateOTP({
+        userId: userId,
+        userPin: data?.pin,
+      }).unwrap();
+      toast({
+        title: "2FA Validation",
+        description: "Access granted.",
+        status: "success",
+        duration: 2000,
+        isClosable: true,
+      });
+      reset({
+        pin: "",
+      });
+      onOTPAccessBlockerToggle();
+    } catch (error) {
+      console.log("error: ", error);
+      toast({
+        title: "Error",
+        description: "Verification code is incorrect.",
+        status: "error",
+        duration: 2000,
+        isClosable: true,
+      });
+    }
   };
-
-  // todo: dont allow user to close the modal if 2FA is not verified or close it and redirect to /login
-
   return (
     <Modal
-      isOpen={isOpen}
-      onClose={onClose}
+      isOpen={isOTPAccessBlockerOpen}
+      onClose={onOTPAccessBlockerToggle}
       closeOnEsc={false}
       closeOnOverlayClick={false}
       isCentered={true}
-      // size="xl"
     >
       <ModalOverlay />{" "}
       <ModalContent
         borderRadius={40}
-        // maxH="350px"
         maxW="400px"
         mt={4}
         border="1px solid rgba(251, 102, 19, 0.3)"
@@ -147,7 +146,6 @@ const TwoFactorAccessBlocker = ({ isOpen, onClose, onOpen }) => {
                   justify="center"
                   align="start"
                   w="full"
-                  // outline="1px solid yellow"
                 >
                   <FormLabel
                     htmlFor="pin"
@@ -167,10 +165,6 @@ const TwoFactorAccessBlocker = ({ isOpen, onClose, onOpen }) => {
                           {...restField}
                           errorBorderColor="red.300"
                           focusBorderColor="orange.300"
-                          onComplete={(value) => {
-                            // TODO: send the pin to the server for verification
-                            console.log(value);
-                          }}
                           isInvalid={!!errors.pin}
                         >
                           <PinInputField ref={ref} />
@@ -198,13 +192,12 @@ const TwoFactorAccessBlocker = ({ isOpen, onClose, onOpen }) => {
             color={"orange.500"}
             letterSpacing={1}
             mr={3}
-            onClick={() => {
-              // TODO: destroy session and redirect to login
-              console.log("accessToken343434: ", accessToken); // null, dispatch(setLogin) dispatch still did not got out of the event handleClick scope in Login.tsx
-              console.log("logout");
-              dispatch(setLogout());
-              // navigate("/login", { replace: true });
-              onClose();
+            onClick={async () => {
+              // TODO: uncomment below dispatch later and remove localStorage.clear()
+              await store.dispatch(authApi.endpoints.sendLogOut.initiate({}));
+              localStorage.clear();
+              onOTPAccessBlockerToggle();
+              navigate("/login", { replace: true });
             }}
             _hover={{
               bg: "WhiteAlpha.800",
@@ -224,11 +217,10 @@ const TwoFactorAccessBlocker = ({ isOpen, onClose, onOpen }) => {
             color={"white"}
             mr={3}
             letterSpacing={1}
-            // isLoading={isLoading}
-            // isLoading={isFetching}
-            // isDisabled={isSubmitting}
+            isLoading={isValidatingOTP}
+            isDisabled={isValidatingOTP}
             cursor="pointer"
-            onClick={handleSubmit(onSubmit)}
+            onClick={handleSubmit(onOTPValidation)}
             _hover={{
               bg: "orange.400",
             }}

@@ -1,9 +1,9 @@
 import { Box, Icon, IconButton, Input, InputGroup } from "@chakra-ui/react";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { MdSend } from "react-icons/md";
 
-const ChatContentFooter = ({ onSubmit }) => {
+const ChatContentFooter = ({ onSendMessage, isLoading }) => {
   const {
     register,
     handleSubmit,
@@ -17,10 +17,10 @@ const ChatContentFooter = ({ onSubmit }) => {
   }, []);
   return (
     <Box
-      w={"full"}
       // bg={"gray.400"}
+      w={"full"}
       borderRadius={6}
-      mb={2}
+      mb={1}
       px={2}
       border="1px solid rgba(251, 102, 19, 0.1)"
       boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.35)"
@@ -39,7 +39,6 @@ const ChatContentFooter = ({ onSubmit }) => {
           id="message"
           type="text"
           variant="filled"
-          // bg="#F9F9F9"
           bg="pong_bg_secondary"
           w={"full"}
           placeholder="Type a message"
@@ -49,7 +48,7 @@ const ChatContentFooter = ({ onSubmit }) => {
           })}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
-              handleSubmit(onSubmit)();
+              handleSubmit(onSendMessage)();
               reset({
                 message: "",
               });
@@ -66,9 +65,10 @@ const ChatContentFooter = ({ onSubmit }) => {
           bg={"pong_cl_primary"}
           size={"md"}
           isRound
-          isLoading={isSubmitting}
+          isLoading={isLoading}
+          isDisabled={isSubmitting}
           onClick={() => {
-            handleSubmit(onSubmit)();
+            handleSubmit(onSendMessage)();
             reset({
               message: "",
             });
@@ -78,7 +78,6 @@ const ChatContentFooter = ({ onSubmit }) => {
             bg: "white",
             color: "pong_cl_primary",
           }}
-          isDisabled={isSubmitting}
         />
       </InputGroup>
     </Box>

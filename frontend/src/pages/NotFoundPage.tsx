@@ -1,8 +1,8 @@
-import { Flex, Link, Tooltip } from "@chakra-ui/react";
+import { Flex, Link } from "@chakra-ui/react";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { useLottie } from "lottie-react";
 import useTitle from "src/hooks/useTitle";
-import animationData from "/src/assets/animations/404.json";
+import animationData from "src/assets/animations/404.json";
 
 const NotFoundPage = () => {
   useTitle("404 Not Found");
@@ -29,18 +29,17 @@ const NotFoundPage = () => {
         h="full"
         bg="white"
       >
-        {/* <Link
-				pos="relative"
-				as={RouterLink}
-				onClick={() => navigate(-1)}
-				w="100vw"
-				h="100vh"
-				cursor="pointer"
-				overflow="hidden"
-			>
-				{View}
-			</Link> */}
-        Not found
+        <Link
+          pos="relative"
+          as={RouterLink}
+          onClick={() => navigate(-1)}
+          w="100vw"
+          h="100vh"
+          cursor="pointer"
+          overflow="hidden"
+        >
+          {View}
+        </Link>
       </Flex>
     </>
   );

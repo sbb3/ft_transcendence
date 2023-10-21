@@ -1,18 +1,15 @@
-import { SearchIcon } from "@chakra-ui/icons";
+import { useEffect, useState } from "react";
 import {
   Avatar,
   AvatarBadge,
   AvatarGroup,
-  Box,
   Flex,
   Icon,
   IconButton,
-  Image,
   InputGroup,
   InputLeftElement,
   Stack,
   Text,
-  Link,
   useToast,
   FormControl,
   FormLabel,
@@ -21,68 +18,193 @@ import {
   Button,
   Select,
 } from "@chakra-ui/react";
+import { SearchIcon } from "@chakra-ui/icons";
 import {
   AutoComplete,
   AutoCompleteInput,
   AutoCompleteItem,
   AutoCompleteList,
 } from "@choc-ui/chakra-autocomplete";
-import { useEffect, useState } from "react";
 import { GiThreeFriends } from "react-icons/gi";
-import { Link as RouterLink } from "react-router-dom";
-import { FiMessageSquare } from "react-icons/fi";
 import { HiUserRemove } from "react-icons/hi";
 import { MdBlockFlipped } from "react-icons/md";
-import { IoGameControllerOutline } from "react-icons/io5";
-import { useNavigate } from "react-router-dom";
+import { BiMicrophone, BiSolidMicrophoneOff } from "react-icons/bi";
 import * as ScrollArea from "@radix-ui/react-scroll-area";
 import "src/styles/scrollbar.css";
-import { faker } from "@faker-js/faker";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-
-// TODO: add member to channel only if the user is an admin or owner
-const members = [...Array(30)].map(() => ({
-  id: faker.string.uuid(),
-  name: faker.internet.userName(),
-  avatar: faker.image.avatar(),
-}));
+import { useSelector } from "react-redux";
+import channelsApi from "src/features/channels/channelsApi";
+import { useNavigate } from "react-router-dom";
 
 const validationSchema = yup.object().shape({
   username: yup.string().required("Username is required").trim(),
-  permissions: yup.string().required("Permissions is required").trim(),
+  role: yup.string().required("role is required").trim(),
 });
 
-const Members = () => {
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [query, setQuery] = useState<string>("");
+const Members = ({ channel }) => {
+  const currentUser = useSelector((state: any) => state.user.currentUser);
   const navigate = useNavigate();
   const toast = useToast();
+  const [query, setQuery] = useState<string>("");
 
   const {
     register,
     handleSubmit,
     control,
-    formState: { errors, isSubmitting },
+    formState: { errors },
     reset,
   } = useForm({
     resolver: yupResolver(validationSchema),
   });
 
-  const onSubmit = (data: any) => {
-    console.log("data: ", data);
-    toast({
-      title: "Member added.",
-      description: "We've added a new member to the channel.",
-      status: "success",
-      duration: 2000,
-      isClosable: true,
-    });
+  const [triggerAddUserOrEditMember, { isLoading: isAddingOrEditing }] =
+    channelsApi.useOnAddUserOrEditMemberMutation();
+
+  const [muteChannelMember] = channelsApi.useMuteChannelMemberMutation();
+  const [unmuteChannelMember] = channelsApi.useUnmuteChannelMemberMutation();
+  const [banChannelMember] = channelsApi.useBanChannelMemberMutation();
+  const [kickChannelMember] = channelsApi.useKickChannelMemberMutation();
+
+  const onAddUserOrEditMember = async (data: any) => {
+    const { username, role } = data;
+    try {
+      if (username === currentUser?.username)
+        throw new Error("You can't add yourself to the channel.");
+      const res = await triggerAddUserOrEditMember({
+        channelId: channel?.id,
+        channelName: channel?.name,
+        data: {
+          username,
+          role,
+        },
+      }).unwrap();
+      toast({
+        title: "Info",
+        description: res?.message,
+        status: "info",
+        duration: 2000,
+        isClosable: true,
+      });
+    } catch (error) {
+      console.log("error22: ", error);
+      toast({
+        title: "Member not added.",
+        description: error?.data?.message || "Member not added to the channel.",
+        status: "error",
+        duration: 2000,
+        isClosable: true,
+      });
+    }
     reset({
       username: "",
-      permissions: "member",
+      role: "member",
     });
+  };
+
+  const handleKickMember = async (memberId) => {
+    try {
+      await kickChannelMember({
+        channelId: channel?.id,
+        memberId,
+        channelName: channel?.name,
+      }).unwrap();
+      toast({
+        title: "Member Kicked.",
+        description: "Member kicked from the channel.",
+        status: "success",
+        duration: 2000,
+        isClosable: true,
+      });
+    } catch (error) {
+      console.log("error: ", error);
+      toast({
+        title: "Member not Kicked.",
+        description: error.message,
+        status: "error",
+        duration: 2000,
+        isClosable: true,
+      });
+    }
+  };
+
+  const handleMuteMember = async (memberId) => {
+    try {
+      await muteChannelMember({
+        channelId: channel?.id,
+        userId: memberId,
+        channelName: channel?.name,
+      }).unwrap();
+      toast({
+        title: "Member Muted.",
+        description: "Member has been muted.",
+        status: "success",
+        duration: 2000,
+        isClosable: true,
+      });
+    } catch (error) {
+      console.log("error: ", error);
+      toast({
+        title: "Error.",
+        description: error.message,
+        status: "error",
+        duration: 2000,
+        isClosable: true,
+      });
+    }
+  };
+
+  const handleUnMuteMember = async (memberId) => {
+    try {
+      await unmuteChannelMember({
+        channelId: channel?.id,
+        userId: memberId,
+        channelName: channel?.name,
+      }).unwrap();
+      toast({
+        title: "Member UnMuted.",
+        description: "Member has been unmuted.",
+        status: "success",
+        duration: 2000,
+        isClosable: true,
+      });
+    } catch (error) {
+      console.log("error: ", error);
+      toast({
+        title: "Error.",
+        description: error.message,
+        status: "error",
+        duration: 2000,
+        isClosable: true,
+      });
+    }
+  };
+
+  const handleBanMember = async (memberId) => {
+    try {
+      await banChannelMember({
+        channelId: channel?.id,
+        userId: memberId,
+        channelName: channel?.name,
+      }).unwrap();
+      toast({
+        title: "Member Banned.",
+        description: "Member banned from the channel.",
+        status: "success",
+        duration: 2000,
+        isClosable: true,
+      });
+    } catch (error) {
+      console.log("error: ", error);
+      toast({
+        title: "Member not banned.",
+        description: error.message || "Member not banned from the channel.",
+        status: "error",
+        duration: 2000,
+        isClosable: true,
+      });
+    }
   };
 
   useEffect(() => {}, []);
@@ -100,9 +222,6 @@ const Members = () => {
       bgImage={`url('src/assets/img/BlackNoise.png')`}
       bgSize="cover"
       bgRepeat="no-repeat"
-      // outline="2px solid yellow"
-      // borderRadius={24}
-      //   bg={"yellow"}
     >
       <Flex direction="row" align="center" justify="center" gap={1.5}>
         <Icon boxSize="22px" as={GiThreeFriends} color="white" />
@@ -126,14 +245,14 @@ const Members = () => {
             Members
           </Text>
           <AvatarGroup size="sm" max={4} color={"pong_bg_primary"}>
-            {members.map((member, i) => (
+            {channel?.members.map((member, i) => (
               <Avatar
-                key={i}
+                key={member?.id}
                 bg="pong_bg_secondary"
                 p={0.5}
                 ml={2}
-                name={member.name}
-                src={"https://bit.ly/ryan-florence"}
+                name={member?.name}
+                src={member?.avatar}
               />
             ))}
           </AvatarGroup>
@@ -142,7 +261,7 @@ const Members = () => {
       <Stack direction="column" justify="start" align="center" spacing={5}>
         <FormControl isInvalid={!!errors.username} mt={0}>
           <FormLabel htmlFor="username" fontSize="lg">
-            Add a member
+            Member
           </FormLabel>
           <Input
             id="username"
@@ -154,45 +273,45 @@ const Members = () => {
             {errors.username && errors.username.message}
           </FormErrorMessage>
         </FormControl>
-        <FormControl isInvalid={!!errors.permissions} mt={0} isRequired>
-          <FormLabel htmlFor="permissions" fontSize="lg">
-            Member Permissions
+        <FormControl isInvalid={!!errors.role} mt={0} isRequired>
+          <FormLabel htmlFor="role" fontSize="lg">
+            Member role
           </FormLabel>
           <Controller
-            name="permissions"
+            name="role"
             control={control}
             defaultValue="member"
             render={({ field }) => (
               <Select
                 {...field}
                 onChange={(inputValue) => {
-                  //   console.log("e: ", inputValue);
-                  //   console.log("field: ", field);
                   field.onChange(inputValue);
-                  // setIsPrivate(inputValue === "private");
                 }}
+                bg="pong_bg_secondary"
               >
-                <option value="member">Member</option>
-                <option value="admin">Admin</option>
-                <option value="owner">Owner</option>
+                <option style={{ background: "transparent" }} value="member">
+                  Member
+                </option>
+                <option style={{ background: "transparent" }} value="admin">
+                  Admin
+                </option>
               </Select>
             )}
           />
           <FormErrorMessage>
-            {errors.permissions && errors.permissions.message}
+            {errors.role && errors.role.message}
           </FormErrorMessage>
         </FormControl>
         <Button
           colorScheme="orange"
           mt={0}
           w="full"
-          // isLoading={isLoading}
-          // isLoading={isFetching}
-          // isDisabled={isSubmitting}
+          isLoading={isAddingOrEditing}
+          isDisabled={isAddingOrEditing}
           cursor="pointer"
-          onClick={handleSubmit(onSubmit)}
+          onClick={handleSubmit(onAddUserOrEditMember)}
         >
-          Add
+          Add / Manage Member
         </Button>
       </Stack>
       <Stack direction={"column"}>
@@ -202,14 +321,12 @@ const Members = () => {
           align="start"
           justify="start"
           gap={1.5}
-          //   bg={"red.400"}
           h={"420px"}
-          //   pr={2}
         >
           <AutoComplete
             as={Stack}
             rollNavigation
-            isLoading={isLoading}
+            // isLoading={isLoading}
             openOnFocus
             defaultIsOpen={true}
             listAllValuesOnFocus
@@ -224,8 +341,6 @@ const Members = () => {
                 color="white"
                 px={2}
                 py={1}
-                // borderTopLeftRadius="md"
-                // borderBottomLeftRadius="md"
                 border="1px solid var(--white, #FFF)"
                 borderRadius="md"
                 cursor="pointer"
@@ -264,8 +379,6 @@ const Members = () => {
                 position: "absolute",
                 display: "block",
                 marginTop: "8px",
-                // marginRight: "4px",
-                // transform: "translate3d(20px, 40px, 0px)",
               }}
               closeOnSelect={false}
               p={1}
@@ -273,12 +386,11 @@ const Members = () => {
             >
               <ScrollArea.Root className="ScrollAreaRoot">
                 <ScrollArea.Viewport className="ScrollAreaViewport">
-                  {members.map((member, i) => (
+                  {channel?.members?.map((member, i) => (
                     <AutoCompleteItem
-                      key={i}
-                      value={member}
+                      key={member?.id}
+                      value={member?.name}
                       textTransform="capitalize"
-                      // bg="pong_bg.300"
                       boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.35)"
                       backdropFilter={"blur(20px)"}
                       bgImage={`url('src/assets/img/BlackNoise.png')`}
@@ -290,11 +402,9 @@ const Members = () => {
                         bg: "pong_bg.500",
                       }}
                       _focus={{
-                        // bg: "pong_bg.300",
                         backgroundColor: "transparent",
                       }}
                       _selected={{
-                        // bg: "pong_bg.300",
                         backgroundColor: "transparent",
                       }}
                     >
@@ -309,12 +419,14 @@ const Members = () => {
                           gap="3px"
                           align="center"
                           w={"full"}
-                          onClick={() => navigate(`/profile/${member.name}`)}
+                          onClick={() =>
+                            navigate(`/profile/${member.username}`)
+                          }
                         >
                           <Avatar
                             size="sm"
-                            name={member.name}
-                            src={member.avatar}
+                            name={member?.name}
+                            src={member?.avatar}
                             borderColor={"green.400"}
                             borderWidth="2px"
                           >
@@ -330,36 +442,115 @@ const Members = () => {
                             fontWeight="medium"
                             ml={2}
                             flex={1}
+                            textTransform={"capitalize"}
                           >
-                            {member.name}
+                            {member?.name}
                           </Text>
                         </Flex>
                         <Flex direction="row" gap="6px" mr={0}>
-                          <IconButton
-                            size="xs"
-                            fontSize="md"
-                            bg={"white"}
-                            color={"red.500"}
-                            borderColor="red.500"
-                            borderWidth="1px"
-                            borderRadius={8}
-                            aria-label="Remove member"
-                            icon={<HiUserRemove />}
-                            _hover={{
-                              bg: "red.500",
-                              color: "white",
-                            }}
-                            onClick={() => {
-                              console.log("delete member");
-                              toast({
-                                title: "Member removed.",
-                                description: "Member removed from the group.",
-                                status: "success",
-                                duration: 2000,
-                                isClosable: true,
-                              });
-                            }}
-                          />
+                          {
+                            // (channel?.ownerId === currentUser?.id ||
+                            //   channel?.members?.find(
+                            //     (m) => m?.id === currentUser?.id
+                            //   )?.role === "admin") && (
+                            <>
+                              {currentUser?.id !== member?.id &&
+                              (channel?.members?.find(
+                                (m) => m?.id === currentUser?.id
+                              )?.role === "admin" ||
+                              channel?.ownerId === currentUser?.id
+                                ? !(
+                                    channel?.members?.find(
+                                      (m) => m?.id === member?.id
+                                    )?.role === "admin" ||
+                                    member?.id === channel?.ownerId
+                                  ) ||
+                                  (member.id !== channel.ownerId &&
+                                    channel.ownerId === currentUser?.id)
+                                : false) ? (
+                                <>
+                                  <IconButton
+                                    size="xs"
+                                    fontSize="md"
+                                    bg={"white"}
+                                    color={"red.500"}
+                                    borderColor="red.500"
+                                    borderWidth="1px"
+                                    borderRadius={8}
+                                    aria-label="Kick member"
+                                    icon={<HiUserRemove />}
+                                    _hover={{
+                                      bg: "red.500",
+                                      color: "white",
+                                    }}
+                                    onClick={() => handleKickMember(member?.id)}
+                                  />
+                                  {!channel?.banned
+                                    // ?.map((member) => member?.id)
+                                    ?.includes(member?.id) && (
+                                    <IconButton
+                                      size="xs"
+                                      fontSize="md"
+                                      bg={"white"}
+                                      color={"red.500"}
+                                      borderColor="red.500"
+                                      borderWidth="1px"
+                                      borderRadius={8}
+                                      aria-label="Ban member"
+                                      icon={<MdBlockFlipped />}
+                                      _hover={{
+                                        bg: "red.500",
+                                        color: "white",
+                                      }}
+                                      onClick={() =>
+                                        handleBanMember(member?.id)
+                                      }
+                                    />
+                                  )}
+                                  {member?.isMuted ? (
+                                    <IconButton
+                                      size="xs"
+                                      fontSize="md"
+                                      bg={"white"}
+                                      color={"green.500"}
+                                      borderColor="green.500"
+                                      borderWidth="1px"
+                                      borderRadius={8}
+                                      aria-label="Mute member"
+                                      icon={<BiMicrophone />}
+                                      _hover={{
+                                        bg: "green.500",
+                                        color: "white",
+                                      }}
+                                      onClick={() =>
+                                        handleUnMuteMember(member?.id)
+                                      }
+                                    />
+                                  ) : (
+                                    <IconButton
+                                      size="xs"
+                                      fontSize="md"
+                                      bg={"white"}
+                                      color={"red.500"}
+                                      borderColor="red.500"
+                                      borderWidth="1px"
+                                      borderRadius={8}
+                                      aria-label="Mute member"
+                                      icon={<BiSolidMicrophoneOff />}
+                                      _hover={{
+                                        bg: "red.500",
+                                        color: "white",
+                                      }}
+                                      onClick={() =>
+                                        handleMuteMember(member?.id)
+                                      }
+                                    />
+                                  )}
+                                </>
+                              ) : null}
+                            </>
+                            // )
+                          }
                         </Flex>
                       </Flex>
                     </AutoCompleteItem>

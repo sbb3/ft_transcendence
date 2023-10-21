@@ -1,11 +1,10 @@
-
 export interface Paddle {
-    x: number;
-    y: number;
-    widthe: number;
-    height: number;
-    color: string;
-    score:number;
+  x: number;
+  y: number;
+  widthe: number;
+  height: number;
+  color: string;
+  score: number;
 }
 
 // export interface hPaddle {
@@ -18,27 +17,26 @@ export interface Paddle {
 // }
 
 export interface Ball {
-    x: number;
-    y: number;
-    radius: number;
-    speed: number;
-    velocityX: number;
-    velocityY: number;
-    color : string;
+  x: number;
+  y: number;
+  radius: number;
+  speed: number;
+  velocityX: number;
+  velocityY: number;
+  color: string;
 }
 
 export interface canvaState {
-    width : number;
-    height : number;
+  width: number;
+  height: number;
 }
 
 export interface Gol {
-    num: string;
-    x: number;
-    y: number;
-    color: string;
+  num: string;
+  x: number;
+  y: number;
+  color: string;
 }
-
 
 // export interface ball {
 //     x: 512;
@@ -67,5 +65,3 @@ export interface Gol {
 //     color: "orange";
 //     score:0;
 // }
-
-

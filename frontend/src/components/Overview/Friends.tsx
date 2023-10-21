@@ -6,13 +6,10 @@ import {
   Box,
   Flex,
   Icon,
-  IconButton,
   InputGroup,
   InputLeftElement,
   Stack,
   Text,
-  Link,
-  useToast,
 } from "@chakra-ui/react";
 import {
   AutoComplete,
@@ -22,32 +19,41 @@ import {
 } from "@choc-ui/chakra-autocomplete";
 import { useEffect, useState } from "react";
 import { GiThreeFriends } from "react-icons/gi";
-import { Link as RouterLink } from "react-router-dom";
-import { HiUserRemove } from "react-icons/hi";
-import { MdBlockFlipped } from "react-icons/md";
-import { IoGameControllerOutline } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 import * as ScrollArea from "@radix-ui/react-scroll-area";
 import "src/styles/scrollbar.css";
-import { faker } from "@faker-js/faker";
+import { useGetFriendsQuery } from "src/features/users/usersApi";
 
-const users = [...Array(30)].map(() => ({
-  id: faker.string.uuid(),
-  name: faker.person.firstName() + " " + faker.person.lastName(),
-  username: faker.internet.userName(),
-  status: faker.helpers.arrayElement(["online", "offline", "in-game"]),
-  avatar: faker.image.avatar(),
-  email: faker.internet.email(),
-  campus: faker.location.city(),
-  gameWin: faker.number.int(50),
-  gameLoss: faker.number.int(40),
-  rank: faker.number.int(100),
-  level: faker.number.int(50),
-}));
+interface FriendsProps {
+  user: {
+    id: number;
+    name: string;
+    username: string;
+    avatar: string;
+    email: string;
+  };
+}
 
-const Friends = () => {
+type Friend = {
+  id: number;
+  name: string;
+  username: string;
+  avatar: string;
+  email: string;
+};
+
+interface Friends {
+  friends: Friend[];
+}
+
+const Friends = ({ user }: FriendsProps) => {
   const navigate = useNavigate();
-  const toast = useToast();
+  const [query, setQuery] = useState("");
+  const {
+    data: friends = [],
+    isLoading: isLoadingFriends,
+    isFetching: isFetchingFriends,
+  } = useGetFriendsQuery(user?.id);
 
   useEffect(() => {}, []);
   return (
@@ -87,14 +93,14 @@ const Friends = () => {
             Friends
           </Text>
           <AvatarGroup size="sm" max={4} color={"pong_bg_primary"}>
-            {users.map((user, i) => (
+            {(friends as []).map((friend: Friend) => (
               <Avatar
                 bg="pong_bg_secondary"
                 p={0.5}
                 ml={2}
-                key={i}
-                name={"user.name"}
-                src={"https://bit.ly/ryan-florence"}
+                key={friend?.id}
+                name={friend?.name}
+                src={friend?.avatar}
               />
             ))}
           </AvatarGroup>
@@ -104,13 +110,12 @@ const Friends = () => {
       <Stack position="relative" direction={"column"} height="full">
         <AutoComplete
           rollNavigation
-          // isLoading={isLoading}
+          isLoading={isLoadingFriends || isFetchingFriends}
           openOnFocus
           defaultIsOpen={true}
           listAllValuesOnFocus
           closeOnSelect={false}
           // flip={false}
-          // style={{ overflow: "hidden" }}
         >
           <InputGroup w="full">
             <InputLeftElement
@@ -127,6 +132,8 @@ const Friends = () => {
               cursor="pointer"
             />
             <AutoCompleteInput
+              onChange={(e) => setQuery(e.target.value)}
+              value={query}
               ml={2}
               flex={1}
               variant="filled"
@@ -145,8 +152,9 @@ const Friends = () => {
           </InputGroup>
 
           <AutoCompleteList
-            // style={{ backgroundImage: "url('src/assets/img/BlackNoise.png')" }}
             style={{
+              minHeight: "420px",
+              width: "100%",
               // borderRadius: "24px",
               border: "1px solid rgba(251, 102, 19, 0.09)",
               boxShadow: "0px 4px 24px -1px rgba(0, 0, 0, 0.35)",
@@ -156,11 +164,10 @@ const Friends = () => {
               bgRepeat: "no-repeat",
               backgroundColor: "transparent",
               // backgroundColor: "red",
-              minHeight: "440px",
               position: "absolute",
               display: "block",
               marginTop: "4px",
-              overflow: "scroll",
+              overflow: "hidden",
               padding: "0px",
             }}
             closeOnSelect={false}
@@ -170,15 +177,16 @@ const Friends = () => {
             <ScrollArea.Root className="ScrollAreaRoot">
               <ScrollArea.Viewport className="ScrollAreaViewport">
                 <Box
-                  height={"430"}
+                  height={"400"}
                   width={"full"}
-                  // bg="green"
+                  //  bg="green"
                   mr={4}
                 >
-                  {users.map((user, i) => (
+                  {(friends as Friend[]).map((friend: Friend) => (
                     <AutoCompleteItem
-                      key={i}
-                      value={user.name}
+                      // w="150px"
+                      key={friend?.id}
+                      value={friend?.name}
                       textTransform="capitalize"
                       bg="pong_bg.200"
                       boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.35)"
@@ -186,7 +194,7 @@ const Friends = () => {
                       bgImage={`url('src/assets/img/BlackNoise.png')`}
                       bgSize="cover"
                       bgRepeat="no-repeat"
-                      borderRadius={50}
+                      borderRadius={5}
                       my={1}
                       _hover={{
                         bg: "pong_bg.500",
@@ -198,6 +206,14 @@ const Friends = () => {
                       _selected={{
                         // bg: "pong_bg.300",
                         backgroundColor: "transparent",
+                      }}
+                      onClick={() => {
+                        setQuery("");
+                        navigate(`/profile/${friend?.username}`, {
+                          state: {
+                            friend,
+                          },
+                        });
                       }}
                     >
                       <Flex
@@ -211,18 +227,11 @@ const Friends = () => {
                           gap="3px"
                           align="center"
                           w={"full"}
-                          onClick={() =>
-                            navigate(`/profile/${user.name}`, {
-                              state: {
-                                user,
-                              },
-                            })
-                          }
                         >
                           <Avatar
                             size="sm"
-                            name={user.name}
-                            src={user.avatar}
+                            name={friend?.name}
+                            src={friend?.avatar}
                             borderColor={"green.400"}
                             borderWidth="2px"
                           >
@@ -239,82 +248,8 @@ const Friends = () => {
                             ml={2}
                             flex={1}
                           >
-                            {user.name}
+                            {friend?.name}
                           </Text>
-                        </Flex>
-                        <Flex direction="row" gap="6px" mr={0}>
-                          <IconButton
-                            size="xs"
-                            fontSize="md"
-                            bg={"white"}
-                            color={"red.500"}
-                            borderColor="red.500"
-                            borderWidth="1px"
-                            borderRadius={8}
-                            aria-label="Block friend"
-                            icon={<MdBlockFlipped />}
-                            _hover={{
-                              bg: "red.500",
-                              color: "white",
-                            }}
-                            onClick={() => {
-                              console.log("block friend");
-                              toast({
-                                title: "Friend blocked.",
-                                description: "We've blocked your friend.",
-                                status: "success",
-                                duration: 2000,
-                                isClosable: true,
-                              });
-                            }}
-                          />
-                          <IconButton
-                            size="xs"
-                            fontSize="md"
-                            bg={"pong_cl_primary"}
-                            color={"white"}
-                            borderRadius={8}
-                            aria-label="Remove friend"
-                            icon={<HiUserRemove />}
-                            _hover={{
-                              bg: "white",
-                              color: "pong_cl_primary",
-                            }}
-                            onClick={() => {
-                              console.log("remove friend");
-                              toast({
-                                title: "Friend removed.",
-                                description: "We've removed your friend.",
-                                status: "success",
-                                duration: 2000,
-                                isClosable: true,
-                              });
-                            }}
-                          />
-                          <IconButton
-                            size="xs"
-                            fontSize="md"
-                            bg={"pong_cl_primary"}
-                            color={"white"}
-                            borderRadius={8}
-                            aria-label="Send game request"
-                            icon={<IoGameControllerOutline />}
-                            _hover={{
-                              bg: "white",
-                              color: "pong_cl_primary",
-                            }}
-                            onClick={() => {
-                              console.log("send game request");
-                              toast({
-                                title: "Game request sent.",
-                                description:
-                                  "We've sent a game request to your friend.",
-                                status: "success",
-                                duration: 2000,
-                                isClosable: true,
-                              });
-                            }}
-                          />
                         </Flex>
                       </Flex>
                     </AutoCompleteItem>

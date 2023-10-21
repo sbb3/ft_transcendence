@@ -5,39 +5,200 @@ import {
   CircularProgress,
   CircularProgressLabel,
   Flex,
-  Heading,
   Icon,
   IconButton,
   Image,
-  Progress,
   Stack,
   Text,
+  useToast,
 } from "@chakra-ui/react";
 import { FiMessageSquare } from "react-icons/fi";
-import { AiOutlineUserAdd } from "react-icons/ai";
+import { AiOutlineUserAdd, AiOutlineUserDelete } from "react-icons/ai";
 import { IoGameControllerOutline } from "react-icons/io5";
 import { GoEye } from "react-icons/go";
 import { HiOutlineMail } from "react-icons/hi";
 import { GiAchievement } from "react-icons/gi";
 import * as ScrollArea from "@radix-ui/react-scroll-area";
 import "src/styles/scrollbar.css";
-import { badges } from "src/config/data/data";
+import { badges } from "src/config/data/badges";
+import { useDispatch, useSelector } from "react-redux";
+import usersApi, { useDeleteFriendMutation } from "src/features/users/usersApi";
+import { setCurrentUser } from "src/features/users/usersSlice";
+import conversationApi, {
+  useCreateConversationWithoutMessageMutation,
+} from "src/features/conversations/conversationsApi";
+import { v4 as uuidv4 } from "uuid";
 
-const Profile = ({ user }) => {
-  const {
-    username,
-    name,
-    status,
-    email,
-    campus,
-    rank,
-    avatar,
-    gameWin,
-    gameLoss,
-    level,
-  } = user;
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import { useNavigate } from "react-router-dom";
+import notificationsApi from "src/features/notifications/notificationsApi";
+dayjs.extend(relativeTime);
+
+interface ProfileProps {
+  user: {
+    id: string;
+    username: string;
+    name: string;
+    email: string;
+    avatar: string;
+    status: string;
+    gameWin: string;
+    gameLoss: string;
+    rank: string;
+    level: string;
+    campus: string;
+    recentGames: object[];
+    friends: object[];
+    blocked: number[];
+    otp_enabled: boolean;
+    otp_validated: boolean;
+    otp_secret: string;
+    otp_url: string;
+    is_profile_completed: boolean;
+  };
+}
+
+const Profile = ({ user }: ProfileProps) => {
+  const currentUser = useSelector((state: any) => state?.user?.currentUser);
+  const toast = useToast();
+  const navigate = useNavigate();
+
+  const [deleteFriend, { isLoading: isDeletingFriend }] =
+    useDeleteFriendMutation();
+
+  const [triggerGetCurrentUser, { isLoading: isLoadingGetCurrentUser }] =
+    usersApi.useLazyGetCurrentUserQuery();
+
+  const [sendNotification] = notificationsApi.useSendNotificationMutation();
+
   const gameWonRate =
-    (parseInt(gameWin) / (parseInt(gameWin) + parseInt(gameLoss))) * 100;
+    (parseInt(user?.gameWin) /
+      (parseInt(user?.gameWin) + parseInt(user?.gameLoss))) *
+    100;
+
+  const [
+    triggerGetConversationByMembersEmails,
+    { isLoading: isLoadingGetConversationByMembersEmails },
+  ] = conversationApi.endpoints.getConversationByMembersEmails.useLazyQuery();
+
+  const [
+    createConversationWithoutMessage,
+    { isLoading: isLoadingCreateConversationWithoutMessage },
+  ] = useCreateConversationWithoutMessageMutation();
+
+  const handleDeleteFriend = async (friendId) => {
+    try {
+      await deleteFriend({
+        currentUserId: currentUser?.id,
+        friendId,
+      }).unwrap();
+      await triggerGetCurrentUser(currentUser?.id);
+
+      toast({
+        title: "Success",
+        description: "Friend has been deleted.",
+        status: "success",
+        duration: 2000,
+        isClosable: true,
+      });
+    } catch (error) {
+      console.log(error);
+      toast({
+        title: "Error",
+        description: error?.data?.message || "Error deleting friend",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
+
+  const handleSendFriendNotification = async () => {
+    if (currentUser?.friends.includes(user?.id)) {
+      toast({
+        title: "Info",
+        description: "He is already your friend",
+        status: "info",
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+    try {
+      const notification = {
+        id: uuidv4(),
+        type: "friendRequest",
+        senderId: currentUser?.id,
+        receiverId: user?.id,
+      };
+      await sendNotification(notification).unwrap();
+
+      toast({
+        title: "Friend request sent",
+        description: "Friend request sent successfully",
+        status: "success",
+        duration: 2000,
+        isClosable: true,
+      });
+    } catch (error) {
+      console.log("error accepting friend request: ", error);
+      toast({
+        title: "Error",
+        description: error?.data?.message || "Error happened",
+        status: "error",
+        duration: 2000,
+        isClosable: true,
+      });
+    }
+  };
+  const handleSendDirectMessage = async () => {
+    try {
+      const conversations = await triggerGetConversationByMembersEmails({
+        firstMemberEmail: currentUser?.email,
+        secondMemberEmail: user?.email,
+      }).unwrap();
+      let id;
+      if (conversations?.length > 0) {
+        const conversation = conversations[0];
+        id = conversation.id;
+        // console.log("id->: ", id);
+      } else {
+        const conversation = {
+          id: uuidv4(),
+          name: [currentUser?.name, user?.name],
+          avatar: [
+            {
+              id: currentUser?.id,
+              avatar: currentUser?.avatar,
+            },
+            {
+              id: user?.id,
+              avatar: user?.avatar,
+            },
+          ],
+          members: [currentUser?.email, user?.email],
+          firstMember: currentUser?.id,
+          secondMember: user?.id,
+          lastMessageContent: "",
+          lastMessageCreatedAt: dayjs().valueOf(),
+        };
+        await createConversationWithoutMessage(conversation).unwrap();
+        id = conversation.id;
+      }
+      navigate(`/chat/conversation/${id}`);
+    } catch (error) {
+      console.log("error: ", error);
+      toast({
+        title: "Error",
+        description: "Error happened while opening the conversation",
+        status: "error",
+        duration: 2000,
+        isClosable: true,
+      });
+    }
+  };
+
   return (
     <Flex
       w={{ sm: "380px" }}
@@ -53,19 +214,17 @@ const Profile = ({ user }) => {
       bgSize="cover"
       bgRepeat="no-repeat"
       gap="12px"
-      // wrap="wrap"
-      // outline="2px solid orange"
     >
       <Stack p={1} direction={{ base: "column" }} spacing="12px">
         <Flex direction="row" gap="28px" align="center">
           <Avatar
             size="xl"
-            name={name}
-            src={avatar}
+            name={user?.name}
+            src={user?.avatar}
             borderColor={
-              status === "online"
+              user?.status === "online"
                 ? "green.400"
-                : status === "offline"
+                : user?.status === "offline"
                 ? "gray.300"
                 : "red.400"
             }
@@ -75,9 +234,9 @@ const Profile = ({ user }) => {
               boxSize="0.6em"
               border="3px solid white"
               bg={
-                status === "online"
+                user?.status === "online"
                   ? "green.400"
-                  : status === "offline"
+                  : user?.status === "offline"
                   ? "gray.400"
                   : "red.400"
               }
@@ -91,52 +250,82 @@ const Profile = ({ user }) => {
                 boxSize={5}
               />
               <Text fontSize="lg" fontWeight="medium">
-                {username}
+                {user?.username}
               </Text>
             </Flex>
-            {/* TODO: hide these buttons when visiting my own profile, do conditional rendering of the username or id of the passed user with the store */}
-            <Flex direction="row" gap="14px" align="center">
-              <IconButton
-                size="sm"
-                fontSize="lg"
-                bg={"pong_cl_primary"}
-                color={"white"}
-                borderRadius={8}
-                aria-label="Send a message"
-                icon={<FiMessageSquare />}
-                _hover={{ bg: "white", color: "pong_cl_primary" }}
-              />
-              <IconButton
-                size="sm"
-                fontSize="lg"
-                bg={"pong_cl_primary"}
-                color={"white"}
-                borderRadius={8}
-                aria-label="Send friend request"
-                icon={<AiOutlineUserAdd />}
-                _hover={{ bg: "white", color: "pong_cl_primary" }}
-              />
-              <IconButton
-                size="sm"
-                fontSize="lg"
-                bg={"pong_cl_primary"}
-                color={"white"}
-                borderRadius={8}
-                aria-label="Send game request"
-                icon={<IoGameControllerOutline />}
-                _hover={{ bg: "white", color: "pong_cl_primary" }}
-              />
-              <IconButton
-                size="sm"
-                fontSize="lg"
-                bg={"pong_cl_primary"}
-                color={"white"}
-                borderRadius={8}
-                aria-label="Spectacle"
-                icon={<GoEye />}
-                _hover={{ bg: "white", color: "pong_cl_primary" }}
-              />
-            </Flex>
+            {currentUser?.id !== user?.id && (
+              <Flex direction="row" gap="14px" align="center">
+                <IconButton
+                  size="sm"
+                  fontSize="lg"
+                  bg={"pong_cl_primary"}
+                  color={"white"}
+                  borderRadius={8}
+                  aria-label="Send a message"
+                  icon={<FiMessageSquare />}
+                  _hover={{ bg: "white", color: "pong_cl_primary" }}
+                  onClick={handleSendDirectMessage}
+                  isLoading={
+                    isLoadingCreateConversationWithoutMessage ||
+                    isLoadingGetConversationByMembersEmails
+                  }
+                />
+                {!user?.friends?.includes(currentUser?.id) && (
+                  <IconButton
+                    size="sm"
+                    fontSize="lg"
+                    bg={"pong_cl_primary"}
+                    color={"white"}
+                    borderRadius={8}
+                    aria-label="Send friend request"
+                    icon={<AiOutlineUserAdd />}
+                    _hover={{ bg: "white", color: "pong_cl_primary" }}
+                    onClick={handleSendFriendNotification}
+                    // isLoading={
+                    //   isLoadingCreateConversationWithoutMessage ||
+                    //   isLoadingGetConversationByMembersEmails
+                    // }
+                  />
+                )}
+                {user?.friends?.includes(currentUser?.id) && (
+                  <>
+                    <IconButton
+                      size="sm"
+                      fontSize="lg"
+                      bg={"red.500"}
+                      color={"white"}
+                      borderRadius={8}
+                      aria-label="Send friend request"
+                      icon={<AiOutlineUserDelete />}
+                      _hover={{ bg: "white", color: "red.500" }}
+                      isLoading={isDeletingFriend || isLoadingGetCurrentUser}
+                      isDisabled={isDeletingFriend || isLoadingGetCurrentUser}
+                      onClick={() => handleDeleteFriend(user?.id)}
+                    />
+                    <IconButton
+                      size="sm"
+                      fontSize="lg"
+                      bg={"pong_cl_primary"}
+                      color={"white"}
+                      borderRadius={8}
+                      aria-label="Send game request"
+                      icon={<IoGameControllerOutline />}
+                      _hover={{ bg: "white", color: "pong_cl_primary" }}
+                    />
+                    <IconButton
+                      size="sm"
+                      fontSize="lg"
+                      bg={"pong_cl_primary"}
+                      color={"white"}
+                      borderRadius={8}
+                      aria-label="Spectacle"
+                      icon={<GoEye />}
+                      _hover={{ bg: "white", color: "pong_cl_primary" }}
+                    />
+                  </>
+                )}
+              </Flex>
+            )}
           </Flex>
         </Flex>
         <Stack direction="column" spacing={1} align="start" w="full">
@@ -155,7 +344,7 @@ const Profile = ({ user }) => {
                 Email
               </Text>
               <Text fontSize="12px" fontWeight="light" color="pong_cl_primary">
-                {email}
+                {user?.email}
               </Text>
             </Stack>
           </Flex>
@@ -165,7 +354,7 @@ const Profile = ({ user }) => {
                 Login 42
               </Text>
               <Text fontSize="12px" fontWeight="medium" color="whiteAlpha.400">
-                {campus}
+                {user?.username}
               </Text>
             </Flex>
             <Flex direction={"column"} gap={1}>
@@ -173,7 +362,7 @@ const Profile = ({ user }) => {
                 Campus
               </Text>
               <Text fontSize="12px" fontWeight="medium" color="whiteAlpha.400">
-                {campus}
+                {user?.campus}
               </Text>
             </Flex>
           </Flex>
@@ -187,7 +376,6 @@ const Profile = ({ user }) => {
               Achievements
             </Text>
           </Flex>
-          {/* TODO: scroll area on y-axis */}
           <ScrollArea.Root className="ScrollAreaRoot">
             <ScrollArea.Viewport className="ScrollAreaViewport">
               <Flex
@@ -253,15 +441,15 @@ const Profile = ({ user }) => {
           >
             <Flex direction="row" gap={3} align="center">
               <Text fontSize="13px" fontWeight="regular" color="whiteAlpha.900">
-                {rank}
+                {user?.rank}
               </Text>
-              <Avatar size="sm" name={name} src={avatar} />
+              <Avatar size="sm" name={user?.name} src={user?.avatar} />
               <Text fontSize="13px" fontWeight="regular" color="whiteAlpha.900">
-                {name}
+                {user?.name}
               </Text>
             </Flex>
             <Text fontSize="13px" fontWeight="semibold" color="pong_cl_primary">
-              {level}
+              {user?.level}
             </Text>
           </Flex>
         </Flex>
@@ -295,7 +483,7 @@ const Profile = ({ user }) => {
                     fontWeight="regular"
                     color="whiteAlpha.600"
                   >
-                    {user.gameWin} W {user.gameLoss} L
+                    {user?.gameWin} W {user?.gameLoss} L
                   </Text>
                 </Stack>
               </CircularProgressLabel>
@@ -326,7 +514,7 @@ const Profile = ({ user }) => {
                     fontWeight="semibold"
                     color="whiteAlpha.900"
                   >
-                    {parseInt(gameWin) + parseInt(gameLoss)}
+                    {parseInt(user?.gameWin) + parseInt(user?.gameLoss)}
                   </Text>
                   <Text
                     fontSize="10px"
