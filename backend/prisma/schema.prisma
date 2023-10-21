@@ -23,6 +23,11 @@ model user {
   is_profile_completed Boolean  @default(false)
   is_otp_validated     Boolean  @default(false)
   otp_secret           String?
+  not_req request[] @relation(name: "user")
+  player_one game[] @relation(name: "player_one")
+  player_two game[] @relation(name: "player_two")
+  send_req request[] @relation(name: "user_send")
+
 }
 
 model channel {
@@ -83,13 +88,33 @@ model notification {
   createdAt	DateTime @default(now())
 }
 
-model leaderboard {
-  id			Int	@id @unique @default(autoincrement())
-  userId		Int
-  name		String
-  username	String
-  avatar	String
-  level		String
-  rank		Int
-  createdAt	DateTime @default(now())
+model game {
+  id Int    @id @default(autoincrement())
+  send_as_request request[]
+  player_one       user     @relation(fields: [player_one_id], references: [id], name: "player_one")
+  player_one_id     Int
+  player_two user   @relation(fields:  [player_two_id], references: [id], name: "player_two")
+  player_two_id Int
+  id_winer Int
+  theme String
+  player_one_score Int
+  player_two_score Int
+  status String
+  createdAt   DateTime  @default(now())
+}
+
+
+model request {
+  id Int    @id @default(autoincrement())
+  user       user     @relation(fields: [userId], references: [id], name: "user")
+  userId     Int
+  is_req_fr_acc Boolean @default(false)
+  id_user_send user   @relation(fields:  [user_snd], references: [id], name: "user_send")
+  user_snd Int
+  id_game_send game   @relation(fields: [id_game], references: [id])
+  id_game Int
+  time_exper   DateTime @default(dbgenerated("NOW() + interval '1 year'"))
+  is_exper  Boolean @default(false)
+  is_seen  Boolean @default(false)
+  is_delete  Boolean @default(false)
 }

@@ -17,63 +17,98 @@ import useTitle from "src/hooks/useTitle";
 import { useNavigate } from "react-router-dom";
 import { setMatchmakingLoading } from "src/features/game/gameSlice";
 import { Controller, useForm } from "react-hook-form";
-import io from "socket.io-client";
+import io, { Socket } from "socket.io-client";
+import { createSocketClient } from "src/app/socket/client";
 
 const Game = () => {
   useTitle("Game");
   const dispatch = useDispatch();
   const currentUser = useSelector((state: any) => state?.user?.currentUser);
+  const accessToken = useSelector((state: any) => state?.auth?.accessToken);
   const navigate = useNavigate();
-  // const { matchmakingLoading } = useSelector((state: any) => state?.game);
-  // const {
-  //   register,
-  //   handleSubmit,
-  //   control,
-  //   formState: { errors },
-  //   reset,
-  // } = useForm({});
-  // // const socket = ClientSocket();
-  // useEffect(() => {
-  //   console.log("game page");
-  //   const socket = ClientSocket();
+  const { matchmakingLoading } = useSelector((state: any) => state?.game);
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+    reset,
+  } = useForm({});
 
-  //   socket.on("found_opponent", (data) => {
-  //     console.log("socket connected found_opponent : ", socket?.id);
-  //     dispatch(setMatchmakingLoading(false));
-  //     console.log("found opponent: ", data);
-  //     navigate(`${data?.data?.id}`, {
-  //       state: { game: data?.data },
-  //     });
-  //   });
+  useEffect(() => {
+    console.log("game page");
+    const socket = io(
+      import.meta.env.VITE_SERVER_MATCHMAKING_SOCKET_URL as string,
+      {
+        transports: ["websocket"],
+        reconnection: false,
+        // reconnection: true,
+        // reconnectionAttempts: 10,
+        // reconnectionDelay: 1000,
+        // upgrade: false,
+        // rejectUnauthorized: false,
+        query: {
+          token: accessToken,
+        },
+      }
+    );
 
-  //   return () => {
-  //     console.log("game page unmounted");
-  //     socket.disconnect();
-  //     // matchmakingSocket?.disconnect();
-  //   };
-  // }, []);
+    socket.on("found_opponent", (data) => {
+      console.log("socket connected found_opponent : ", socket?.id);
+      dispatch(setMatchmakingLoading(false));
+      console.log("found opponent: ", data);
+      navigate(`${data?.data?.id}`, {
+        // id === -1 -> bot ->
+        /*
+          else id game,
+        */
+        state: { game: data?.data },
+      });
+    });
 
-  // const handleMatchmaking = async (data: any) => {
-  //   console.log("matchmaking data: ", data);
-  //   dispatch(setMatchmakingLoading(true));
-  //   // socket = ClientSocket();
-  //   const socket = ClientSocket();
-  //   socket.on("connect", () => {
-  //     socket.on("disconnect", () => {
-  //       console.log("socket disconnected join_queue");
-  //     });
-  //     console.log("socket connected join_queue : ", socket?.id);
-  //     socket.emit("join_queue", {
-  //       userId: currentUser?.id,
-  //       username: currentUser?.username,
-  //       socketId: socket?.id,
-  //     });
-  //   });
-  //   // socket.disconnect();
-  //   reset({
-  //     gameMode: "normal",
-  //   });
-  // };
+    return () => {
+      console.log("game page unmounted");
+      socket.disconnect();
+      // matchmakingSocket?.disconnect();
+    };
+  }, []);
+
+  const handleMatchmaking = async (data: any) => {
+    console.log("matchmaking data: ", data);
+    dispatch(setMatchmakingLoading(true));
+    // socket = ClientSocket();
+    const socket = io(
+      import.meta.env.VITE_SERVER_MATCHMAKING_SOCKET_URL as string,
+      {
+        transports: ["websocket"],
+        reconnection: false,
+        // reconnection: true,
+        // reconnectionAttempts: 10,
+        // reconnectionDelay: 1000,
+        // upgrade: false,
+        // rejectUnauthorized: false,
+        query: {
+          token: accessToken,
+        },
+      }
+    );
+    socket.on("connect", () => {
+      socket.on("disconnect", () => {
+        console.log("socket disconnected join_queue");
+      });
+      console.log("socket connected join_queue : ", socket?.id);
+      socket.emit("join_queue", {
+        userId: currentUser?.id,
+        // type: "multiplayer" | "bot",
+        // mode: "easy" | "medium" | "hard",
+        socketId: socket?.id,
+      });
+    });
+    // socket.disconnect();
+    reset({
+      gameMode: "normal",
+    });
+  };
 
   // const handlelOpez = async (data: any) => {
   //   console.log("loopez: ");
@@ -186,7 +221,7 @@ const Game = () => {
               {errors?.gameMode && errors?.gameMode?.message}
             </FormErrorMessage>
           </FormControl> */}
-          {/* <Button
+          <Button
             colorScheme="orange"
             onClick={handleSubmit(handleMatchmaking)}
             isDisabled={matchmakingLoading}
@@ -194,9 +229,6 @@ const Game = () => {
             loadingText="Finding an opponent"
           >
             Start Matchmaking
-          </Button> */}
-          <Button onClick={handlelOpez} loadingText="Finding an opponent">
-            lopez
           </Button>
         </Stack>
       </VStack>
