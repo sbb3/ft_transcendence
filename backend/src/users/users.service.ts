@@ -209,4 +209,35 @@ export class UsersService extends PrismaClient {
     if (!user) throw new NotFoundException();
     return user;
   }
+
+
+  async updateUserGameStatus(userId: number) {
+    const user = await this.user.update({
+      where: { id: userId },
+      data: {
+        status: "in_game",
+      },
+    });
+    
+    if (!user) throw new NotFoundException();
+    return user;
+  }
+
+  async updateUserIsWiner(userId: number) {
+    const user = await this.user.findUnique({
+      where: { id: userId },
+    });
+    if (!user) {
+      throw new NotFoundException(`User with id ${userId} not found`);
+    }
+    const user1 = await this.user.update({
+      where: { id: userId },
+      data: {
+        game_wine: user.game_wine++,
+      },
+    });
+    
+    if (!user1) throw new NotFoundException();
+    return user1;
+  }
 }

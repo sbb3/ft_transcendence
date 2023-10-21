@@ -19,6 +19,7 @@ model user {
   avatar               String
   campus               String
   status               String
+  game_wine            Int
   is_otp_enabled       Boolean  @default(false)
   is_profile_completed Boolean  @default(false)
   is_otp_validated     Boolean  @default(false)
@@ -27,7 +28,21 @@ model user {
   player_one game[] @relation(name: "player_one")
   player_two game[] @relation(name: "player_two")
   send_req request[] @relation(name: "user_send")
+}
 
+
+model game {
+  id Int    @id @default(autoincrement())
+  send_as_request request[]
+  player_one       user     @relation(fields: [player_one_id], references: [id], name: "player_one")
+  player_one_id     Int
+  player_two user   @relation(fields:  [player_two_id], references: [id], name: "player_two")
+  player_two_id Int
+  id_winer Int
+  player_one_score Int
+  player_two_score Int
+  status String
+  createdAt   DateTime  @default(now())
 }
 
 model channel {
@@ -86,21 +101,6 @@ model notification {
   senderId	Int
   receiverId	Int
   createdAt	DateTime @default(now())
-}
-
-model game {
-  id Int    @id @default(autoincrement())
-  send_as_request request[]
-  player_one       user     @relation(fields: [player_one_id], references: [id], name: "player_one")
-  player_one_id     Int
-  player_two user   @relation(fields:  [player_two_id], references: [id], name: "player_two")
-  player_two_id Int
-  id_winer Int
-  theme String
-  player_one_score Int
-  player_two_score Int
-  status String
-  createdAt   DateTime  @default(now())
 }
 
 

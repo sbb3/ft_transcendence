@@ -33,19 +33,6 @@ export class GameGateway
   }
 
   handleConnection(client: Socket, room: string) {
-    // client.emit('initMyP', this.myP);
-    // const accessToken = client.handshake.query.accessToken as string;
-    // console.log(`accessToken`, accessToken);
-    // if (!this.first && this.i != 0) {
-    //   room = 'room' + this.i;
-    //   this.first = true;
-    // } else if (this.i == 0 && !this.first) {
-    //   this.first = true;
-    // } else if (this.first) {
-    //   room = 'room' + this.i;
-    //   this.first = false;
-    //   this.i++;
-    // }
     client.emit('name_room', room);
     this.logger.log(`room name for client : ${room}`);
     client.join(room);
@@ -63,7 +50,7 @@ export class GameGateway
   @SubscribeMessage('join_queue')
   initMyPa(client: Socket, data): void {
     if (data.type == 'bot') {
-      this.wss.emit('found_opponent', {
+      this.wss.emit('start_game', {
         data: {
           id: -1,
           type: 'bot',
@@ -80,9 +67,10 @@ export class GameGateway
       this.room = 'room' + this.i;
       client.join(this.room);
 
-      this.wss.emit('found_opponent', {
+      this.wss.emit('start_game', {
         data: {
-          id: 1,
+          id: 0,
+          room: this.room,
         },
       });
       this.first = false;
@@ -90,19 +78,4 @@ export class GameGateway
     }
   }
 
-  // @SubscribeMessage('msgToServer')
-  // handleMessage(client: Socket, message: string): void {
-  //   client.broadcast.emit('message', message);
-  //   // this.wss.emit('message', message);
-  // }
-
-  // @SubscribeMessage('upMyP')
-  // update(client: Socket, myPO: Paddle): void{
-  //   this.myP.x = myPO.x += 10;
-  //   client.emit('update', this.myP);
-  // }
-  // upMyPad(client: Socket, message: string): void {
-  //   client.broadcast.emit('message', message);
-  //   // this.wss.emit('message', message);
-  // }
 }

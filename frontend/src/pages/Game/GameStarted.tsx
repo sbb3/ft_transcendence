@@ -4,6 +4,8 @@ import { useLocation, useParams } from "react-router-dom";
 import Loader from "src/components/Utils/Loader";
 import { useGetGameByIdQuery } from "src/features/game/gameApi";
 import useTitle from "src/hooks/useTitle";
+import { Ball, Gol, Paddle, canvaState } from "./interfaces";
+import io, { Socket } from "socket.io-client";
 
 let bool = true;
 let bool2 = true;

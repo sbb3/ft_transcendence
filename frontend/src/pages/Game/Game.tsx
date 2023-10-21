@@ -92,37 +92,37 @@ const Game = () => {
     console.log("matchmaking data: ", data);
     console.log("gameType: ", gameType);
     dispatch(setMatchmakingLoading(true));
-    // const socket = io(
-    //   import.meta.env.VITE_SERVER_MATCHMAKING_SOCKET_URL as string,
-    //   {
-    //     transports: ["websocket"],
-    //     reconnection: false,
-    //     // reconnection: true,
-    //     // reconnectionAttempts: 10,
-    //     // reconnectionDelay: 1000,
-    //     // upgrade: false,
-    //     // rejectUnauthorized: false,
-    //     query: {
-    //       token: accessToken,
-    //     },
-    //   }
-    // );
-    // socket.on("connect", () => {
-    //   socket.on("disconnect", () => {
-    //     console.log("socket disconnected join_queue");
-    //   });
-    //   console.log("socket connected join_queue : ", socket?.id);
-    //   socket.emit("join_queue", {
-    //     userId: currentUser?.id,
-    //     // gameType: "multiplayer" | "bot",
-    //     // gameMode: "easy" | "medium" | "hard",
-    //     socketId: socket?.id,
-    //   });
-    // });
-    // // socket.disconnect();
-    // reset({
-    //   gameMode: "normal",
-    // });
+    const socket = io(
+      import.meta.env.VITE_SERVER_MATCHMAKING_SOCKET_URL as string,
+      {
+        transports: ["websocket"],
+        reconnection: false,
+        // reconnection: true,
+        // reconnectionAttempts: 10,
+        // reconnectionDelay: 1000,
+        // upgrade: false,
+        // rejectUnauthorized: false,
+        query: {
+          token: accessToken,
+        },
+      }
+    );
+    socket.on("connect", () => {
+      socket.on("disconnect", () => {
+        console.log("socket disconnected join_queue");
+      });
+      console.log("socket connected join_queue : ", socket?.id);
+      socket.emit("join_queue", {
+        userId: currentUser?.id,
+        // gameType: "multiplayer" | "bot",
+        // gameMode: "easy" | "medium" | "hard",
+        socketId: socket?.id,
+      });
+    });
+    // socket.disconnect();
+    reset({
+      gameMode: "normal",
+    });
   };
 
   return (
