@@ -11,8 +11,8 @@ import {
 } from '@nestjs/websockets';
 import path from 'path';
 import { Server, Socket } from 'socket.io';
-import { Paddle, Ball, Gol, canvaState } from './game.interface';
-import { update, mouvePaddle, bootPaddel } from './game.update';
+// import { Paddle, Ball, Gol, canvaState } from './game.interface';
+// import { update, mouvePaddle, bootPaddel } from './game.update';
 
 @WebSocketGateway({
   namespace: 'matchmaking',
@@ -62,17 +62,16 @@ export class GameGateway
 
   @SubscribeMessage('join_queue')
   initMyPa(client: Socket, data): void {
-	if (data.type == 'bot')
-	this.wss.emit('found_opponent', {
+    if (data.type == 'bot') {
+      this.wss.emit('found_opponent', {
         data: {
           id: -1,
-		  type: "bot",
-		  mode: "",
-
+          type: 'bot',
+          mode: '',
         },
       });
-	  return;
-  }
+      return;
+    }
     if (!this.first) {
       this.room = 'room' + this.i;
       client.join(this.room);
@@ -80,10 +79,10 @@ export class GameGateway
     } else if (this.first) {
       this.room = 'room' + this.i;
       client.join(this.room);
-		
+
       this.wss.emit('found_opponent', {
         data: {
-          id,
+          id: 1,
         },
       });
       this.first = false;
