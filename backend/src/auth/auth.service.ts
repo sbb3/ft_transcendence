@@ -11,9 +11,7 @@ import { PrismaClient } from '@prisma/client';
 
 @Injectable()
 export class AuthService extends PrismaClient {
-  constructor(
-    private jwtService: JwtService
-  ) {
+  constructor(private jwtService: JwtService) {
     super();
   }
 
@@ -35,48 +33,44 @@ export class AuthService extends PrismaClient {
     try {
       await this.jwtService.verifyAsync(token, { secret: secretKey });
       const decodedToken = this.decodeToken(token);
-      const user = decodedToken?.id ? await this.user.findUnique({
-        where : {
-          id : decodedToken.id
-        }
-      }) : null;
+      const user = decodedToken?.id
+        ? await this.user.findUnique({
+            where: {
+              id: decodedToken.id,
+            },
+          })
+        : null;
 
-      if (!user)
-        throw new UnauthorizedException();
+      if (!user) throw new UnauthorizedException();
     } catch {
       throw new UnauthorizedException();
     }
   }
 
   async createUserIfNotFound(user: any) {
-    let dbUser = await this.user.findUnique({
-      where : {
-        username : user.username
-      }
+    const dbUser = await this.user.findUnique({
+      where: {
+        username: user.username,
+      },
     });
- 
-    return !dbUser ? await this.user.create({
-        data : user
-      }) : dbUser;
+    return !dbUser
+      ? await this.user.create({
+          data: user,
+        })
+      : dbUser;
   }
 
   async updateUserData(whichUser: any, toUpdate: any) {
     const user = await this.user.update({
-      where : whichUser,
-      data : toUpdate
+      where: whichUser,
+      data: toUpdate,
     });
 
-    if (!user)
-      throw new NotFoundException('User not found.');
+    if (!user) throw new NotFoundException('User not found.');
     return user;
   }
 
-  initCookie(
-    key: string,
-    value: string,
-    parameters: any,
-    @Res() resp: any,
-  ) {
+  initCookie(key: string, value: string, parameters: any, @Res() resp: any) {
     resp.cookie(key, value, parameters);
   }
 
@@ -88,18 +82,23 @@ export class AuthService extends PrismaClient {
     response.cookie(cookieName, '', params);
   }
 
-	async signInLogic(request : Request, response : Response) {
-			const allInfos = request['user'];
-			allInfos.status = 'online';
-			const dbUser = await this.createUserIfNotFound(allInfos);
-			const refreshToken = await this.generateRefreshToken({id : dbUser.id});
+  async signInLogic(request: Request, response: Response) {
+    const allInfos = request['user'];
+    allInfos.status = 'online';
+    const dbUser = await this.createUserIfNotFound(allInfos);
+    const refreshToken = await this.generateRefreshToken({ id: 1 });
+    this.initCookie(
+      'refresh_token',
+      refreshToken,
+      {
+        maxAge: 24 * 15 * 60 * 60 * 1000, // 15 days
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none',
+      },
+      response,
+    );
 
-			this.initCookie('refresh_token', refreshToken, {
-				maxAge: 24 * 15 * 60 * 60 * 1000, // 15 days
-				httpOnly : true,
-				secure : true,
-				sameSite : 'none'
-			}, response);
-			return response.redirect(process.env.FRONT_URL + '');
-	}
+    return response.redirect(process.env.FRONT_URL + '');
+  }
 }

@@ -17,6 +17,7 @@ const Layout = () => {
   return (
     <Flex
       w={{ base: "full", sm: "460px", md: 780, lg: 980, xl: 1250 }}
+      // w={{ base: "full", sm: "460px", md: 780, lg: 1200, xl: 1250 }}
       h="full"
       gap={1}
       borderRadius={24}
@@ -28,6 +29,7 @@ const Layout = () => {
       align="start"
       p={2}
       alignItems={"stretch"}
+      bg="green.600"
     >
       <Stack
         w="160px"

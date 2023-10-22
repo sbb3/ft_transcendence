@@ -9,7 +9,7 @@ import { ChatGateway } from './chat/chat.gateway';
 import { NotificationModule } from './notifications/notification.module';
 import { NotificationGateway } from './notifications/notification.gateway';
 // import { GameGateway } from './game/game.gateway';
-import { GameModule } from './game/game.module';
+// import { GameModule } from './game/game.module';
 
 @Module({
   imports: [
@@ -24,7 +24,7 @@ import { GameModule } from './game/game.module';
     ChatGateway,
     NotificationModule,
     NotificationGateway,
-    GameModule,
+    // GameModule,
     // GameGateway,
   ],
   controllers: [],

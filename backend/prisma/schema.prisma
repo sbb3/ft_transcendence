@@ -19,21 +19,17 @@ model user {
   avatar               String
   campus               String
   status               String
-  game_wine            Int
+  game_wine            Int?
   is_otp_enabled       Boolean  @default(false)
   is_profile_completed Boolean  @default(false)
   is_otp_validated     Boolean  @default(false)
   otp_secret           String?
-  not_req request[] @relation(name: "user")
   player_one game[] @relation(name: "player_one")
   player_two game[] @relation(name: "player_two")
-  send_req request[] @relation(name: "user_send")
 }
-
 
 model game {
   id Int    @id @default(autoincrement())
-  send_as_request request[]
   player_one       user     @relation(fields: [player_one_id], references: [id], name: "player_one")
   player_one_id     Int
   player_two user   @relation(fields:  [player_two_id], references: [id], name: "player_two")
@@ -103,18 +99,3 @@ model notification {
   createdAt	DateTime @default(now())
 }
 
-
-model request {
-  id Int    @id @default(autoincrement())
-  user       user     @relation(fields: [userId], references: [id], name: "user")
-  userId     Int
-  is_req_fr_acc Boolean @default(false)
-  id_user_send user   @relation(fields:  [user_snd], references: [id], name: "user_send")
-  user_snd Int
-  id_game_send game   @relation(fields: [id_game], references: [id])
-  id_game Int
-  time_exper   DateTime @default(dbgenerated("NOW() + interval '1 year'"))
-  is_exper  Boolean @default(false)
-  is_seen  Boolean @default(false)
-  is_delete  Boolean @default(false)
-}

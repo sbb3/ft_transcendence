@@ -15,6 +15,8 @@ interface RecentGamesProps {
     username: string;
     avatar: string;
     recentGames: {
+      // TODO: recentGames will not be in user object, it will be fetched from the server
+      // TODO: get the games and sort them by date
       id: number;
       player: {
         id: number;
@@ -39,7 +41,9 @@ interface RecentGamesProps {
 }
 
 const RecentGames = ({ user }: RecentGamesProps) => {
-  // const { data: recentGames, isLoading, isFetching, isError, error } = useGetUserRecentGamesQuery(currentUser?.id);
+  // const { data: recentGames, isLoading, isFetching, isError, error } = useGetUserRecentGamesQuery(currentUser?.id, {
+  //   refetchOnMountOrArgChange: true,
+  // });
   // const { recentGames } = user;
   const navigate = useNavigate();
 

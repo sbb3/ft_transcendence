@@ -38,7 +38,7 @@ export class UsersController extends PrismaClient {
     return this.usersService.findAllUsers();
   }
 
-  @Get(':id')
+  @Get('user/:id')
   findOne(@Param('id') id: string) {
     this.logger.log('\nfind by id\n');
     return this.usersService.findOneById(id);
@@ -114,6 +114,26 @@ export class UsersController extends PrismaClient {
       return response.status(200).json(user);
     } catch (error) {
       return response.status(404).json(error);
+    }
+  }
+  @ApiOperation({ summary: 'Get leaderboard' })
+  @UseGuards(JwtGuard)
+  @Get('leaderboard')
+  async getLeaderboard() {
+    try {
+      return await this.usersService.getLeaderboard();
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
+  @ApiOperation({ summary: 'Get recent games' })
+  @UseGuards(JwtGuard)
+  @Get(':userId/recentgames')
+  async getRecentGames(@Param('userId', ParseIntPipe) userId: number) {
+    try {
+      return await this.usersService.getRecentGames(userId);
+    } catch (error) {
+      throw new BadRequestException(error.message);
     }
   }
 }

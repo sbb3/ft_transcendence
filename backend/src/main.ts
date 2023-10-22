@@ -16,7 +16,7 @@ async function bootstrap() {
         // postman
         callback(null, true);
       } else {
-        callback(new Error('Not allowed by CORS'));
+        callback(new Error('Not allowed by CORS 2'));
       }
     },
     credentials: true,

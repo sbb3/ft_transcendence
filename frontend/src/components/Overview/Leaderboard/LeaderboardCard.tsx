@@ -4,7 +4,7 @@ import { RankIcon } from "src/assets/icons/icons";
 import { useNavigate } from "react-router-dom";
 
 const LeaderboardCard = ({ key, player }) => {
-  const { name, username, avatar, rank } = player;
+  const { name, username, avatar, level } = player;
   const navigate = useNavigate();
   return (
     <Flex
@@ -19,11 +19,11 @@ const LeaderboardCard = ({ key, player }) => {
       align="center"
       cursor={"pointer"}
       bgColor={
-        rank == "1"
+        level == "1"
           ? "#FFCA28"
-          : rank == "2"
+          : level == "2"
           ? "#F4F4F4"
-          : rank == "3"
+          : level == "3"
           ? "#FF8228"
           : "rgba(255, 255, 255, 0.2)"
       }
@@ -31,7 +31,7 @@ const LeaderboardCard = ({ key, player }) => {
     >
       <Flex direction="row" gap={3} align="center" pl={2} pr={2}>
         <Text fontSize="12px" fontWeight="bold" color="#312244">
-          {rank}
+          {level}
         </Text>
         <Avatar size="sm" name={name} src={avatar} />
         <Text fontSize="14px" fontWeight="medium" color="#312244">

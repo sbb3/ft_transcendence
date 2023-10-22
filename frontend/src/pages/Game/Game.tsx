@@ -1,4 +1,5 @@
 import {
+  Box,
   Button,
   Flex,
   FormControl,
@@ -8,33 +9,21 @@ import {
   RadioGroup,
   Stack,
   Text,
-  Tooltip,
   VStack,
 } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import useTitle from "src/hooks/useTitle";
 import { useNavigate } from "react-router-dom";
 import { setMatchmakingLoading } from "src/features/game/gameSlice";
 import { Controller, useForm } from "react-hook-form";
-import io, { Socket } from "socket.io-client";
-import { createSocketClient } from "src/app/socket/client";
+import io from "socket.io-client";
 import Loader from "src/components/Utils/Loader";
-import { useLottie } from "lottie-react";
-import animationData from "src/assets/animations/orange_loading_animation.json";
+import { Player } from "@lottiefiles/react-lottie-player";
 
-const style = {
-  width: "200px",
-  color: "orange",
-};
-const options = {
-  loop: true,
-  autoplay: true,
-  animationData,
-};
 const Game = () => {
   useTitle("Game");
-  const { View } = useLottie(options, style);
+  const playerRef = useRef(null);
 
   const dispatch = useDispatch();
   const currentUser = useSelector((state: any) => state?.user?.currentUser);
@@ -51,75 +40,54 @@ const Game = () => {
   } = useForm({});
 
   useEffect(() => {
-    console.log("game page");
     const socket = io(
       import.meta.env.VITE_SERVER_MATCHMAKING_SOCKET_URL as string,
       {
         transports: ["websocket"],
         reconnection: false,
-        // reconnection: true,
-        // reconnectionAttempts: 10,
-        // reconnectionDelay: 1000,
-        // upgrade: false,
-        // rejectUnauthorized: false,
         query: {
           token: accessToken,
         },
       }
     );
 
-    socket.on("start_game", (data) => {
+    socket.on("found_opponent", (data) => {
       console.log("socket connected start_game : ", socket?.id);
       dispatch(setMatchmakingLoading(false));
-      console.log("found opponent: ", data);
+      playerRef?.current?.stop();
       navigate(`${data?.data?.id}`, {
-        // id === -1 -> bot ->
-        /*
-          else id game,
-        */
         state: { game: data?.data },
       });
     });
 
     return () => {
-      console.log("game page unmounted");
       socket.disconnect();
-      // matchmakingSocket?.disconnect();
+      dispatch(setMatchmakingLoading(false));
+      playerRef?.current?.stop();
     };
   }, []);
 
   const handleMatchmaking = async (data: any) => {
-    console.log("matchmaking data: ", data);
-    console.log("gameType: ", gameType);
     dispatch(setMatchmakingLoading(true));
     const socket = io(
       import.meta.env.VITE_SERVER_MATCHMAKING_SOCKET_URL as string,
       {
         transports: ["websocket"],
         reconnection: false,
-        // reconnection: true,
-        // reconnectionAttempts: 10,
-        // reconnectionDelay: 1000,
-        // upgrade: false,
-        // rejectUnauthorized: false,
         query: {
           token: accessToken,
         },
       }
     );
     socket.on("connect", () => {
-      socket.on("disconnect", () => {
-        console.log("socket disconnected join_queue");
-      });
-      console.log("socket connected join_queue : ", socket?.id);
       socket.emit("join_queue", {
         userId: currentUser?.id,
-        // gameType: "multiplayer" | "bot",
-        // gameMode: "easy" | "medium" | "hard",
+        gameType,
+        gameMode: data?.gameMode,
         socketId: socket?.id,
       });
     });
-    // socket.disconnect();
+    socket.disconnect();
     reset({
       gameMode: "normal",
     });
@@ -133,14 +101,22 @@ const Game = () => {
       direction="column"
       justify="center"
       align="center"
-      bg="purple.700"
       p={2}
       borderRadius={26}
       gap={{ base: 4, sm: 6, md: 8 }}
+      bg="red.600"
     >
       {matchmakingLoading ? (
         // <Loader />
-        <>{View}</>
+        <>
+          <Player
+            ref={playerRef}
+            autoplay
+            loop
+            src="src/assets/animations/orange_loading_animation.json"
+            style={{ height: "200px", width: "200px", color: "orange" }}
+          />
+        </>
       ) : (
         <>
           <Flex
@@ -151,33 +127,28 @@ const Game = () => {
             align="center"
             p={2}
             borderRadius={26}
-            gap={{ base: 5, sm: 10, md: 15 }}
-            bg={"yellow.400"}
+            gap={{ base: 2, sm: 6, md: 15 }}
+            bg="cyan.600"
           >
             <VStack
               pos="relative"
               justify="center"
               align="center"
-              // w={{ base: "200px", sm: "300px", md: "400px" }}
-              w={{ base: "600px" }}
+              w={{ base: "full", sm: "350px", md: "500px" }}
+              // w={{ base: "600px" }}
               h={{ base: "400px" }}
-              borderRadius={{ base: "15px", sm: "25px", md: "40px" }}
+              borderRadius={{ base: "15px", sm: "20px", md: "30px" }}
               border="1px solid rgba(251, 102, 19, 0.1)"
               boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.35)"
               backdropFilter={"blur(20px)"}
-              // bgImage={`url('src/assets/img/ai_bot_playing.jpg')`}
-
+              // bgImage={`url('src/assets/img/bot.jpg')`}
               bgSize="cover"
               bgRepeat="no-repeat"
+              opacity={gameType === "bot" ? 0.5 : 1}
               p={{ base: 5 }}
               spacing={6}
-              bg={gameType === "bot" ? "red.500" : "red.400"}
               onClick={() => {
                 setGameType("bot");
-              }}
-              _hover={{
-                bg: "red.500",
-                cursor: "pointer",
               }}
             >
               <Stack
@@ -244,25 +215,20 @@ const Game = () => {
               pos="relative"
               justify="center"
               align="center"
-              // w={{ base: "200px", sm: "300px", md: "400px" }}
-              w={{ base: "600px" }}
+              w={{ base: "full", sm: "350px", md: "500px" }}
               h={{ base: "400px" }}
-              borderRadius={{ base: "15px", sm: "25px", md: "40px" }}
+              borderRadius={{ base: "15px", sm: "20px", md: "30px" }}
               border="1px solid rgba(251, 102, 19, 0.1)"
-              boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.35)"
+              boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.45)"
               backdropFilter={"blur(20px)"}
-              // bgImage={`url('src/assets/img/ai_bot_playing.jpg')`}
               bgSize="cover"
+              // bgImage={`url('src/assets/img/multiplayer.jpg')`}
               bgRepeat="no-repeat"
+              opacity={gameType === "multiplayer" ? 0.5 : 1}
               p={{ base: 5 }}
               spacing={6}
-              bg={gameType === "multiplayer" ? "green.500" : "green.400"}
               onClick={() => {
                 setGameType("multiplayer");
-              }}
-              _hover={{
-                bg: "green.500",
-                cursor: "pointer",
               }}
             >
               <Stack

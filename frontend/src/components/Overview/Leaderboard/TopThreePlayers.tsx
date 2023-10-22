@@ -24,7 +24,9 @@ const TopThreePlayers = ({ top3Players }) => {
           borderColor={"white"}
           borderWidth="4px"
           // borderRadius="0px"
-          onClick={() => navigate(`/profile/${player2?.username}`)}
+          onClick={() =>
+            player2?.username && navigate(`/profile/${player2?.username}`)
+          }
           cursor={"pointer"}
         >
           <AvatarBadge
@@ -43,10 +45,10 @@ const TopThreePlayers = ({ top3Players }) => {
         </Avatar>
         <Flex direction="column" align="center" justify="center" gap={0}>
           <Text fontSize="12px" fontWeight="semibold" color="whiteAlpha.800">
-            {player2?.name}
+            {player2?.name || ""}
           </Text>
           <Text fontSize="10px" fontWeight="light" color="whiteAlpha.600">
-            {`Level ${player2?.level}`}
+            {`Level ${player2?.level || 0}`}
           </Text>
         </Flex>
       </Stack>
@@ -54,11 +56,13 @@ const TopThreePlayers = ({ top3Players }) => {
         <Avatar
           size="xl"
           name={player1?.name}
-          src={"https://anasdouib.me/images/picture.webp"}
+          src={player1?.avatar}
           borderColor={"#FFCA28"}
           borderWidth="4px"
           // borderRadius="0px"
-          onClick={() => navigate(`/profile/${player1?.username}`)}
+          onClick={() =>
+            player1?.username && navigate(`/profile/${player1?.username}`)
+          }
           cursor={"pointer"}
         >
           <Box
@@ -85,10 +89,10 @@ const TopThreePlayers = ({ top3Players }) => {
         </Avatar>
         <Flex direction="column" align="center" justify="center" gap={0}>
           <Text fontSize="12px" fontWeight="semibold" color="whiteAlpha.800">
-            {player1?.name}
+            {player1?.name || ""}
           </Text>
           <Text fontSize="10px" fontWeight="light" color="whiteAlpha.600">
-            {`Level ${player1?.level}`}
+            {`Level ${player1?.level || 0}`}
           </Text>
         </Flex>
       </Stack>
@@ -100,7 +104,9 @@ const TopThreePlayers = ({ top3Players }) => {
           borderColor={"#FF8228"}
           borderWidth="4px"
           // borderRadius="0px"
-          onClick={() => navigate(`/profile/${player3?.username}`)}
+          onClick={() =>
+            player3?.username && navigate(`/profile/${player3?.username}`)
+          }
           cursor={"pointer"}
         >
           <AvatarBadge
@@ -119,10 +125,10 @@ const TopThreePlayers = ({ top3Players }) => {
         </Avatar>
         <Flex direction="column" align="center" justify="center" gap={0}>
           <Text fontSize="12px" fontWeight="semibold" color="whiteAlpha.800">
-            {player3?.name}
+            {player3?.name || ""}
           </Text>
           <Text fontSize="10px" fontWeight="light" color="whiteAlpha.600">
-            {`Level ${player3?.level}`}
+            {`Level ${player3?.level || 0}`}
           </Text>
         </Flex>
       </Stack>

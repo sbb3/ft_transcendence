@@ -7,7 +7,6 @@ import Loader from "../../Utils/Loader";
 import LeaderboardCard from "./LeaderboardCard";
 import TopThreePlayers from "./TopThreePlayers";
 
-// TODO: either leaderboard have a separate collection, or we could get all users and sort them by their rank
 const Leaderboard = () => {
   const toast = useToast();
   const {

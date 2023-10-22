@@ -210,34 +210,53 @@ export class UsersService extends PrismaClient {
     return user;
   }
 
-
-  async updateUserGameStatus(userId: number) {
-    const user = await this.user.update({
-      where: { id: userId },
-      data: {
-        status: "in_game",
+  async getLeaderboard() {
+    const users = await this.user.findMany({
+      orderBy: {
+        level: 'desc',
+      },
+      select: {
+        id: true,
+        username: true,
+        name: true,
+        avatar: true,
+        level: true,
       },
     });
-    
-    if (!user) throw new NotFoundException();
-    return user;
+    return users;
   }
-
-  async updateUserIsWiner(userId: number) {
+  async getRecentGames(userId: number) {
     const user = await this.user.findUnique({
       where: { id: userId },
+      select: {
+        id: true,
+        username: true,
+        avatar: true,
+        name: true,
+      },
     });
     if (!user) {
       throw new NotFoundException(`User with id ${userId} not found`);
     }
-    const user1 = await this.user.update({
-      where: { id: userId },
-      data: {
-        game_wine: user.game_wine++,
-      },
-    });
-    
-    if (!user1) throw new NotFoundException();
-    return user1;
+    console.log('user', user);
+    // const games = await this.game.findMany({
+    //   where: {
+    //     some: {
+    //       id: userId,
+    //     },
+    //   },
+    //   orderBy: {
+    //     created_at: 'desc',
+    //   },
+    //   include: {
+    //     select: {
+    //       id: true,
+    //       username: true,
+    //       avatar: true,
+    //     },
+    //   },
+    // });
+    // return games;
+    return [];
   }
 }

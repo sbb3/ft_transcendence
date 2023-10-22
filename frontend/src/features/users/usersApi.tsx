@@ -45,7 +45,7 @@ const usersApi = apiSlice.injectEndpoints({
       },
     }),
     getUserById: builder.query({
-      query: (id: number) => `users/${id}`, // users/id return object {}, users?id=1, return array []
+      query: (id: number) => `users/user/${id}`, // users/id return object {}, users?id=1, return array []
     }),
     getUserByUsername: builder.query({
       query: (username: string) => `users/username/${username}`,

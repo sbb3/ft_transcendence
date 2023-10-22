@@ -36,7 +36,7 @@ function App() {
               <Route path="settings" element={<Settings />} />
               <Route path="game" element={<GameLayout />}>
                 <Route index element={<Game />} />
-                <Route path=":id" element={<GameStarted />} />
+                {/* <Route path=":id" element={<GameStarted />} /> */}
               </Route>
               <Route path="chat" element={<Chat />}>
                 <Route index element={<ChatSplashScreen />} />
@@ -61,4 +61,4 @@ function App() {
 
 export default App;
 
-// TODO: leaderboard, recent games, player rank ...
+// TODO: leaderboard event listener, recent games, player rank ...
