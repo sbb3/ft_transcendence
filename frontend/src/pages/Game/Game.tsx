@@ -104,7 +104,6 @@ const Game = () => {
       p={2}
       borderRadius={26}
       gap={{ base: 4, sm: 6, md: 8 }}
-      bg="red.600"
     >
       {matchmakingLoading ? (
         // <Loader />
@@ -124,40 +123,55 @@ const Game = () => {
             w={"full"}
             direction={{ base: "column", sm: "column", md: "row" }}
             justify="center"
-            align="center"
+            align="start"
             p={2}
             borderRadius={26}
             gap={{ base: 2, sm: 6, md: 15 }}
-            bg="cyan.600"
           >
-            <VStack
-              pos="relative"
-              justify="center"
-              align="center"
-              w={{ base: "full", sm: "350px", md: "500px" }}
-              // w={{ base: "600px" }}
-              h={{ base: "400px" }}
-              borderRadius={{ base: "15px", sm: "20px", md: "30px" }}
-              border="1px solid rgba(251, 102, 19, 0.1)"
-              boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.35)"
-              backdropFilter={"blur(20px)"}
-              // bgImage={`url('src/assets/img/bot.jpg')`}
-              bgSize="cover"
-              bgRepeat="no-repeat"
-              opacity={gameType === "bot" ? 0.5 : 1}
-              p={{ base: 5 }}
-              spacing={6}
-              onClick={() => {
-                setGameType("bot");
-              }}
+            <Stack
+              align={"center"}
+              justify={"center"}
+              spacing={{ base: 2, md: 4 }}
             >
+              <VStack
+                pos="relative"
+                justify="center"
+                align="center"
+                w={{
+                  base: "full",
+                  sm: "350px",
+                  md: "350px",
+                  lg: "380px",
+                  xl: "500px",
+                }}
+                // w={{ base: "600px" }}
+                h={{ base: "400px" }}
+                borderRadius={{ base: "15px", sm: "20px", md: "30px" }}
+                border="1px solid rgba(251, 102, 19, 0.1)"
+                boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.35)"
+                backdropFilter={"blur(20px)"}
+                bgImage={`url('src/assets/img/bot.jpg')`}
+                bgSize="cover"
+                bgRepeat="no-repeat"
+                bgPos={"center"}
+                opacity={gameType === "bot" ? 0.5 : 1}
+                p={{ base: 5 }}
+                spacing={6}
+                onClick={() => {
+                  setGameType("bot");
+                }}
+              ></VStack>
+
               <Stack
                 align={"center"}
                 justify={"center"}
                 spacing={{ base: 2, md: 4 }}
+                onClick={() => {
+                  setGameType("bot");
+                }}
               >
                 <Text
-                  fontSize={{ base: "lg", sm: "lg", md: "2xl" }}
+                  fontSize={{ base: "lg", sm: "lg", md: "3xl" }}
                   fontWeight="bold"
                   color="orange.400"
                   textTransform={"uppercase"}
@@ -165,17 +179,30 @@ const Game = () => {
                 >
                   Bot
                 </Text>
-                <Text
+                {/* <Text
                   fontSize={{ base: "sm", sm: "md", md: "lg" }}
                   fontWeight="medium"
                   color="whiteAlpha.900"
                   textAlign={"center"}
                 >
                   Play against a bot
-                </Text>
-                <FormControl isInvalid={!!errors.gameMode} mt={0}>
-                  <FormLabel htmlFor="gameMode" fontSize="lg">
-                    Game Mode
+                </Text> */}
+                <FormControl
+                  as={Stack}
+                  justify="center"
+                  align="start"
+                  isInvalid={!!errors.gameMode}
+                  gap={{ base: 2, sm: 2, md: 4 }}
+                >
+                  <FormLabel
+                    htmlFor="gameMode"
+                    fontSize="lg"
+                    fontWeight="semibold"
+                    color="whiteAlpha.800"
+                    textTransform={"uppercase"}
+                    m={0}
+                  >
+                    Game mode
                   </FormLabel>
                   <Controller
                     name="gameMode"
@@ -189,17 +216,42 @@ const Game = () => {
                         }}
                       >
                         <Stack
-                          direction="column"
-                          justify={"center"}
-                          align={"start"}
-                          spacing={1}
+                          direction="row"
+                          justify={"start"}
+                          align={"center"}
+                          spacing={4}
+                          m={0}
                         >
                           <Radio colorScheme={"orange"} value="normal">
-                            Normal
+                            <Text
+                              fontSize={{ base: "sm", sm: "md", md: "lg" }}
+                              fontWeight="medium"
+                              color="whiteAlpha.800"
+                              textAlign={"center"}
+                            >
+                              Normal
+                            </Text>
                           </Radio>
 
+                          <Radio colorScheme={"orange"} value="medium">
+                            <Text
+                              fontSize={{ base: "sm", sm: "md", md: "lg" }}
+                              fontWeight="medium"
+                              color="whiteAlpha.800"
+                              textAlign={"center"}
+                            >
+                              Medium
+                            </Text>
+                          </Radio>
                           <Radio colorScheme={"orange"} value="hard">
-                            Hard
+                            <Text
+                              fontSize={{ base: "sm", sm: "md", md: "lg" }}
+                              fontWeight="medium"
+                              color="whiteAlpha.800"
+                              textAlign={"center"}
+                            >
+                              Hard
+                            </Text>
                           </Radio>
                         </Stack>
                       </RadioGroup>
@@ -210,34 +262,50 @@ const Game = () => {
                   </FormErrorMessage>
                 </FormControl>
               </Stack>
-            </VStack>
-            <VStack
-              pos="relative"
-              justify="center"
-              align="center"
-              w={{ base: "full", sm: "350px", md: "500px" }}
-              h={{ base: "400px" }}
-              borderRadius={{ base: "15px", sm: "20px", md: "30px" }}
-              border="1px solid rgba(251, 102, 19, 0.1)"
-              boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.45)"
-              backdropFilter={"blur(20px)"}
-              bgSize="cover"
-              // bgImage={`url('src/assets/img/multiplayer.jpg')`}
-              bgRepeat="no-repeat"
-              opacity={gameType === "multiplayer" ? 0.5 : 1}
-              p={{ base: 5 }}
-              spacing={6}
-              onClick={() => {
-                setGameType("multiplayer");
-              }}
+            </Stack>
+
+            <Stack
+              align={"center"}
+              justify={"center"}
+              spacing={{ base: 2, md: 4 }}
             >
+              <VStack
+                pos="relative"
+                justify="center"
+                align="center"
+                w={{
+                  base: "full",
+                  sm: "350px",
+                  md: "350px",
+                  lg: "380px",
+                  xl: "500px",
+                }}
+                h={{ base: "400px" }}
+                borderRadius={{ base: "15px", sm: "20px", md: "30px" }}
+                border="1px solid rgba(251, 102, 19, 0.1)"
+                boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.45)"
+                backdropFilter={"blur(20px)"}
+                bgImage={`url('src/assets/img/multiplayer.jpg')`}
+                bgSize="cover"
+                bgPos={"center"}
+                bgRepeat="no-repeat"
+                opacity={gameType === "multiplayer" ? 0.5 : 1}
+                p={{ base: 5 }}
+                spacing={6}
+                onClick={() => {
+                  setGameType("multiplayer");
+                }}
+              ></VStack>
               <Stack
                 align={"center"}
                 justify={"center"}
                 spacing={{ base: 2, md: 4 }}
+                onClick={() => {
+                  setGameType("multiplayer");
+                }}
               >
                 <Text
-                  fontSize={{ base: "lg", sm: "lg", md: "2xl" }}
+                  fontSize={{ base: "lg", sm: "lg", md: "3xl" }}
                   fontWeight="bold"
                   color="orange.400"
                   textTransform={"uppercase"}
@@ -245,18 +313,23 @@ const Game = () => {
                 >
                   Multiplayer
                 </Text>
-                <Text
+                {/* <Text
                   fontSize={{ base: "sm", sm: "md", md: "lg" }}
                   fontWeight="medium"
                   color="whiteAlpha.900"
                   textAlign={"center"}
                 >
                   Play against another player
-                </Text>
+                </Text> */}
               </Stack>
-            </VStack>
+            </Stack>
           </Flex>
           <Button
+            fontSize={{ base: "sm", sm: "md", md: "lg" }}
+            fontWeight="medium"
+            color="whiteAlpha.900"
+            textTransform={"uppercase"}
+            borderRadius={5}
             colorScheme="orange"
             onClick={handleSubmit(handleMatchmaking)}
             isDisabled={matchmakingLoading}

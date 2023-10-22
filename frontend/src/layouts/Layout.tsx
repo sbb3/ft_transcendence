@@ -29,7 +29,6 @@ const Layout = () => {
       align="start"
       p={2}
       alignItems={"stretch"}
-      bg="green.600"
     >
       <Stack
         w="160px"
