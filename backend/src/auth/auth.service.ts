@@ -86,7 +86,7 @@ export class AuthService extends PrismaClient {
     const allInfos = request['user'];
     allInfos.status = 'online';
     const dbUser = await this.createUserIfNotFound(allInfos);
-    const refreshToken = await this.generateRefreshToken({ id: 1 });
+    const refreshToken = await this.generateRefreshToken({ id: dbUser.id });
     this.initCookie(
       'refresh_token',
       refreshToken,
