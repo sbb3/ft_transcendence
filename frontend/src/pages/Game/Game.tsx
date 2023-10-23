@@ -1,4 +1,5 @@
 import {
+  Avatar,
   Box,
   Button,
   Flex,
@@ -119,6 +120,62 @@ const Game = () => {
       ) : (
         <>
           <Flex
+            justify="space-around"
+            align="center"
+            w={"full"}
+            borderRadius={15}
+            p={{ base: 1, md: 2 }}
+            // gap={{ base: 4, sm: 6, md: 8 }}
+            // bg="pong_bg.300"
+            bg="pong_cl.500"
+            boxShadow={"0px 4px 24px -1px rgba(0, 0, 0, 0.35)"}
+          >
+            <Stack
+              align={"center"}
+              justify={"center"}
+              spacing={{ base: 1, md: 2 }}
+            >
+              <Avatar
+                size={{ base: "md", md: "lg" }}
+                // name={user?.name}
+                // src={user?.avatar}
+                borderWidth="1px"
+              />
+              <Text
+                fontSize={{ base: "md", md: "lg" }}
+                fontWeight="bold"
+                color="whiteAlpha.900"
+                textTransform={"uppercase"}
+                textAlign={"center"}
+                letterSpacing={1}
+              >
+                {/* {user?.name} */} sbb3
+              </Text>
+            </Stack>
+            <Stack
+              align={"center"}
+              justify={"center"}
+              spacing={{ base: 1, md: 2 }}
+            >
+              <Avatar
+                size={{ base: "md", md: "lg" }}
+                // name={user?.name}
+                // src={user?.avatar}
+                borderWidth="1px"
+              />
+              <Text
+                fontSize={{ base: "md", md: "lg" }}
+                fontWeight="bold"
+                color="whiteAlpha.900"
+                textTransform={"uppercase"}
+                textAlign={"center"}
+                letterSpacing={1}
+              >
+                {/* {user?.name} */} lopez
+              </Text>
+            </Stack>
+          </Flex>
+          <Flex
             pos="relative"
             w={"full"}
             direction={{ base: "column", sm: "column", md: "row" }}
@@ -150,7 +207,8 @@ const Game = () => {
                 border="1px solid rgba(251, 102, 19, 0.1)"
                 boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.35)"
                 backdropFilter={"blur(20px)"}
-                bgImage={`url('src/assets/img/bot.jpg')`}
+                // bgImage={`url('src/assets/img/bot.jpg')`}
+                bgImage={`url('src/assets/img/bot1.jpg')`}
                 bgSize="cover"
                 bgRepeat="no-repeat"
                 bgPos={"center"}
@@ -285,7 +343,8 @@ const Game = () => {
                 border="1px solid rgba(251, 102, 19, 0.1)"
                 boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.45)"
                 backdropFilter={"blur(20px)"}
-                bgImage={`url('src/assets/img/multiplayer.jpg')`}
+                // bgImage={`url('src/assets/img/multiplayer.jpg')`}
+                bgImage={`url('src/assets/img/multiplayer1.jpg')`}
                 bgSize="cover"
                 bgPos={"center"}
                 bgRepeat="no-repeat"
