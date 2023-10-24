@@ -26,13 +26,25 @@ export class NotificationService extends PrismaClient {
         !sender ? 'Sender not found.' : 'Receiver not found.',
       );
 
-    // check if sender and receiver are friends, the friends array is in the user table
     if (sender.friends.includes(receiver.id)) {
       throw new BadRequestException(
         'You cannot send a friend request to an existing friend.',
       );
     }
-
+    if (createNotificationDto.type !== 'conversation') {
+      const existingNotification = await this.notification.findFirst({
+        where: {
+          senderId: createNotificationDto.senderId,
+          receiverId: createNotificationDto.receiverId,
+          type: createNotificationDto.type,
+        },
+      });
+      if (existingNotification) {
+        throw new BadRequestException(
+          'You have already sent a friend request to this user.',
+        );
+      }
+    }
     const newNotification = await this.notification.create({
       data: createNotificationDto,
     });
