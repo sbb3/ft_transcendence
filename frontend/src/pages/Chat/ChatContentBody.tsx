@@ -1,8 +1,7 @@
-import { Box, Flex, Stack, Text } from "@chakra-ui/react";
-import * as ScrollArea from "@radix-ui/react-scroll-area";
+import { Flex, Stack, Text } from "@chakra-ui/react";
 import "src/styles/scrollbarChatBody.css";
-import { useEffect, useRef, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import ConversationMessage from "./Conversation/ConversationMessage";
 import messagesApi, {
   useGetMessagesByConversationIdQuery,
@@ -10,15 +9,21 @@ import messagesApi, {
 import Loader from "src/components/Utils/Loader";
 import store from "src/app/store";
 import InfiniteScroll from "react-infinite-scroll-component";
-import { Scrollbars } from "rc-scrollbars";
 import ChatRightModal from "./ChatRightModal";
+
+interface ChatContentBodyType {
+  conversationId: string;
+  toggleProfileDrawer: () => void;
+  isProfileDrawerOpen: boolean;
+  receiverUser: any;
+}
 
 const ChatContentBody = ({
   conversationId,
   toggleProfileDrawer,
   isProfileDrawerOpen,
-  receiverUser = {} as any,
-}) => {
+  receiverUser,
+}: ChatContentBodyType) => {
   const currentUser = useSelector((state: any) => state?.user?.currentUser);
   const [page, setPage] = useState(1);
 
@@ -27,7 +32,6 @@ const ChatContentBody = ({
     isLoading: isLoadingMessages,
     isFetching: isFetchingMessages,
     isError,
-    error,
   } = useGetMessagesByConversationIdQuery(conversationId); // add page = 1, limit = 10
 
   useEffect(() => {
@@ -69,7 +73,7 @@ const ChatContentBody = ({
         fontWeight="semibold"
       >
         <Text fontSize="xl" fontWeight="normal" color="white">
-          {error?.data?.message || "Something went wrong 🤷‍♂️"}
+          {"Something went wrong 🤷‍♂️"}
         </Text>
       </Flex>
     );
@@ -126,7 +130,7 @@ const ChatContentBody = ({
       border="1px solid rgba(251, 102, 19, 0.1)"
       boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.35)"
       backdropFilter={"blur(20px)"}
-      bgImage={`url('src/assets/img/BlackNoise.png')`}
+      bgImage={`url('assets/img/BlackNoise.webp')`}
       bgSize="cover"
       bgRepeat="no-repeat"
     >

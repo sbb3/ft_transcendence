@@ -22,8 +22,16 @@ import { FiFile } from "react-icons/fi";
 import usersApi from "src/features/users/usersApi";
 import { useSelector } from "react-redux";
 
-const ProfileDetailsFormModal = ({ isOpen, onToggle }) => {
-  const currentUser = useSelector((state) => state?.user?.currentUser);
+interface ProfileDetailsFormModalProps {
+  isOpen: boolean;
+  onToggle: () => void;
+}
+
+const ProfileDetailsFormModal = ({
+  isOpen,
+  onToggle,
+}: ProfileDetailsFormModalProps) => {
+  const currentUser = useSelector((state: any) => state?.user?.currentUser);
   const toast = useToast();
   const {
     register,
@@ -44,7 +52,7 @@ const ProfileDetailsFormModal = ({ isOpen, onToggle }) => {
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   const { ref, ...rest } = register("avatar", {
-    validate: (value) => {
+    validate: (value: any) => {
       if (value?.length > 0) {
         if (value[0]?.size > 3000000) {
           return "Max file size is 3mb!";
@@ -98,7 +106,7 @@ const ProfileDetailsFormModal = ({ isOpen, onToggle }) => {
         username: "",
         avatar: undefined,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.log("error: ", error);
       toast({
         title: "Error.",
@@ -117,7 +125,7 @@ const ProfileDetailsFormModal = ({ isOpen, onToggle }) => {
         border="1px solid rgba(251, 102, 19, 0.3)"
         boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.35)"
         backdropFilter={"blur(20px)"}
-        bgImage={`url('src/assets/img/BlackNoise.png')`}
+        bgImage={`url('assets/img/BlackNoise.webp')`}
         bgSize="cover"
         bgRepeat="no-repeat"
         bg="transparent"
@@ -228,7 +236,7 @@ const ProfileDetailsFormModal = ({ isOpen, onToggle }) => {
             <Box>
               <Image
                 boxSize={{ base: "300px", md: "350px" }}
-                src="src/assets/svgs/complete_profile.svg"
+                src="assets/svg/complete_profile.svg"
                 alt="profile illustration"
                 borderRadius={20}
               />

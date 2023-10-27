@@ -25,7 +25,7 @@ const ChatContentFooter = ({ onSendMessage, isLoading }) => {
       border="1px solid rgba(251, 102, 19, 0.1)"
       boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.35)"
       backdropFilter={"blur(20px)"}
-      bgImage={`url('src/assets/img/BlackNoise.png')`}
+      bgImage={`url('assets/img/BlackNoise.webp')`}
       bgSize="cover"
       bgRepeat="no-repeat"
     >

@@ -1,38 +1,38 @@
 export const badges = [
   {
-    link: "src/assets/svgs/badges/Gold.svg",
+    link: "assets/svg/badges/Gold.svg",
     alt: "Gold Badge",
   },
   {
-    link: "src/assets/svgs/badges/Silver.svg",
+    link: "assets/svg/badges/Silver.svg",
     alt: "Silver Badge",
   },
   {
-    link: "src/assets/svgs/badges/Bronze.svg",
+    link: "assets/svg/badges/Bronze.svg",
     alt: "Bronze Badge",
   },
   {
-    link: "src/assets/svgs/badges/Gold.svg",
+    link: "assets/svg/badges/Gold.svg",
     alt: "Gold Badge",
   },
   {
-    link: "src/assets/svgs/badges/Silver.svg",
+    link: "assets/svg/badges/Silver.svg",
     alt: "Silver Badge",
   },
   {
-    link: "src/assets/svgs/badges/Bronze.svg",
+    link: "assets/svg/badges/Bronze.svg",
     alt: "Bronze Badge",
   },
   {
-    link: "src/assets/svgs/badges/Gold.svg",
+    link: "assets/svg/badges/Gold.svg",
     alt: "Gold Badge",
   },
   {
-    link: "src/assets/svgs/badges/Silver.svg",
+    link: "assets/svg/badges/Silver.svg",
     alt: "Silver Badge",
   },
   {
-    link: "src/assets/svgs/badges/Bronze.svg",
+    link: "assets/svg/badges/Bronze.svg",
     alt: "Bronze Badge",
   },
 ];

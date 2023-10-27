@@ -7,7 +7,7 @@ import { v4 as uuidv4 } from "uuid";
 const messagesApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getMessagesByConversationId: builder.query({
-      query: (conversationId) =>
+      query: (conversationId: string) =>
         `conversations/messages?conversationId=${conversationId}&page=${1}`,
       // transformResponse: (response: any) => {
       //   const messages = response?.messages?.reverse();
@@ -15,18 +15,20 @@ const messagesApi = apiSlice.injectEndpoints({
       //   return { messages, totalPages };
       // },
       async onCacheEntryAdded(
-        arg,
+        _arg: any,
         { getState, updateCachedData, cacheDataLoaded, cacheEntryRemoved }: any
       ) {
-        const currentUser = getState()?.user?.currentUser?.id;
-        const socket = createSocketClient();
+        const socket = createSocketClient({
+          api_url: import.meta.env.VITE_SERVER_CHAT_SOCKET_URL as string,
+        });
+        const currentUserId = getState()?.user?.currentUser?.id;
 
         try {
           await cacheDataLoaded;
           socket.on("conversationMessage", (data) => {
             const sender = data.data.sender;
             const receiver = data.data.receiver;
-            if (currentUser === sender || currentUser === receiver) {
+            if (currentUserId === sender || currentUserId === receiver) {
               updateCachedData((draft) => {
                 const message = draft?.messages?.find(
                   (m) => m.id === data?.data?.id
@@ -45,17 +47,20 @@ const messagesApi = apiSlice.injectEndpoints({
       },
     }),
     getMoreMessagesByConversationId: builder.query({
-      query: ({ conversationId, page }) =>
+      query: ({
+        conversationId,
+        page,
+      }: {
+        conversationId: string;
+        page: number;
+      }) =>
         `conversations/messages?conversationId=${conversationId}&page=${page}`,
       // transformResponse: (response: any) => {
       //   const messages = response?.messages?.reverse();
       //   const totalPages = response?.totalPages;
       //   return { messages, totalPages };
       // },
-      async onQueryStarted(
-        arg,
-        { dispatch, getState, updateCachedData, queryFulfilled }: any
-      ) {
+      async onQueryStarted(arg, { dispatch, queryFulfilled }: any) {
         const { conversationId } = arg;
         try {
           const result = await queryFulfilled;
@@ -79,7 +84,14 @@ const messagesApi = apiSlice.injectEndpoints({
       },
     }),
     addMessage: builder.mutation({
-      query: (msgData) => ({
+      query: (msgData: {
+        id: string;
+        conversationId: string;
+        sender: number;
+        receiver: number;
+        content: string;
+        lastMessageCreatedAt: number;
+      }) => ({
         url: `conversations/addmessage`,
         method: "POST",
         body: { ...msgData },
@@ -138,12 +150,19 @@ const messagesApi = apiSlice.injectEndpoints({
       },
     }),
     createMessage: builder.mutation({
-      query: (data) => ({
+      query: (data: {
+        id: string;
+        conversationId: string;
+        sender: number;
+        receiver: number;
+        content: string;
+        lastMessageCreatedAt: number;
+      }) => ({
         url: `conversations/addmessage`,
         method: "POST",
         body: { ...data },
       }),
-      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }: any) {
+      async onQueryStarted(arg, { dispatch, queryFulfilled }: any) {
         const messageData = arg;
         const { conversationId } = messageData;
         // optimistic update

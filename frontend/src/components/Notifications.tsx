@@ -31,7 +31,6 @@ function Notifications() {
   const toast = useToast();
   const navigate = useNavigate();
   // const location = useLocation();
-  // console.log("location: ", location);
   const {
     data: notifications = [],
     isLoading: isNotificationsLoading,
@@ -78,13 +77,6 @@ function Notifications() {
       }).unwrap();
       refetch();
       await triggerGetCurrentUser(currentUser?.id).unwrap();
-      // or
-      // dispatch(
-      //   setCurrentUser({
-      //     ...currentUser,
-      //     friends: [...currentUser?.friends, sender.id],
-      //   })
-      // );
       toast({
         title: "Success",
         description: "Friend request accepted",
@@ -92,7 +84,7 @@ function Notifications() {
         duration: 2000,
         isClosable: true,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.log("error accepting friend request: ", error);
       toast({
         title: "Error",
@@ -119,7 +111,7 @@ function Notifications() {
         duration: 2000,
         isClosable: true,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.log("error accepting game challenge: ", error);
       toast({
         title: "Error",
@@ -229,7 +221,6 @@ function Notifications() {
                     align={"center"}
                     gap={2}
                     minH="40px"
-                    // bg={"transparent"}
                     bg={"pong_bg.100"}
                     cursor={"pointer"}
                     borderBottom={"1px solid rgba(255, 255, 255, 0.1)"}
@@ -288,7 +279,6 @@ function Notifications() {
                     gap={4}
                     minH="40px"
                     bg={"transparent"}
-                    // bg={"pong_bg.400"}
                     cursor={"pointer"}
                     borderBottom={"1px solid rgba(255, 255, 255, 0.1)"}
                   >

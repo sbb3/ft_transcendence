@@ -22,6 +22,7 @@ export class CloudinaryService {
         {
           folder: 'avatars',
           public_id: modifiedFileName,
+          format: 'webp',
         },
         (error, result) => {
           if (error) return reject(error);

@@ -1,12 +1,8 @@
 import {
-  Box,
   Button,
-  Flex,
   FormControl,
   FormErrorMessage,
   FormLabel,
-  Heading,
-  Image,
   Input,
   Modal,
   ModalBody,
@@ -15,26 +11,20 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  PinInput,
-  PinInputField,
   Radio,
   RadioGroup,
   Stack,
-  Text,
   Textarea,
   Tooltip,
-  VStack,
-  useDisclosure,
 } from "@chakra-ui/react";
 import { Controller, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useToast } from "@chakra-ui/react";
-import { ReactNode, useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCreateChannelMutation } from "src/features/channels/channelsApi";
 import { v4 as uuidv4 } from "uuid";
-import { fa, tr } from "@faker-js/faker";
 import { useSelector } from "react-redux";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -74,8 +64,8 @@ const CreateChannel = ({
   onToggleCreateChannel: () => void;
 }) => {
   const currentUser = useSelector((state: any) => state.user.currentUser);
-  const [isProtected, setIsProtected] = useState(false);
-  const [openTooltip, setOpenTooltip] = useState(""); // [1
+  const [isProtected, setIsProtected] = useState<boolean>(false);
+  const [openTooltip, setOpenTooltip] = useState<string>("");
   const passRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const toast = useToast();
@@ -125,7 +115,7 @@ const CreateChannel = ({
         duration: 2000,
         isClosable: true,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.log("error: ", error);
       toast({
         title: "Channel not created.",
@@ -160,7 +150,7 @@ const CreateChannel = ({
         border="1px solid rgba(251, 102, 19, 0.3)"
         boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.35)"
         backdropFilter={"blur(20px)"}
-        bgImage={`url('src/assets/img/BlackNoise.png')`}
+        bgImage={`url('assets/img/BlackNoise.webp')`}
         bgSize="cover"
         bgRepeat="no-repeat"
         bg="transparent"

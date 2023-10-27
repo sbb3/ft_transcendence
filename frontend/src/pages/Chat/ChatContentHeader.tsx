@@ -8,7 +8,6 @@ import {
   Text,
   useDisclosure,
 } from "@chakra-ui/react";
-import React from "react";
 import { FaHashtag } from "react-icons/fa";
 import { FiInfo } from "react-icons/fi";
 import ChannelInfoAbout from "src/components/Chat/ChannelInfoAbout";
@@ -28,7 +27,6 @@ const ChatContentHeader = ({
       height={"full"}
       justify="start"
       align="center"
-      // bg={"red.400"}
       h={20}
       borderRadius={6}
       p={4}
@@ -37,11 +35,10 @@ const ChatContentHeader = ({
       border="1px solid rgba(251, 102, 19, 0.1)"
       boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.35)"
       backdropFilter={"blur(20px)"}
-      bgImage={`url('src/assets/img/BlackNoise.png')`}
+      bgImage={`url('assets/img/BlackNoise.webp')`}
       bgSize="cover"
       bgRepeat="no-repeat"
       bg="pong_bg_first"
-      // bg="pong_bg_secondary"
     >
       {type === "DM" ? (
         <Flex

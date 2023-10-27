@@ -39,9 +39,9 @@ dayjs.extend(relativeTime);
 const ChatRightModal = ({ participantUserId, isOpen, toggleProfileDrawer }) => {
   console.log("participantUserId: ", participantUserId);
   const currentUser = useSelector((state: any) => state?.user?.currentUser);
-  const prefetchUser = usersApi.usePrefetch("getCurrentUser", {
-    force: true,
-  });
+  // const prefetchUser = usersApi.usePrefetch("getCurrentUser", {
+  //   force: true,
+  // });
   const navigate = useNavigate();
   const toast = useToast();
 
@@ -52,9 +52,6 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleProfileDrawer }) => {
   } = useGetUserByIdQuery(participantUserId, {
     refetchOnMountOrArgChange: true,
   });
-
-  const [triggerGetCurrentUser, { isLoading: isLoadingGetCurrentUser }] =
-    usersApi.useLazyGetCurrentUserQuery();
 
   const [
     triggerGetConversationByMembersEmails,
@@ -150,7 +147,7 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleProfileDrawer }) => {
         isClosable: true,
       });
       toggleProfileDrawer();
-    } catch (error) {
+    } catch (error: any) {
       console.log("error accepting friend request: ", error);
       console.log("error: ", error);
       toast({
@@ -162,11 +159,7 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleProfileDrawer }) => {
       });
     }
   };
-  // TODO: handle the case when the user send a game request to a user who already have a game request from him
-  // TODO: listen for game request accepted socket.io event (oppoent accepted)
-  // TODO: cannot send a game request to a opponent who is already playing a game
-  // TODO: possible to send a direct game request only to a friend, not all
-  // TODO: later, think about other  possible cases
+
   const handleSendGameChallengeNotification = async () => {
     try {
       const notification = {
@@ -186,7 +179,7 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleProfileDrawer }) => {
         isClosable: true,
       });
       toggleProfileDrawer();
-    } catch (error) {
+    } catch (error: any) {
       console.log("error: ", error);
       toast({
         title: "Error",
@@ -212,7 +205,7 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleProfileDrawer }) => {
         isClosable: true,
       });
       toggleProfileDrawer();
-    } catch (error) {
+    } catch (error: any) {
       console.log("error: ", error);
       toast({
         title: "Error",
@@ -238,7 +231,7 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleProfileDrawer }) => {
         isClosable: true,
       });
       toggleProfileDrawer();
-    } catch (error) {
+    } catch (error: any) {
       console.log("error: ", error);
       toast({
         title: "Error",
@@ -265,13 +258,11 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleProfileDrawer }) => {
         borderTopRightRadius: "26px",
         borderBottomRightRadius: "26px",
         backgroundColor: "rgba(51, 51, 51, 0.9)",
-        // padding: "4px",
       }}
     >
       <Stack
         w="full"
         h="full"
-        // bg="pong_bg_primary"
         p={2}
         spacing={4}
         borderTopRightRadius="26px"
@@ -350,16 +341,12 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleProfileDrawer }) => {
         <Flex
           direction="row"
           gap="8px"
-          // background="rgba(4, 3, 1, 0.08)"
           bg="pong_bg_secondary"
-          // borderRadius={4}
           w="full"
           h="40px"
-          // bgGradient="linear(to-r, pong_bg_secondary, pong_bg_primary)"
           justify="center"
           align="center"
           borderRadius={8}
-          // wrap={"wrap"}
         >
           <IconButton
             size="sm"
@@ -373,13 +360,11 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleProfileDrawer }) => {
             onClick={handleSendDirectMessage}
             isLoading={
               isLoadingGetConversationByMembersEmails ||
-              isLoadingCreateConversationWithoutMessage ||
-              isLoadingGetCurrentUser
+              isLoadingCreateConversationWithoutMessage
             }
-            _disabled={
+            disabled={
               isLoadingGetConversationByMembersEmails ||
-              isLoadingCreateConversationWithoutMessage ||
-              isLoadingGetCurrentUser
+              isLoadingCreateConversationWithoutMessage
             }
           />
           <IconButton

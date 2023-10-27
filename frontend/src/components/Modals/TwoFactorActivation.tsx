@@ -40,10 +40,9 @@ const pinSchema = yup.object().shape({
 
 const TwoFactorActivation = ({ isOpen, onToggle }) => {
   const currentUser = useSelector((state: any) => state?.user?.currentUser);
-  const [qrCodeUrl, setQrCodeUrl] = useState("");
+  const [qrCodeUrl, setQrCodeUrl] = useState<string>("");
   const toast = useToast();
   const {
-    register,
     handleSubmit,
     control,
     formState: { errors },
@@ -57,7 +56,7 @@ const TwoFactorActivation = ({ isOpen, onToggle }) => {
   useEffect(() => {
     generateOTP(currentUser?.id)
       .unwrap()
-      .then((data) => {
+      .then((data: any) => {
         QRCode.toDataURL(data?.otpauthUrl)
           .then(setQrCodeUrl)
           .catch((err) => {
@@ -92,7 +91,7 @@ const TwoFactorActivation = ({ isOpen, onToggle }) => {
         pin: "",
       });
       onToggle();
-    } catch (error) {
+    } catch (error: any) {
       console.log("error: ", error);
       toast({
         title: "Error",
@@ -119,7 +118,7 @@ const TwoFactorActivation = ({ isOpen, onToggle }) => {
         border="1px solid rgba(251, 102, 19, 0.3)"
         boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.35)"
         backdropFilter={"blur(20px)"}
-        bgImage={`url('src/assets/img/BlackNoise.png')`}
+        bgImage={`url('assets/img/BlackNoise.webp')`}
         bgSize="cover"
         bgRepeat="no-repeat"
         bg="transparent"
@@ -135,7 +134,7 @@ const TwoFactorActivation = ({ isOpen, onToggle }) => {
           >
             <Flex justify="center" align="center" w="full">
               <Image
-                src="src/assets/svgs/2fa_activation.svg"
+                src="assets/svg/2fa_activation.svg"
                 alt="Two Factor Authentication Activation"
                 borderRadius={20}
                 w="320px"

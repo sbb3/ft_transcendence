@@ -2,14 +2,16 @@ import { apiSlice } from "src/app/api/apiSlice";
 import messagesApi from "../messages/messagesApi";
 import { createSocketClient } from "src/app/socket/client";
 import { v4 as uuidv4 } from "uuid";
-import usersApi from "../users/usersApi";
 
 interface Conversation {
-  id: number;
-  title: string;
+  id: string;
+  firstMember: number;
+  secondMember: number;
+  lastMessageContent: string;
+  lastMessageCreatedAt: number;
+  name: string[];
+  avatar: { id: number; avatar: string }[];
   members: string[];
-  createdAt: string;
-  updatedAt: string;
 }
 
 const conversationApi = apiSlice.injectEndpoints({
@@ -18,9 +20,11 @@ const conversationApi = apiSlice.injectEndpoints({
       query: (currentUserEmail) => `conversations?email=${currentUserEmail}`,
       async onCacheEntryAdded(
         arg,
-        { dispatch, updateCachedData, cacheDataLoaded, cacheEntryRemoved }
+        { updateCachedData, cacheDataLoaded, cacheEntryRemoved }: any
       ) {
-        const socket = createSocketClient();
+        const socket = createSocketClient({
+          api_url: import.meta.env.VITE_SERVER_CHAT_SOCKET_URL as string,
+        });
 
         try {
           await cacheDataLoaded;
@@ -29,7 +33,7 @@ const conversationApi = apiSlice.injectEndpoints({
               (email) => email === arg
             );
             if (isDataBelongToThisUser) {
-              updateCachedData((draft) => {
+              updateCachedData((draft: any) => {
                 const conversation = draft?.find(
                   (c) => c.id === data?.data?.id
                 );
@@ -53,13 +57,15 @@ const conversationApi = apiSlice.injectEndpoints({
       },
     }),
     getConversation: builder.query({
-      query: (conversationId) =>
+      query: (conversationId: number) =>
         `conversations/conversation?id=${conversationId}`,
       async onCacheEntryAdded(
-        arg,
-        { dispatch, updateCachedData, cacheDataLoaded, cacheEntryRemoved }
+        _arg: any,
+        { dispatch, cacheDataLoaded, cacheEntryRemoved }: any
       ) {
-        const socket = createSocketClient();
+        const socket = createSocketClient({
+          api_url: import.meta.env.VITE_SERVER_CHAT_SOCKET_URL as string,
+        });
 
         try {
           await cacheDataLoaded;
@@ -78,9 +84,15 @@ const conversationApi = apiSlice.injectEndpoints({
       },
     }),
     getConversationByMembersEmails: builder.query({
-      query: ({ firstMemberEmail, secondMemberEmail }) =>
+      query: ({
+        firstMemberEmail,
+        secondMemberEmail,
+      }: {
+        firstMemberEmail: string;
+        secondMemberEmail: string;
+      }) =>
         `conversations/conversationByEmails?member1=${firstMemberEmail}&member2=${secondMemberEmail}`,
-      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }: any) {
+      async onQueryStarted(_arg: any, { queryFulfilled }: any) {
         try {
           await queryFulfilled;
         } catch (error) {
@@ -89,7 +101,7 @@ const conversationApi = apiSlice.injectEndpoints({
       },
     }),
     createConversation: builder.mutation({
-      query: (conversation) => ({
+      query: (conversation: Conversation) => ({
         url: `conversations`,
         method: "POST",
         body: {
@@ -115,12 +127,12 @@ const conversationApi = apiSlice.injectEndpoints({
           await queryFulfilled;
 
           const messageData = {
-            id: uuidv4(),
-            conversationId: conversation.id,
-            sender: getState()?.user?.currentUser?.id,
-            receiver: arg.secondMember,
-            content: conversation.lastMessageContent,
-            lastMessageCreatedAt: conversation.lastMessageCreatedAt,
+            id: uuidv4() as string,
+            conversationId: conversation.id as string,
+            sender: getState()?.user?.currentUser?.id as number,
+            receiver: arg.secondMember as number,
+            content: conversation.lastMessageContent as string,
+            lastMessageCreatedAt: conversation.lastMessageCreatedAt as number,
           };
           await dispatch(
             messagesApi.endpoints.createMessage.initiate(messageData)
@@ -132,10 +144,16 @@ const conversationApi = apiSlice.injectEndpoints({
       },
     }),
     createConversationWithoutMessage: builder.mutation({
-      query: (conversation) => ({
-        url: `/conversations`,
+      query: (conversation: Conversation) => ({
+        url: `conversations`,
         method: "POST",
-        body: { ...conversation },
+        body: {
+          id: conversation.id,
+          firstMember: conversation.firstMember,
+          secondMember: conversation.secondMember,
+          lastMessageContent: conversation.lastMessageContent,
+          lastMessageCreatedAt: conversation.lastMessageCreatedAt,
+        },
       }),
       async onQueryStarted(arg, { dispatch, getState, queryFulfilled }: any) {
         const conversation = arg;
@@ -157,36 +175,40 @@ const conversationApi = apiSlice.injectEndpoints({
       },
     }),
     updateConversation: builder.mutation({
-      query: (data = {} as { id: number; message: any }) => ({
+      query: (data: { id: string; message: any }) => ({
         url: `conversations`,
         method: "PATCH",
         body: { ...data },
       }),
-      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
+      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }: any) {
         // optimistic update
-        // const patchResult = dispatch(
-        //   conversationApi?.util?.updateQueryData(
-        //     "getConversations",
-        //     getState().user.currentUser?.email,
-        //     (draft) => {
-        //       console.log("arg: ", arg);
-        //       console.log("updateQueryData arg: ", draft);
-        //       // draft = { ...draft, ...arg.data };
-        //     }
-        //   )
-        // );
-        // console.log("arg2: ", arg);
+        const patchResult = dispatch(
+          conversationApi?.util?.updateQueryData(
+            "getConversations",
+            getState().user.currentUser?.email,
+            (draft) => {
+              const conversation = draft?.find((c) => c.id === arg.id);
+              if (conversation?.id) {
+                conversation.lastMessageContent =
+                  arg.message.lastMessageContent;
+                conversation.lastMessageCreatedAt =
+                  arg.message.lastMessageCreatedAt;
+                draft = { ...draft, ...conversation };
+              }
+            }
+          )
+        );
 
         try {
           await queryFulfilled;
         } catch (error) {
           console.log("error: ", error);
-          // patchResult.undo();
+          patchResult.undo();
         }
       },
     }),
     deleteConversation: builder.mutation({
-      query: (conversationId) => ({
+      query: (conversationId: string) => ({
         url: `conversations/${conversationId}`,
         method: "DELETE",
       }),

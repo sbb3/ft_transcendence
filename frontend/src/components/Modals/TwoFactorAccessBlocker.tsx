@@ -23,11 +23,11 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useToast } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 import { useLottie } from "lottie-react";
-import animationData from "src/assets/animations/animation_fingerprint.json";
 import { useSelector } from "react-redux";
 import { useValidateOTPMutation } from "src/features/users/usersApi";
 import store from "src/app/store";
 import authApi from "src/features/auth/authApi";
+import animationData from "src/assets/lottie/animation_fingerprint.json" assert { type: "json" };
 
 const pinSchema = yup.object().shape({
   pin: yup
@@ -56,7 +56,7 @@ const TwoFactorAccessBlocker = ({
   const { View } = useLottie(options, style);
   const toast = useToast();
   const {
-    register,
+    // register,
     handleSubmit,
     control,
     formState: { errors },
@@ -86,7 +86,7 @@ const TwoFactorAccessBlocker = ({
         pin: "",
       });
       onOTPAccessBlockerToggle();
-    } catch (error) {
+    } catch (error: any) {
       console.log("error: ", error);
       toast({
         title: "Error",
@@ -113,7 +113,7 @@ const TwoFactorAccessBlocker = ({
         border="1px solid rgba(251, 102, 19, 0.3)"
         boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.35)"
         backdropFilter={"blur(20px)"}
-        bgImage={`url('src/assets/img/BlackNoise.png')`}
+        bgImage={`url('assets/img/BlackNoise.webp')`}
         bgSize="cover"
         bgRepeat="no-repeat"
         bg="transparent"
@@ -193,9 +193,7 @@ const TwoFactorAccessBlocker = ({
             letterSpacing={1}
             mr={3}
             onClick={async () => {
-              // TODO: uncomment below dispatch later and remove localStorage.clear()
               await store.dispatch(authApi.endpoints.sendLogOut.initiate({}));
-              localStorage.clear();
               onOTPAccessBlockerToggle();
               navigate("/login", { replace: true });
             }}

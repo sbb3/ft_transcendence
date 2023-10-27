@@ -116,7 +116,7 @@ const SearchDMsChannels = () => {
               border: "1px solid rgba(251, 102, 19, 0.39)",
               boxShadow: "0px 4px 24px -1px rgba(0, 0, 0, 0.25)",
               backdropFilter: "blur(20px)",
-              backgroundImage: "url('src/assets/img/BlackNoise.png')",
+              backgroundImage: "url('assets/img/BlackNoise.webp')",
               bgSize: "cover",
               bgRepeat: "no-repeat",
               backgroundColor: "#FF7F00",

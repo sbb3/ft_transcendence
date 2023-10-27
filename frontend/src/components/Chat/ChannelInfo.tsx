@@ -18,16 +18,39 @@ import channelsApi, {
 } from "src/features/channels/channelsApi";
 dayjs.extend(relativeTime);
 
-const ChannelAbout = ({ channel }) => {
+interface ChannelType {
+  channel: {
+    id: number;
+    name: string;
+    description: string;
+    createdAt: string;
+    ownerId: number;
+    owner: {
+      id: number;
+      name: string;
+    };
+    members: [
+      {
+        id: number;
+        name: string;
+        username: string;
+        avatar: string;
+        role: string;
+        isMuted: boolean;
+      }
+    ];
+    banned: number[];
+  };
+}
+
+const ChannelAbout = ({ channel }: ChannelType) => {
   const currentUser = useSelector((state: any) => state?.user?.currentUser);
 
   const navigate = useNavigate();
-  const [deleteChannel, { isLoading: isDeletingChannel }] =
-    useDeleteChannelMutation();
+  const [deleteChannel] = useDeleteChannelMutation();
 
   const [LeaveChannel] = channelsApi.useLeaveChannelMutation();
 
-  // TODO: invalidate the cache
   const handleLeaveChannel = async () => {
     try {
       await LeaveChannel({
@@ -41,7 +64,6 @@ const ChannelAbout = ({ channel }) => {
     }
   };
 
-  // TODO: invalidate the cache
   const handleDeleteChannel = async () => {
     try {
       await deleteChannel({ id: channel?.id, name: channel?.name }).unwrap();
@@ -61,9 +83,6 @@ const ChannelAbout = ({ channel }) => {
       align="center"
       justify="center"
       borderRadius={40}
-      // bg="red"
-      // pl={3}
-      // pr={2}
       p={2}
     >
       <Stack spacing={1} align="start" w="full">

@@ -3,7 +3,7 @@ import { Routes, Route } from "react-router-dom";
 import {
   Overview,
   Settings,
-  Game,
+  // Game,
   Chat,
   Support,
   Login,
@@ -15,7 +15,7 @@ import {
   Layout,
   PrefetchUsers,
   GameLayout,
-  GameStarted,
+  // GameStarted,
   CheckOTP,
   AuthVerification,
   StayLoggedIn,
@@ -35,7 +35,7 @@ function App() {
               <Route path="profile/:username" element={<PlayerProfile />} />
               <Route path="settings" element={<Settings />} />
               <Route path="game" element={<GameLayout />}>
-                <Route index element={<Game />} />
+                {/* <Route index element={<Game />} /> */}
                 {/* <Route path=":id" element={<GameStarted />} /> */}
               </Route>
               <Route path="chat" element={<Chat />}>
@@ -61,4 +61,4 @@ function App() {
 
 export default App;
 
-// TODO: leaderboard event listener, recent games, player rank ...
+// TODO: recent games, player rank ...

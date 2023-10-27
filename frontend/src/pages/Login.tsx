@@ -21,19 +21,19 @@ const Login = () => {
       minH={{ base: 750 }}
       bg="pong_bg_primary"
     >
-      {/* <MotionBox
+      <MotionBox
         pos="absolute"
         w={{ base: "300px", sm: "400px", md: "550px" }}
         h={{ base: "300px", sm: "400px", md: "550px" }}
-        bgImage="url('src/assets/img/cropped_circle_pong.png')"
+        bgImage="url('assets/img/cropped_circle_pong.webp')"
         bgPosition="center"
         bgSize="contain"
         bgRepeat="no-repeat"
         bgBlendMode="lighten"
-        animate={{ rotate: 360 }}
-        transition={{ ease: "linear", duration: 5, repeat: Infinity }}
+        // animate={{ rotate: 360 }}
+        // transition={{ ease: "linear", duration: 5, repeat: Infinity }}
         opacity={0.9}
-      /> */}
+      />
       <VStack
         pos="relative"
         justify="center"
@@ -44,7 +44,7 @@ const Login = () => {
         border="1px solid rgba(251, 102, 19, 0.1)"
         boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.35)"
         backdropFilter={"blur(20px)"}
-        bgImage={`url('src/assets/img/BlackNoise.png')`}
+        bgImage={`url('assets/img/BlackNoise.webp')`}
         bgSize="cover"
         bgRepeat="no-repeat"
         p={{ base: 5 }}

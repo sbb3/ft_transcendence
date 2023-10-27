@@ -7,6 +7,14 @@ import Loader from "../../Utils/Loader";
 import LeaderboardCard from "./LeaderboardCard";
 import TopThreePlayers from "./TopThreePlayers";
 
+interface LeaderboardPlayer {
+  id: number;
+  name: string;
+  username: string;
+  avatar: string;
+  level: string;
+}
+
 const Leaderboard = () => {
   const toast = useToast();
   const {
@@ -14,14 +22,8 @@ const Leaderboard = () => {
     isLoading,
     isFetching,
     isError,
-    refetch,
+    // refetch,
   } = useGetLeaderboardQuery({}, { refetchOnMountOrArgChange: true });
-
-  // useEffect(() => {
-  // TODO: listening on a socket event, iwill refetch the leaderboard when a game is finished, or update the leaderboard in real time
-  // const socket - ClientSocket();
-  //   // refetch();
-  // }, []);
 
   if (isError) {
     toast({
@@ -44,7 +46,7 @@ const Leaderboard = () => {
       border="1px solid rgba(251, 102, 19, 0.1)"
       boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.35)"
       backdropFilter={"blur(20px)"}
-      bgImage={`url('src/assets/img/BlackNoise.png')`}
+      bgImage={`url('assets/img/BlackNoise.webp')`}
       bgSize="cover"
       bgRepeat="no-repeat"
     >
@@ -89,7 +91,7 @@ const Leaderboard = () => {
                   overflow="hidden"
                 >
                   {leaderboardData?.length > 0 ? (
-                    leaderboardData?.map((player) => (
+                    leaderboardData?.map((player: LeaderboardPlayer) => (
                       <LeaderboardCard key={player?.id} player={player} />
                     ))
                   ) : (

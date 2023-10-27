@@ -1,6 +1,6 @@
 FROM node:18
 
-COPY backend /app
+COPY backend/ /app
 
 WORKDIR /app
 
@@ -14,5 +14,5 @@ RUN chmod 777 prisma_script.sh
 
 # CMD [ "npm", "run", "start:dev" ]
 
-# CMD [ "./prisma_script.sh" ]
-ENTRYPOINT [ "./prisma_script.sh" ]
+CMD [ "bash", "/app/prisma_script.sh" ]
+# ENTRYPOINT [ "./prisma_script.sh" ]

@@ -1,6 +1,13 @@
-import { Avatar, AvatarBadge, Box, Flex, Stack, Text } from "@chakra-ui/react";
+import {
+  Avatar,
+  AvatarBadge,
+  Box,
+  Flex,
+  Image,
+  Stack,
+  Text,
+} from "@chakra-ui/react";
 import "src/styles/scrollbar.css";
-import { CrownIcon } from "src/assets/icons/icons";
 import { useNavigate } from "react-router-dom";
 
 const TopThreePlayers = ({ top3Players }) => {
@@ -59,19 +66,17 @@ const TopThreePlayers = ({ top3Players }) => {
           src={player1?.avatar}
           borderColor={"#FFCA28"}
           borderWidth="4px"
-          // borderRadius="0px"
           onClick={() =>
             player1?.username && navigate(`/profile/${player1?.username}`)
           }
           cursor={"pointer"}
         >
-          <Box
-            position="absolute"
-            top={"-14"}
-            // top={"0"}
-            translateY={"-50%"}
-          >
-            <CrownIcon boxSize="75px" />
+          <Box position="absolute" top={"-16"} translateY={"-50%"}>
+            <Image
+              src={"assets/svg/crown_icon.svg"}
+              alt="crown icon"
+              boxSize={20} // 1rem = 16px, 75 / 16 = 4.6875rem
+            />
           </Box>
           <AvatarBadge
             boxSize="0.9em"

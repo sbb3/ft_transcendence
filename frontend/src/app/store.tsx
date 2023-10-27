@@ -1,4 +1,4 @@
-import { configureStore, MiddlewareArray } from "@reduxjs/toolkit";
+import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "src/features/auth/authSlice";
 import conversationsReducer from "src/features/conversations/conversationsSlice";
 import userReducer from "src/features/users/usersSlice";
@@ -13,9 +13,8 @@ const store = configureStore({
     user: userReducer,
     game: gameReducer,
   },
-  middleware: (
-    getDefaultMiddleware: MiddlewareArray // enables caching, invalidation and other features of `rtk-query`
-  ) => getDefaultMiddleware().concat(apiSlice.middleware),
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware().concat(apiSlice.middleware),
 });
 
 export default store;

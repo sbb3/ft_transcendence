@@ -5,8 +5,6 @@ import Sidebar from "src/components/Sidebar";
 import { motion } from "framer-motion";
 import { useSelector } from "react-redux";
 import ProfileDetailsFormModal from "src/components/DetailsFormModal";
-import { useEffect } from "react";
-import { io } from "socket.io-client";
 
 const MotionBox = motion(Box);
 
@@ -17,7 +15,6 @@ const Layout = () => {
   return (
     <Flex
       w={{ base: "full", sm: "460px", md: 780, lg: 980, xl: 1250 }}
-      // w={{ base: "full", sm: "460px", md: 780, lg: 1200, xl: 1250 }}
       h="full"
       gap={1}
       borderRadius={24}
@@ -42,7 +39,7 @@ const Layout = () => {
         border="1px solid rgba(251, 102, 19, 0.1)"
         boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.35)"
         backdropFilter={"blur(20px)"}
-        bgImage={`url('src/assets/img/BlackNoise.png')`}
+        bgImage={`url('assets/img/BlackNoise.webp')`}
         bgSize="cover"
         bgRepeat="no-repeat"
       >
@@ -58,20 +55,20 @@ const Layout = () => {
         gap={2}
         p={2}
       >
-        {/* <MotionBox
+        <MotionBox
           pos="absolute"
           w={{ base: "300px", sm: "400px", md: "550px" }}
           h={{ base: "300px", sm: "400px", md: "550px" }}
-          bgImage="url('src/assets/img/cropped_circle_pong.png')"
+          bgImage="url('assets/img/cropped_circle_pong.webp')"
           bgPosition="center"
           bgSize="contain"
           bgRepeat="no-repeat"
           bgBlendMode="lighten"
-          animate={{ rotate: 360 }}
-          transition={{ ease: "linear", duration: 5, repeat: Infinity }}
+          // animate={{ rotate: 360 }}
+          // transition={{ ease: "linear", duration: 5, repeat: Infinity }}
           opacity={0.9}
           zIndex={-2}
-        /> */}
+        />
         <Header />
         <Flex
           pos="relative"

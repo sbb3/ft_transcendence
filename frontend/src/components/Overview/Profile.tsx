@@ -21,23 +21,21 @@ import { GiAchievement } from "react-icons/gi";
 import * as ScrollArea from "@radix-ui/react-scroll-area";
 import "src/styles/scrollbar.css";
 import { badges } from "src/config/data/badges";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import usersApi, { useDeleteFriendMutation } from "src/features/users/usersApi";
-import { setCurrentUser } from "src/features/users/usersSlice";
 import conversationApi, {
   useCreateConversationWithoutMessageMutation,
 } from "src/features/conversations/conversationsApi";
 import { v4 as uuidv4 } from "uuid";
-
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { useNavigate } from "react-router-dom";
 import notificationsApi from "src/features/notifications/notificationsApi";
 dayjs.extend(relativeTime);
 
-interface ProfileProps {
+export interface ProfileProps {
   user: {
-    id: string;
+    id: number;
     username: string;
     name: string;
     email: string;
@@ -102,7 +100,7 @@ const Profile = ({ user }: ProfileProps) => {
         duration: 2000,
         isClosable: true,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.log(error);
       toast({
         title: "Error",
@@ -141,7 +139,7 @@ const Profile = ({ user }: ProfileProps) => {
         duration: 2000,
         isClosable: true,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.log("error accepting friend request: ", error);
       toast({
         title: "Error",
@@ -205,12 +203,11 @@ const Profile = ({ user }: ProfileProps) => {
       h={{ base: "600px" }}
       direction={{ base: "column" }}
       p={4}
-      // bg="orange.900"
       borderRadius={24}
       border="1px solid rgba(251, 102, 19, 0.1)"
       boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.35)"
       backdropFilter={"blur(20px)"}
-      bgImage={`url('src/assets/img/BlackNoise.png')`}
+      bgImage={`url('assets/img/BlackNoise.webp')`}
       bgSize="cover"
       bgRepeat="no-repeat"
       gap="12px"
@@ -245,7 +242,7 @@ const Profile = ({ user }: ProfileProps) => {
           <Flex direction="column" gap="10px" justify="center">
             <Flex direction="row" gap="7px" align="center">
               <Image
-                src="/src/assets/svgs/username_pre_svg.svg"
+                src="assets/svg/username_pre_svg.svg"
                 alt="username pre svg"
                 boxSize={5}
               />
@@ -393,7 +390,7 @@ const Profile = ({ user }: ProfileProps) => {
                     key={index}
                     src={`/${badge.link}`}
                     alt={badge.alt}
-                    boxSize={10}
+                    boxSize={8}
                   />
                 ))}
               </Flex>
@@ -430,7 +427,6 @@ const Profile = ({ user }: ProfileProps) => {
             justify="space-between"
             bg="pong_bg.200"
             boxShadow={"0px 4px 24px -1px rgba(0, 0, 0, 0.25)"}
-            // bg={"rgba(51, 51, 51, 0)"}
             opacity="90%"
             borderRadius="40px"
             align="center"

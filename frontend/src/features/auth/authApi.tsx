@@ -10,12 +10,12 @@ const authApi = apiSlice.injectEndpoints({
         method: "POST",
         body: { userId },
       }),
-      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg: any, { dispatch, queryFulfilled }) {
         try {
           await queryFulfilled;
 
           dispatch(setUserLoggedOut());
-          dispatch(removeUser()); // clear user data
+          dispatch(removeUser());
         } catch (err: any) {
           console.log(`err: `, err);
           return;
@@ -27,7 +27,7 @@ const authApi = apiSlice.injectEndpoints({
         url: "/auth/refresh",
         method: "GET",
       }),
-      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg: any, { dispatch, queryFulfilled }) {
         try {
           const result = await queryFulfilled;
           dispatch(
@@ -44,76 +44,9 @@ const authApi = apiSlice.injectEndpoints({
         }
       },
     }),
-    login: builder.mutation({
-      query: (data) => ({
-        url: "/login",
-        method: "POST",
-        body: data,
-      }),
-
-      async onQueryStarted(arg, { queryFulfilled, dispatch }) {
-        try {
-          const result = await queryFulfilled;
-          localStorage.setItem(
-            "auth",
-            JSON.stringify({
-              accessToken: result.data.accessToken,
-              userId: result.data.user.id,
-            })
-          );
-
-          dispatch(
-            setUserLoggedIn({
-              accessToken: result.data.accessToken,
-              userId: result.data.user.id,
-            })
-          );
-
-          dispatch(setCurrentUser(result.data.user));
-        } catch (err) {
-          // do nothing
-        }
-      },
-    }),
-    register: builder.mutation({
-      query: (data) => ({
-        url: "/register",
-        method: "POST",
-        body: data,
-      }),
-      async onQueryStarted(arg, { queryFulfilled, dispatch }) {
-        try {
-          const result = await queryFulfilled;
-
-          localStorage.setItem(
-            "auth",
-            JSON.stringify({
-              accessToken: result.data.accessToken,
-              userId: result.data.user.id,
-            })
-          );
-
-          dispatch(
-            setUserLoggedIn({
-              accessToken: result.data.accessToken,
-              userId: result.data.user.id,
-            })
-          );
-
-          // dispatch(setCurrentUser(result.data.user));
-        } catch (err) {
-          // do nothing
-        }
-      },
-    }),
   }),
 });
 
-export const {
-  useSendLogOutMutation,
-  useGetNewAccessTokenMutation,
-  useLoginMutation,
-  useRegisterMutation,
-} = authApi;
+export const { useSendLogOutMutation, useGetNewAccessTokenMutation } = authApi;
 
 export default authApi;

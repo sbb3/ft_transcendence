@@ -1,12 +1,12 @@
 import { apiSlice } from "src/app/api/apiSlice";
-import io from "socket.io-client";
+import { createSocketClient } from "src/app/socket/client";
 
 const notificationsApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getNotifications: builder.query({
       query: () => `notification`,
       async onCacheEntryAdded(
-        arg,
+        _arg: any,
         {
           dispatch,
           getState,
@@ -15,24 +15,14 @@ const notificationsApi = apiSlice.injectEndpoints({
           cacheEntryRemoved,
         }: any
       ) {
-        const socket = io(
-          import.meta.env.VITE_SERVER_NOTIFICATION_SOCKET_URL as string,
-          {
-            transports: ["websocket"],
-            reconnection: false,
-            // reconnection: true,
-            // reconnectionAttempts: 10,
-            // reconnectionDelay: 1000,
-            // upgrade: false,
-            // rejectUnauthorized: false,
-          }
-        );
+        const socket = createSocketClient({
+          api_url: import.meta.env
+            .VITE_SERVER_NOTIFICATION_SOCKET_URL as string,
+        });
 
         try {
           await cacheDataLoaded;
-          console.log("cacheDataLoaded");
           socket.on("notification", (data) => {
-            console.log("notification received: ", data);
             const currentUserId = getState()?.user?.currentUser?.id;
             const senderId = data.data.sender.id;
             const receiverId = data.data.receiverId;
@@ -47,10 +37,10 @@ const notificationsApi = apiSlice.injectEndpoints({
                     getState()?.conversations?.conversationsId !==
                       data?.data?.conversationId
                   ) {
-                    console.log("msg notification added to cache");
+                    // console.log("msg notification added to cache");
                     draft?.unshift(data?.data);
                   } else {
-                    console.log("msg notification not added to cache, deleted");
+                    // console.log("msg notification not added to cache, deleted");
                     dispatch(
                       notificationsApi?.endpoints?.deleteNotification?.initiate(
                         data?.data?.id
@@ -82,8 +72,7 @@ const notificationsApi = apiSlice.injectEndpoints({
         method: "POST",
         body: { ...data },
       }),
-      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
-        // console.log("body: ", arg);
+      async onQueryStarted(_arg: any, { queryFulfilled }) {
         try {
           await queryFulfilled;
         } catch (error) {
@@ -96,7 +85,7 @@ const notificationsApi = apiSlice.injectEndpoints({
         url: `notification/${id}`,
         method: "DELETE",
       }),
-      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
+      async onQueryStarted(_arg: any, { queryFulfilled }) {
         try {
           await queryFulfilled;
         } catch (error) {

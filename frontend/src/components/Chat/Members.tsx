@@ -43,7 +43,32 @@ const validationSchema = yup.object().shape({
   role: yup.string().required("role is required").trim(),
 });
 
-const Members = ({ channel }) => {
+interface ChannelType {
+  channel: {
+    id: number;
+    name: string;
+    description: string;
+    createdAt: string;
+    ownerId: number;
+    owner: {
+      id: number;
+      name: string;
+    };
+    members: [
+      {
+        id: number;
+        name: string;
+        username: string;
+        avatar: string;
+        role: string;
+        isMuted: boolean;
+      }
+    ];
+    banned: number[];
+  };
+}
+
+const Members = ({ channel }: ChannelType) => {
   const currentUser = useSelector((state: any) => state.user.currentUser);
   const navigate = useNavigate();
   const toast = useToast();
@@ -87,7 +112,7 @@ const Members = ({ channel }) => {
         duration: 2000,
         isClosable: true,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.log("error22: ", error);
       toast({
         title: "Member not added.",
@@ -117,7 +142,7 @@ const Members = ({ channel }) => {
         duration: 2000,
         isClosable: true,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.log("error: ", error);
       toast({
         title: "Member not Kicked.",
@@ -143,7 +168,7 @@ const Members = ({ channel }) => {
         duration: 2000,
         isClosable: true,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.log("error: ", error);
       toast({
         title: "Error.",
@@ -169,7 +194,7 @@ const Members = ({ channel }) => {
         duration: 2000,
         isClosable: true,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.log("error: ", error);
       toast({
         title: "Error.",
@@ -181,7 +206,7 @@ const Members = ({ channel }) => {
     }
   };
 
-  const handleBanMember = async (memberId) => {
+  const handleBanMember = async (memberId: number) => {
     try {
       await banChannelMember({
         channelId: channel?.id,
@@ -195,7 +220,7 @@ const Members = ({ channel }) => {
         duration: 2000,
         isClosable: true,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.log("error: ", error);
       toast({
         title: "Member not banned.",
@@ -219,7 +244,7 @@ const Members = ({ channel }) => {
       border="1px solid rgba(251, 102, 19, 0.1)"
       boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.35)"
       backdropFilter={"blur(20px)"}
-      bgImage={`url('src/assets/img/BlackNoise.png')`}
+      bgImage={`url('assets/img/BlackNoise.webp')`}
       bgSize="cover"
       bgRepeat="no-repeat"
     >
@@ -245,7 +270,7 @@ const Members = ({ channel }) => {
             Members
           </Text>
           <AvatarGroup size="sm" max={4} color={"pong_bg_primary"}>
-            {channel?.members.map((member, i) => (
+            {channel?.members.map((member) => (
               <Avatar
                 key={member?.id}
                 bg="pong_bg_secondary"
@@ -372,7 +397,7 @@ const Members = ({ channel }) => {
                 border: "1px solid rgba(251, 102, 19, 0.39)",
                 boxShadow: "0px 4px 24px -1px rgba(0, 0, 0, 0.25)",
                 backdropFilter: "blur(20px)",
-                backgroundImage: "url('src/assets/img/BlackNoise.png')",
+                backgroundImage: "url('assets/img/BlackNoise.webp')",
                 bgSize: "cover",
                 bgRepeat: "no-repeat",
                 backgroundColor: "transparent",
@@ -386,14 +411,14 @@ const Members = ({ channel }) => {
             >
               <ScrollArea.Root className="ScrollAreaRoot">
                 <ScrollArea.Viewport className="ScrollAreaViewport">
-                  {channel?.members?.map((member, i) => (
+                  {channel?.members?.map((member) => (
                     <AutoCompleteItem
                       key={member?.id}
                       value={member?.name}
                       textTransform="capitalize"
                       boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.35)"
                       backdropFilter={"blur(20px)"}
-                      bgImage={`url('src/assets/img/BlackNoise.png')`}
+                      bgImage={`url('assets/img/BlackNoise.webp')`}
                       bgSize="cover"
                       bgRepeat="no-repeat"
                       borderRadius={50}

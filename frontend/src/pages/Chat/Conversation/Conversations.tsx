@@ -31,7 +31,7 @@ import Loader from "src/components/Utils/Loader";
 import { createSocketClient } from "src/app/socket/client";
 dayjs.extend(relativeTime);
 
-const Conversations = ({}) => {
+const Conversations = () => {
   const currentUser = useSelector((state: any) => state.user.currentUser);
   const navigate = useNavigate();
   const [conversationIdToDelete, setConversationIdToDelete] = useState("");
@@ -53,10 +53,11 @@ const Conversations = ({}) => {
   });
 
   useEffect(() => {
-    const socket = createSocketClient();
+    const socket = createSocketClient({
+      api_url: import.meta.env.VITE_SERVER_CHAT_SOCKET_URL as string,
+    });
     socket.on("deleteConversation", (data = {} as any) => {
       if (conversations?.map((c) => c.id).includes(data?.data?.id)) {
-        console.log("inside deleteConversation: ", data);
         refetchConversations();
       }
     });

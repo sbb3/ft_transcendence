@@ -48,7 +48,7 @@ const Settings = () => {
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   const { ref, ...rest } = register("avatar", {
-    validate: (value) => {
+    validate: (value: any) => {
       if (value?.length > 0) {
         if (value[0]?.size > 3000000) {
           return "Max file size is 3mb!";
@@ -103,7 +103,7 @@ const Settings = () => {
         username: "",
         avatar: undefined,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.log("error: ", error);
       toast({
         title: "Error.",
@@ -125,7 +125,7 @@ const Settings = () => {
         duration: 2000,
         isClosable: true,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.log("error: ", error);
       toast({
         title: "Error.",
@@ -147,7 +147,7 @@ const Settings = () => {
       border="1px solid rgba(251, 102, 19, 0.1)"
       boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.35)"
       backdropFilter={"blur(20px)"}
-      bgImage={`url('src/assets/img/BlackNoise.png')`}
+      bgImage={`url('assets/img/BlackNoise.webp')`}
       bgSize="cover"
       bgRepeat="no-repeat"
     >
@@ -255,7 +255,7 @@ const Settings = () => {
       </Flex>
       <Box>
         <Image
-          src="src/assets/svgs/account_settings.svg"
+          src="assets/svg/account_settings.svg"
           alt="profile illustration"
           borderRadius={20}
         />

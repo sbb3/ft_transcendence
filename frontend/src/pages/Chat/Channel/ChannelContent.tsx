@@ -39,9 +39,7 @@ const ChannelContent = () => {
     data: messages,
     isLoading: isLoadingMessages,
     isFetching: isFetchingMessages,
-    isUninitialized: isUninitializedMessages,
     isError: isErrorGettingMessages,
-    refetch,
   } = useGetMessagesByChannelNameQuery(channelname);
 
   const [createChannelMessage, { isLoading: isCreatingChannelMsg }] =
@@ -67,7 +65,6 @@ const ChannelContent = () => {
     });
   }
 
-  // TODO: check if user is a member of the channel, if not, redirect to chat
   const onSendMessage = async (data: any) => {
     const { message } = data;
     if (channels?.length === 0 || !message) return;
@@ -88,7 +85,7 @@ const ChannelContent = () => {
 
     try {
       await createChannelMessage(msg).unwrap();
-    } catch (error) {
+    } catch (error: any) {
       console.log("error ", error);
       toast({
         title: "Message not sent.",
@@ -119,7 +116,7 @@ const ChannelContent = () => {
       border="1px solid rgba(251, 102, 19, 0.1)"
       boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.35)"
       backdropFilter={"blur(20px)"}
-      bgImage={`url('src/assets/img/BlackNoise.png')`}
+      bgImage={`url('assets/img/BlackNoise.webp')`}
       bgSize="cover"
       bgRepeat="no-repeat"
       //   gap={6}

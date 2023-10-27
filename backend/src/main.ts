@@ -9,14 +9,16 @@ import { GlobalExceptionFilter } from './global-exception.filter';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  const allowedOrigins = ['http://localhost:5173', 'http://127.0.0.1:5173'];
+  const allowedOrigins = ['http://localhost:5173', 'http://127.0.0.1:5173',
+  "http://localhost:80", "http://localhost"
+];
   const corsOptions = {
     origin: (origin, callback) => {
       if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
         // postman
         callback(null, true);
       } else {
-        callback(new Error('Not allowed by CORS 2'));
+        callback(new Error('Not allowed by CORS'));
       }
     },
     credentials: true,

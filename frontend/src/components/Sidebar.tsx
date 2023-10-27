@@ -6,20 +6,18 @@ import {
   Stack,
   Text,
   Tooltip,
+  Image,
 } from "@chakra-ui/react";
 import { GoPlay } from "react-icons/go";
 import { HiOutlineStatusOnline } from "react-icons/hi";
 import { IoChatbubbleEllipsesSharp, IoSettingsOutline } from "react-icons/io5";
 import { MdSpaceDashboard, MdContactSupport } from "react-icons/md";
 import { BiSolidLogOutCircle } from "react-icons/bi";
-import { BeatLoader } from "react-spinners";
-import { motion } from "framer-motion";
+// import { BeatLoader } from "react-spinners";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import store from "src/app/store";
 import authApi from "src/features/auth/authApi";
-
-const MotionBrandIcon = motion(Box);
 
 const NavigationPanel = [
   {
@@ -62,17 +60,10 @@ const Sidebar = () => {
 
   return (
     <Stack spacing={5} align="center" w="full" pos="relative">
-      <MotionBrandIcon
+      <Image
+        src="assets/svg/brand_icon.svg"
         w={{ base: "40px" }}
         h={{ base: "40px" }}
-        bgImage="url('src/assets/svgs/brand_icon.svg')"
-        bgPosition="center"
-        bgSize="contain"
-        bgRepeat="no-repeat"
-        bgBlendMode="lighten"
-        // animate={{ rotate: 360 }}
-        // transition={{ ease: "linear", duration: 5, repeat: Infinity }}
-        opacity={0.9}
         onClick={() => navigate("/")}
         cursor="pointer"
       />
@@ -167,11 +158,9 @@ const Sidebar = () => {
                 }}
                 onClick={async () => {
                   if (nav.name === "Logout") {
-                    // TODO: uncomment below dispatch later and remove localStorage.clear()
                     await store.dispatch(
                       authApi.endpoints.sendLogOut.initiate(currentUser?.id)
                     );
-                    localStorage.clear();
                     navigate(nav.path, { replace: true });
                   } else {
                     navigate(nav.path);

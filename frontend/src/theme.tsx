@@ -1,49 +1,11 @@
-import { defineStyleConfig, extendTheme } from "@chakra-ui/react";
-import Color from "color";
+import {
+  //  defineStyleConfig,
+  extendTheme,
+} from "@chakra-ui/react";
+// import Color from "color";
 
 // const lighten = (clr, value) => Color(clr).lighten(value).hex().toString();
 // const darken = (clr, value) => Color(clr).darken(value).hex().toString();
-
-const Button = defineStyleConfig({
-  // The styles all button have in common
-  baseStyle: {
-    color: "blackAlpha.900",
-    bg: "#FF9100",
-    fontWeight: "bold",
-    textTransform: "uppercase",
-    borderRadius: "base", // <-- border radius is same for all variants and sizes
-  },
-  // Two sizes: sm and md
-  sizes: {
-    sm: {
-      fontSize: "sm",
-      px: 4, // <-- px is short for paddingLeft and paddingRight
-      py: 3, // <-- py is short for paddingTop and paddingBottom
-    },
-    md: {
-      fontSize: "md",
-      px: 6, // <-- these values are tokens from the design system
-      py: 4, // <-- these values are tokens from the design system
-    },
-  },
-  // Two variants: outline and solid
-  variants: {
-    outline: {
-      border: "2px solid",
-      borderColor: "purple.500",
-      color: "purple.500",
-    },
-    solid: {
-      bg: "purple.500",
-      color: "white",
-    },
-  },
-  // The default size and variant values
-  defaultProps: {
-    size: "md",
-    variant: "outline",
-  },
-});
 
 const Drawer = {
   sizes: {
@@ -80,22 +42,7 @@ const theme = extendTheme({
       700: "#FFA000",
     },
   },
-  // components: {
-  //   Link: {
-  //     variants: {
-  //       custom: {
-  //         textDecoration: "none !important",
-  //       },
-  //     },
-  //     baseStyle: {
-  //       textDecoration: "none !important",
-  //     },
-  //   },
-  //   Drawer: {
-  //     Drawer
-  //   },
-  //   // Button,
-  // },
+
   components: {
     Drawer,
   },
@@ -117,10 +64,6 @@ const theme = extendTheme({
         direction: "row",
         justifyContent: "center",
         alignItems: "start",
-        // overflow: "auto",
-        // height: "100vh",
-        // width: "100vw",
-        // minWidth: "100vw",
         position: "relative",
         margin: 0,
         paddng: 0,
@@ -132,7 +75,6 @@ const theme = extendTheme({
       },
       a: {
         textDecoration: "none",
-        // target: '_blank',
       },
     },
   },

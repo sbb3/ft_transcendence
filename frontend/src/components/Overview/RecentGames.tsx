@@ -3,44 +3,45 @@ import { GiGamepadCross } from "react-icons/gi";
 import * as ScrollArea from "@radix-ui/react-scroll-area";
 import "src/styles/scrollbar.css";
 import { useNavigate } from "react-router-dom";
-import { useGetUserRecentGamesQuery } from "src/features/game/gameApi";
+// import { useGetUserRecentGamesQuery } from "src/features/game/gameApi";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 dayjs.extend(relativeTime);
 
-interface RecentGamesProps {
-  user: {
-    id: number;
-    name: string;
-    username: string;
-    avatar: string;
-    recentGames: {
-      // TODO: recentGames will not be in user object, it will be fetched from the server
-      // TODO: get the games and sort them by date
-      id: number;
-      player: {
-        id: number;
-        name: string;
-        username: string;
-        avatar: string;
-        score: number;
-      };
-      opponent: {
-        id: number;
-        name: string;
-        username: string;
-        avatar: string;
-        score: number;
-      };
-      date: string;
-      status: string;
-      winStatus: string;
-      createdAt: number;
-    }[];
-  };
-}
+// interface RecentGamesProps {
+//   user: {
+//     id: number;
+//     name: string;
+//     username: string;
+//     avatar: string;
+//     recentGames: {
+//       id: number;
+//       player: {
+//         id: number;
+//         name: string;
+//         username: string;
+//         avatar: string;
+//         score: number;
+//       };
+//       opponent: {
+//         id: number;
+//         name: string;
+//         username: string;
+//         avatar: string;
+//         score: number;
+//       };
+//       date: string;
+//       status: string;
+//       winStatus: string;
+//       createdAt: number;
+//     }[];
+//   };
+// }
 
-const RecentGames = ({ user }: RecentGamesProps) => {
+// TODO: recentGames will not be in user object, it will be fetched from the server
+// TODO: get the games and sort them by date
+// const RecentGames = ({ user }: RecentGamesProps) => {
+const RecentGames = ({ user }) => {
   // const { data: recentGames, isLoading, isFetching, isError, error } = useGetUserRecentGamesQuery(currentUser?.id, {
   //   refetchOnMountOrArgChange: true,
   // });
@@ -58,7 +59,7 @@ const RecentGames = ({ user }: RecentGamesProps) => {
       border="1px solid rgba(251, 102, 19, 0.1)"
       boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.35)"
       backdropFilter={"blur(20px)"}
-      bgImage={`url('src/assets/img/BlackNoise.png')`}
+      bgImage={`url('assets/img/BlackNoise.webp')`}
       bgSize="cover"
       bgRepeat="no-repeat"
     >

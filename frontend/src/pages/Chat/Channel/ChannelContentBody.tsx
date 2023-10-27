@@ -1,20 +1,26 @@
-import { Avatar, Box, Flex, Stack, Text } from "@chakra-ui/react";
+import { Box, Flex, Stack, Text } from "@chakra-ui/react";
 import * as ScrollArea from "@radix-ui/react-scroll-area";
 import "src/styles/scrollbarChatBody.css";
 import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import ChatRightModal from "../ChatRightModal";
-import usersApi from "src/features/users/usersApi";
 import ChannelMessage from "./ChannelMessage";
+
+interface ChannelContentBodyType {
+  messages: any;
+  toggleProfileDrawer: () => void;
+  isProfileDrawerOpen: boolean;
+  error?: any;
+}
 
 const ChannelContentBody = ({
   messages = [],
   toggleProfileDrawer,
   isProfileDrawerOpen,
   error = null,
-}) => {
+}: ChannelContentBodyType) => {
   const currentUser = useSelector((state: any) => state?.user?.currentUser);
-  const messagesRef = useRef(null);
+  const messagesRef = useRef<HTMLDivElement>(null);
   const [participantUserId, setParticipantUserId] = useState(0);
 
   const scrollToBottom = () => {
@@ -42,7 +48,7 @@ const ChannelContentBody = ({
       border="1px solid rgba(251, 102, 19, 0.1)"
       boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.35)"
       backdropFilter={"blur(20px)"}
-      bgImage={`url('src/assets/img/BlackNoise.png')`}
+      bgImage={`url('assets/img/BlackNoise.webp')`}
       bgSize="cover"
       bgRepeat="no-repeat"
     >

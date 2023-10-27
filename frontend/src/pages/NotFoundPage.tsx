@@ -1,24 +1,32 @@
 import { Flex, Link } from "@chakra-ui/react";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
-import { useLottie } from "lottie-react";
 import useTitle from "src/hooks/useTitle";
-import animationData from "src/assets/animations/404.json";
+import { useLottie } from "lottie-react";
+import animationData from "src/assets/lottie/404.json" assert { type: "json" };
+import { useEffect } from "react";
+
+const style = {
+  width: "100%",
+  height: "100%",
+};
+const options = {
+  loop: true,
+  autoplay: true,
+  animationData,
+};
 
 const NotFoundPage = () => {
   useTitle("404 Not Found");
   const navigate = useNavigate();
 
-  const style = {
-    width: "100%",
-    height: "100%",
-  };
-  const options = {
-    loop: true,
-    autoplay: true,
-    animationData,
-  };
-
   const { View } = useLottie(options, style);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      navigate("/");
+    }, 1000);
+    return () => clearTimeout(timeout);
+  }, [navigate]);
 
   return (
     <>
@@ -32,7 +40,6 @@ const NotFoundPage = () => {
         <Link
           pos="relative"
           as={RouterLink}
-          onClick={() => navigate(-1)}
           w="100vw"
           h="100vh"
           cursor="pointer"

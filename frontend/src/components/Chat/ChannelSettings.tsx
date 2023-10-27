@@ -1,7 +1,5 @@
 import {
-  Box,
   Button,
-  Flex,
   FormControl,
   FormErrorMessage,
   FormLabel,
@@ -15,8 +13,7 @@ import { Controller, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useToast } from "@chakra-ui/react";
-import { ReactNode, useEffect, useRef, useState } from "react";
-import { useSelector } from "react-redux";
+import { useRef, useState } from "react";
 import { useEditChannelInfoMutation } from "src/features/channels/channelsApi";
 
 const validationSchema = yup.object().shape({
@@ -46,7 +43,6 @@ const validationSchema = yup.object().shape({
 });
 
 const ChannelSettings = ({ channel, onToggleChannelInfo }) => {
-  const currentUser = useSelector((state: any) => state.user.currentUser);
   const [isProtected, setIsProtected] = useState(false);
   const passRef = useRef<HTMLInputElement>(null);
   const toast = useToast();
@@ -54,7 +50,7 @@ const ChannelSettings = ({ channel, onToggleChannelInfo }) => {
     register,
     handleSubmit,
     control,
-    formState: { errors, isSubmitting },
+    formState: { errors },
     reset,
   } = useForm({
     resolver: yupResolver(validationSchema),
@@ -79,7 +75,7 @@ const ChannelSettings = ({ channel, onToggleChannelInfo }) => {
         duration: 3000,
         isClosable: true,
       });
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
         description: "Error happened while editing channel info.",
@@ -106,9 +102,6 @@ const ChannelSettings = ({ channel, onToggleChannelInfo }) => {
       align="center"
       justify="center"
       borderRadius={40}
-      // bg="red"
-      // pl={3}
-      // pr={2}
       p={2}
     >
       <FormControl isInvalid={!!errors.name} mt={0} isRequired>
@@ -121,9 +114,6 @@ const ChannelSettings = ({ channel, onToggleChannelInfo }) => {
           placeholder="Channel name"
           {...register("name")}
         />
-        {/* {errors?.name && (
-                    <FormErrorMessage>{errors?.name?.message}</FormErrorMessage>
-                  )} */}
         <FormErrorMessage>
           {errors.name && errors.name.message}
         </FormErrorMessage>
@@ -204,7 +194,6 @@ const ChannelSettings = ({ channel, onToggleChannelInfo }) => {
         w={"full"}
         letterSpacing={1}
         isLoading={isEditingChannelInfo}
-        // isLoading={isFetching}
         isDisabled={isEditingChannelInfo}
         cursor="pointer"
         onClick={handleSubmit(onEditChannel)}

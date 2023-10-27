@@ -1,9 +1,21 @@
-import { Avatar, Flex, Text } from "@chakra-ui/react";
+import { Avatar, Flex, Image, Text } from "@chakra-ui/react";
 import "src/styles/scrollbar.css";
-import { RankIcon } from "src/assets/icons/icons";
 import { useNavigate } from "react-router-dom";
 
-const LeaderboardCard = ({ key, player }) => {
+interface LeaderboardPlayer {
+  id: number;
+  name: string;
+  username: string;
+  avatar: string;
+  level: string;
+}
+
+interface LeaderboardCardProps {
+  key: number;
+  player: LeaderboardPlayer;
+}
+
+const LeaderboardCard = ({ key, player }: LeaderboardCardProps) => {
   const { name, username, avatar, level } = player;
   const navigate = useNavigate();
   return (
@@ -38,7 +50,11 @@ const LeaderboardCard = ({ key, player }) => {
           {name}
         </Text>
       </Flex>
-      <RankIcon boxSize={6} />
+      <Image
+        src={"assets/svg/rank_icon.svg"}
+        alt="rankIcon"
+        boxSize="1.5rem" // 1rem = 16px ,  1.5rem = 24px, 2 rem = 32px
+      />
     </Flex>
   );
 };

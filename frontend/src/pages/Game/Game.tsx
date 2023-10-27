@@ -1,10 +1,8 @@
 import {
   Avatar,
-  Box,
   Button,
   Flex,
   FormControl,
-  FormErrorMessage,
   FormLabel,
   Radio,
   RadioGroup,
@@ -12,86 +10,77 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
-import { useEffect, useRef, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import {
+  //  useEffect, useRef,
+  useState,
+} from "react";
+import {
+  //  useDispatch,
+  useSelector,
+} from "react-redux";
 import useTitle from "src/hooks/useTitle";
-import { useNavigate } from "react-router-dom";
-import { setMatchmakingLoading } from "src/features/game/gameSlice";
+// import { useNavigate } from "react-router-dom";
+// import { setMatchmakingLoading } from "src/features/game/gameSlice";
 import { Controller, useForm } from "react-hook-form";
-import io from "socket.io-client";
-import Loader from "src/components/Utils/Loader";
-import { Player } from "@lottiefiles/react-lottie-player";
+// import { createSocketClient } from "src/app/socket/client";
+import BarLoader from "react-spinners/BeatLoader";
 
 const Game = () => {
   useTitle("Game");
-  const playerRef = useRef(null);
+  // const playerRef = useRef<any>(null);
 
-  const dispatch = useDispatch();
-  const currentUser = useSelector((state: any) => state?.user?.currentUser);
-  const accessToken = useSelector((state: any) => state?.auth?.accessToken);
-  const navigate = useNavigate();
+  // const dispatch = useDispatch();
+  // const currentUser = useSelector((state: any) => state?.user?.currentUser);
+  // const navigate = useNavigate();
   const [gameType, setGameType] = useState<"multiplayer" | "bot">("bot");
   const { matchmakingLoading } = useSelector((state: any) => state?.game);
   const {
-    register,
+    // register,
     handleSubmit,
     control,
     formState: { errors },
-    reset,
+    // reset,
   } = useForm({});
 
-  useEffect(() => {
-    const socket = io(
-      import.meta.env.VITE_SERVER_MATCHMAKING_SOCKET_URL as string,
-      {
-        transports: ["websocket"],
-        reconnection: false,
-        query: {
-          token: accessToken,
-        },
-      }
-    );
+  // useEffect(() => {
+  //   const socket = createSocketClient({
+  //     api_url: import.meta.env.VITE_SERVER_MATCHMAKING_SOCKET_URL as string,
+  //   });
 
-    socket.on("found_opponent", (data) => {
-      console.log("socket connected start_game : ", socket?.id);
-      dispatch(setMatchmakingLoading(false));
-      playerRef?.current?.stop();
-      navigate(`${data?.data?.id}`, {
-        state: { game: data?.data },
-      });
-    });
+  //   socket.on("found_opponent", (data) => {
+  //     console.log("socket connected start_game : ", socket?.id);
+  //     dispatch(setMatchmakingLoading(false));
+  //     playerRef?.current?.stop();
+  //     navigate(`${data?.data?.id}`, {
+  //       state: { game: data?.data },
+  //     });
+  //   });
 
-    return () => {
-      socket.disconnect();
-      dispatch(setMatchmakingLoading(false));
-      playerRef?.current?.stop();
-    };
-  }, []);
+  //   return () => {
+  //     socket.disconnect();
+  //     dispatch(setMatchmakingLoading(false));
+  //     playerRef?.current?.stop();
+  //   };
+  // }, []);
 
   const handleMatchmaking = async (data: any) => {
-    dispatch(setMatchmakingLoading(true));
-    const socket = io(
-      import.meta.env.VITE_SERVER_MATCHMAKING_SOCKET_URL as string,
-      {
-        transports: ["websocket"],
-        reconnection: false,
-        query: {
-          token: accessToken,
-        },
-      }
-    );
-    socket.on("connect", () => {
-      socket.emit("join_queue", {
-        userId: currentUser?.id,
-        gameType,
-        gameMode: data?.gameMode,
-        socketId: socket?.id,
-      });
-    });
-    socket.disconnect();
-    reset({
-      gameMode: "normal",
-    });
+    console.log("data : ", data);
+    // dispatch(setMatchmakingLoading(true));
+    // const socket = createSocketClient({
+    //   api_url: import.meta.env.VITE_SERVER_MATCHMAKING_SOCKET_URL as string,
+    // });
+    // socket.on("connect", () => {
+    //   socket.emit("join_queue", {
+    //     userId: currentUser?.id,
+    //     gameType,
+    //     gameMode: data?.gameMode,
+    //     socketId: socket?.id,
+    //   });
+    // });
+    // socket.disconnect();
+    // reset({
+    //   gameMode: "normal",
+    // });
   };
 
   return (
@@ -107,16 +96,7 @@ const Game = () => {
       gap={{ base: 4, sm: 6, md: 8 }}
     >
       {matchmakingLoading ? (
-        // <Loader />
-        <>
-          <Player
-            ref={playerRef}
-            autoplay
-            loop
-            src="src/assets/animations/orange_loading_animation.json"
-            style={{ height: "200px", width: "200px", color: "orange" }}
-          />
-        </>
+        <BarLoader color={"#FF8707"} />
       ) : (
         <>
           <Flex
@@ -201,14 +181,12 @@ const Game = () => {
                   lg: "380px",
                   xl: "500px",
                 }}
-                // w={{ base: "600px" }}
                 h={{ base: "400px" }}
                 borderRadius={{ base: "15px", sm: "20px", md: "30px" }}
                 border="1px solid rgba(251, 102, 19, 0.1)"
                 boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.35)"
                 backdropFilter={"blur(20px)"}
-                // bgImage={`url('src/assets/img/bot.jpg')`}
-                bgImage={`url('src/assets/img/bot1.jpg')`}
+                bgImage={`url('assets/img/bot.webp')`}
                 bgSize="cover"
                 bgRepeat="no-repeat"
                 bgPos={"center"}
@@ -237,14 +215,6 @@ const Game = () => {
                 >
                   Bot
                 </Text>
-                {/* <Text
-                  fontSize={{ base: "sm", sm: "md", md: "lg" }}
-                  fontWeight="medium"
-                  color="whiteAlpha.900"
-                  textAlign={"center"}
-                >
-                  Play against a bot
-                </Text> */}
                 <FormControl
                   as={Stack}
                   justify="center"
@@ -315,9 +285,6 @@ const Game = () => {
                       </RadioGroup>
                     )}
                   />
-                  <FormErrorMessage>
-                    {errors?.gameMode && errors?.gameMode?.message}
-                  </FormErrorMessage>
                 </FormControl>
               </Stack>
             </Stack>
@@ -343,8 +310,8 @@ const Game = () => {
                 border="1px solid rgba(251, 102, 19, 0.1)"
                 boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.45)"
                 backdropFilter={"blur(20px)"}
-                // bgImage={`url('src/assets/img/multiplayer.jpg')`}
-                bgImage={`url('src/assets/img/multiplayer1.jpg')`}
+                // bgImage={`url('assets/img/multiplayer.webp')`}
+                bgImage={`url('assets/img/multiplayer1.webp')`}
                 bgSize="cover"
                 bgPos={"center"}
                 bgRepeat="no-repeat"
@@ -372,14 +339,6 @@ const Game = () => {
                 >
                   Multiplayer
                 </Text>
-                {/* <Text
-                  fontSize={{ base: "sm", sm: "md", md: "lg" }}
-                  fontWeight="medium"
-                  color="whiteAlpha.900"
-                  textAlign={"center"}
-                >
-                  Play against another player
-                </Text> */}
               </Stack>
             </Stack>
           </Flex>

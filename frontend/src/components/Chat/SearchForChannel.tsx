@@ -15,22 +15,8 @@ import {
   ModalCloseButton,
   ModalBody,
   ModalFooter,
-  useDisclosure,
-  Popover,
-  PopoverContent,
-  PopoverArrow,
-  PopoverCloseButton,
-  PopoverTrigger,
-  Accordion,
-  AccordionItem,
-  AccordionButton,
-  AccordionPanel,
   Box,
-  AccordionIcon,
-  FormControl,
-  FormLabel,
   Input,
-  FormErrorMessage,
 } from "@chakra-ui/react";
 import {
   AutoComplete,
@@ -38,41 +24,36 @@ import {
   AutoCompleteItem,
   AutoCompleteList,
 } from "@choc-ui/chakra-autocomplete";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { MdGroupAdd } from "react-icons/md";
-import { useNavigate } from "react-router-dom";
 import * as ScrollArea from "@radix-ui/react-scroll-area";
 import "src/styles/scrollbar.css";
 import channelsApi, {
   useGetAllChannelsExceptPrivateOnesQuery,
 } from "src/features/channels/channelsApi";
 import { useSelector } from "react-redux";
-import { useUpdateChannelMutation } from "src/features/channels/channelsApi";
+
+interface SearchForChannelType {
+  isOpenSearchChannel: boolean;
+  onToggleSearchChannel: () => void;
+}
+
 const SearchForChannel = ({
   isOpenSearchChannel,
   onToggleSearchChannel,
-}: {
-  isOpenSearchChannel: boolean;
-  onToggleSearchChannel: () => void;
-}) => {
+}: SearchForChannelType) => {
   const [password, setPassword] = useState("");
   const [showPasswordInput, setShowPasswordInput] = useState("");
   const currentUser = useSelector((state: any) => state.user.currentUser);
   const toast = useToast();
-  const navigate = useNavigate();
-  const {
-    data: channels,
-    isLoading,
-    error,
-  } = useGetAllChannelsExceptPrivateOnesQuery({
-    refetchOnMountOrArgChange: true,
-  });
+  const { data: channels, isLoading } = useGetAllChannelsExceptPrivateOnesQuery(
+    {
+      refetchOnMountOrArgChange: true,
+    }
+  );
 
   const [joinChannel, { isLoading: isJoininChannel }] =
     channelsApi.useJoinChannelMutation();
-
-  const [checkChannelPassword, { isLoading: isCheckingChannelPassword }] =
-    channelsApi.useCheckChannelPasswordMutation();
 
   const clearStates = () => {
     setPassword("");
@@ -97,7 +78,7 @@ const SearchForChannel = ({
         duration: 2000,
         isClosable: true,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.log("error ", error);
       toast({
         title: "Unable to join channel.",
@@ -127,7 +108,7 @@ const SearchForChannel = ({
           border="1px solid rgba(251, 102, 19, 0.3)"
           boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.35)"
           backdropFilter={"blur(20px)"}
-          bgImage={`url('src/assets/img/BlackNoise.png')`}
+          bgImage={`url('assets/img/BlackNoise.webp')`}
           bgSize="cover"
           bgRepeat="no-repeat"
           bg="transparent"
@@ -143,7 +124,6 @@ const SearchForChannel = ({
                 align="start"
                 justify="start"
                 gap={1.5}
-                // bg={"red.400"}
                 h={"420px"}
               >
                 <AutoComplete
@@ -191,7 +171,7 @@ const SearchForChannel = ({
                       border: "1px solid rgba(251, 102, 19, 0.39)",
                       boxShadow: "0px 4px 24px -1px rgba(0, 0, 0, 0.25)",
                       backdropFilter: "blur(20px)",
-                      backgroundImage: "url('src/assets/img/BlackNoise.png')",
+                      backgroundImage: "url('assets/img/BlackNoise.webp')",
                       bgSize: "cover",
                       bgRepeat: "no-repeat",
                       backgroundColor: "transparent",
@@ -202,36 +182,29 @@ const SearchForChannel = ({
                       // transform: "translate3d(20px, 40px, 0px)",
                     }}
                     closeOnSelect={false}
-                    // p={1}
                     w="full"
-                    // outline="2px solid green"
-                    // ml={0}
                   >
                     <ScrollArea.Root className="ScrollAreaRoot">
                       <ScrollArea.Viewport className="ScrollAreaViewport">
                         {channels?.length > 0 ? (
-                          channels?.map((channel, i) => (
+                          channels?.map((channel) => (
                             <AutoCompleteItem
                               key={channel.id}
                               value={channel.name}
                               textTransform="capitalize"
-                              // bg="pong_bg.300"
                               boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.35)"
                               backdropFilter={"blur(20px)"}
-                              bgImage={`url('src/assets/img/BlackNoise.png')`}
+                              bgImage={`url('assets/img/BlackNoise.webp')`}
                               bgSize="cover"
                               bgRepeat="no-repeat"
                               borderRadius={5}
-                              // my={1}
                               _hover={{
                                 bg: "transparent",
                               }}
                               _focus={{
-                                // bg: "pong_bg.300",
                                 backgroundColor: "transparent",
                               }}
                               _selected={{
-                                // bg: "pong_bg.300",
                                 backgroundColor: "transparent",
                               }}
                             >
@@ -240,7 +213,6 @@ const SearchForChannel = ({
                                 justify="space-between"
                                 align="center"
                                 w="full"
-                                // bg="yellow.400"
                               >
                                 <Stack
                                   w="full"
@@ -248,7 +220,6 @@ const SearchForChannel = ({
                                   justify={"start"}
                                   align="start"
                                   spacing={1}
-                                  // bg="green.400"
                                 >
                                   <Flex
                                     w="full"
@@ -256,7 +227,6 @@ const SearchForChannel = ({
                                     justify="space-between"
                                     align="center"
                                     gap={3}
-                                    // bg="red.400"
                                   >
                                     <Text
                                       color="white"
@@ -264,12 +234,11 @@ const SearchForChannel = ({
                                       fontWeight="medium"
                                       ml={2}
                                       flex={1}
-                                      // bg="red.500"
                                     >
                                       {channel.name}
                                     </Text>
                                     {!channel?.members
-                                      ?.map((m) => m.id)
+                                      ?.map((m: { id: number }) => m.id)
                                       ?.includes(currentUser?.id) && (
                                       <IconButton
                                         aria-label="Join channel"
@@ -286,7 +255,6 @@ const SearchForChannel = ({
                                           color: "pong_cl_primary",
                                         }}
                                         isLoading={isJoininChannel}
-                                        // onClick={handleJoinChannel}
                                         onClick={() => {
                                           if (channel.privacy === "public") {
                                             handleJoinChannel(channel);

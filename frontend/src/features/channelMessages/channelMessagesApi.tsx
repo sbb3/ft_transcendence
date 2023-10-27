@@ -7,11 +7,13 @@ const channelMessagesApi = apiSlice.injectEndpoints({
     getMessagesByChannelName: builder.query({
       query: (channelName) => `/channels/messages?channelName=${channelName}`,
       async onCacheEntryAdded(
-        arg,
+        _arg: any,
         { getState, updateCachedData, cacheDataLoaded, cacheEntryRemoved }: any
       ) {
         const currentUser = getState()?.user?.currentUser;
-        const socket = createSocketClient();
+        const socket = createSocketClient({
+          api_url: import.meta.env.VITE_SERVER_CHAT_SOCKET_URL as string,
+        });
 
         try {
           await cacheDataLoaded;

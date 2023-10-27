@@ -67,7 +67,7 @@ const Friends = ({ user }: FriendsProps) => {
       border="1px solid rgba(251, 102, 19, 0.1)"
       boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.35)"
       backdropFilter={"blur(20px)"}
-      bgImage={`url('src/assets/img/BlackNoise.png')`}
+      bgImage={`url('assets/img/BlackNoise.webp')`}
       bgSize="cover"
       bgRepeat="no-repeat"
     >
@@ -159,7 +159,7 @@ const Friends = ({ user }: FriendsProps) => {
               border: "1px solid rgba(251, 102, 19, 0.09)",
               boxShadow: "0px 4px 24px -1px rgba(0, 0, 0, 0.35)",
               backdropFilter: "blur(20px)",
-              backgroundImage: "url('src/assets/img/BlackNoise.png')",
+              backgroundImage: "url('assets/img/BlackNoise.webp')",
               bgSize: "cover",
               bgRepeat: "no-repeat",
               backgroundColor: "transparent",
@@ -191,7 +191,7 @@ const Friends = ({ user }: FriendsProps) => {
                       bg="pong_bg.200"
                       boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.35)"
                       backdropFilter={"blur(20px)"}
-                      bgImage={`url('src/assets/img/BlackNoise.png')`}
+                      bgImage={`url('assets/img/BlackNoise.webp')`}
                       bgSize="cover"
                       bgRepeat="no-repeat"
                       borderRadius={5}

@@ -15,30 +15,22 @@ import {
   Icon,
   IconButton,
   InputGroup,
-  InputLeftElement,
   InputRightElement,
-  useDisclosure,
 } from "@chakra-ui/react";
-import React, { useEffect } from "react";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useForm } from "react-hook-form";
 import { MdSend } from "react-icons/md";
-import { Search2Icon, SearchIcon } from "@chakra-ui/icons";
-// import { useAddMessageMutation } from "src/features/messages/messagesApi";
+import { Search2Icon } from "@chakra-ui/icons";
 import conversationApi, {
   useCreateConversationMutation,
 } from "src/features/conversations/conversationsApi";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { apiSlice } from "src/app/api/apiSlice";
 import store from "src/app/store";
 import { v4 as uuidv4 } from "uuid";
 import usersApi from "src/features/users/usersApi";
-import { useGetUserByEmailQuery } from "src/features/users/usersApi";
 import messagesApi from "src/features/messages/messagesApi";
-import { useGetConversationByMembersEmailsQuery } from "src/features/conversations/conversationsApi";
-import Loader from "../Utils/Loader";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 dayjs.extend(relativeTime);
@@ -48,9 +40,14 @@ const validationSchema = yup.object().shape({
   message: yup.string().required("Message is required").trim(),
 });
 
+interface UserType {
+  id: number;
+  name: string;
+  email: string;
+  avatar: string;
+}
+
 const AddDirectMessage = ({ isOpenDM, onToggleDM }) => {
-  // const { isOpen, onOpen, onClose } = useDisclosure();
-  const dispatch = useDispatch();
   const navigate = useNavigate();
   const currentUser = useSelector((state: any) => state.user.currentUser);
 
@@ -66,7 +63,7 @@ const AddDirectMessage = ({ isOpenDM, onToggleDM }) => {
   });
 
   const [getUserByEmail, { isLoading: isLoadinGetUserByEmail }] =
-    usersApi.endpoints.getUserByEmail.useLazyQuery();
+    usersApi.useLazyGetUserByEmailQuery();
 
   const [
     triggerGetConversationByMembersEmails,
@@ -84,7 +81,7 @@ const AddDirectMessage = ({ isOpenDM, onToggleDM }) => {
       if (receiverEmail === currentUser?.email)
         throw new Error("You can't send message to yourself");
 
-      const to = await getUserByEmail(receiverEmail).unwrap();
+      const to = (await getUserByEmail(receiverEmail).unwrap()) as UserType;
       const conversations = await triggerGetConversationByMembersEmails({
         firstMemberEmail: currentUser?.email,
         secondMemberEmail: receiverEmail,
@@ -131,7 +128,7 @@ const AddDirectMessage = ({ isOpenDM, onToggleDM }) => {
       });
       onToggleDM();
       navigate(`/chat/conversation/${conversationId}`);
-    } catch (error) {
+    } catch (error: any) {
       console.log("error: ", error);
       if (error?.message === "user not found") {
         toast({
@@ -176,20 +173,16 @@ const AddDirectMessage = ({ isOpenDM, onToggleDM }) => {
       >
         <ModalOverlay />
         <ModalContent
-          // bg="green"
           borderRadius={40}
-          // maxH="350px"
-          // maxW={{ base: "full", sm: "350px", md: 450 }}
           maxW={{ base: "350px", lg: "450px" }}
           mt={4}
           border="1px solid rgba(251, 102, 19, 0.3)"
           boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.35)"
           backdropFilter={"blur(20px)"}
-          bgImage={`url('src/assets/img/BlackNoise.png')`}
+          bgImage={`url('assets/img/BlackNoise.webp')`}
           bgSize="cover"
           bgRepeat="no-repeat"
           bg="transparent"
-          //   w={{ base: "full", sm: "full", md: 820 }}
         >
           <ModalHeader>Direct messages</ModalHeader>
           <ModalCloseButton onClick={onToggleDM} />
@@ -197,7 +190,6 @@ const AddDirectMessage = ({ isOpenDM, onToggleDM }) => {
             <Stack
               mt={0}
               spacing={6}
-              //  w={{ base: "full", sm: "full", md: 620 }}
               align="center"
               justify="start"
               borderRadius={40}
@@ -215,8 +207,6 @@ const AddDirectMessage = ({ isOpenDM, onToggleDM }) => {
                     color="white"
                     px={2}
                     py={1}
-                    // borderTopLeftRadius="md"
-                    // borderBottomLeftRadius="md"
                     border="1px solid var(--white, #FFF)"
                     borderRadius="md"
                     cursor="pointer"
@@ -230,16 +220,6 @@ const AddDirectMessage = ({ isOpenDM, onToggleDM }) => {
                     type="text"
                     color="white"
                     placeholder="email to send message to"
-                    // onChange={(e) => {
-
-                    // }}
-                    //   _placeholder={{
-                    //     fontSize: 14,
-                    //     letterSpacing: 0.5,
-                    //     fontWeight: "light",
-                    //     opacity: 0.7,
-                    //     color: "gray.500",
-                    //   }}
                     _hover={{
                       borderColor: "pong_cl_primary",
                       background: "pong_bg_secondary",
@@ -251,13 +231,7 @@ const AddDirectMessage = ({ isOpenDM, onToggleDM }) => {
                 </FormErrorMessage>
               </FormControl>
 
-              <Box
-                w={"full"}
-                // bg={"gray.400"}
-                borderRadius={6}
-                mb={2}
-                // px={2}
-              >
+              <Box w={"full"} borderRadius={6} mb={2}>
                 <InputGroup
                   w={"full"}
                   gap={2}

@@ -38,15 +38,6 @@ const baseQueryJWTverify = async (args: any, api: any, extraOptions: any) => {
 };
 
 export const apiSlice = createApi({
-  // baseQuery: async (args, api, extraOptions) => {
-  //   const result = await baseQuery(args, api, extraOptions);
-
-  //   if (result?.error?.status === 401) {
-  //     api.dispatch(setUserLoggedOut());
-  //     localStorage.clear();
-  //   }
-  //   return result;
-  // },
   baseQuery: baseQueryJWTverify,
   tagTypes: [],
   endpoints: () => ({}),

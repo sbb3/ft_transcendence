@@ -29,7 +29,7 @@ const menuBtnStyle = {
   border: "none",
 };
 
-const Channels = ({}) => {
+const Channels = () => {
   const currentUser = useSelector((state: any) => state.user.currentUser);
   const toast = useToast();
   const navigate = useNavigate();
@@ -111,7 +111,7 @@ const Channels = ({}) => {
                   <ScrollArea.Root className="ScrollAreaRoot">
                     <ScrollArea.Viewport className="ScrollAreaViewport">
                       {channels?.length > 0 ? (
-                        channels?.map((channel, index) => (
+                        channels?.map((channel) => (
                           <MenuItem
                             key={channel?.id}
                             bg={"trasparent"}

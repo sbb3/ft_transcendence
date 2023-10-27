@@ -2,27 +2,18 @@ import { apiSlice } from "src/app/api/apiSlice";
 import { setCurrentUser } from "./usersSlice";
 import { createSocketClient } from "src/app/socket/client";
 
-interface Friend {
-  id: number;
-  name: string;
-  username: string;
-  avatar: string;
-  email: string;
-}
-
-interface FriendsList {
-  friends: Friend[];
-}
-
 const usersApi = apiSlice.injectEndpoints({
   endpoints: (builder: any) => ({
     getUsers: builder.query({
       query: () => "users",
-      async onCacheEntryAdded(
-        arg: any,
-        { dispatch, updateCachedData, cacheDataLoaded, cacheEntryRemoved }: any
-      ) {
-        const socket = createSocketClient();
+      async onCacheEntryAdded({
+        updateCachedData,
+        cacheDataLoaded,
+        cacheEntryRemoved,
+      }: any) {
+        const socket = createSocketClient({
+          api_url: import.meta.env.VITE_SERVER_USER_SOCKET_URL as string,
+        });
         try {
           await cacheDataLoaded;
           socket.on("newuser", (data: any) => {
@@ -45,11 +36,11 @@ const usersApi = apiSlice.injectEndpoints({
       },
     }),
     getUserById: builder.query({
-      query: (id: number) => `users/user/${id}`, // users/id return object {}, users?id=1, return array []
+      query: (id: number) => `users/user/${id}`,
     }),
     getUserByUsername: builder.query({
       query: (username: string) => `users/username/${username}`,
-      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
+      async onQueryStarted(_arg: any, { queryFulfilled }: any) {
         try {
           await queryFulfilled;
         } catch (error) {
@@ -59,7 +50,7 @@ const usersApi = apiSlice.injectEndpoints({
     }),
     getUserByEmail: builder.query({
       query: (email: string) => `users/email/${email}`,
-      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
+      async onQueryStarted(_arg: any, { queryFulfilled }) {
         try {
           await queryFulfilled;
         } catch (error) {
@@ -68,12 +59,12 @@ const usersApi = apiSlice.injectEndpoints({
       },
     }),
     getCurrentUser: builder.query({
-      query: (currentUserId) => ({
+      query: (currentUserId: number) => ({
         url: `/users/currentuser/${currentUserId}`,
         method: "GET",
         // mode: "no-cors"
       }),
-      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
+      async onQueryStarted(_arg: any, { dispatch, queryFulfilled }) {
         try {
           const result = await queryFulfilled;
           const user = result?.data;
@@ -84,12 +75,12 @@ const usersApi = apiSlice.injectEndpoints({
       },
     }),
     updateUserSettings: builder.mutation({
-      query: ({ id, formData }) => ({
+      query: ({ id, formData }: { id: number; formData: FormData }) => ({
         url: `users/${id}/settings`,
         method: "PATCH",
         body: formData,
       }),
-      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
+      async onQueryStarted(_arg: any, { dispatch, queryFulfilled }) {
         try {
           const result = await queryFulfilled;
           const user = result?.data;
@@ -100,7 +91,7 @@ const usersApi = apiSlice.injectEndpoints({
       },
     }),
     getFriends: builder.query({
-      query: (id) => `users/${id}/friends`,
+      query: (id: number) => `users/${id}/friends`,
     }),
     addFriend: builder.mutation({
       query: ({ currentUserId, friendId }) => ({
@@ -108,19 +99,9 @@ const usersApi = apiSlice.injectEndpoints({
         method: "POST",
         body: { friendId },
       }),
-      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
-        // invalidate the cache for getFriends
+      async onQueryStarted(_arg: any, { dispatch, queryFulfilled }) {
         try {
           const result = await queryFulfilled;
-          // await dispatch(
-          //   usersApi.util.prefetch(
-          //     "getFriends",
-          //     getState()?.user?.currentUser?.id,
-          //     {
-          //       force: true,
-          //     } as any
-          //   )
-          // );
           const user = result?.data;
           await dispatch(setCurrentUser(user));
         } catch (error) {
@@ -129,12 +110,17 @@ const usersApi = apiSlice.injectEndpoints({
       },
     }),
     deleteFriend: builder.mutation({
-      query: ({ currentUserId, friendId }) => ({
+      query: ({
+        currentUserId,
+        friendId,
+      }: {
+        currentUserId: number;
+        friendId: number;
+      }) => ({
         url: `users/${currentUserId}/friends/${friendId}`,
         method: "DELETE",
       }),
-      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
-        // invalidate the cache for getFriends
+      async onQueryStarted(_arg: any, { dispatch, queryFulfilled }) {
         try {
           const result = await queryFulfilled;
           const user = result?.data;
@@ -145,19 +131,19 @@ const usersApi = apiSlice.injectEndpoints({
       },
     }),
     generateOTP: builder.mutation({
-      query: (userId) => ({
+      query: (userId: number) => ({
         url: `otp-generate`,
         method: "POST",
         body: { userId },
       }),
     }),
     verifyOTP: builder.mutation({
-      query: ({ userId, userPin }) => ({
+      query: ({ userId, userPin }: { userId: number; userPin: string }) => ({
         url: `otp-verify`,
         method: "POST",
         body: { userId, userPin },
       }),
-      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
+      async onQueryStarted(_arg: any, { dispatch, queryFulfilled }) {
         try {
           const result = await queryFulfilled;
           const user = result?.data;
@@ -168,12 +154,12 @@ const usersApi = apiSlice.injectEndpoints({
       },
     }),
     validateOTP: builder.mutation({
-      query: ({ userId, userPin }) => ({
+      query: ({ userId, userPin }: { userId: number; userPin: string }) => ({
         url: `otp-validate`,
         method: "POST",
         body: { userId, userPin },
       }),
-      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
+      async onQueryStarted(_arg: any, { dispatch, queryFulfilled }) {
         try {
           const result = await queryFulfilled;
           const user = result?.data;
@@ -184,12 +170,12 @@ const usersApi = apiSlice.injectEndpoints({
       },
     }),
     disableOTP: builder.mutation({
-      query: (userId) => ({
+      query: (userId: number) => ({
         url: `otp-disable`,
         method: "POST",
         body: { userId },
       }),
-      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
+      async onQueryStarted(_arg: any, { dispatch, queryFulfilled }) {
         try {
           const result = await queryFulfilled;
           const user = result?.data;
@@ -200,15 +186,14 @@ const usersApi = apiSlice.injectEndpoints({
       },
     }),
     checkProfileCompleted: builder.mutation({
-      query: (userId) => ({
+      query: (userId: number) => ({
         url: `users/profile-check-completed`,
         method: "POST",
         body: { userId },
       }),
-      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
+      async onQueryStarted(_arg: any, { dispatch, queryFulfilled }) {
         try {
           const result = await queryFulfilled;
-          console.log("result: ", result);
           const user = result?.data;
           await dispatch(setCurrentUser(user));
         } catch (error) {
@@ -217,12 +202,18 @@ const usersApi = apiSlice.injectEndpoints({
       },
     }),
     blockUser: builder.mutation({
-      query: ({ id, blockedUserId }) => ({
+      query: ({
+        id,
+        blockedUserId,
+      }: {
+        id: number;
+        blockedUserId: number;
+      }) => ({
         url: `users/${id}/blockuser`,
         method: "PATCH",
         body: { blockedUserId },
       }),
-      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
+      async onQueryStarted(_arg: any, { dispatch, queryFulfilled }) {
         try {
           const result = await queryFulfilled;
           const user = result?.data;
@@ -233,12 +224,18 @@ const usersApi = apiSlice.injectEndpoints({
       },
     }),
     unblockUser: builder.mutation({
-      query: ({ id, blockedUserId }) => ({
+      query: ({
+        id,
+        blockedUserId,
+      }: {
+        id: number;
+        blockedUserId: number;
+      }) => ({
         url: `users/${id}/unblockuser`,
         method: "PATCH",
         body: { blockedUserId },
       }),
-      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
+      async onQueryStarted(_arg: any, { dispatch, queryFulfilled }) {
         try {
           const result = await queryFulfilled;
           const user = result?.data;

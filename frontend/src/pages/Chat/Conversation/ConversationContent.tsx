@@ -6,28 +6,21 @@ import ChatContentBody from "../ChatContentBody";
 import { useNavigate, useParams } from "react-router-dom";
 import Loader from "src/components/Utils/Loader";
 import { useAddMessageMutation } from "src/features/messages/messagesApi";
-import conversationApi, {
-  useGetConversationQuery,
-} from "src/features/conversations/conversationsApi";
+import { useGetConversationQuery } from "src/features/conversations/conversationsApi";
 import { useGetUserByEmailQuery } from "src/features/users/usersApi";
 import { useDispatch, useSelector } from "react-redux";
 import { v4 as uuidv4 } from "uuid";
 import { setCurrentConversationId } from "src/features/conversations/conversationsSlice";
-import store from "src/app/store";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 dayjs.extend(relativeTime);
 
-interface IChatReceiver {
-  id: number;
-  name: string;
-  email: string;
-  password: string;
-}
+type ConversationParams = {
+  id: string;
+};
 
 const ConversationContent = () => {
   const dispatch = useDispatch();
-  // const [receiver, setReceiver] = useState(null);
   const [receiverEmail, setReceiverEmail] = useState("");
   const [skip, setSkip] = useState(true);
   const currentUser = useSelector((state: any) => state.user.currentUser);
@@ -35,7 +28,7 @@ const ConversationContent = () => {
   const { isOpen: isProfileDrawerOpen, onToggle: toggleProfileDrawer } =
     useDisclosure();
   const toast = useToast();
-  const { id } = useParams();
+  const { id } = useParams<ConversationParams>();
 
   const {
     data: conversations,
@@ -98,31 +91,24 @@ const ConversationContent = () => {
     }
   }, [conversations]);
 
-  // useEffect(() => {
-  //   if (receiverUser) {
-  //     setReceiver(receiverUser);
-  //   }
-  // }, [receiverUser]);
-
   const onSendMessage = async (data: any) => {
     const { message } = data;
-    // const receiver = receiverUser;
     try {
       const msgData = {
-        id: uuidv4(),
-        conversationId: id,
-        sender: currentUser?.id,
-        receiver: receiverUser?.id,
-        content: message,
-        lastMessageCreatedAt: dayjs().valueOf(),
+        id: uuidv4() as string,
+        conversationId: id as string,
+        sender: currentUser?.id as number,
+        receiver: receiverUser?.id as number,
+        content: message as string,
+        lastMessageCreatedAt: dayjs().valueOf() as number,
       };
       const conversation = conversations[0];
-      if (conversation.id) {
+      if (conversation?.id) {
         await addMessage(msgData).unwrap();
       } else {
         navigate("/chat", { replace: true });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.log("error: ", error);
       toast({
         title: "Message not sent.",
@@ -167,7 +153,7 @@ const ConversationContent = () => {
       border="1px solid rgba(251, 102, 19, 0.1)"
       boxShadow="0px 4px 24px -1px rgba(0, 0, 0, 0.35)"
       backdropFilter={"blur(20px)"}
-      bgImage={`url('src/assets/img/BlackNoise.png')`}
+      bgImage={`url('assets/img/BlackNoise.webp')`}
       bgSize="cover"
       bgRepeat="no-repeat"
     >
@@ -203,7 +189,7 @@ const ConversationContent = () => {
               receiverUser={receiverUser}
             />
             <ChatContentBody
-              conversationId={id}
+              conversationId={id as string}
               toggleProfileDrawer={toggleProfileDrawer}
               isProfileDrawerOpen={isProfileDrawerOpen}
               receiverUser={receiverUser}

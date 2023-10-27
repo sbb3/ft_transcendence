@@ -16,16 +16,12 @@ const channelsApi = apiSlice.injectEndpoints({
     getSingleChannelByName: builder.query({
       query: (name) => `channels?name=${name}`,
       async onCacheEntryAdded(
-        arg,
-        {
-          dispatch,
-          getState,
-          updateCachedData,
-          cacheDataLoaded,
-          cacheEntryRemoved,
-        }: any
+        _arg: any,
+        { getState, updateCachedData, cacheDataLoaded, cacheEntryRemoved }: any
       ) {
-        const socket = createSocketClient();
+        const socket = createSocketClient({
+          api_url: import.meta.env.VITE_SERVER_CHAT_SOCKET_URL as string,
+        });
         try {
           await cacheDataLoaded;
           socket.on("channel", (data) => {
@@ -59,16 +55,12 @@ const channelsApi = apiSlice.injectEndpoints({
     getChannelsByMemberId: builder.query({
       query: (currentUserId) => `channels/members/${currentUserId}`,
       async onCacheEntryAdded(
-        arg,
-        {
-          dispatch,
-          getState,
-          updateCachedData,
-          cacheDataLoaded,
-          cacheEntryRemoved,
-        }: any
+        _arg: any,
+        { getState, updateCachedData, cacheDataLoaded, cacheEntryRemoved }: any
       ) {
-        const socket = createSocketClient();
+        const socket = createSocketClient({
+          api_url: import.meta.env.VITE_SERVER_CHAT_SOCKET_URL as string,
+        });
         try {
           await cacheDataLoaded;
           socket.on("channel", (data) => {
@@ -137,7 +129,7 @@ const channelsApi = apiSlice.injectEndpoints({
       }),
     }),
     editChannelInfo: builder.mutation({
-      query: ({ id, channelName, data }) => ({
+      query: ({ id, data }) => ({
         url: `/channels/${id}/update`,
         method: "PATCH",
         body: { ...data },
@@ -255,17 +247,16 @@ const channelsApi = apiSlice.injectEndpoints({
     LeaveChannel: builder.mutation({
       query: ({
         channelId,
-        channelName,
         memberId,
       }: {
         channelId: number;
+        channelName?: string;
         memberId: number;
-        channelName: string;
       }) => ({
         url: `channels/${channelId}/members/${memberId}/leave`,
         method: "PATCH",
       }),
-      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
+      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }: any) {
         const channelId = arg.channelId;
         const patchResult = dispatch(
           channelsApi.util.updateQueryData(
@@ -303,11 +294,11 @@ const channelsApi = apiSlice.injectEndpoints({
       },
     }),
     muteChannelMember: builder.mutation({
-      query: ({ channelId, userId, channelName }) => ({
+      query: ({ channelId, userId }) => ({
         url: `channels/${channelId}/members/${userId}/mute`,
         method: "PATCH",
       }),
-      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
+      async onQueryStarted(arg, { dispatch, queryFulfilled }: any) {
         const channelId = arg.channelId;
         const patchResult = dispatch(
           channelsApi.util.updateQueryData(
@@ -336,11 +327,11 @@ const channelsApi = apiSlice.injectEndpoints({
       },
     }),
     unmuteChannelMember: builder.mutation({
-      query: ({ channelId, userId, channelName }) => ({
+      query: ({ channelId, userId }) => ({
         url: `/channels/${channelId}/members/${userId}/unmute`,
         method: "PATCH",
       }),
-      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
+      async onQueryStarted(arg, { dispatch, queryFulfilled }: any) {
         const channelId = arg.channelId;
         const patchResult = dispatch(
           channelsApi.util.updateQueryData(
@@ -373,7 +364,7 @@ const channelsApi = apiSlice.injectEndpoints({
         url: `channels/${channelId}/members/${userId}/ban`,
         method: "PATCH",
       }),
-      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
+      async onQueryStarted(arg, { dispatch, queryFulfilled }: any) {
         const channelId = arg.channelId;
         const patchResult = dispatch(
           channelsApi.util.updateQueryData(
@@ -410,7 +401,10 @@ const channelsApi = apiSlice.injectEndpoints({
         method: "POST",
         body: { ...data },
       }),
-      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }: any) {
+      async onQueryStarted(
+        _arg: any,
+        { dispatch, getState, queryFulfilled }: any
+      ) {
         try {
           await queryFulfilled;
           await dispatch(
@@ -428,11 +422,11 @@ const channelsApi = apiSlice.injectEndpoints({
       },
     }),
     kickChannelMember: builder.mutation({
-      query: ({ channelId, memberId, channelName }) => ({
+      query: ({ channelId, memberId }) => ({
         url: `channels/${channelId}/members/${memberId}/kick`,
         method: "PATCH",
       }),
-      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
+      async onQueryStarted(arg, { dispatch, queryFulfilled }: any) {
         const channelId = arg.channelId;
         const patchResult = dispatch(
           channelsApi.util.updateQueryData(
@@ -463,12 +457,12 @@ const channelsApi = apiSlice.injectEndpoints({
       },
     }),
     onAddUserOrEditMember: builder.mutation({
-      query: ({ channelId, channelName, data }) => ({
+      query: ({ channelId, data }) => ({
         url: `channels/${channelId}/members/edit`,
         method: "PATCH",
         body: { ...data },
       }),
-      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
+      async onQueryStarted(arg, { dispatch, queryFulfilled }: any) {
         try {
           await queryFulfilled;
           dispatch(

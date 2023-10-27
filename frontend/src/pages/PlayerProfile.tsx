@@ -1,6 +1,6 @@
 import { Flex, useToast } from "@chakra-ui/react";
 import { useParams } from "react-router-dom";
-import Profile from "src/components/Overview/Profile";
+import Profile, { ProfileProps } from "src/components/Overview/Profile";
 import RecentGames from "src/components/Overview/RecentGames";
 import Loader from "src/components/Utils/Loader";
 import { useGetUserByUsernameQuery } from "src/features/users/usersApi";
@@ -42,7 +42,7 @@ const PlayerProfile = () => {
         <Loader />
       ) : user ? (
         <Flex direction={{ base: "column", xl: "row" }} gap={4}>
-          <Profile user={user} />
+          <Profile user={user as ProfileProps["user"]} />
           <RecentGames user={user} />
         </Flex>
       ) : (

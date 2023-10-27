@@ -1,11 +1,11 @@
 import {
   Box,
+  Button,
   Flex,
   FormControl,
   FormErrorMessage,
   FormLabel,
   Input,
-  Link,
   Text,
   Textarea,
   VStack,
@@ -13,9 +13,6 @@ import {
 import { useForm } from "react-hook-form";
 import useWeb3forms from "use-web3forms";
 import { useToast } from "@chakra-ui/react";
-import { useLottie } from "lottie-react";
-import animationData from "src/assets/animations/btnSend.json";
-import { Link as RouterLink } from "react-router-dom";
 import useTitle from "src/hooks/useTitle";
 
 interface FormData {
@@ -26,17 +23,6 @@ interface FormData {
 
 function Support() {
   useTitle("Support");
-  const style = {
-    width: "200px",
-    color: "purple",
-  };
-  const options = {
-    loop: true,
-    autoplay: true,
-    animationData,
-  };
-
-  const { View } = useLottie(options, style);
   const toast = useToast();
 
   const {
@@ -48,7 +34,7 @@ function Support() {
 
   const { submit } = useWeb3forms({
     apikey: import.meta.env.VITE_WEB3FORMS_API_KEY,
-    onSuccess(successMessage, data) {
+    onSuccess(successMessage) {
       toast({
         title: "Message sent.",
         description: successMessage,
@@ -151,9 +137,15 @@ function Support() {
             cursor="pointer"
             overflow="hidden"
           >
-            <Link as={RouterLink} onClick={handleSubmit(onSubmit)}>
-              {View}
-            </Link>
+            <Button
+              maxW="md"
+              colorScheme="orange"
+              size="lg"
+              letterSpacing={1}
+              onClick={handleSubmit(onSubmit)}
+            >
+              Send Message
+            </Button>
           </Flex>
         </Box>
       </VStack>
