@@ -51,9 +51,8 @@ export class AuthService extends PrismaClient {
   async createUserIfNotFound(user: any) {
     const dbUser = await this.user.findUnique({
       where: {
-        username: user.username,
         email: user.email
-      },
+      }
     });
     const dbUserPrime = await this.user.findUnique({
       where : {
