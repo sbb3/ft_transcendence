@@ -36,6 +36,9 @@ export class ChatService extends PrismaClient {
       throw new NotFoundException(
         !sender ? 'Sender not found.' : 'Receiver not found.',
       );
+    if (sender.blocked.find(blocked => blocked == receiver.id)
+      || receiver.blocked.find(blocked => blocked == sender.id))
+        throw new BadRequestException("User is blocked.");
     if (!conversation) throw new NotFoundException('Conversation not found.');
     const newMessage = await this.messageData.create({ data: messageDto });
     if (!newMessage)
@@ -70,6 +73,11 @@ export class ChatService extends PrismaClient {
             createConversationDto.secondMember +
             "' not found.",
       );
+
+    if (firstUser.blocked.find(blocked => blocked == secondUser.id)
+      || secondUser.blocked.find(blocked => blocked == firstUser.id))
+        throw new BadRequestException("User is blocked.");
+
     const conversation = await this.conversation.findMany({
       where: {
         firstMember: {
