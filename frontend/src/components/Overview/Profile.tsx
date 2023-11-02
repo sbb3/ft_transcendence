@@ -49,8 +49,8 @@ export interface ProfileProps {
     recentGames: object[];
     friends: object[];
     blocked: number[];
-    otp_enabled: boolean;
-    otp_validated: boolean;
+    is_otp_enabled: boolean;
+    is_otp_validated: boolean;
     otp_secret: string;
     otp_url: string;
     is_profile_completed: boolean;

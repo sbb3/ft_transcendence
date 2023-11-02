@@ -40,7 +40,7 @@ const pinSchema = yup.object().shape({
 
 const TwoFactorActivation = ({ isOpen, onToggle }) => {
   const currentUser = useSelector((state: any) => state?.user?.currentUser);
-  const [qrCodeUrl, setQrCodeUrl] = useState<string>("");
+  const [qrCodeUrl, setQrCodeUrl] = useState("");
   const toast = useToast();
   const {
     handleSubmit,
@@ -57,9 +57,9 @@ const TwoFactorActivation = ({ isOpen, onToggle }) => {
     generateOTP(currentUser?.id)
       .unwrap()
       .then((data: any) => {
-        QRCode.toDataURL(data?.otpauthUrl)
+        QRCode.toDataURL(data?.otpAuthUrl)
           .then(setQrCodeUrl)
-          .catch((err) => {
+          .catch((err: any) => {
             console.error("err: ", err);
             toast({
               title: "Error",
@@ -80,6 +80,7 @@ const TwoFactorActivation = ({ isOpen, onToggle }) => {
         userId: currentUser?.id,
         userPin: data?.pin,
       }).unwrap();
+
       toast({
         title: "2FA activated.",
         description: "You can now login with 2FA.",

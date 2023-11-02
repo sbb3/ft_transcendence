@@ -92,7 +92,7 @@ const Leaderboard = () => {
                 >
                   {leaderboardData?.length > 0 ? (
                     leaderboardData?.map((player: LeaderboardPlayer) => (
-                      <LeaderboardCard key={player?.id} player={player} />
+                      <LeaderboardCard player={player} />
                     ))
                   ) : (
                     <Text

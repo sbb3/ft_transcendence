@@ -88,7 +88,7 @@ function Support() {
           >
             get in touch
           </Text>
-          <Text mt={4} fontSize="lg" color="#95A1B2">
+          <Text mt={4} fontSize="lg" color="whiteAlpha.900">
             Having an problem or just want to say Hi ? Send us a message
           </Text>
         </VStack>

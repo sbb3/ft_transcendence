@@ -11,16 +11,15 @@ interface LeaderboardPlayer {
 }
 
 interface LeaderboardCardProps {
-  key: number;
   player: LeaderboardPlayer;
 }
 
-const LeaderboardCard = ({ key, player }: LeaderboardCardProps) => {
+const LeaderboardCard = ({ player }: LeaderboardCardProps) => {
   const { name, username, avatar, level } = player;
   const navigate = useNavigate();
   return (
     <Flex
-      key={key}
+      key={player?.id}
       direction="row"
       justify="space-between"
       w="220px"

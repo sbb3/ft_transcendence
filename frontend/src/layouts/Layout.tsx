@@ -55,20 +55,6 @@ const Layout = () => {
         gap={2}
         p={2}
       >
-        <MotionBox
-          pos="absolute"
-          w={{ base: "300px", sm: "400px", md: "550px" }}
-          h={{ base: "300px", sm: "400px", md: "550px" }}
-          bgImage="url('assets/img/cropped_circle_pong.webp')"
-          bgPosition="center"
-          bgSize="contain"
-          bgRepeat="no-repeat"
-          bgBlendMode="lighten"
-          // animate={{ rotate: 360 }}
-          // transition={{ ease: "linear", duration: 5, repeat: Infinity }}
-          opacity={0.9}
-          zIndex={-2}
-        />
         <Header />
         <Flex
           pos="relative"
@@ -80,6 +66,20 @@ const Layout = () => {
           borderRadius={26}
           p={2}
         >
+          <MotionBox
+            pos="absolute"
+            w={{ base: "300px", sm: "400px", md: "550px" }}
+            h={{ base: "300px", sm: "400px", md: "550px" }}
+            bgImage="url('assets/img/cropped_circle_pong.webp')"
+            bgPosition="center"
+            bgSize="contain"
+            bgRepeat="no-repeat"
+            bgBlendMode="lighten"
+            // animate={{ rotate: 360 }}
+            // transition={{ ease: "linear", duration: 5, repeat: Infinity }}
+            opacity={0.6}
+            zIndex={-2}
+          />
           {!currentUser?.is_profile_completed ? (
             <ProfileDetailsFormModal isOpen={true} onToggle={onToggle} />
           ) : (

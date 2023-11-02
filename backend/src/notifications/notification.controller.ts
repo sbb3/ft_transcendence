@@ -27,17 +27,17 @@ export class NotificationController {
     @Body() createNotificationDto: CreateNotificationDto,
     @Res() res: Response,
   ) {
-    // try {
-    return res
-      .status(200)
-      .json(
-        await this.notificationService.createNotification(
-          createNotificationDto,
-        ),
-      );
-    // } catch (error) {
-    //   return res.status(500).json(error);
-    // }
+    try {
+      return res
+        .status(200)
+        .json(
+          await this.notificationService.createNotification(
+            createNotificationDto,
+          ),
+        );
+    } catch (error) {
+      return res.status(500).json(error);
+    }
   }
 
   @Get()

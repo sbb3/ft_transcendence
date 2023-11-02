@@ -22,12 +22,11 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useToast } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
-import { useLottie } from "lottie-react";
 import { useSelector } from "react-redux";
 import { useValidateOTPMutation } from "src/features/users/usersApi";
 import store from "src/app/store";
 import authApi from "src/features/auth/authApi";
-import animationData from "src/assets/lottie/animation_fingerprint.json" assert { type: "json" };
+import { Player } from "@lottiefiles/react-lottie-player";
 
 const pinSchema = yup.object().shape({
   pin: yup
@@ -37,23 +36,12 @@ const pinSchema = yup.object().shape({
     .trim(),
 });
 
-const style = {
-  width: "200px",
-  color: "orage",
-};
-
-const options = {
-  loop: true,
-  autoplay: true,
-  animationData,
-};
 const TwoFactorAccessBlocker = ({
   isOTPAccessBlockerOpen,
   onOTPAccessBlockerToggle,
 }) => {
   const userId = useSelector((state: any) => state?.auth?.userId);
   const navigate = useNavigate();
-  const { View } = useLottie(options, style);
   const toast = useToast();
   const {
     // register,
@@ -128,7 +116,14 @@ const TwoFactorAccessBlocker = ({
             pr={2}
           >
             <Flex justifyContent="center" alignItems="center">
-              <Box display="block">{View}</Box>
+              <Box display="block" p={6}>
+                <Player
+                  autoplay
+                  loop
+                  src="src/assets/lottie/animation_fingerprint.json"
+                  style={{ height: "200px", width: "200px", color: "orange" }}
+                />
+              </Box>
             </Flex>
 
             <Stack spacing={3} w={"full"} align={"center"}>

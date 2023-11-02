@@ -237,7 +237,7 @@ const Members = ({ channel }: ChannelType) => {
     <Stack
       direction={{ base: "column" }}
       spacing="24px"
-      w={{ base: "350px", lg: "450px" }}
+      w={{ base: "full", lg: "450px" }}
       h={{ base: "full" }}
       p={{ base: 4, md: 6 }}
       borderRadius={24}
@@ -283,7 +283,13 @@ const Members = ({ channel }: ChannelType) => {
           </AvatarGroup>
         </Flex>
       </Flex>
-      <Stack direction="column" justify="start" align="center" spacing={5}>
+      <Stack
+        w={"full"}
+        direction="column"
+        justify="start"
+        align="center"
+        spacing={5}
+      >
         <FormControl isInvalid={!!errors.username} mt={0}>
           <FormLabel htmlFor="username" fontSize="lg">
             Member

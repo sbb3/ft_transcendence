@@ -161,7 +161,7 @@ const Settings = () => {
             <Switch
               id="2fa"
               colorScheme="orange"
-              isChecked={currentUser?.otp_enabled}
+              isChecked={currentUser?.is_otp_enabled}
               onChange={(e) => {
                 if (e.target.checked === true) {
                   onToggle2FAModal();

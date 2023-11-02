@@ -132,14 +132,14 @@ const usersApi = apiSlice.injectEndpoints({
     }),
     generateOTP: builder.mutation({
       query: (userId: number) => ({
-        url: `otp-generate`,
+        url: `otp/generate`,
         method: "POST",
         body: { userId },
       }),
     }),
     verifyOTP: builder.mutation({
       query: ({ userId, userPin }: { userId: number; userPin: string }) => ({
-        url: `otp-verify`,
+        url: `otp/verify`,
         method: "POST",
         body: { userId, userPin },
       }),
@@ -155,7 +155,7 @@ const usersApi = apiSlice.injectEndpoints({
     }),
     validateOTP: builder.mutation({
       query: ({ userId, userPin }: { userId: number; userPin: string }) => ({
-        url: `otp-validate`,
+        url: `otp/validate`,
         method: "POST",
         body: { userId, userPin },
       }),
@@ -171,7 +171,7 @@ const usersApi = apiSlice.injectEndpoints({
     }),
     disableOTP: builder.mutation({
       query: (userId: number) => ({
-        url: `otp-disable`,
+        url: `otp/disable`,
         method: "POST",
         body: { userId },
       }),

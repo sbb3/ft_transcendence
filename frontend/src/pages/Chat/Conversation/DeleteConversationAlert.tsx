@@ -50,10 +50,9 @@ const DeleteConversationAlert = ({
 
   return (
     <>
-      <Button colorScheme="red" onClick={onOpen}>
-        Delete Customer
-      </Button>
-
+      {/* <Button colorScheme="red" onClick={onOpen}>
+        Delete Conversation
+      </Button> */}
       <AlertDialog
         isOpen={isOpen}
         leastDestructiveRef={cancelRef}

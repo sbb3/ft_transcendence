@@ -51,11 +51,11 @@ export class OtpController {
       const isValid = this.otpService.verifyTwoFaCode(userPin, user.otp_secret);
 
       if (isValid) {
-        await this.otpService.updateUserData(
+        const updatedUser = await this.otpService.updateUserData(
           { id: userId },
-          { is_otp_enabled: true },
+          { is_otp_enabled: true, is_otp_validated: true },
         );
-        return response.json({ verified: true });
+        return response.json(updatedUser);
       }
       return response.status(403).json({ verified: false });
     } catch (error) {
@@ -79,11 +79,11 @@ export class OtpController {
       const isValid = this.otpService.verifyTwoFaCode(userPin, user.otp_secret);
 
       if (isValid) {
-        await this.otpService.updateUserData(
+        const updatedUser = await this.otpService.updateUserData(
           { id: userId },
           { is_otp_validated: true },
         );
-        return response.json({ validated: true });
+        return response.json(updatedUser);
       }
       return response.status(403).json({ validated: false });
     } catch (error) {
@@ -102,7 +102,7 @@ export class OtpController {
     @Res() response: Response,
   ) {
     try {
-      await this.otpService.updateUserData(
+      const updatedUser = await this.otpService.updateUserData(
         { id: userId },
         {
           is_otp_enabled: false,
@@ -111,7 +111,7 @@ export class OtpController {
         },
       );
 
-      return response.json({ otp_disabled: true });
+      return response.json(updatedUser);
     } catch (error) {
       return response.status(404).json(error);
     }

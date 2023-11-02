@@ -1,4 +1,4 @@
-FROM node:lts AS build-stage
+FROM node:18 AS build-stage
 
 WORKDIR /app
 
@@ -14,7 +14,7 @@ ENV NODE_OPTIONS=--max_old_space_size=4096
 
 RUN npm run build
 
-FROM node:lts AS production-stage
+FROM node:18 AS production-stage
 
 WORKDIR /app
 

@@ -90,11 +90,13 @@ const ChannelAbout = ({ channel }: ChannelType) => {
           Description
         </Text>
         <Text
+          w="full"
           fontSize="14px"
           fontWeight="medium"
           color="whiteAlpha.900"
           ml={2}
           textAlign={"start"}
+          // outline="2px solid #fff"
         >
           {channel?.description}
         </Text>
@@ -124,13 +126,17 @@ const ChannelAbout = ({ channel }: ChannelType) => {
           Created by
         </Text>
         <Text
+          w="full"
           fontSize="14px"
           fontWeight="medium"
           color="pong_cl_primary"
           ml={2}
+          textAlign={"start"}
         >
-          {channel?.owner?.name} on{" "}
-          {dayjs(channel?.createdAt).format("MMMM DD, YYYY, HH:mm")}
+          {channel?.members?.find((m) => m?.id === channel?.ownerId)?.name} on{" "}
+          <span style={{ color: "#FF8707", fontSize: "14px" }}>
+            {dayjs(channel?.createdAt).format("MMMM DD, YYYY, HH:mm")}
+          </span>
         </Text>
       </Stack>
       <Flex direction="row" align="center" justify="start" w="full" gap={4}>
