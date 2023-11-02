@@ -8,6 +8,7 @@ import { JwtService } from '@nestjs/jwt';
 import { jwtConstants } from './auth.constants';
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
+import { generateUsername } from "unique-username-generator";
 
 @Injectable()
 export class AuthService extends PrismaClient {
@@ -50,9 +51,17 @@ export class AuthService extends PrismaClient {
   async createUserIfNotFound(user: any) {
     const dbUser = await this.user.findUnique({
       where: {
-        username: user.username,
-      },
+        email: user.email
+      }
     });
+    const dbUserPrime = await this.user.findUnique({
+      where : {
+          username: user.username,
+      }
+    });
+
+    if (!dbUser && dbUserPrime)
+      user.username = generateUsername();
     return !dbUser
       ? await this.user.create({
           data: user,
