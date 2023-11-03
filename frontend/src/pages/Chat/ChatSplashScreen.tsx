@@ -28,7 +28,7 @@ const ChatSplashScreen = () => {
       >
         <Flex justify="center" align="center">
           <Image
-            src="assets/svg/messaging_girl.svg"
+            src="/assets/svg/messaging_girl.svg"
             alt="Messaging girl"
             borderRadius={20}
           />

@@ -1,48 +1,104 @@
-// import { Injectable , NotFoundException,} from '@nestjs/common';
-// import { Prisma, game } from '@prisma/client';
-// import { PrismaClient } from '@prisma/client';
-// import { Game } from './game.entity';
+import { Injectable, NotFoundException, } from '@nestjs/common';
+import { Prisma, game, PrismaClient } from '@prisma/client';
+import { UsersService } from 'src/users/users.service';
 
-// const prisma = new PrismaClient();
-// @Injectable()
-// export class GameService extends PrismaClient{
+@Injectable()
+export class GameService extends PrismaClient {
+	constructor(
+		private readonly userService: UsersService,) {
+		super();
+	}
 
-// 	isUserExist = (game: Game | null): game is Game => {
-// 		return game !== null;
-// 	  };
+	async createGame(data: Prisma.gameCreateInput) {
+		// console.log("herererer");
+		const game = await this.game.create({
+			data,
+		});
+		if (!game) {
+			console.log("errro lopez");
+		}
+		return game;
+	}
 
-// 	async findOneById(id_game: string): Promise<game> {
-// 	const game = await this.game.findUnique({
-// 		where: {id : parseInt(id_game, 10)}
-// 	})
-// 	if (!game) {
-// 		throw new NotFoundException(`Game with ID ${id_game} not found`);
-// 	}
-//     return
-//   }
+	isUserExist = (game: game | null): game is game => {
+		return game !== null;
+	};
 
-//   async updatGameEnd(gameId: number, id_winer: number, status: string) {
-// 	if (id_winer) {
-// 		const game = await this.game.update({
-// 			where: { id : gameId},
-// 			data: {
-// 				id_winer: id_winer,
-// 				status: status,
-// 			},
-// 		})
-// 		if (!game) {
-// 			throw new NotFoundException(`Game with id ${gameId} not found`);
-// 		}
-// 	}
-// 	const game = await this.game.findUnique({
-// 		where: {id: gameId},
-// 	});
-// 	return game;
-//   }
+	async findOneById(id_game: string): Promise<game> {
+		const game = await this.game.findUnique({
+			where: { id: parseInt(id_game, 10) }
+		})
+		if (!game) {
+			throw new NotFoundException(`Game with ID ${id_game} not found`);
+		}
+		return
+	}
 
-//   async findAllGames() {
-//     const games = await this.game.findMany();
-//     return games;
-//   }
+	async updatGameEnd(gameId: number, id_winer: number, status: string) {
+		if (id_winer) {
+			const game = await this.game.update({
+				where: { id: gameId },
+				data: {
+					id_winer: id_winer,
+					status: status,
+				},
+			})
+			if (!game) {
+				throw new NotFoundException(`Game with id ${gameId} not found`);
+			}
+		}
+		const game = await this.game.findUnique({
+			where: { id: gameId },
+		});
+		return game;
+	}
 
-// }
+	async updateUserGameStatus(userId: number, status: string) {
+		const user = await this.userService.user.update({
+			where: { id: userId },
+			data: {
+				status: status,
+			},
+		});
+
+		if (!user) throw new NotFoundException();
+		return user;
+	}
+
+	async updateUserIsWiner(userId: number) {
+		const user = await this.userService.user.findUnique({
+			where: { id: userId },
+		});
+		if (!user) {
+			throw new NotFoundException(`User with id ${userId} not found`);
+		}
+		const user1 = await this.userService.user.update({
+			where: { id: userId },
+			data: {
+				game_wine: user.game_wine++,
+			},
+		});
+
+		if (!user1) throw new NotFoundException();
+		return user1;
+	}
+
+	async findAllGames() {
+		return await this.game.findMany();
+	}
+
+	//get the user status from the database
+	async getUserStatus(userId: number) {
+		const user = await this.userService.user.findUnique({
+			where: { id: userId },
+		});
+		if (!user) {
+			throw new NotFoundException(`User with id ${userId} not found`);
+		}
+		return user.status;
+	}
+
+
+
+
+}

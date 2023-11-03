@@ -16,5 +16,6 @@ import { UserGateway } from './users.gateway';
   ],
   controllers: [UsersController],
   providers: [UsersService, CloudinaryProvider, CloudinaryService, UserGateway],
+  exports: [UsersService],
 })
-export class UsersModule {}
+export class UsersModule { }

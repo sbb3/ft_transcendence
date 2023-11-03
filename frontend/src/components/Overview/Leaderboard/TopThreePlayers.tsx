@@ -73,7 +73,7 @@ const TopThreePlayers = ({ top3Players }) => {
         >
           <Box position="absolute" top={"-16"} translateY={"-50%"}>
             <Image
-              src={"assets/svg/crown_icon.svg"}
+              src={"/assets/svg/crown_icon.svg"}
               alt="crown icon"
               boxSize={20} // 1rem = 16px, 75 / 16 = 4.6875rem
             />

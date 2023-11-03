@@ -236,7 +236,7 @@ const ProfileDetailsFormModal = ({
             <Box>
               <Image
                 boxSize={{ base: "300px", md: "350px" }}
-                src="assets/svg/complete_profile.svg"
+                src="/assets/svg/complete_profile.svg"
                 alt="profile illustration"
                 borderRadius={20}
               />

@@ -6,6 +6,8 @@ const GameLayout = () => {
       pos="relative"
       w={"full"}
       h={"full"}
+      minH={"800px"}
+
       justify="center"
       align="center"
       p={2}

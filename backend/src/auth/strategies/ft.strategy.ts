@@ -7,20 +7,20 @@ export class FtStrategy extends PassportStrategy(Strategy, '42') {
 
     constructor() {
         super({
-            clientID : process.env.APP_UID,
-            clientSecret : process.env.APP_SECRET,
-            callbackURL : process.env.CALLBACK_URL,
+            clientID: process.env.APP_UID,
+            clientSecret: process.env.APP_SECRET,
+            callbackURL: process.env.CALLBACK_URL,
         });
     }
 
-    async validate(access_token : string, refresh_token : string, profile : any) : Promise<any> {
+    async validate(access_token: string, refresh_token: string, profile: any): Promise<any> {
         return {
-            username : profile.username,
-            name : profile._json.first_name,
-            avatar : profile._json.image.link,
-            email : profile._json.email,
-            campus : profile._json.campus[0].name,
+            username: profile.username,
+            name: profile._json.usual_full_name,
+            avatar: profile._json.image.link,
+            email: profile._json.email,
+            campus: profile._json.campus[0].name,
         };
-	}
+    }
 
 }

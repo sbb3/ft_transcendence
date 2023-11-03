@@ -61,7 +61,7 @@ const Sidebar = () => {
   return (
     <Stack spacing={5} align="center" w="full" pos="relative">
       <Image
-        src="assets/svg/brand_icon.svg"
+        src="/assets/svg/brand_icon.svg"
         w={{ base: "40px" }}
         h={{ base: "40px" }}
         onClick={() => navigate("/")}

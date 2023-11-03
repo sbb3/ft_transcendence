@@ -222,8 +222,8 @@ const Profile = ({ user }: ProfileProps) => {
               user?.status === "online"
                 ? "green.400"
                 : user?.status === "offline"
-                ? "gray.300"
-                : "red.400"
+                  ? "gray.300"
+                  : "red.400"
             }
             borderWidth="3px"
           >
@@ -234,15 +234,15 @@ const Profile = ({ user }: ProfileProps) => {
                 user?.status === "online"
                   ? "green.400"
                   : user?.status === "offline"
-                  ? "gray.400"
-                  : "red.400"
+                    ? "gray.400"
+                    : "red.400"
               }
             />
           </Avatar>
           <Flex direction="column" gap="10px" justify="center">
             <Flex direction="row" gap="7px" align="center">
               <Image
-                src="assets/svg/username_pre_svg.svg"
+                src="/assets/svg/username_pre.svg"
                 alt=""
                 boxSize={5}
               />
@@ -278,10 +278,10 @@ const Profile = ({ user }: ProfileProps) => {
                     icon={<AiOutlineUserAdd />}
                     _hover={{ bg: "white", color: "pong_cl_primary" }}
                     onClick={handleSendFriendNotification}
-                    // isLoading={
-                    //   isLoadingCreateConversationWithoutMessage ||
-                    //   isLoadingGetConversationByMembersEmails
-                    // }
+                  // isLoading={
+                  //   isLoadingCreateConversationWithoutMessage ||
+                  //   isLoadingGetConversationByMembersEmails
+                  // }
                   />
                 )}
                 {user?.friends?.includes(currentUser?.id) && (
@@ -383,7 +383,7 @@ const Profile = ({ user }: ProfileProps) => {
                 p={2}
                 justify="start"
                 align={"center"}
-                // overflowX="hidden"
+              // overflowX="hidden"
               >
                 {badges.map((badge, index) => (
                   <Image

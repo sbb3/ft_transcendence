@@ -1,38 +1,41 @@
-// import { Body, Controller, Get, Param, Post , Logger, BadRequestException,} from '@nestjs/common';
-// import { user, Prisma } from '@prisma/client';
-// import { GameService } from './game.service';
+import { Body, Controller, Get, Param, Post, Logger, BadRequestException, } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
+import { GameService } from './game.service';
 
-// @Controller('game')
-// export class GameController {
-//   constructor(private readonly gameService: GameService) {}
+@Controller('game')
+export class GameController {
+	constructor(private readonly gameService: GameService) { }
+	// constructor(private gameService: GameService) {}
 
-//   private readonly logger = new Logger(Controller.name);
 
-//   @Get(':id')
-//   findOne(@Param('id') id: string) {
-//     return this.gameService.findOneById(id);
-//   }
+	private readonly logger = new Logger(Controller.name);
 
-//   @Get()
-//   findAll() {
-//     this.logger.log('\nfind all users\n');
-//     return this.gameService.findAllGames();
-//   }
 
-//   @Post(':id/:id_winer/:status')
-//   async updatGameEnd(@Param('id') gameId: number, @Param('id_winer') id_winer: number, @Param('status') status: string)
-//   {
-// 	try {
-// 		const game = await this.gameService.updatGameEnd(gameId, id_winer, status);
-// 		return game;
-// 	}
-// 	catch (error) {
-// 		throw new BadRequestException(error.message);
-// 	}
-//   }
+	@Get(':id')
+	findOne(@Param('id') id: string) {
+		return this.gameService.findOneById(id);
+	}
 
-// //   @Post()
-// //   async creat(@Body() body: Prisma.gameCreateInput) {
-// //     return this.gameService.create(body);
-// //   }
-// }
+	@Get()
+	findAll() {
+		this.logger.log('\nfind all users\n');
+		return this.gameService.findAllGames();
+	}
+
+	@Post()
+	updateUser(@Param('userid') userid: number, status: string) {
+		this.gameService.updateUserGameStatus(userid, status);
+	}
+
+
+	@Post()
+	updateUserWiner(@Param('userid') userid: number) {
+		this.gameService.updateUserIsWiner(userid);
+	}
+
+
+	@Post()
+	async creat(@Body() body: Prisma.gameCreateInput) {
+		return this.gameService.createGame(body);
+	}
+}

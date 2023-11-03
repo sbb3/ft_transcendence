@@ -135,7 +135,7 @@ const TwoFactorActivation = ({ isOpen, onToggle }) => {
           >
             <Flex justify="center" align="center" w="full">
               <Image
-                src="assets/svg/2fa_activation.svg"
+                src="/assets/svg/2fa_activation.svg"
                 alt="Two Factor Authentication Activation"
                 borderRadius={20}
                 w="320px"

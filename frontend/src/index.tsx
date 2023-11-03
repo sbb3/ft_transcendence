@@ -12,7 +12,6 @@ import ChannelContent from "src/pages/Chat/Channel/ChannelContent.tsx";
 import ChatSplashScreen from "src/pages/Chat/ChatSplashScreen.tsx";
 import PrefetchUsers from "src/components/PrefetchUsers.tsx";
 import GameLayout from "src/pages/Game/GameLayout.tsx";
-// import GameStarted from "src/pages/Game/GameStarted.tsx";
 import CheckOTP from "src/features/auth/CheckOTP.tsx";
 import AuthVerification from "src/features/auth/AuthVerification";
 import StayLoggedIn from "src/features/auth/StayLoggedIn.tsx";
@@ -32,7 +31,6 @@ export {
   Layout,
   PrefetchUsers,
   GameLayout,
-  // GameStarted,
   CheckOTP,
   AuthVerification,
   StayLoggedIn,

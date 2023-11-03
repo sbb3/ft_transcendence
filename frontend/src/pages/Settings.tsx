@@ -255,7 +255,7 @@ const Settings = () => {
       </Flex>
       <Box>
         <Image
-          src="assets/svg/account_settings.svg"
+          src="/assets/svg/account_settings.svg"
           alt="profile illustration"
           borderRadius={20}
         />

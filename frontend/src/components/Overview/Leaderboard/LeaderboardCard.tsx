@@ -33,10 +33,10 @@ const LeaderboardCard = ({ player }: LeaderboardCardProps) => {
         level == "1"
           ? "#FFCA28"
           : level == "2"
-          ? "#F4F4F4"
-          : level == "3"
-          ? "#FF8228"
-          : "rgba(255, 255, 255, 0.2)"
+            ? "#F4F4F4"
+            : level == "3"
+              ? "#FF8228"
+              : "rgba(255, 255, 255, 0.2)"
       }
       onClick={() => navigate(`/profile/${username}`)}
     >
@@ -50,7 +50,7 @@ const LeaderboardCard = ({ player }: LeaderboardCardProps) => {
         </Text>
       </Flex>
       <Image
-        src={"assets/svg/rank_icon.svg"}
+        src={"/assets/svg/rank_icon.svg"}
         alt="rankIcon"
         boxSize="1.5rem" // 1rem = 16px ,  1.5rem = 24px, 2 rem = 32px
       />
