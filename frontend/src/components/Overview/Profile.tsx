@@ -243,7 +243,7 @@ const Profile = ({ user }: ProfileProps) => {
             <Flex direction="row" gap="7px" align="center">
               <Image
                 src="assets/svg/username_pre_svg.svg"
-                alt="username pre svg"
+                alt=""
                 boxSize={5}
               />
               <Text fontSize="lg" fontWeight="medium">

@@ -336,7 +336,6 @@ const Conversations = () => {
           <DeleteConversationAlert
             conversationId={conversationIdToDelete}
             isOpen={isAlertDialogOpen}
-            onOpen={onOpenAlertDialog}
             onClose={onCloseAlertDialog}
             cancelRef={cancelRef}
           />

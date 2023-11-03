@@ -1,6 +1,6 @@
 import Overview from "./pages/Overview";
 import NotFoundPage from "./pages/NotFoundPage";
-// import Game from "./pages/Game/Game";
+import Game from "./pages/Game/Game";
 import Chat from "./pages/Chat/Chat";
 import Support from "./pages/Support";
 import Settings from "./pages/Settings";
@@ -20,7 +20,7 @@ import StayLoggedIn from "src/features/auth/StayLoggedIn.tsx";
 export {
   Overview,
   NotFoundPage,
-  // Game,
+  Game,
   Chat,
   Support,
   Settings,

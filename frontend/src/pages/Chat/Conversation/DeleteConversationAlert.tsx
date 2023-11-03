@@ -14,7 +14,6 @@ import { useDeleteConversationMutation } from "src/features/conversations/conver
 const DeleteConversationAlert = ({
   conversationId,
   isOpen,
-  onOpen,
   onClose,
   cancelRef,
 }) => {
