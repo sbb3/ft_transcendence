@@ -90,6 +90,7 @@ const Game = () => {
     dispatch(setMatchmakingLoading(false));
     setGameStarted(false);
     setGameData({});
+    socket?.current?.emit("cancelMatchmaking");
   }
 
   const handleGameEnded = () => {

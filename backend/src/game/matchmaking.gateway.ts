@@ -60,6 +60,12 @@ export class MatchmakingGateway
 	}
 
 
+	@SubscribeMessage('cancelMatchmaking')
+	cancelMatchmaking(client: Socket) {
+		console.log('cancel matchmaking');
+		this.first = false;
+		this.firstUserId = -1;
+	}
 
 
 	@SubscribeMessage('join_queue')

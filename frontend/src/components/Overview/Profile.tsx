@@ -112,6 +112,39 @@ const Profile = ({ user }: ProfileProps) => {
     }
   };
 
+
+  const handleSendGameChallengeNotification = async () => {
+    try {
+      const notification = {
+        id: uuidv4(),
+        type: "gameRequest",
+        senderId: currentUser?.id,
+        receiverId: participantUser?.id,
+      };
+      store.dispatch(
+        await notificationsApi.endpoints.sendNotification.initiate(notification)
+      );
+      toast({
+        title: "Game request sent",
+        description: "Game request sent successfully",
+        status: "success",
+        duration: 2000,
+        isClosable: true,
+      });
+      toggleProfileDrawer();
+    } catch (error: any) {
+      console.log("error: ", error);
+      toast({
+        title: "Error",
+        description: error?.data?.message || "Error happened",
+        status: "error",
+        duration: 2000,
+        isClosable: true,
+      });
+    }
+  };
+
+
   const handleSendFriendNotification = async () => {
     if (currentUser?.friends.includes(user?.id)) {
       toast({
@@ -252,20 +285,34 @@ const Profile = ({ user }: ProfileProps) => {
             </Flex>
             {currentUser?.id !== user?.id && (
               <Flex direction="row" gap="14px" align="center">
+                {
+                  user?.status === "online" && (
+                    <IconButton
+                      size="sm"
+                      fontSize="lg"
+                      bg={"pong_cl_primary"}
+                      color={"white"}
+                      borderRadius={8}
+                      aria-label="Send a message"
+                      icon={<FiMessageSquare />}
+                      _hover={{ bg: "white", color: "pong_cl_primary" }}
+                      onClick={handleSendDirectMessage}
+                      isLoading={
+                        isLoadingCreateConversationWithoutMessage ||
+                        isLoadingGetConversationByMembersEmails
+                      }
+                    />
+                  )}
                 <IconButton
                   size="sm"
                   fontSize="lg"
                   bg={"pong_cl_primary"}
                   color={"white"}
                   borderRadius={8}
-                  aria-label="Send a message"
-                  icon={<FiMessageSquare />}
+                  aria-label="Send game request"
+                  icon={<IoGameControllerOutline />}
                   _hover={{ bg: "white", color: "pong_cl_primary" }}
-                  onClick={handleSendDirectMessage}
-                  isLoading={
-                    isLoadingCreateConversationWithoutMessage ||
-                    isLoadingGetConversationByMembersEmails
-                  }
+                  onClick={handleSendGameChallengeNotification}
                 />
                 {!user?.friends?.includes(currentUser?.id) && (
                   <IconButton

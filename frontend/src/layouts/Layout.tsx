@@ -5,6 +5,8 @@ import Sidebar from "src/components/Sidebar";
 import { motion } from "framer-motion";
 import { useSelector } from "react-redux";
 import ProfileDetailsFormModal from "src/components/DetailsFormModal";
+import { useEffect } from "react";
+import { createSocketClient } from "src/app/socket/client";
 
 const MotionBox = motion(Box);
 
@@ -12,6 +14,23 @@ const Layout = () => {
   const currentUser = useSelector((state: any) => state?.user?.currentUser);
   const { onToggle } = useDisclosure();
 
+  useEffect(() => {
+    const socket = createSocketClient({
+      api_url: import.meta.env.VITE_SERVER_USER_SOCKET_URL as string,
+    });
+
+    socket.on("connect", () => {
+      socket.on("game_accepted", (data) => {
+        console.log("game_accepted", data);
+      }
+      );
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }
+    , []);
   return (
     <Flex
       w={{ base: "full", sm: "460px", md: 780, lg: 980, xl: 1250 }}
