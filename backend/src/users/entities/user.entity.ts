@@ -21,7 +21,8 @@ export class User implements Prisma.userCreateInput {
   avatar: string;
   campus: string;
   status: string;
-  game_wine: number;
+  WonGames: number;
+  LostGames: number;
   is_profile_completed?: boolean;
   is_otp_enabled?: boolean;
   is_otp_validated?: boolean;
@@ -39,7 +40,8 @@ export class User implements Prisma.userCreateInput {
     this.avatar = data.avatar;
     this.campus = data.campus;
     this.status = data.status;
-    this.game_wine = data.game_wine;
+    this.WonGames = data.WonGames;
+    this.LostGames = data.LostGames;
     this.is_profile_completed = data.is_profile_completed;
     this.is_otp_enabled = data.is_otp_enabled;
     this.is_otp_validated = data.is_otp_validated;

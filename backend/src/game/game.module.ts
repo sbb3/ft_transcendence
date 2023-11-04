@@ -5,7 +5,6 @@ import { UsersModule } from 'src/users/users.module';
 import { MatchmakingGateway } from './matchmaking.gateway';
 import { GameGateway } from './game.gateway';
 import { GameService } from './game.service';
-import { UsersService } from 'src/users/users.service';
 
 @Module({
 	controllers: [GameController],

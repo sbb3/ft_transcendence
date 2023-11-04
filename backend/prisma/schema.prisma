@@ -19,7 +19,8 @@ model user {
   avatar               String
   campus               String
   status               String
-  game_wine            Int?
+  WonGames            Int
+  LostGames            Int
   is_otp_enabled       Boolean  @default(false)
   is_profile_completed Boolean  @default(false)
   is_otp_validated     Boolean  @default(false)
@@ -31,8 +32,6 @@ model game {
   player_one_id  Int
   player_two_id Int
   id_winer Int
-  player_one_score Int
-  player_two_score Int
   status String
   createdAt   DateTime  @default(now())
 }

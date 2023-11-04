@@ -66,20 +66,33 @@ export class GameService extends PrismaClient {
 	}
 
 	async updateUserIsWiner(userId: number) {
-		const user = await this.userService.user.findUnique({
-			where: { id: userId },
-		});
-		if (!user) {
-			throw new NotFoundException(`User with id ${userId} not found`);
-		}
-		const user1 = await this.userService.user.update({
-			where: { id: userId },
-			data: {
-				game_wine: user.game_wine++,
+		console.log("QWEWQE");
+		const user1 = await this.user.update({
+			where: {
+				id: userId
 			},
+			data: {
+				WonGames: {
+					increment: 1
+				}
+			}
 		});
 
-		if (!user1) throw new NotFoundException();
+		return user1;
+	}
+
+
+	async updateUserIsLoser(userId: number) {
+		const user1 = await this.user.update({
+			where: {
+				id: userId
+			},
+			data: {
+				LostGames: {
+					increment: 1
+				}
+			}
+		});
 		return user1;
 	}
 

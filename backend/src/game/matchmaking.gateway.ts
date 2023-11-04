@@ -10,14 +10,12 @@ import {
 	WsResponse,
 } from '@nestjs/websockets';
 
-// import path from 'path';
+
 import { GameService } from './game.service';
 import { Server, Socket } from 'socket.io';
-// import { UsersService } from 'src/users/users.service';
-// import { Paddle, Ball, Gol, canvaState } from './game.interface';
-// import { getIdGame } from './game.update';
+
 import { PrismaClient } from '@prisma/client';
-// import { random } from 'lodash';
+
 
 @WebSocketGateway({
 	namespace: 'matchmaking',
@@ -29,7 +27,6 @@ import { PrismaClient } from '@prisma/client';
 @Injectable()
 export class MatchmakingGateway
 	implements OnGatewayInit, OnGatewayDisconnect, OnGatewayConnection {
-	// gameTable: { player_one_id: number; palyer_two_id: any; player_one_score: number; player_two_score: number; status: string; created_at: Date; };
 	constructor(
 		private readonly gameService: GameService,
 
@@ -67,68 +64,58 @@ export class MatchmakingGateway
 
 	@SubscribeMessage('join_queue')
 	async initMyPa(client: Socket, data) {
-		// console.log(`id of the game : ${game?.id}`);
 		console.log('id of the first user ', this.i);
 		console.log(`incoming data from frontend : ${client?.id}, ${JSON.stringify(data)}`);
-		if (data.gameType == 'bot') {
-			// TODO: handle game mode
+		if (data.gameType === "bot") {
+
 			this.wss.emit('start_game', {
-				data: {
-					id: this.id,
-					gameType: 'bot',
+				gameInfo: {
+					players: [data.userId],
+					gameType: data?.gameType,
 					mode: data?.gameMode,
 				},
 			});
+			console.log('bot game');
 			return;
 		}
-		console.log(`first : ${this.first}`);
+		else {
 
-		// && await this.gameService.getUserStatus(data.userId) == 'online'
+			console.log(`first : ${this.first}`);
 
-		// let randomNum = -1;
-		if (!this.first) {
-			// randomNum = random(0, 1000);
-			// this.room = 'room' + this.i;
-			this.firstUserId = data.userId;
-			// client.join(this.room);
-			this.first = true;
-			//get the status of the user from the database
+			if (!this.first) {
 
-		} else if (this.first) {
-			this.room = 'room' + this.i;
-			// client.join(this.room);
-			// const
-			console.log(`room name for client : ${this.room}`);
-			this.gameTable = {
-				player_one_id: this.firstUserId,
-				player_two_id: data.userId,
-				id_winer: -1,
-				player_one_score: 0,
-				player_two_score: 0,
-				status: 'playing',
-				createdAt: new Date(),
-			};
-			// console.log(this.game);
-			const game = await this.gameService.createGame(this.gameTable);
-			if (!game) {
-				console.log('errro game');
+				this.firstUserId = data.userId;
+				this.first = true;
+
+			} else if (this.first) {
+				this.room = 'room' + this.i;
+
+				console.log(`room name for client : ${this.room}`);
+				this.gameTable = {
+					player_one_id: this.firstUserId,
+					player_two_id: data.userId,
+					id_winer: -1,
+					status: 'playing',
+					createdAt: new Date(),
+				};
+
+				const game = await this.gameService.createGame(this.gameTable);
+				if (!game) {
+					console.log('errro game');
+				}
+
+				console.log("Room before joining" + this.room);
+				this.wss.emit('start_game', {
+					gameInfo: {
+						id: game?.id,
+						room: this.room,
+						players: [this.firstUserId, data.userId],
+					},
+				});
+				this.firstUserId = -1;
+				this.first = false;
+				this.i++;
 			}
-			//use updateUser from game.controller.ts
-			// this.gameService.updateUserGameStatus(data.id);
-			// this.gameService.updateUserGameStatus(this.firstUserId);
-
-			// }
-			console.log("Room before joining" + this.room);
-			this.wss.emit('start_game', {
-				gameInfo: {
-					id: game?.id,
-					room: this.room,
-					players: [this.firstUserId, data.userId],
-				},
-			});
-			this.firstUserId = -1;
-			this.first = false;
-			this.i++;
 		}
 	}
 }

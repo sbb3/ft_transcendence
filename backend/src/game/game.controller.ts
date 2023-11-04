@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Param, Post, Logger, BadRequestException, } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { user, Prisma } from '@prisma/client';
 import { GameService } from './game.service';
+import { UsersService } from 'src/users/users.service';
 
 @Controller('game')
 export class GameController {

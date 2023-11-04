@@ -35,7 +35,7 @@ const Game = () => {
   const socket = useRef<any>();
   const { matchmakingLoading } = useSelector((state: any) => state?.game);
   const [gameType, setGameType] = useState<"multiplayer" | "bot">("bot");
-  const [gameStarted, setGameStarted] = useState(true);
+  const [gameStarted, setGameStarted] = useState(false);
   const [gameData, setGameData] = useState<any>({});
 
 
@@ -193,8 +193,8 @@ const Game = () => {
         </Flex>
         <Stack
           justify="center"
-          align="center"
           zIndex={1}
+          align="center"
           pos="relative"
           w={"full"}
           h={"full"}
@@ -204,7 +204,7 @@ const Game = () => {
           backdropFilter={"blur(20px)"}
           // bgImage={`url('https://th.bing.com/th/id/OIG.70xG4FEh.BOmaKZtaYiG')`}
           // background="radial-gradient(circle at 50%, rgb(255, 197, 61) 0%, rgb(255, 94, 7) 100%)"
-          // bgImage={`url('/assets/img/game_bg_1.jpg')`}
+          bgImage={`url('/assets/img/game_bg_1.jpg')`}
           bgSize="cover"
           bgRepeat="no-repeat"
           bgPos={"center"}

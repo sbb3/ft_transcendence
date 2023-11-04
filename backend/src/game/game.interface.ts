@@ -15,7 +15,6 @@ export interface Ball {
 	velocityY: number;
 	score_my: number,
 	score_her: number,
-	angle: number;
 	color: string;
 }
 
@@ -29,13 +28,25 @@ export interface Room {
 	endGame: boolean;
 	id_game: number;
 	idFirstPlayer: string;
-	id_socket_first: any;
+	socket_first: any;
 	idSecondPlayer: string;
-	id_socket_second: any;
+	socket_second: any;
 	myPaddle: Paddle;
 	herPaddle: Paddle;
 	intervalId: any;
 	ball: Ball;
 	is_empty: boolean;
 	canvasState: canvaState;
+}
+
+export interface Boot {
+	mode: any;
+	idUser: string;
+	socket: any;
+	myPaddle: Paddle;
+	bootPaddle: Paddle;
+	ball: Ball;
+	canvasState: canvaState;
+	intervalId: any;
+	isDone: boolean;
 }
