@@ -24,24 +24,20 @@ import { useNavigate } from "react-router-dom";
 import { setMatchmakingLoading } from "src/features/game/gameSlice";
 import { Controller, useForm } from "react-hook-form";
 import { createSocketClient } from "src/app/socket/client";
-import BarLoader from "react-spinners/BeatLoader";
+import GridLoader from "react-spinners/GridLoader";
 import GameStarted from "./GameStarted";
-
-interface MatchmakingFormData {
-  gameMode: string;
-}
 
 const Game = () => {
   useTitle("Game");
-  const socket = useRef(null);
-
-  const dispatch = useDispatch();
   const currentUser = useSelector((state: any) => state?.user?.currentUser);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [gameType, setGameType] = useState<"multiplayer" | "bot">("bot");
+  const socket = useRef<any>();
   const { matchmakingLoading } = useSelector((state: any) => state?.game);
-  const [gameStarted, setGameStarted] = useState(false);
+  const [gameType, setGameType] = useState<"multiplayer" | "bot">("bot");
+  const [gameStarted, setGameStarted] = useState(true);
   const [gameData, setGameData] = useState<any>({});
+
 
   const {
     // register,
@@ -57,7 +53,6 @@ const Game = () => {
     });
 
     const startGameEvent = (data) => {
-      console.log("start_game: ", data);
       if (data.gameInfo.players?.includes(currentUser?.id)) {
         dispatch(setMatchmakingLoading(false));
         setGameStarted(true);
@@ -77,10 +72,7 @@ const Game = () => {
     };
   }, [navigate, dispatch, currentUser?.id]);
 
-  // const handleMatchmaking = async (data: MatchmakingFormData) => {
   const handleMatchmaking = async (data: any) => {
-    console.log("data : ", data);
-    console.log("gameType : ", gameType);
     dispatch(setMatchmakingLoading(true));
     socket?.current?.emit("join_queue", {
       userId: currentUser?.id,
@@ -93,6 +85,17 @@ const Game = () => {
     });
   };
 
+  const handleCancelMatchmaking = () => {
+    dispatch(setMatchmakingLoading(false));
+    setGameStarted(false);
+    setGameData({});
+  }
+
+  const handleGameEnded = () => {
+    setGameStarted(false);
+    setGameData({});
+  }
+
   let content;
 
   if (matchmakingLoading) {
@@ -103,8 +106,9 @@ const Game = () => {
           align="center"
           w={"full"}
           h={"full"}
+          spacing={{ base: 2, md: 4 }}
         >
-          <BarLoader color={"#fbbf13"} loading={true} size={20} />
+          <GridLoader color={"#fff"} loading={true} />
           <Text
             fontSize={{ base: "md", md: "lg" }}
             fontWeight="bold"
@@ -115,21 +119,101 @@ const Game = () => {
           >
             Finding an opponent
           </Text>
+          <Button
+            fontSize={{ base: "sm", sm: "md", md: "lg" }}
+            fontWeight="medium"
+            color="whiteAlpha.900"
+            textTransform={"uppercase"}
+            borderRadius={5}
+            colorScheme="orange"
+            onClick={handleCancelMatchmaking}
+          >
+            Cancel
+          </Button>
         </Stack>
       </>
     )
   }
   else if (gameStarted) {
     content = (
-      <Box
-        pos="relative"
-        w={"full"}
-        h={"full"}
-        bg="purple.500"
-        zIndex={1}
-      >
-        <GameStarted gameData={gameData} />
-      </Box>
+      <>
+        <Flex
+          justify="space-around"
+          align="center"
+          w={"full"}
+          borderRadius={15}
+          p={{ base: 1, md: 2 }}
+          background="radial-gradient(circle at 50%, rgb(255, 197, 61) 0%, rgb(255, 94, 7) 100%)"
+          boxShadow={"0px 4px 24px -1px rgba(0, 0, 0, 0.35)"}
+        >
+          <Stack
+            align={"center"}
+            justify={"center"}
+            spacing={{ base: 1, md: 2 }}
+          >
+            <Avatar
+              size={{ base: "md", md: "md" }}
+              // name={user?.name}
+              // src={user?.avatar}
+              borderWidth="1px"
+            />
+            <Text
+              fontSize={{ base: "md", md: "md" }}
+              fontWeight="bold"
+              color="whiteAlpha.900"
+              textTransform={"uppercase"}
+              textAlign={"center"}
+              letterSpacing={1}
+            >
+              sbb32
+            </Text>
+          </Stack>
+          <Stack
+            align={"center"}
+            justify={"center"}
+            spacing={{ base: 1, md: 2 }}
+          >
+            <Avatar
+              size={{ base: "md", md: "md" }}
+              // name={user?.name}
+              // src={user?.avatar}
+              borderWidth="1px"
+            />
+            <Text
+              fontSize={{ base: "md", md: "md" }}
+              fontWeight="bold"
+              color="whiteAlpha.900"
+              textTransform={"uppercase"}
+              textAlign={"center"}
+              letterSpacing={1}
+            >
+              lopez
+            </Text>
+          </Stack>
+        </Flex>
+        <Stack
+          justify="center"
+          align="center"
+          zIndex={1}
+          pos="relative"
+          w={"full"}
+          h={"full"}
+          borderRadius={15}
+          border="1px solid rgba(251, 102, 19, 0.1)"
+          boxShadow={"0px 4px 24px -1px rgba(0, 0, 0, 0.35)"}
+          backdropFilter={"blur(20px)"}
+          // bgImage={`url('https://th.bing.com/th/id/OIG.70xG4FEh.BOmaKZtaYiG')`}
+          // background="radial-gradient(circle at 50%, rgb(255, 197, 61) 0%, rgb(255, 94, 7) 100%)"
+          // bgImage={`url('/assets/img/game_bg_1.jpg')`}
+          bgSize="cover"
+          bgRepeat="no-repeat"
+          bgPos={"center"}
+          spacing={{ base: 2, md: 4 }}
+        >
+
+          <GameStarted gameData={gameData} handleGameEnded={handleGameEnded} />
+        </Stack>
+      </>
 
     );
   } else {
@@ -364,7 +448,7 @@ const Game = () => {
       align="center"
       p={gameStarted ? 0 : 2}
       borderRadius={26}
-      gap={{ base: 4, sm: 6, md: 8 }}
+      gap={{ base: 2, sm: 3, md: 4 }}
     >
       {content}
     </Flex>

@@ -441,7 +441,7 @@ const Profile = ({ user }: ProfileProps) => {
               </Text>
               <Avatar size="sm" name={user?.name} src={user?.avatar} />
               <Text fontSize="13px" fontWeight="regular" color="whiteAlpha.900">
-                {user?.name}
+                {user?.username}
               </Text>
             </Flex>
             <Text fontSize="13px" fontWeight="semibold" color="pong_cl_primary">

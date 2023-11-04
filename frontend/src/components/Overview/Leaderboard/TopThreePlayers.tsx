@@ -52,7 +52,7 @@ const TopThreePlayers = ({ top3Players }) => {
         </Avatar>
         <Flex direction="column" align="center" justify="center" gap={0}>
           <Text fontSize="12px" fontWeight="semibold" color="whiteAlpha.800">
-            {player2?.name || ""}
+            {player2?.username || ""}
           </Text>
           <Text fontSize="10px" fontWeight="light" color="whiteAlpha.600">
             {`Level ${player2?.level || 0}`}
@@ -62,7 +62,7 @@ const TopThreePlayers = ({ top3Players }) => {
       <Stack direction="column" spacing={4} align="center">
         <Avatar
           size="xl"
-          name={player1?.name}
+          name={player1?.username}
           src={player1?.avatar}
           borderColor={"#FFCA28"}
           borderWidth="4px"
@@ -104,7 +104,7 @@ const TopThreePlayers = ({ top3Players }) => {
       <Stack direction="column" spacing={4} align="center">
         <Avatar
           size="lg"
-          name={player3?.name}
+          name={player3?.username}
           src={player3?.avatar}
           borderColor={"#FF8228"}
           borderWidth="4px"
@@ -130,7 +130,7 @@ const TopThreePlayers = ({ top3Players }) => {
         </Avatar>
         <Flex direction="column" align="center" justify="center" gap={0}>
           <Text fontSize="12px" fontWeight="semibold" color="whiteAlpha.800">
-            {player3?.name || ""}
+            {player3?.username || ""}
           </Text>
           <Text fontSize="10px" fontWeight="light" color="whiteAlpha.600">
             {`Level ${player3?.level || 0}`}

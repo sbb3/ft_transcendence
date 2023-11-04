@@ -46,7 +46,7 @@ const LeaderboardCard = ({ player }: LeaderboardCardProps) => {
         </Text>
         <Avatar size="sm" name={name} src={avatar} />
         <Text fontSize="14px" fontWeight="medium" color="#312244">
-          {name}
+          {username}
         </Text>
       </Flex>
       <Image

@@ -1,4 +1,4 @@
-import { Flex } from "@chakra-ui/react";
+import { Button, Flex, Image } from "@chakra-ui/react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useTitle from "src/hooks/useTitle";
@@ -8,8 +8,9 @@ import { draw, } from "./DrawUtils";
 import { useSelector } from "react-redux";
 import { useToast } from "@chakra-ui/react";
 
-const GameStarted = ({ gameData = {} }) => {
+const GameStarted = ({ gameData = {}, handleGameEnded }) => {
   useTitle("Game");
+  const [gameResult, setGameResult] = useState<string>("Lose");
   const toast = useToast();
   const navigate = useNavigate();
   const currentUser = useSelector((state: any) => state?.user?.currentUser);
@@ -36,6 +37,7 @@ const GameStarted = ({ gameData = {} }) => {
     //   game_id: gameData?.id,
     // });
     if (id === currentUser?.id) {
+      setGameResult("Win");
       toast({
         title: "You win",
         status: "success",
@@ -43,6 +45,7 @@ const GameStarted = ({ gameData = {} }) => {
         isClosable: true,
       });
     } else {
+      setGameResult("Lose");
       toast({
         title: "You lose",
         description: "You lose",
@@ -51,12 +54,8 @@ const GameStarted = ({ gameData = {} }) => {
         isClosable: true,
       });
     }
+    // handleGameEnded();
     socket?.close();
-    // setTimeout(() => {
-    navigate("/game", {
-      replace: true,
-    })
-    // } , 300);
   };
 
   const mvPaddleEvent = (paddle: Paddle) => {
@@ -79,12 +78,7 @@ const GameStarted = ({ gameData = {} }) => {
         duration: 9000,
         isClosable: true,
       });
-      // socket?.close();
-      // setTimeout(() => {
-      navigate("/game", {
-        replace: true,
-      })
-      // } , 300);
+      setGameResult("Win");
     }
 
     newsocket?.on("befforTime", beforeTimeEvent);
@@ -167,7 +161,7 @@ const GameStarted = ({ gameData = {} }) => {
 
 
   const eventPaddel = (event) => {
-    let rect = canvasRef.current.getBoundingClientRect();
+    const rect = canvasRef.current.getBoundingClientRect();
     const num = event.clientY - rect.top;
     setBool(false);
 
@@ -177,7 +171,7 @@ const GameStarted = ({ gameData = {} }) => {
       room: gameData?.room,
       id: currentUser?.id,
     });
-    console.log("Mv paddle here");
+    // console.log("Mv paddle here");
     socket?.on("mvPaddle", mvPaddleEvent);
   }
 
@@ -223,15 +217,64 @@ const GameStarted = ({ gameData = {} }) => {
 
 
 
+  let content;
+
+  if (gameResult === "Win") {
+    content = (
+      <>
+        <Image
+          src="/assets/img/winner.webp"
+          alt="You Win"
+        />
+
+        <Button
+          fontSize={{ base: "sm", sm: "md", md: "lg" }}
+          fontWeight="medium"
+          color="whiteAlpha.900"
+          textTransform={"uppercase"}
+          borderRadius={5}
+          colorScheme="orange"
+          onClick={handleGameEnded}
+        >
+          Play again
+        </Button>
+      </>
+    );
+  } else if (gameResult === "Lose") {
+    content = (
+      <>
+        <Image
+          src="/assets/img/gameover.webp"
+          alt="You Lost"
+          w="150px"
+          h="150px"
+        />
+        <Button
+          fontSize={{ base: "sm", sm: "md", md: "lg" }}
+          fontWeight="medium"
+          color="whiteAlpha.900"
+          textTransform={"uppercase"}
+          borderRadius={5}
+          colorScheme="orange"
+          onClick={handleGameEnded}
+        >
+          Play again
+        </Button>
+      </>
+    );
+  }
 
 
   return (
-    <canvas
-      ref={canvasRef}
-      width={600}
-      height={400}
+    <>
+      {content}
+      <canvas
+        ref={canvasRef}
+        width={600}
+        height={400}
 
-    />
+      />
+    </>
   );
 };
 

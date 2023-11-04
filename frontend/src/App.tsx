@@ -60,7 +60,7 @@ function App() {
 export default App;
 
 // TODO: recent games, player rank ...
-// TODO: set port 80 on the backend .env, set canvas back
+// TODO: set port 80 on the backend .env, set canvas back, npm run build for nestjs
 /*
 
 <Flex

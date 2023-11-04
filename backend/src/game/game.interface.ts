@@ -15,6 +15,7 @@ export interface Ball {
 	velocityY: number;
 	score_my: number,
 	score_her: number,
+	angle: number;
 	color: string;
 }
 
