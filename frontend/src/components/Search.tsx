@@ -46,7 +46,8 @@ const Search = () => {
   }
 
   return (
-    <Flex direction="row" align="center" justify="center">
+    <Flex direction="row" align="center" justify="center"
+    >
       <AutoComplete
         isLoading={isLoading || isFetching}
         openOnFocus

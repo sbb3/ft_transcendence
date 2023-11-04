@@ -24,7 +24,7 @@ const Header = () => {
       bgImage={`url('assets/img/BlackNoise.webp')`}
       bgSize="cover"
       bgRepeat="no-repeat"
-      zIndex={1}
+      zIndex={2}
     >
       <Search />
       <Flex direction="row" gap={3} ml={10}>

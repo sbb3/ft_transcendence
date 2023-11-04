@@ -8,9 +8,6 @@ import { draw, } from "./DrawUtils";
 import { useSelector } from "react-redux";
 import { useToast } from "@chakra-ui/react";
 
-// import { useHistory } from 'react-router-dom';
-
-
 const GameStarted = ({ gameData = {} }) => {
   useTitle("Game");
   const toast = useToast();
@@ -92,6 +89,7 @@ const GameStarted = ({ gameData = {} }) => {
 
     newsocket?.on("befforTime", beforeTimeEvent);
     // newsocket?.on("mvPaddle", mvPaddleEvent);
+
 
     return () => {
       if (canvasRef?.current)
@@ -185,7 +183,9 @@ const GameStarted = ({ gameData = {} }) => {
 
 
   useEffect(() => {
+
     if (canvasRef.current && bool) {
+
       canvasRef.current.addEventListener("mousemove", eventPaddel);
     }
 
@@ -228,11 +228,9 @@ const GameStarted = ({ gameData = {} }) => {
   return (
     <canvas
       ref={canvasRef}
-      width="600"
-      height="400"
-    // onClick={(e) => {
-    //   alert("player stop the game");
-    // }}
+      width={600}
+      height={400}
+
     />
   );
 };
