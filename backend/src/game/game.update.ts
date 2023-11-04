@@ -83,8 +83,8 @@ export function update(ball: Ball, canva: canvaState, myp: Paddle, herp: Paddle,
 		let angl = center * (Math.PI / 3);
 		if (angl > Math.PI / 3)
 			angl = Math.PI / 3;
-		ball.velocityX = (2 * Math.cos(angl)) * -1;
-		ball.velocityY = (2 * Math.sin(angl)) * -1;
+		ball.velocityX = (ball.speed * Math.cos(angl)) * -1;
+		ball.velocityY = (ball.speed * Math.sin(angl)) * -1;
 		// console.log('colision  her');
 		// ball.velocityX = -0.5;
 		if (mode === "normal")
@@ -101,14 +101,15 @@ export function update(ball: Ball, canva: canvaState, myp: Paddle, herp: Paddle,
 	else if ((player == myp) && (ball.x - ball.radius < player.x + player.widthe)) {
 		let center = ((ball.y - (player.y + player.height / 2)) / (player.height / 2));
 		let angl = center * (Math.PI / 3);
-		ball.velocityX = (2 * Math.cos(angl));
-		ball.velocityY = (2 * Math.sin(angl));
+		ball.velocityX = (ball.speed * Math.cos(angl));
+		ball.velocityY = (ball.speed * Math.sin(angl));
 		// ball.velocityX *= -0.5;
 		// console.log('colision  my');
 
 		if (mode === "normal")
 			ball.speed += 1;
 		else if (mode === "hard") {
+			console.log("harddddddddddddddddddddddddddd");
 			ball.speed += 1;
 			myp.height -= 5;
 			if (myp.height < 30)

@@ -71,7 +71,7 @@ export class MatchmakingGateway
 			this.wss.emit('start_game', {
 				gameInfo: {
 					players: [data.userId],
-					gameType: data?.gameType,
+					// gameType: "Bot",
 					mode: data?.gameMode,
 				},
 			});

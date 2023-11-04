@@ -73,6 +73,7 @@ const Game = () => {
   }, [navigate, dispatch, currentUser?.id]);
 
   const handleMatchmaking = async (data: any) => {
+    console.log("data: ", data);
     dispatch(setMatchmakingLoading(true));
     socket?.current?.emit("join_queue", {
       userId: currentUser?.id,
@@ -81,7 +82,7 @@ const Game = () => {
       socketId: socket?.current?.id,
     });
     reset({
-      gameMode: "normal",
+      gameMode: "easy",
     });
   };
 
@@ -137,82 +138,7 @@ const Game = () => {
   else if (gameStarted) {
     content = (
       <>
-        <Flex
-          justify="space-around"
-          align="center"
-          w={"full"}
-          borderRadius={15}
-          p={{ base: 1, md: 2 }}
-          background="radial-gradient(circle at 50%, rgb(255, 197, 61) 0%, rgb(255, 94, 7) 100%)"
-          boxShadow={"0px 4px 24px -1px rgba(0, 0, 0, 0.35)"}
-        >
-          <Stack
-            align={"center"}
-            justify={"center"}
-            spacing={{ base: 1, md: 2 }}
-          >
-            <Avatar
-              size={{ base: "md", md: "md" }}
-              // name={user?.name}
-              // src={user?.avatar}
-              borderWidth="1px"
-            />
-            <Text
-              fontSize={{ base: "md", md: "md" }}
-              fontWeight="bold"
-              color="whiteAlpha.900"
-              textTransform={"uppercase"}
-              textAlign={"center"}
-              letterSpacing={1}
-            >
-              sbb32
-            </Text>
-          </Stack>
-          <Stack
-            align={"center"}
-            justify={"center"}
-            spacing={{ base: 1, md: 2 }}
-          >
-            <Avatar
-              size={{ base: "md", md: "md" }}
-              // name={user?.name}
-              // src={user?.avatar}
-              borderWidth="1px"
-            />
-            <Text
-              fontSize={{ base: "md", md: "md" }}
-              fontWeight="bold"
-              color="whiteAlpha.900"
-              textTransform={"uppercase"}
-              textAlign={"center"}
-              letterSpacing={1}
-            >
-              lopez
-            </Text>
-          </Stack>
-        </Flex>
-        <Stack
-          justify="center"
-          zIndex={1}
-          align="center"
-          pos="relative"
-          w={"full"}
-          h={"full"}
-          borderRadius={15}
-          border="1px solid rgba(251, 102, 19, 0.1)"
-          boxShadow={"0px 4px 24px -1px rgba(0, 0, 0, 0.35)"}
-          backdropFilter={"blur(20px)"}
-          // bgImage={`url('https://th.bing.com/th/id/OIG.70xG4FEh.BOmaKZtaYiG')`}
-          // background="radial-gradient(circle at 50%, rgb(255, 197, 61) 0%, rgb(255, 94, 7) 100%)"
-          bgImage={`url('/assets/img/game_bg_1.jpg')`}
-          bgSize="cover"
-          bgRepeat="no-repeat"
-          bgPos={"center"}
-          spacing={{ base: 2, md: 4 }}
-        >
-
-          <GameStarted gameData={gameData} handleGameEnded={handleGameEnded} />
-        </Stack>
+        <GameStarted gameData={gameData} handleGameEnded={handleGameEnded} />
       </>
 
     );
@@ -307,7 +233,7 @@ const Game = () => {
                 <Controller
                   name="gameMode"
                   control={control}
-                  defaultValue="normal"
+                  defaultValue="easy"
                   render={({ field }) => (
                     <RadioGroup
                       {...field}
@@ -322,6 +248,17 @@ const Game = () => {
                         spacing={4}
                         m={0}
                       >
+                        <Radio colorScheme={"orange"} value="easy">
+                          <Text
+                            fontSize={{ base: "sm", sm: "md", md: "lg" }}
+                            fontWeight="medium"
+                            color="whiteAlpha.800"
+                            textAlign={"center"}
+                          >
+                            Easy
+                          </Text>
+                        </Radio>
+
                         <Radio colorScheme={"orange"} value="normal">
                           <Text
                             fontSize={{ base: "sm", sm: "md", md: "lg" }}
@@ -330,17 +267,6 @@ const Game = () => {
                             textAlign={"center"}
                           >
                             Normal
-                          </Text>
-                        </Radio>
-
-                        <Radio colorScheme={"orange"} value="medium">
-                          <Text
-                            fontSize={{ base: "sm", sm: "md", md: "lg" }}
-                            fontWeight="medium"
-                            color="whiteAlpha.800"
-                            textAlign={"center"}
-                          >
-                            Medium
                           </Text>
                         </Radio>
                         <Radio colorScheme={"orange"} value="hard">

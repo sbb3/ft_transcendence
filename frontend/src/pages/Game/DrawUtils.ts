@@ -61,21 +61,17 @@ export function drawLine(ctx, a, b, c, d, e, f, color) {
 export function draw(canvas, ball, mPaddle, hPaddle, canvaS) {
 
 
-	let ctx = canvas.current.getContext("2d");
-	if (!ctx) {
-		console.log("ctx", ctx);
-		return;
-	}
+	const ctx = canvas.current.getContext("2d");
+	if (!ctx) return;
 	ctx.clearRect(0, 0, 600, 400);
-
+	// console.log("balllllllllllllllllllllllll", ball);
 
 	drawCircle(ctx, ball);
 	drawRect(ctx, mPaddle);
 	drawRect(ctx, hPaddle);
 
 	drawLine(ctx, 4, 8, canvaS?.width / 2, 0, 0, 576, "white");
-
-	drawtext(ctx, ball?.score_my, canvaS?.width / 4, canvaS?.height / 5, "white");
+	drawtext(ctx, ball?.score_my.toString(), canvaS?.width / 4, canvaS?.height / 5, "white");
 	drawtext(ctx, ball?.score_her, (3 * canvaS?.width) / 4, canvaS?.height / 5, "white");
 
 }

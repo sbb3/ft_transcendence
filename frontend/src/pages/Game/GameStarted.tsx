@@ -1,4 +1,4 @@
-import { Button, Image } from "@chakra-ui/react";
+import { Avatar, Button, Flex, Image, Stack, Text } from "@chakra-ui/react";
 import { useEffect, useRef, useState } from "react";
 import useTitle from "src/hooks/useTitle";
 import { Ball, Paddle, canvaState } from "./interfaces";
@@ -50,6 +50,7 @@ const GameStarted = ({ gameData = {}, handleGameEnded }) => {
   };
 
   const mvPaddleEvent = (paddle: Paddle) => {
+    // console.log("I just emitted a mvBootPaddle event loooopeeez");
     if (paddle.x === 0)
       setMPaddle(paddle);
     else
@@ -62,18 +63,8 @@ const GameStarted = ({ gameData = {}, handleGameEnded }) => {
     });
 
     setSocket(newsocket);
-    const beforeTimeEvent = () => {
-      toast({
-        title: "Your opponent left the game",
-        status: "error",
-        duration: 9000,
-        isClosable: true,
-      });
-      setGameResult("Win");
-    }
-
     // newsocket?.on("befforTime", beforeTimeEvent);
-    // newsocket?.on("mvPaddle", mvPaddleEvent);
+    newsocket?.on("mvPaddle", mvPaddleEvent);
 
 
     return () => {
@@ -115,8 +106,12 @@ const GameStarted = ({ gameData = {}, handleGameEnded }) => {
         room: gameData?.room,
         player_id: currentUser?.id,
         game_id: gameData?.id,
+        mode: gameData?.mode,
       });
       socket?.on("mvBall", mvBallEvent);
+      socket?.on("mvBootPaddle", (paddle: Paddle) => {
+        setHPaddle(paddle);
+      });
       socket?.on("gameOver", gameOverEvent);
     }
     draw(canvasRef, ball, mPaddle, hPaddle, canvaS);
@@ -128,11 +123,11 @@ const GameStarted = ({ gameData = {}, handleGameEnded }) => {
     const num = event.clientY - rect.top;
     setBool(false);
 
-    console.log("I just emitted a mvPAddle event");
-    console.log("Socket : " + socket);
+    // console.log("I just emitted a mvPAddle event");
+    // console.log("Socket : " + socket);
     socket?.emit("mvPaddle", {
       num: num,
-      room: location.state.game.room,
+      room: gameData.room,
       id: currentUser?.id,
     });
     socket?.on("mvPaddle", (paddle: Paddle) => {
@@ -197,14 +192,90 @@ const GameStarted = ({ gameData = {}, handleGameEnded }) => {
 
   return (
     <>
-      {content}
-      <canvas
-        ref={canvasRef}
-        width={600}
-        height={400}
+      <Flex
+        justify="space-around"
+        align="center"
+        w={"full"}
+        borderRadius={15}
+        p={{ base: 1, md: 2 }}
+        background="radial-gradient(circle at 50%, rgb(255, 197, 61) 0%, rgb(255, 94, 7) 100%)"
+        boxShadow={"0px 4px 24px -1px rgba(0, 0, 0, 0.35)"}
+      >
+        <Stack
+          align={"center"}
+          justify={"center"}
+          spacing={{ base: 1, md: 2 }}
+        >
+          <Avatar
+            size={{ base: "md", md: "md" }}
+            // name={user?.name}
+            // src={user?.avatar}
+            borderWidth="1px"
+          />
+          <Text
+            fontSize={{ base: "md", md: "md" }}
+            fontWeight="bold"
+            color="whiteAlpha.900"
+            textTransform={"uppercase"}
+            textAlign={"center"}
+            letterSpacing={1}
+          >
+            {currentUser?.name}
+          </Text>
+        </Stack>
+        <Stack
+          align={"center"}
+          justify={"center"}
+          spacing={{ base: 1, md: 2 }}
+        >
+          <Avatar
+            size={{ base: "md", md: "md" }}
+            // name={user?.name}
+            // src={user?.avatar}
+            borderWidth="1px"
+          />
+          <Text
+            fontSize={{ base: "md", md: "md" }}
+            fontWeight="bold"
+            color="whiteAlpha.900"
+            textTransform={"uppercase"}
+            textAlign={"center"}
+            letterSpacing={1}
+          >
+            lopez
+          </Text>
+        </Stack>
+      </Flex>
+      <Stack
+        justify="center"
+        zIndex={1}
+        align="center"
+        pos="relative"
+        w={"full"}
+        h={"full"}
+        borderRadius={15}
+        border="1px solid rgba(251, 102, 19, 0.1)"
+        boxShadow={"0px 4px 24px -1px rgba(0, 0, 0, 0.35)"}
+        backdropFilter={"blur(20px)"}
+        // bgImage={`url('https://th.bing.com/th/id/OIG.70xG4FEh.BOmaKZtaYiG')`}
+        // background="radial-gradient(circle at 50%, rgb(255, 197, 61) 0%, rgb(255, 94, 7) 100%)"
+        // bgImage={`url('/assets/img/game_bg_1.jpg')`}
+        bgSize="cover"
+        bgRepeat="no-repeat"
+        bgPos={"center"}
+        spacing={{ base: 2, md: 4 }}
+      >
 
-      />
+        {content}
+        <canvas
+          ref={canvasRef}
+          width={600}
+          height={400}
+
+        />
+      </Stack>
     </>
+
   );
 };
 
