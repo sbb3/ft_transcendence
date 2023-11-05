@@ -16,6 +16,11 @@ const ConversationMessage = ({
       justify="start"
       borderRadius={6}
       p={1}
+      filter={
+        currentUser?.blocked?.includes(message?.sender)
+          ? "blur(6px)"
+          : "none"
+      }
     >
       {message?.sender !== currentUser?.id && (
         <Avatar

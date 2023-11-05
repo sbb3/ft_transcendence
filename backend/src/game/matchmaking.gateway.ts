@@ -70,19 +70,22 @@ export class MatchmakingGateway
 	@SubscribeMessage('accept_game_challenge')
 	async acceptGameChallenge(client: Socket, data) {
 		console.log("accept game challenge in the backend")
+		if (this.gameService.getUserStatus(data.challengedUserId) === "playing" || this.gameService.getUserStatus(data.challengerUserId) === "playing")
+			return;
 		this.room = 'room' + this.i;
 		this.i++;
 
 		console.log(`room name for client : ${this.room}`);
 		console.log("data : ", data)
+		const user1 = await this.gameService.getUserById(data.challengerUserId);
+		const user2 = await this.gameService.getUserById(data.challengedUserId);
 		const game = await this.gameService.createGame({
-			player_one_id: data.challengedUserId,
-			player_two_id: data.challengerUserId,
+			player_one_id: data.challengerUserId,
+			player_two_id: data.challengedUserId,
 			id_winer: -1,
 			status: 'playing',
 			createdAt: new Date(),
 		});
-		console.log('players ids : ', data.challengedUserId, data.challengerUserId)
 		if (!game) {
 			console.log('errro game');
 		}
@@ -91,7 +94,9 @@ export class MatchmakingGateway
 			gameInfo: {
 				id: game?.id,
 				room: this.room,
-				players: [data.challengedUserId, data.challengerUserId],
+				players: [user1, user2],
+				gameMode: "Multiplayer",
+
 			},
 		});
 	}
@@ -99,15 +104,18 @@ export class MatchmakingGateway
 
 	@SubscribeMessage('join_queue')
 	async initMyPa(client: Socket, data) {
+		if (this.gameService.getUserStatus(data.userId) === "playing")
+			return;
 		console.log('id of the first user ', this.i);
 		console.log(`incoming data from frontend : ${client?.id}, ${JSON.stringify(data)}`);
 		if (data.gameType === "bot") {
-
+			const user1 = await this.gameService.getUserById(data.userId);
 			this.wss.emit('start_game', {
 				gameInfo: {
-					players: [data.userId],
+					players: [user1],
 					// gameType: "Bot",
 					mode: data?.gameMode,
+					gameMode: "Bot",
 				},
 			});
 			console.log('bot game');
@@ -138,13 +146,15 @@ export class MatchmakingGateway
 				if (!game) {
 					console.log('errro game');
 				}
-
-				console.log("Room before joining" + this.room);
+				const user1 = await this.gameService.getUserById(this.firstUserId);
+				const user2 = await this.gameService.getUserById(data.userId);
 				this.wss.emit('start_game', {
 					gameInfo: {
 						id: game?.id,
 						room: this.room,
-						players: [this.firstUserId, data.userId],
+						players: [user1, user2],
+						gameMode: "Multiplayer",
+
 					},
 				});
 				this.firstUserId = -1;

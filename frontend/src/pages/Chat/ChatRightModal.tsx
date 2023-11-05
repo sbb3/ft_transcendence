@@ -394,17 +394,22 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleProfileDrawer }) => {
               onClick={handleSendFriendNotification}
             />
           )}
-          <IconButton
-            size="sm"
-            fontSize="lg"
-            bg={"pong_cl_primary"}
-            color={"white"}
-            borderRadius={8}
-            aria-label="Send game request"
-            icon={<IoGameControllerOutline />}
-            _hover={{ bg: "white", color: "pong_cl_primary" }}
-            onClick={handleSendGameChallengeNotification}
-          />
+          {
+            !currentUser?.blocked.includes(participantUser?.id) &&
+            (
+              <IconButton
+                size="sm"
+                fontSize="lg"
+                bg={"pong_cl_primary"}
+                color={"white"}
+                borderRadius={8}
+                aria-label="Send game request"
+                icon={<IoGameControllerOutline />}
+                _hover={{ bg: "white", color: "pong_cl_primary" }}
+                onClick={handleSendGameChallengeNotification}
+              />
+            )
+          }
           {currentUser?.blocked.includes(participantUser?.id) ? (
             <IconButton
               size="sm"
@@ -450,7 +455,7 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleProfileDrawer }) => {
               </Text>
               <Link
                 as={RouterLink}
-                to={`https://profile.intra.42.fr/users/${participantUser?.username}`}
+                to={`https://profile.intra.42.fr/users/${participantUser?.originalUsername}`}
                 isExternal
                 fontSize="12px"
                 fontWeight="medium"

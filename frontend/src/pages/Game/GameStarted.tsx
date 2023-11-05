@@ -23,6 +23,8 @@ const GameStarted = ({ gameData = {}, handleGameEnded }) => {
   const [hPaddle, setHPaddle] = useState<Paddle>();
   const [ball, setBall] = useState<Ball>();
   const [canvaS, setCanvaS] = useState<canvaState>();
+  const [currentUserScore, setCurrentUserScore] = useState<number>(0);
+  const [opponentScore, setOpponentScore] = useState<number>(0);
 
   const mvBallEvent = (bl: Ball) => {
     setBall(bl);
@@ -116,6 +118,8 @@ const GameStarted = ({ gameData = {}, handleGameEnded }) => {
       });
       socket?.on("gameOver", gameOverEvent);
     }
+    setCurrentUserScore(ball?.score_my);
+    setOpponentScore(ball?.score_her);
     draw(canvasRef, ball, mPaddle, hPaddle, canvaS);
   }, [socket, ball, mPaddle, hPaddle, canvaS, int]);
 
@@ -162,7 +166,7 @@ const GameStarted = ({ gameData = {}, handleGameEnded }) => {
           borderRadius={5}
           colorScheme="orange"
           onClick={() => {
-            store.dispatch(setGameEnded({}));
+            store.dispatch(setGameEnded());
           }}
         >
           Play again
@@ -197,58 +201,91 @@ const GameStarted = ({ gameData = {}, handleGameEnded }) => {
   return (
     <>
       <Flex
-        justify="space-around"
+        direction={"column"}
         align="center"
+        justify="center"
         w={"full"}
         borderRadius={15}
-        p={{ base: 1, md: 2 }}
+        p={{ base: 1, md: 1 }}
         background="radial-gradient(circle at 50%, rgb(255, 197, 61) 0%, rgb(255, 94, 7) 100%)"
         boxShadow={"0px 4px 24px -1px rgba(0, 0, 0, 0.35)"}
+        gap={0}
+
       >
-        <Stack
-          align={"center"}
-          justify={"center"}
-          spacing={{ base: 1, md: 2 }}
+        <Flex
+          align="center"
+          justify="space-around"
+          w={"full"}
+
         >
-          <Avatar
-            size={{ base: "md", md: "md" }}
-            // name={user?.name}
-            // src={user?.avatar}
-            borderWidth="1px"
-          />
+          <Stack
+            direction={{ base: "column", md: "row" }}
+            align={"center"}
+            justify={"center"}
+            spacing={{ base: 1, md: 2 }}
+          >
+            <Avatar
+              size={{ base: "md", md: "lg" }}
+              name={gameData?.gameMode === "Bot" ? currentUser?.username : gameData?.players[0]?.username}
+              src={gameData?.gameMode === "Bot" ? currentUser?.avatar : gameData?.players[0]?.avatar}
+              borderWidth="1px"
+            />
+            <Text
+              fontSize={{ base: "md", md: "md" }}
+              fontWeight="bold"
+              color="whiteAlpha.900"
+              textTransform={"uppercase"}
+              textAlign={"center"}
+              letterSpacing={1}
+              maxW="100px"
+              isTruncated
+            >
+              {gameData?.gameMode === "Bot" ? currentUser?.username : gameData?.players[0]?.username}
+            </Text>
+          </Stack>
+          <Stack
+            direction={{ base: "column", md: "row" }}
+            align={"center"}
+            justify={"center"}
+            spacing={{ base: 1, md: 2 }}
+
+          >
+            <Avatar
+              size={{ base: "md", md: "lg" }}
+              name={gameData?.gameMode === "Bot" ? "Bot" : gameData?.players[1]?.username}
+              src={gameData?.gameMode === "Bot" ? "/assets/img/bot_avatar.webp" : gameData?.players[1]?.avatar}
+              borderWidth="1px"
+            />
+            <Text
+              fontSize={{ base: "md", md: "md" }}
+              fontWeight="bold"
+              color="whiteAlpha.900"
+              textTransform={"uppercase"}
+              textAlign={"center"}
+              letterSpacing={1}
+            >
+              {gameData?.gameMode === "Bot" ? "Bot" : gameData?.players[1]?.username}
+            </Text>
+          </Stack>
+        </Flex>
+        <Flex
+          justify="center"
+          align="center"
+          wrap="wrap"
+        >
           <Text
-            fontSize={{ base: "md", md: "md" }}
+            fontSize={{ base: "xl", md: "3xl", lg: "4xl" }}
             fontWeight="bold"
             color="whiteAlpha.900"
             textTransform={"uppercase"}
             textAlign={"center"}
             letterSpacing={1}
+
           >
-            {currentUser?.name}
+            {currentUserScore} - {opponentScore}
           </Text>
-        </Stack>
-        <Stack
-          align={"center"}
-          justify={"center"}
-          spacing={{ base: 1, md: 2 }}
-        >
-          <Avatar
-            size={{ base: "md", md: "md" }}
-            // name={user?.name}
-            // src={user?.avatar}
-            borderWidth="1px"
-          />
-          <Text
-            fontSize={{ base: "md", md: "md" }}
-            fontWeight="bold"
-            color="whiteAlpha.900"
-            textTransform={"uppercase"}
-            textAlign={"center"}
-            letterSpacing={1}
-          >
-            lopez
-          </Text>
-        </Stack>
+        </Flex>
+
       </Flex>
       <Stack
         justify="center"
@@ -263,7 +300,7 @@ const GameStarted = ({ gameData = {}, handleGameEnded }) => {
         backdropFilter={"blur(20px)"}
         // bgImage={`url('https://th.bing.com/th/id/OIG.70xG4FEh.BOmaKZtaYiG')`}
         // background="radial-gradient(circle at 50%, rgb(255, 197, 61) 0%, rgb(255, 94, 7) 100%)"
-        // bgImage={`url('/assets/img/game_bg_1.jpg')`}
+        bgImage={`url('/assets/img/game_bg_1.jpg')`}
         bgSize="cover"
         bgRepeat="no-repeat"
         bgPos={"center"}

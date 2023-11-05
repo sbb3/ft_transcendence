@@ -64,6 +64,7 @@ export class AuthService extends PrismaClient {
     if (!dbUser) {
       user.WonGames = 0;
       user.LostGames = 0;
+      user.originalUsername = user.username;
     }
     return !dbUser
       ? await this.user.create({

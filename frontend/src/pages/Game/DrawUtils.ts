@@ -71,7 +71,5 @@ export function draw(canvas, ball, mPaddle, hPaddle, canvaS) {
 	drawRect(ctx, hPaddle);
 
 	drawLine(ctx, 4, 8, canvaS?.width / 2, 0, 0, 576, "white");
-	drawtext(ctx, ball?.score_my.toString(), canvaS?.width / 4, canvaS?.height / 5, "white");
-	drawtext(ctx, ball?.score_her, (3 * canvaS?.width) / 4, canvaS?.height / 5, "white");
 
 }

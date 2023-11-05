@@ -111,6 +111,16 @@ export class GameService extends PrismaClient {
 		return user.status;
 	}
 
+	async getUserById(userId: number) {
+		const user = await this.userService.user.findUnique({
+			where: { id: userId },
+		});
+		if (!user) {
+			throw new NotFoundException(`User with id ${userId} not found`);
+		}
+		return user;
+	}
+
 
 
 

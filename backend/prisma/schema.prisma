@@ -15,6 +15,7 @@ model user {
   blocked     Int[]
   email                String   @unique
   username             String   @unique
+  originalUsername String
   name                 String
   avatar               String
   campus               String

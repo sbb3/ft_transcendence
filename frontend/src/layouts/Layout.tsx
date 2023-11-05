@@ -8,7 +8,7 @@ import ProfileDetailsFormModal from "src/components/DetailsFormModal";
 import { useEffect } from "react";
 import { createSocketClient } from "src/app/socket/client";
 import store from "src/app/store";
-import { setGameData, setGameEnded, setGameStarted, setMatchmakingLoading } from "src/features/game/gameSlice";
+import { setGameData, setGameEnded, setGameStarted } from "src/features/game/gameSlice";
 
 const MotionBox = motion(Box);
 
@@ -22,15 +22,16 @@ const Layout = () => {
     });
 
     socket.on("game_accepted", (data) => {
-      store.dispatch(setGameStarted(true));
-      store.dispatch(setGameData(data?.gameInfo));
-      navigate("/game");
-
+      if (data.gameInfo.players?.map(p => p.id).includes(currentUser?.id)) {
+        store.dispatch(setGameStarted(true));
+        store.dispatch(setGameData(data?.gameInfo));
+        navigate("/game");
+      }
     });
 
     return () => {
       socket.disconnect();
-      store.dispatch(setGameEnded({}));
+      store.dispatch(setGameEnded());
     };
   }
     , []);

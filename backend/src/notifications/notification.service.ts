@@ -25,12 +25,21 @@ export class NotificationService extends PrismaClient {
       throw new NotFoundException(
         !sender ? 'Sender not found.' : 'Receiver not found.',
       );
-
-    if (sender.friends.includes(receiver.id)) {
-      throw new BadRequestException(
-        'You cannot send a friend request to an existing friend.',
-      );
+    if (createNotificationDto.type === 'friendRequest') {
+      if (sender.friends.includes(receiver.id)) {
+        throw new BadRequestException(
+          'You cannot send a friend request to an existing friend.',
+        );
+      }
     }
+    if (createNotificationDto.type === 'gameRequest') {
+      if (receiver.status === 'playing') {
+        throw new BadRequestException(
+          'You cannot send a game request to a player who is already playing.',
+        );
+      }
+    }
+
     if (createNotificationDto.type !== 'conversation') {
       const existingNotification = await this.notification.findFirst({
         where: {
@@ -39,9 +48,14 @@ export class NotificationService extends PrismaClient {
           type: createNotificationDto.type,
         },
       });
-      if (existingNotification) {
+      if (existingNotification && existingNotification.type === 'friendRequest') {
         throw new BadRequestException(
           'You have already sent a friend request to this user.',
+        );
+      }
+      if (existingNotification && existingNotification.type === 'gameRequest') {
+        throw new BadRequestException(
+          'You have already sent a game request to this user.',
         );
       }
     }

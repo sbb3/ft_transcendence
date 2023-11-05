@@ -54,7 +54,7 @@ const Game = () => {
     });
 
     const startGameEvent = (data) => {
-      if (data.gameInfo.players?.includes(currentUser?.id)) {
+      if (data.gameInfo.players?.map(p => p.id).includes(currentUser?.id)) {
         dispatch(setMatchmakingLoading(false));
         dispatch(setGameStarted(true));
         dispatch(setGameData(data?.gameInfo));
@@ -87,12 +87,12 @@ const Game = () => {
 
   const handleCancelMatchmaking = () => {
     dispatch(setMatchmakingLoading(false));
-    dispatch(setGameEnded({}));
+    dispatch(setGameEnded());
     socket?.current?.emit("cancelMatchmaking");
   }
 
   const handleGameEnded = async () => {
-    store.dispatch(await setGameEnded({}));
+    store.dispatch(await setGameEnded());
   }
 
   let content;
