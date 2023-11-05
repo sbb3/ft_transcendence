@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   HttpException,
   HttpStatus,
   Injectable,
@@ -7,6 +8,7 @@ import {
 import { User } from './entities/user.entity';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { PrismaClient } from '@prisma/client';
+import { BlockUserDto } from './dto/block-user.dto';
 @Injectable()
 export class UsersService extends PrismaClient {
   constructor(private cloudinaryService: CloudinaryService) {
@@ -258,5 +260,72 @@ export class UsersService extends PrismaClient {
     // });
     // return games;
     return [];
+  }
+
+
+  async blockUser(blockUserDto: BlockUserDto, id: number) {
+    const user = await this.user.findUnique({
+      where: {
+        id: id
+      }
+    });
+    const toBlock = await this.user.findUnique({
+      where: {
+        id: blockUserDto.blockedUserId
+      }
+    });
+
+    if (id == blockUserDto.blockedUserId)
+      throw new BadRequestException('Can\'t block yourself.');
+    if (!toBlock || !user)
+      throw new NotFoundException(!toBlock ? "User to block not found." : "User not found.");
+    if (user.blocked.find(id => id == toBlock.id))
+      throw new BadRequestException('Already blocked.');
+
+    user.blocked.push(toBlock.id);
+    const updated = await this.user.update({
+      where: {
+        id: id,
+      },
+      data: {
+        blocked: user.blocked,
+      }
+    })
+    return updated;
+  }
+
+  async unblockUser(blockUserDto: BlockUserDto, id: number) {
+    const user = await this.user.findUnique({
+      where: {
+        id: id
+      }
+    });
+
+    const toUnblock = await this.user.findUnique({
+      where: {
+        id: blockUserDto.blockedUserId
+      }
+    });
+
+    if (id == blockUserDto.blockedUserId)
+      throw new BadRequestException('Can\'t unblock yourself.');
+    if (!toUnblock || !user)
+      throw new NotFoundException(!toUnblock ? "User to unblock not found." : "User not found.");
+    let index = user.blocked.indexOf(toUnblock.id);
+
+    if (index < 0)
+      throw new BadRequestException('This user is not blocked.');
+    user.blocked.splice(index, 1);
+
+    const updated = await this.user.update({
+      where: {
+        id: id
+      },
+      data: {
+        blocked: user.blocked
+      }
+    });
+
+    return updated;
   }
 }

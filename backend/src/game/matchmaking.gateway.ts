@@ -70,7 +70,9 @@ export class MatchmakingGateway
 	@SubscribeMessage('accept_game_challenge')
 	async acceptGameChallenge(client: Socket, data) {
 		console.log("accept game challenge in the backend")
-		if (this.gameService.getUserStatus(data.challengedUserId) === "playing" || this.gameService.getUserStatus(data.challengerUserId) === "playing")
+		const challengedUserIdStatus = await this.gameService.getUserStatus(data.challengedUserId);
+		const challengerUserIdStatus = await this.gameService.getUserStatus(data.challengerUserId);
+		if (challengedUserIdStatus === "playing" || challengerUserIdStatus === "playing")
 			return;
 		this.room = 'room' + this.i;
 		this.i++;
@@ -104,7 +106,8 @@ export class MatchmakingGateway
 
 	@SubscribeMessage('join_queue')
 	async initMyPa(client: Socket, data) {
-		if (this.gameService.getUserStatus(data.userId) === "playing")
+		const userStatus = await this.gameService.getUserStatus(data.userId);
+		if (userStatus === "playing")
 			return;
 		console.log('id of the first user ', this.i);
 		console.log(`incoming data from frontend : ${client?.id}, ${JSON.stringify(data)}`);

@@ -86,6 +86,7 @@ const Profile = ({ user }: ProfileProps) => {
     { isLoading: isLoadingCreateConversationWithoutMessage },
   ] = useCreateConversationWithoutMessageMutation();
 
+
   const handleDeleteFriend = async (friendId) => {
     try {
       await deleteFriend({
@@ -122,9 +123,8 @@ const Profile = ({ user }: ProfileProps) => {
         senderId: currentUser?.id,
         receiverId: user?.id,
       };
-      store.dispatch(
-        await notificationsApi.endpoints.sendNotification.initiate(notification)
-      );
+      await sendNotification(notification).unwrap();
+
       toast({
         title: "Game request sent",
         description: "Game request sent successfully",
@@ -304,7 +304,7 @@ const Profile = ({ user }: ProfileProps) => {
                     />
                   )}
                 {
-                  !currentUser?.blocked.includes(participantUser?.id) &&
+                  !currentUser?.blocked.includes(user?.id) &&
                   (
                     <IconButton
                       size="sm"

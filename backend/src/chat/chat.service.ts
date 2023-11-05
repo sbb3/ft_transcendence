@@ -38,7 +38,7 @@ export class ChatService extends PrismaClient {
       );
     if (sender.blocked.find(blocked => blocked == receiver.id)
       || receiver.blocked.find(blocked => blocked == sender.id))
-        throw new BadRequestException("User is blocked.");
+      throw new BadRequestException("User is blocked.");
     if (!conversation) throw new NotFoundException('Conversation not found.');
     const newMessage = await this.messageData.create({ data: messageDto });
     if (!newMessage)
@@ -67,16 +67,16 @@ export class ChatService extends PrismaClient {
       throw new NotFoundException(
         !firstUser
           ? "User with id '" +
-            createConversationDto.firstMember +
-            "' not found."
+          createConversationDto.firstMember +
+          "' not found."
           : "User with id '" +
-            createConversationDto.secondMember +
-            "' not found.",
+          createConversationDto.secondMember +
+          "' not found.",
       );
 
     if (firstUser.blocked.find(blocked => blocked == secondUser.id)
       || secondUser.blocked.find(blocked => blocked == firstUser.id))
-        throw new BadRequestException("User is blocked.");
+      throw new BadRequestException("User is blocked.");
 
     const conversation = await this.conversation.findMany({
       where: {
@@ -262,40 +262,32 @@ export class ChatService extends PrismaClient {
   }
 
   async getMessagesByConversationId(conversationId: string, page: number) {
+    const LIMIT = 10;
     const count = await this.messageData.count({
       where: {
         conversationId,
       },
     });
+    const totalPages = Math.ceil(count / LIMIT);
     const messages = await this.messageData.findMany({
       where: {
         conversationId: conversationId,
       },
-      skip: (page - 1) * 10,
-      take: 10,
+      skip: (page - 1) * LIMIT,
+      take: LIMIT,
       orderBy: {
         lastMessageCreatedAt: 'desc',
       },
     });
 
     if (messages.length == 0)
-      return { totalPages: Math.ceil(count / 10), messages };
-    const sender = await this.user.findUnique({
-      where: {
-        id: messages[0]?.sender,
-      },
-    });
-    const receiver = await this.user.findUnique({
-      where: {
-        id: messages[0]?.receiver,
-      },
-    });
+      return { totalPages, messages };
 
     const msgs = messages.map((message) => {
       return {
         id: message.id,
-        sender: sender.id,
-        receiver: receiver.id,
+        sender: message.sender,
+        receiver: message.receiver,
         content: message.content,
         lastMessageCreatedAt: message.lastMessageCreatedAt,
         conversationId: message.conversationId,
@@ -303,7 +295,7 @@ export class ChatService extends PrismaClient {
     });
     return {
       messages: msgs,
-      totalPages: Math.ceil(count / 10),
+      totalPages,
     };
   }
 

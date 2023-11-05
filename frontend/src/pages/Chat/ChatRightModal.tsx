@@ -67,6 +67,8 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleProfileDrawer }) => {
 
   const [unblockUser] = usersApi.useUnblockUserMutation();
 
+  const [sendNotification] = notificationsApi.useSendNotificationMutation();
+
   if (isLoadingParticipantUser || isFetchingParticipantUser) return <Loader />;
 
   const handleSendDirectMessage = async () => {
@@ -136,9 +138,8 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleProfileDrawer }) => {
         senderId: currentUser?.id,
         receiverId: participantUser?.id,
       };
-      store.dispatch(
-        await notificationsApi.endpoints.sendNotification.initiate(notification)
-      );
+      await sendNotification(notification).unwrap();
+
       toast({
         title: "Friend request sent",
         description: "Friend request sent successfully",
@@ -168,9 +169,7 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleProfileDrawer }) => {
         senderId: currentUser?.id,
         receiverId: participantUser?.id,
       };
-      store.dispatch(
-        await notificationsApi.endpoints.sendNotification.initiate(notification)
-      );
+      await sendNotification(notification).unwrap();
       toast({
         title: "Game request sent",
         description: "Game request sent successfully",

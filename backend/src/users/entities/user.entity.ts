@@ -17,12 +17,15 @@ export class User implements Prisma.userCreateInput {
   level?: string;
   email: string;
   username: string;
+  originalUsername: string;
+
   name: string;
   avatar: string;
   campus: string;
   status: string;
   WonGames: number;
   LostGames: number;
+
   is_profile_completed?: boolean;
   is_otp_enabled?: boolean;
   is_otp_validated?: boolean;
@@ -36,6 +39,7 @@ export class User implements Prisma.userCreateInput {
     this.level = data.level;
     this.email = data.email;
     this.username = data.username;
+    this.originalUsername = data.originalUsername;
     this.name = data.name;
     this.avatar = data.avatar;
     this.campus = data.campus;

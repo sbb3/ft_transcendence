@@ -17,7 +17,6 @@ const StayLoggedIn = () => {
       try {
         await getNewAccessToken({}).unwrap();
       } catch (err: any) {
-        console.log(`err getting new access token: `, err);
         return;
       }
     };

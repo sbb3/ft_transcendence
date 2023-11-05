@@ -18,7 +18,7 @@ import { JwtGuard } from 'src/auth/guards/jwt.guard';
 @ApiTags('notification')
 @Controller('notification')
 export class NotificationController {
-  constructor(private readonly notificationService: NotificationService) {}
+  constructor(private readonly notificationService: NotificationService) { }
 
   @Post()
   @ApiOperation({ summary: 'Create a new notification.' })
@@ -36,6 +36,7 @@ export class NotificationController {
           ),
         );
     } catch (error) {
+      console.log("error in create notification", error);
       return res.status(500).json(error);
     }
   }

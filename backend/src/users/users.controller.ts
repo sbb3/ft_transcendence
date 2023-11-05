@@ -21,6 +21,7 @@ import { ApiBody, ApiOperation } from '@nestjs/swagger';
 import { userIdDto } from './dto/creatuserDto';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import { PrismaClient } from '@prisma/client';
+import { BlockUserDto } from './dto/block-user.dto';
 
 @Controller('users')
 export class UsersController extends PrismaClient {
@@ -134,6 +135,31 @@ export class UsersController extends PrismaClient {
       return await this.usersService.getRecentGames(userId);
     } catch (error) {
       throw new BadRequestException(error.message);
+    }
+  }
+
+  @UseGuards(JwtGuard)
+  @Patch(':id/blockuser')
+  async blockUser(@Res() response: Response, @Body() blockUserDto: BlockUserDto, @Param("id", ParseIntPipe) id: number) {
+    try {
+      const user = await this.usersService.blockUser(blockUserDto, id);
+      return response.status(200).json(user)
+    }
+    catch (error) {
+      return error.status ? response.status(error.status).json(error) : response.status(500).json(error);
+    }
+  }
+
+
+  @UseGuards(JwtGuard)
+  @Patch(':id/unblockuser')
+  async unblockUser(@Res() response: Response, @Body() blockUserDto: BlockUserDto, @Param("id", ParseIntPipe) id: number) {
+    try {
+      const user = await this.usersService.unblockUser(blockUserDto, id);
+      return response.status(200).json(user)
+    }
+    catch (error) {
+      return error.status ? response.status(error.status).json(error) : response.status(500).json(error);
     }
   }
 }
