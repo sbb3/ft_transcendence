@@ -31,6 +31,7 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { useNavigate } from "react-router-dom";
 import notificationsApi from "src/features/notifications/notificationsApi";
+import store from "src/app/store";
 dayjs.extend(relativeTime);
 
 export interface ProfileProps {
@@ -119,7 +120,7 @@ const Profile = ({ user }: ProfileProps) => {
         id: uuidv4(),
         type: "gameRequest",
         senderId: currentUser?.id,
-        receiverId: participantUser?.id,
+        receiverId: user?.id,
       };
       store.dispatch(
         await notificationsApi.endpoints.sendNotification.initiate(notification)
@@ -131,7 +132,6 @@ const Profile = ({ user }: ProfileProps) => {
         duration: 2000,
         isClosable: true,
       });
-      toggleProfileDrawer();
     } catch (error: any) {
       console.log("error: ", error);
       toast({

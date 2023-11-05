@@ -67,6 +67,35 @@ export class MatchmakingGateway
 		this.firstUserId = -1;
 	}
 
+	@SubscribeMessage('accept_game_challenge')
+	async acceptGameChallenge(client: Socket, data) {
+		console.log("accept game challenge in the backend")
+		this.room = 'room' + this.i;
+		this.i++;
+
+		console.log(`room name for client : ${this.room}`);
+		console.log("data : ", data)
+		const game = await this.gameService.createGame({
+			player_one_id: data.challengedUserId,
+			player_two_id: data.challengerUserId,
+			id_winer: -1,
+			status: 'playing',
+			createdAt: new Date(),
+		});
+		console.log('players ids : ', data.challengedUserId, data.challengerUserId)
+		if (!game) {
+			console.log('errro game');
+		}
+
+		this.wss.emit('game_accepted', {
+			gameInfo: {
+				id: game?.id,
+				room: this.room,
+				players: [data.challengedUserId, data.challengerUserId],
+			},
+		});
+	}
+
 
 	@SubscribeMessage('join_queue')
 	async initMyPa(client: Socket, data) {

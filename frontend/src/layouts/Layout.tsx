@@ -1,4 +1,4 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import { Box, Flex, Stack, useDisclosure } from "@chakra-ui/react";
 import Header from "./Header";
 import Sidebar from "src/components/Sidebar";
@@ -7,27 +7,30 @@ import { useSelector } from "react-redux";
 import ProfileDetailsFormModal from "src/components/DetailsFormModal";
 import { useEffect } from "react";
 import { createSocketClient } from "src/app/socket/client";
+import store from "src/app/store";
+import { setGameData, setGameEnded, setGameStarted, setMatchmakingLoading } from "src/features/game/gameSlice";
 
 const MotionBox = motion(Box);
 
 const Layout = () => {
   const currentUser = useSelector((state: any) => state?.user?.currentUser);
   const { onToggle } = useDisclosure();
-
+  const navigate = useNavigate();
   useEffect(() => {
     const socket = createSocketClient({
-      api_url: import.meta.env.VITE_SERVER_USER_SOCKET_URL as string,
+      api_url: import.meta.env.VITE_SERVER_MATCHMAKING_SOCKET_URL as string,
     });
 
-    socket.on("connect", () => {
-      socket.on("game_accepted", (data) => {
-        console.log("game_accepted", data);
-      }
-      );
+    socket.on("game_accepted", (data) => {
+      store.dispatch(setGameStarted(true));
+      store.dispatch(setGameData(data?.gameInfo));
+      navigate("/game");
+
     });
 
     return () => {
       socket.disconnect();
+      store.dispatch(setGameEnded({}));
     };
   }
     , []);

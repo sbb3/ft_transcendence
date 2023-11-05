@@ -6,6 +6,8 @@ import io, { Socket } from "socket.io-client";
 import { draw, } from "./DrawUtils";
 import { useSelector } from "react-redux";
 import { useToast } from "@chakra-ui/react";
+import store from "src/app/store";
+import { setGameEnded } from "src/features/game/gameSlice";
 
 const GameStarted = ({ gameData = {}, handleGameEnded }) => {
   useTitle("Game");
@@ -159,7 +161,9 @@ const GameStarted = ({ gameData = {}, handleGameEnded }) => {
           textTransform={"uppercase"}
           borderRadius={5}
           colorScheme="orange"
-          onClick={handleGameEnded}
+          onClick={() => {
+            store.dispatch(setGameEnded({}));
+          }}
         >
           Play again
         </Button>

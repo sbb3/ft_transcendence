@@ -21,11 +21,12 @@ import {
 } from "react-redux";
 import useTitle from "src/hooks/useTitle";
 import { useNavigate } from "react-router-dom";
-import { setMatchmakingLoading } from "src/features/game/gameSlice";
+import { setMatchmakingLoading, setGameStarted, setGameData, setGameEnded } from "src/features/game/gameSlice";
 import { Controller, useForm } from "react-hook-form";
 import { createSocketClient } from "src/app/socket/client";
 import GridLoader from "react-spinners/GridLoader";
 import GameStarted from "./GameStarted";
+import store from "src/app/store";
 
 const Game = () => {
   useTitle("Game");
@@ -34,9 +35,9 @@ const Game = () => {
   const navigate = useNavigate();
   const socket = useRef<any>();
   const { matchmakingLoading } = useSelector((state: any) => state?.game);
+  const { gameStarted } = useSelector((state: any) => state?.game);
+  const { gameData } = useSelector((state: any) => state?.game);
   const [gameType, setGameType] = useState<"multiplayer" | "bot">("bot");
-  const [gameStarted, setGameStarted] = useState(false);
-  const [gameData, setGameData] = useState<any>({});
 
 
   const {
@@ -55,8 +56,8 @@ const Game = () => {
     const startGameEvent = (data) => {
       if (data.gameInfo.players?.includes(currentUser?.id)) {
         dispatch(setMatchmakingLoading(false));
-        setGameStarted(true);
-        setGameData(data?.gameInfo);
+        dispatch(setGameStarted(true));
+        dispatch(setGameData(data?.gameInfo));
       }
     }
 
@@ -66,14 +67,12 @@ const Game = () => {
       socket?.current?.off("start_game", startGameEvent);
       socket?.current?.disconnect();
       dispatch(setMatchmakingLoading(false));
-      setGameStarted(false);
-      setGameData({});
-
+      dispatch(setGameStarted(false));
+      dispatch(setGameData({}));
     };
   }, [navigate, dispatch, currentUser?.id]);
 
   const handleMatchmaking = async (data: any) => {
-    console.log("data: ", data);
     dispatch(setMatchmakingLoading(true));
     socket?.current?.emit("join_queue", {
       userId: currentUser?.id,
@@ -88,14 +87,12 @@ const Game = () => {
 
   const handleCancelMatchmaking = () => {
     dispatch(setMatchmakingLoading(false));
-    setGameStarted(false);
-    setGameData({});
+    dispatch(setGameEnded({}));
     socket?.current?.emit("cancelMatchmaking");
   }
 
-  const handleGameEnded = () => {
-    setGameStarted(false);
-    setGameData({});
+  const handleGameEnded = async () => {
+    store.dispatch(await setGameEnded({}));
   }
 
   let content;

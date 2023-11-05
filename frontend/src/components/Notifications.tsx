@@ -23,6 +23,8 @@ import { CloseIcon } from "@chakra-ui/icons";
 import usersApi, { useAddFriendMutation } from "src/features/users/usersApi";
 import { useAcceptGameChallengeMutation } from "src/features/game/gameApi";
 import { useSelector } from "react-redux";
+import { useEffect, useRef } from "react";
+import { createSocketClient } from "src/app/socket/client";
 
 dayjs.extend(relativeTime);
 
@@ -30,6 +32,18 @@ function Notifications() {
   const currentUser = useSelector((state: any) => state.user.currentUser);
   const toast = useToast();
   const navigate = useNavigate();
+  const socket = useRef<any>();
+
+  useEffect(() => {
+    socket.current = createSocketClient({
+      api_url: import.meta.env.VITE_SERVER_MATCHMAKING_SOCKET_URL as string,
+    });
+
+    return () => {
+      socket?.current?.disconnect();
+    };
+  }, []);
+
   // const location = useLocation();
   const {
     data: notifications = [],
@@ -99,10 +113,15 @@ function Notifications() {
   const handleAcceptGameChallenge = async ({ id, sender }) => {
     try {
       await deleteNotification(id).unwrap();
-      await acceptGameChallenge({
+      // await acceptGameChallenge({
+      //   challengedUserId: currentUser?.id,
+      //   challengerUserId: sender?.id,
+      // }).unwrap();
+      console.log("accepting game challenge");
+      socket?.current?.emit("accept_game_challenge", {
         challengedUserId: currentUser?.id,
         challengerUserId: sender?.id,
-      }).unwrap();
+      });
       refetch();
       toast({
         title: "Done",
@@ -213,7 +232,7 @@ function Notifications() {
               .sort((a, b) => dayjs(b?.createdAt).diff(dayjs(a?.createdAt))) // in descending order from the newest to the oldest
               .map((notification) =>
                 notification?.type === "message" &&
-                notification?.receiverId === currentUser?.id ? (
+                  notification?.receiverId === currentUser?.id ? (
                   <MenuItem
                     key={notification?.id}
                     as={Flex}
