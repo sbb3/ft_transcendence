@@ -35,7 +35,6 @@ export class UsersController extends PrismaClient {
   // usersService: any;
   @Get()
   findAll() {
-    this.logger.log('\nfind all users\n');
     return this.usersService.findAllUsers();
   }
 
@@ -68,8 +67,6 @@ export class UsersController extends PrismaClient {
     @Body('username') username: string,
     @UploadedFile() avatar: Express.Multer.File,
   ) {
-    console.log('userId', userId);
-    console.log('username', username);
     try {
       const user = await this.usersService.updateUserDetails(
         userId,

@@ -15,7 +15,6 @@ export class GameController {
 
 	@Get()
 	findAll() {
-		this.logger.log('\nfind all users\n');
 		return this.gameService.findAllGames();
 	}
 

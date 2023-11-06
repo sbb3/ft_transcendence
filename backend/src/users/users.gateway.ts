@@ -26,8 +26,6 @@ export class UserGateway
   async handleConnection(client: Socket, ...args: any[]) {
     const userId = client.handshake.query.userId as string;
     if (!this.connectedUsers.has(userId)) {
-      //   console.log('client connected', client.id);
-      //   update user status to online
       await this.user
         .update({
           where: {
@@ -38,7 +36,7 @@ export class UserGateway
           },
         })
         .catch((err) => {
-          console.log('user online update error', err);
+          // console.log('user online update error', err);
         });
       this.connectedUsers.add(userId);
     }
@@ -48,7 +46,6 @@ export class UserGateway
   async handleDisconnect(client: Socket) {
     const userId = client.handshake.query.userId as string;
     if (this.connectedUsers.has(userId)) {
-      //   console.log('client disconnected', userId);
       await this.user
         .update({
           where: {
@@ -59,7 +56,7 @@ export class UserGateway
           },
         })
         .catch((err) => {
-          console.log('user offline update error', err);
+          // console.log('user offline update error', err);
         });
       this.connectedUsers.delete(userId);
     }
@@ -67,7 +64,6 @@ export class UserGateway
   }
 
   async sendOnlineUsers(dataToSend: any) {
-    // console.log('dataToSend', dataToSend);
     this.server.emit('onlineUsers', { data: dataToSend });
   }
 }

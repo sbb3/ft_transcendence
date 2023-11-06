@@ -36,8 +36,7 @@ export class MatchmakingGateway
 	}
 
 	handleDisconnect(client: Socket) {
-		this.queue = this.queue.filter(client => client.socketId == client.id);
-		this.logger.log(`Client disconnected looopez: ${client.id}`);
+		this.queue = this.queue.filter(c => c.socketId != client.id);
 	}
 
 	afterInit(server: Server) {
@@ -46,7 +45,7 @@ export class MatchmakingGateway
 
 	@SubscribeMessage('cancelMatchmaking')
 	cancelMatchmaking(client: Socket) {
-		this.queue = this.queue.filter(client => client.socketId == client.id);
+		this.queue = this.queue.filter(c => c.socketId != client.id);
 	}
 
 	@SubscribeMessage('accept_game_challenge')
