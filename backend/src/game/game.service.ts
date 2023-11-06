@@ -10,7 +10,6 @@ export class GameService extends PrismaClient {
 	}
 
 	async createGame(data: Prisma.gameCreateInput) {
-		// console.log("herererer");
 		const game = await this.game.create({
 			data,
 		});
@@ -80,7 +79,6 @@ export class GameService extends PrismaClient {
 	}
 
 	async updateUserIsWiner(userId: number) {
-		console.log("QWEWQE");
 		const user1 = await this.user.update({
 			where: {
 				id: userId

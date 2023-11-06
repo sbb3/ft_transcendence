@@ -36,7 +36,6 @@ export class NotificationController {
           ),
         );
     } catch (error) {
-      console.log("error in create notification", error);
       return res.status(500).json(error);
     }
   }
