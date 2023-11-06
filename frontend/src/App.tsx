@@ -61,3 +61,4 @@ export default App;
 
 // TODO: recent games, player rank ...
 // TODO: set port 80 on the backend .env, set canvas back, npm run build for nestjs
+// in game change it with playing, UI winning player score set at 4, it should be 5, score my and score her, winrate and rank

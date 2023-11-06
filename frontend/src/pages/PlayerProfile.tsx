@@ -43,7 +43,7 @@ const PlayerProfile = () => {
       ) : user ? (
         <Flex direction={{ base: "column", xl: "row" }} gap={4}>
           <Profile user={user as ProfileProps["user"]} />
-          <RecentGames user={user} />
+          <RecentGames />
         </Flex>
       ) : (
         <Flex

@@ -16,6 +16,7 @@ export interface Ball {
 	score_my: number,
 	score_her: number,
 	color: string;
+	angl: number;
 }
 
 export interface canvaState {

@@ -19,8 +19,8 @@ const GameStarted = ({ gameData = {}, handleGameEnded }) => {
   const [bool, setBool] = useState<boolean>(true);
   const [gol, setGol] = useState<boolean>(false);
   const [socket, setSocket] = useState<Socket>();
-  const [mPaddle, setMPaddle] = useState<Paddle>();
-  const [hPaddle, setHPaddle] = useState<Paddle>();
+  const [playerOnePaddle, setPlayerOnePaddle] = useState<Paddle>();
+  const [playerTwoPaddle, setPlayerTwoPaddle] = useState<Paddle>();
   const [ball, setBall] = useState<Ball>();
   const [canvaS, setCanvaS] = useState<canvaState>();
   const [currentUserScore, setCurrentUserScore] = useState<number>(0);
@@ -31,7 +31,7 @@ const GameStarted = ({ gameData = {}, handleGameEnded }) => {
   }
 
   const gameOverEvent = (id: number) => {
-    if (id === currentUser?.id) {
+    if (id === currentUser?.id.toString()) {
       setGameResult("Win");
       toast({
         title: "You win",
@@ -56,9 +56,9 @@ const GameStarted = ({ gameData = {}, handleGameEnded }) => {
   const mvPaddleEvent = (paddle: Paddle) => {
     // console.log("I just emitted a mvBootPaddle event loooopeeez");
     if (paddle.x === 0)
-      setMPaddle(paddle);
+      setPlayerOnePaddle(paddle);
     else
-      setHPaddle(paddle);
+      setPlayerTwoPaddle(paddle);
   }
 
   useEffect(() => {
@@ -86,25 +86,25 @@ const GameStarted = ({ gameData = {}, handleGameEnded }) => {
   const initPaddleSocket = (canvaS: canvaState, ball: Ball, mPaddle: Paddle, hPaddle: Paddle) => {
     setCanvaS(canvaS);
     setBall(ball);
-    setMPaddle(mPaddle);
-    setHPaddle(hPaddle);
+    setPlayerOnePaddle(mPaddle);
+    setPlayerTwoPaddle(hPaddle);
   }
 
   useEffect(() => {
     if (!int && socket) {
       setInt(true);
-      socket?.emit("initMyP", gameData?.room, currentUser?.id, gameData?.id);
+      socket?.emit("initMyP", gameData?.room, gameData?.players[0].id, gameData?.id);
       socket?.on("initMyP", initPaddleSocket);
       if (canvasRef.current && bool)
         canvasRef.current.addEventListener("mousemove", eventPaddel);
-      draw(canvasRef, ball, mPaddle, hPaddle, canvaS);
+      draw(canvasRef, ball, playerOnePaddle, playerTwoPaddle, canvaS);
     }
-  }, [socket, mPaddle, hPaddle, canvasRef, bool, int]);
+  }, [socket, playerOnePaddle, playerTwoPaddle, canvasRef, bool, int]);
 
 
 
   useEffect(() => {
-    if (!gol && ball && mPaddle && hPaddle && canvaS) {
+    if (!gol && ball && playerOnePaddle && playerTwoPaddle && canvaS) {
       setGol(true);
       socket?.emit("mvBall", {
         room: gameData?.room,
@@ -114,14 +114,14 @@ const GameStarted = ({ gameData = {}, handleGameEnded }) => {
       });
       socket?.on("mvBall", mvBallEvent);
       socket?.on("mvBootPaddle", (paddle: Paddle) => {
-        setHPaddle(paddle);
+        setPlayerTwoPaddle(paddle);
       });
       socket?.on("gameOver", gameOverEvent);
     }
     setCurrentUserScore(ball?.score_my);
     setOpponentScore(ball?.score_her);
-    draw(canvasRef, ball, mPaddle, hPaddle, canvaS);
-  }, [socket, ball, mPaddle, hPaddle, canvaS, int]);
+    draw(canvasRef, ball, playerOnePaddle, playerTwoPaddle, canvaS);
+  }, [socket, ball, playerOnePaddle, playerTwoPaddle, canvaS, int]);
 
 
   const eventPaddel = (event) => {
@@ -139,10 +139,10 @@ const GameStarted = ({ gameData = {}, handleGameEnded }) => {
     socket?.on("mvPaddle", (paddle: Paddle) => {
       if (paddle.x === 0) {
         // console.log("I just emitted a mvBootPaddle event");
-        setMPaddle(paddle);
+        setPlayerOnePaddle(paddle);
       }
       else {
-        setHPaddle(paddle);
+        setPlayerTwoPaddle(paddle);
 
       }
     });

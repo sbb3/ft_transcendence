@@ -8,13 +8,6 @@ const gameApi = apiSlice.injectEndpoints({
     getGameById: builder.query({
       query: (id) => `games/${id}`,
     }),
-    // sendGameChallenge: builder.mutation({
-    //     query: (data) => ({
-    //         url: "games/challenge",
-    //         method: "POST",
-    //         body: { ...data },
-    //     }),
-    // }),
     acceptGameChallenge: builder.mutation({
       query: (data) => ({
         url: "games/challenge/accept",
@@ -23,7 +16,7 @@ const gameApi = apiSlice.injectEndpoints({
       }),
     }),
     getUserRecentGames: builder.query({
-      query: (id) => `users/${id}/recentgames/`,
+      query: (id) => `users/${id}/recentgames`,
     }),
   }),
 });

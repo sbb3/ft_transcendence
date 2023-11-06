@@ -1,52 +1,41 @@
-import { Avatar, Box, Flex, Icon, Stack, Text } from "@chakra-ui/react";
+import { Avatar, Box, Flex, Icon, Stack, Text, useToast } from "@chakra-ui/react";
 import { GiGamepadCross } from "react-icons/gi";
 import * as ScrollArea from "@radix-ui/react-scroll-area";
 import "src/styles/scrollbar.css";
 import { useNavigate } from "react-router-dom";
-// import { useGetUserRecentGamesQuery } from "src/features/game/gameApi";
+import { useGetUserRecentGamesQuery } from "src/features/game/gameApi";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import Loader from "../Utils/Loader";
+import { useSelector } from "react-redux";
 dayjs.extend(relativeTime);
 
-// interface RecentGamesProps {
-//   user: {
-//     id: number;
-//     name: string;
-//     username: string;
-//     avatar: string;
-//     recentGames: {
-//       id: number;
-//       player: {
-//         id: number;
-//         name: string;
-//         username: string;
-//         avatar: string;
-//         score: number;
-//       };
-//       opponent: {
-//         id: number;
-//         name: string;
-//         username: string;
-//         avatar: string;
-//         score: number;
-//       };
-//       date: string;
-//       status: string;
-//       winStatus: string;
-//       createdAt: number;
-//     }[];
-//   };
-// }
+const RecentGames = () => {
+  const { currentUser } = useSelector((state: any) => state?.user);
+  const { data: recentGames = [], isLoading, isFetching, isError } = useGetUserRecentGamesQuery(currentUser?.id, {
+    refetchOnMountOrArgChange: true,
+    refetchOnFocus: true,
+    refetchOnReconnect: true,
 
-// TODO: recentGames will not be in user object, it will be fetched from the server
-// TODO: get the games and sort them by date
-// const RecentGames = ({ user }: RecentGamesProps) => {
-const RecentGames = ({ user }) => {
-  // const { data: recentGames, isLoading, isFetching, isError, error } = useGetUserRecentGamesQuery(currentUser?.id, {
-  //   refetchOnMountOrArgChange: true,
-  // });
-  // const { recentGames } = user;
+  });
   const navigate = useNavigate();
+  const toast = useToast();
+
+  if (isLoading || isFetching)
+    return (
+      <Loader />
+    )
+
+  if (isError) {
+    toast({
+      title: "Error",
+      description: "Error fetching recent games",
+      status: "error",
+      duration: 5000,
+      isClosable: true,
+      position: "top",
+    });
+  }
 
   return (
     <Stack
@@ -89,13 +78,10 @@ const RecentGames = ({ user }) => {
               overflow="hidden"
               mr={2}
             >
-              {user?.recentGames?.length > 0 ? (
-                user?.recentGames
+              {recentGames?.length > 0 ? (
+                recentGames
                   .slice()
-                  ?.sort((a, b) =>
-                    dayjs(a.createdAt).isBefore(dayjs(b.createdAt)) ? 1 : -1
-                  )
-                  ?.map(({ id, player, opponent, date, status, winStatus }) => (
+                  ?.map(({ id, playerOne, playerTwo, createdAt, status, winnerId }) => (
                     <>
                       <Flex
                         key={id}
@@ -104,22 +90,19 @@ const RecentGames = ({ user }) => {
                         align="start"
                         gap={"18px"}
                         borderColor={
-                          winStatus === "win"
+                          winnerId === currentUser?.id
                             ? "green.400"
-                            : winStatus === "lost"
-                            ? "red.400"
-                            : "yellow.400"
+                            : "red.400"
                         }
                         borderWidth="1px"
                         borderRadius="15px"
-                        // borderStyle="dashed"
                         p={2}
                       >
                         <Stack direction="column" spacing={2} align="center">
                           <Avatar
                             size="lg"
-                            name={player?.name}
-                            src={player?.avatar}
+                            name={playerOne?.name}
+                            src={playerOne?.avatar}
                             borderRadius="15px"
                           />
                           <Text
@@ -127,7 +110,7 @@ const RecentGames = ({ user }) => {
                             fontWeight="medium"
                             color="whiteAlpha.800"
                           >
-                            {player?.name}
+                            {playerOne?.username}
                           </Text>
                         </Stack>
                         <Stack direction="column" spacing={0.5} align="center">
@@ -136,14 +119,14 @@ const RecentGames = ({ user }) => {
                             fontWeight="normal"
                             color="gray.400"
                           >
-                            {dayjs(date).fromNow()}
+                            {dayjs(createdAt).fromNow()}
                           </Text>
                           <Text
                             fontSize="20px"
                             fontWeight="semibold"
                             color="whiteAlpha.900"
                           >
-                            {`${player?.score} - ${opponent?.score}`}
+                            {`${playerOne?.score} - ${playerTwo?.score}`}
                           </Text>
                           <Text
                             fontSize="13px"
@@ -156,12 +139,12 @@ const RecentGames = ({ user }) => {
                         <Stack direction="column" spacing={2} align="center">
                           <Avatar
                             size="lg"
-                            name={opponent?.name}
-                            src={opponent?.avatar}
+                            name={playerTwo?.name}
+                            src={playerTwo?.avatar}
                             borderRadius="15px"
                             cursor={"pointer"}
                             onClick={() =>
-                              navigate(`/profile/${opponent?.username}`)
+                              navigate(`/profile/${playerTwo?.originalUsername}`)
                             }
                           />
                           <Text
@@ -169,7 +152,7 @@ const RecentGames = ({ user }) => {
                             fontWeight="medium"
                             color="whiteAlpha.800"
                           >
-                            {opponent?.name}
+                            {playerTwo?.username}
                           </Text>
                         </Stack>
                       </Flex>

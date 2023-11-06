@@ -34,13 +34,27 @@ export class GameService extends PrismaClient {
 		return
 	}
 
-	async updatGameEnd(gameId: number, id_winer: number, status: string) {
+	async updatGameEnd({
+		gameId,
+		id_winer,
+		status,
+		player_one_score,
+		player_two_score
+	}: {
+		gameId: number;
+		id_winer: number;
+		status: string;
+		player_one_score: number;
+		player_two_score: number;
+	}) {
 		if (id_winer) {
 			const game = await this.game.update({
 				where: { id: gameId },
 				data: {
 					id_winer: id_winer,
 					status: status,
+					player_one_score: player_one_score,
+					player_two_score: player_two_score,
 				},
 			})
 			if (!game) {

@@ -15,7 +15,6 @@ import {
 import { FiMessageSquare } from "react-icons/fi";
 import { AiOutlineUserAdd, AiOutlineUserDelete } from "react-icons/ai";
 import { IoGameControllerOutline } from "react-icons/io5";
-import { GoEye } from "react-icons/go";
 import { HiOutlineMail } from "react-icons/hi";
 import { GiAchievement } from "react-icons/gi";
 import * as ScrollArea from "@radix-ui/react-scroll-area";
@@ -31,7 +30,6 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { useNavigate } from "react-router-dom";
 import notificationsApi from "src/features/notifications/notificationsApi";
-import store from "src/app/store";
 dayjs.extend(relativeTime);
 
 export interface ProfileProps {
@@ -361,16 +359,7 @@ const Profile = ({ user }: ProfileProps) => {
                       icon={<IoGameControllerOutline />}
                       _hover={{ bg: "white", color: "pong_cl_primary" }}
                     />
-                    <IconButton
-                      size="sm"
-                      fontSize="lg"
-                      bg={"pong_cl_primary"}
-                      color={"white"}
-                      borderRadius={8}
-                      aria-label="Spectacle"
-                      icon={<GoEye />}
-                      _hover={{ bg: "white", color: "pong_cl_primary" }}
-                    />
+
                   </>
                 )}
               </Flex>

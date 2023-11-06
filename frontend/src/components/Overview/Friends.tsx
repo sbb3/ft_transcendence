@@ -40,6 +40,7 @@ type Friend = {
   username: string;
   avatar: string;
   email: string;
+  status: string;
 };
 
 interface Friends {
@@ -53,9 +54,13 @@ const Friends = ({ user }: FriendsProps) => {
     data: friends = [],
     isLoading: isLoadingFriends,
     isFetching: isFetchingFriends,
-  } = useGetFriendsQuery(user?.id);
+  } = useGetFriendsQuery(user?.id, {
+    refetchOnMountOrArgChange: true,
+    refetchOnFocus: true,
+    refetchOnReconnect: true,
+  });
 
-  useEffect(() => {}, []);
+  useEffect(() => { }, []);
   return (
     <Stack
       direction={{ base: "column" }}
@@ -115,7 +120,7 @@ const Friends = ({ user }: FriendsProps) => {
           defaultIsOpen={true}
           listAllValuesOnFocus
           closeOnSelect={false}
-          // flip={false}
+        // flip={false}
         >
           <InputGroup w="full">
             <InputLeftElement
@@ -179,7 +184,6 @@ const Friends = ({ user }: FriendsProps) => {
                 <Box
                   height={"400"}
                   width={"full"}
-                  //  bg="green"
                   mr={4}
                 >
                   {(friends as Friend[]).map((friend: Friend) => (
@@ -200,11 +204,9 @@ const Friends = ({ user }: FriendsProps) => {
                         bg: "pong_bg.500",
                       }}
                       _focus={{
-                        // bg: "pong_bg.300",
                         backgroundColor: "transparent",
                       }}
                       _selected={{
-                        // bg: "pong_bg.300",
                         backgroundColor: "transparent",
                       }}
                       onClick={() => {
@@ -232,13 +234,22 @@ const Friends = ({ user }: FriendsProps) => {
                             size="sm"
                             name={friend?.name}
                             src={friend?.avatar}
-                            borderColor={"green.400"}
+                            borderColor={
+                              friend?.status === "online" ? "green.500"
+                                : friend?.status === "offline" ? "gray.500"
+                                  : "red.500"
+                            }
                             borderWidth="2px"
                           >
                             <AvatarBadge
                               boxSize="0.9em"
                               border="1px solid white"
-                              bg={"green.400"}
+                              bg={
+                                friend?.status === "online" ? "green.500"
+                                  : friend?.status === "offline" ? "gray.500"
+                                    : "red.500"
+                              }
+
                             />
                           </Avatar>
                           <Text

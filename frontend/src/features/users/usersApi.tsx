@@ -6,6 +6,7 @@ const usersApi = apiSlice.injectEndpoints({
   endpoints: (builder: any) => ({
     getUsers: builder.query({
       query: () => "users",
+      providesTags: ["getUsers"],
       async onCacheEntryAdded({
         updateCachedData,
         cacheDataLoaded,
@@ -80,6 +81,7 @@ const usersApi = apiSlice.injectEndpoints({
         method: "PATCH",
         body: formData,
       }),
+      invalidatesTags: ["getUsers"],
       async onQueryStarted(_arg: any, { dispatch, queryFulfilled }) {
         try {
           const result = await queryFulfilled;
@@ -87,6 +89,7 @@ const usersApi = apiSlice.injectEndpoints({
           await dispatch(setCurrentUser(user));
         } catch (error) {
           console.log("error: ", error);
+
         }
       },
     }),

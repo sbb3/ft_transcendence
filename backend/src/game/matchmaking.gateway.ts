@@ -38,7 +38,6 @@ export class MatchmakingGateway
 	room: string = 'room';
 	id: number = -1;
 	firstUserId: number = -1;
-	gameTable;
 
 	@WebSocketServer() wss: Server;
 	private logger: Logger = new Logger('GameGateway');
@@ -72,7 +71,7 @@ export class MatchmakingGateway
 		console.log("accept game challenge in the backend")
 		const challengedUserIdStatus = await this.gameService.getUserStatus(data.challengedUserId);
 		const challengerUserIdStatus = await this.gameService.getUserStatus(data.challengerUserId);
-		if (challengedUserIdStatus === "playing" || challengerUserIdStatus === "playing")
+		if (challengedUserIdStatus !== "online" || challengerUserIdStatus !== "online")
 			return;
 		this.room = 'room' + this.i;
 		this.i++;
@@ -84,6 +83,8 @@ export class MatchmakingGateway
 		const game = await this.gameService.createGame({
 			player_one_id: data.challengerUserId,
 			player_two_id: data.challengedUserId,
+			player_one_score: 0,
+			player_two_score: 0,
 			id_winer: -1,
 			status: 'playing',
 			createdAt: new Date(),
@@ -107,7 +108,7 @@ export class MatchmakingGateway
 	@SubscribeMessage('join_queue')
 	async initMyPa(client: Socket, data) {
 		const userStatus = await this.gameService.getUserStatus(data.userId);
-		if (userStatus === "playing")
+		if (userStatus !== "online")
 			return;
 		console.log('id of the first user ', this.i);
 		console.log(`incoming data from frontend : ${client?.id}, ${JSON.stringify(data)}`);
@@ -137,15 +138,15 @@ export class MatchmakingGateway
 				this.room = 'room' + this.i;
 
 				console.log(`room name for client : ${this.room}`);
-				this.gameTable = {
+				const game = await this.gameService.createGame({
 					player_one_id: this.firstUserId,
 					player_two_id: data.userId,
+					player_one_score: 0,
+					player_two_score: 0,
 					id_winer: -1,
 					status: 'playing',
 					createdAt: new Date(),
-				};
-
-				const game = await this.gameService.createGame(this.gameTable);
+				});
 				if (!game) {
 					console.log('errro game');
 				}

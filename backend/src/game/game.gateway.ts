@@ -12,8 +12,9 @@ import {
 import path from 'path';
 import { Server, Socket } from 'socket.io';
 import { Paddle, Ball, canvaState, Room, Boot } from './game.interface';
-import { update, mouvePaddle, bootPaddel } from './game.update';
+import { update, mouvePaddle, bootPaddel, setRandomDirection } from './game.update';
 import { GameService } from './game.service';
+import { PrismaClient } from '@prisma/client';
 
 
 @WebSocketGateway({
@@ -23,13 +24,15 @@ import { GameService } from './game.service';
 		credentials: true,
 	},
 })
-export class GameGateway
+export class GameGateway extends PrismaClient
 	implements OnGatewayInit, OnGatewayDisconnect {
 
 	constructor(
 		private readonly gameService: GameService,
 
-	) { }
+	) {
+		super();
+	}
 	@WebSocketServer() wss: Server;
 
 
@@ -46,12 +49,13 @@ export class GameGateway
 		x: this.canvaS.width / 2,
 		y: this.canvaS.height / 2,
 		radius: 10,
-		speed: 2,
-		velocityX: 5,
-		velocityY: 5,
+		speed: 2.5,
+		velocityX: 0,
+		velocityY: 0,
 		score_my: 0,
 		score_her: 0,
 		color: 'white',
+		angl: setRandomDirection(),
 	};
 
 	myP: Paddle = {
@@ -165,6 +169,10 @@ export class GameGateway
 						game_id: val.id_game,
 					},
 					intervalId: val.intervalId,
+					playersScore: {
+						score_my: val.ball.score_my,
+						score_her: val.ball.score_her,
+					}
 				})
 			}
 		}
@@ -211,8 +219,13 @@ export class GameGateway
 		this.roomMap.get(info.data.room).socket_first.leave(info.data.room);
 		this.roomMap.get(info.data.room).socket_second.leave(info.data.room);
 
-
-		this.gameService.updatGameEnd(parseInt(info.data.game_id, 10), parseInt(player, 10), "end");
+		this.gameService.updatGameEnd({
+			gameId: parseInt(info.data.game_id, 10),
+			id_winer: parseInt(player, 10),
+			status: "FINISHED",
+			player_one_score: info.playersScore.score_my,
+			player_two_score: info.playersScore.score_her,
+		});
 		this.roomMap.delete(info.data.room);
 
 	}
@@ -223,18 +236,26 @@ export class GameGateway
 
 
 	@SubscribeMessage('initMyP')
-	initMyPa(client: Socket, data): void {
-		console.log("data here : ", data);
+	async initMyPa(client: Socket, data) {
+		// console.log("idfirstplayer ", this.roomMap.get(data[0]).idFirstPlayer);
 		if (data[0] != null) {
+			const game = await this.game.findUnique({
+				where: {
+					id: data[2]
+				}
+			})
+			if (!game) {
+				console.log("game not found");
+				return;
+			}
 			if (!this.roomMap.has(data[0])) {
-
 				client.join(data[0]);
 				console.log("Room after joining : " + data[0]);
 				this.roomMap.set(data[0], {
 					startGame: false,
 					endGame: false,
 					id_game: data[2],
-					idFirstPlayer: data[1],
+					idFirstPlayer: game.player_one_id.toString(),
 					socket_first: client,
 					idSecondPlayer: '',
 					socket_second: '',
@@ -250,19 +271,9 @@ export class GameGateway
 				client.join(data[0]);
 				console.log("Second client : room after joining : " + data[0]);
 				this.roomMap.set(data[0], {
-					startGame: false,
-					endGame: false,
-					id_game: data[2],
-					idFirstPlayer: this.roomMap.get(data[0]).idFirstPlayer,
-					socket_first: this.roomMap.get(data[0]).socket_first,
-					idSecondPlayer: data[1],
+					...this.roomMap.get(data[0]),
+					idSecondPlayer: game.player_two_id.toString(),
 					socket_second: client,
-					myPaddle: this.roomMap.get(data[0]).myPaddle,
-					herPaddle: this.roomMap.get(data[0]).herPaddle,
-					ball: this.roomMap.get(data[0]).ball,
-					intervalId: {},
-					is_empty: false,
-					canvasState: this.roomMap.get(data[0]).canvasState,
 				});
 				this.gameService.updateUserGameStatus(parseInt(this.roomMap.get(data[0]).idFirstPlayer, 10), "playing");
 				this.gameService.updateUserGameStatus(parseInt(this.roomMap.get(data[0]).idSecondPlayer, 10), "playing");
@@ -306,6 +317,10 @@ export class GameGateway
 						this.endGame({
 							data: data,
 							intervalId: intervalId,
+							playersScore: {
+								score_my: this.roomMap.get(data.room).ball.score_my,
+								score_her: this.roomMap.get(data.room).ball.score_her,
+							}
 						})
 						return;
 					}

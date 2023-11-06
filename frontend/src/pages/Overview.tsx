@@ -26,7 +26,7 @@ function Overview() {
       </Flex>
       <Flex direction={{ base: "column", xl: "column" }} gap={4}>
         <Friends user={currentUser} />
-        <RecentGames user={currentUser} />
+        <RecentGames />
       </Flex>
     </Flex>
   );

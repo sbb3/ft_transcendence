@@ -33,6 +33,8 @@ const Search = () => {
     isError,
   } = useGetUsersQuery({
     refetchOnMountOrArgChange: true,
+    refetchOnFocus: true,
+    refetchOnReconnect: true,
   });
 
   if (isError) {
@@ -54,6 +56,7 @@ const Search = () => {
         listAllValuesOnFocus
         closeOnSelect={true}
         flip={false}
+
       >
         <InputGroup mr={4}>
           <InputLeftElement
@@ -105,6 +108,7 @@ const Search = () => {
           p={1}
           mr={2}
           w="full"
+
         >
           <ScrollArea.Root
             style={{
@@ -155,15 +159,8 @@ const Search = () => {
                           size="sm"
                           name={user.name}
                           src={user.avatar}
-                          borderColor={"green.400"}
-                          borderWidth="2px"
-                        >
-                          <AvatarBadge
-                            boxSize="0.9em"
-                            border="1px solid white"
-                            bg={"green.400"}
-                          />
-                        </Avatar>
+                          borderWidth="1px"
+                        />
                         <Text
                           color="white"
                           fontSize="14px"

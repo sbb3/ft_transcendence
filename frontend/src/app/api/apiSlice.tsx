@@ -39,6 +39,6 @@ const baseQueryJWTverify = async (args: any, api: any, extraOptions: any) => {
 
 export const apiSlice = createApi({
   baseQuery: baseQueryJWTverify,
-  tagTypes: [],
+  tagTypes: ["getUsers"],
   endpoints: () => ({}),
 });

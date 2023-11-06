@@ -166,11 +166,7 @@ export class UsersService extends PrismaClient {
         friends: [...friend.friends, id],
       },
     });
-    // TODO: emit event to friend in order to update his friends list
-    // this.websocketService.emit('friend_accepted', {
-    //   id: friendId,
-    //   userId: id,
-    // });
+
     return currentUser;
   }
   async deleteFriend(id: number, friendId: number) {
@@ -240,26 +236,53 @@ export class UsersService extends PrismaClient {
     if (!user) {
       throw new NotFoundException(`User with id ${userId} not found`);
     }
-    console.log('user', user);
-    // const games = await this.game.findMany({
-    //   where: {
-    //     some: {
-    //       id: userId,
-    //     },
-    //   },
-    //   orderBy: {
-    //     created_at: 'desc',
-    //   },
-    //   include: {
-    //     select: {
-    //       id: true,
-    //       username: true,
-    //       avatar: true,
-    //     },
-    //   },
-    // });
-    // return games;
-    return [];
+    const games = await this.game.findMany({
+      where: {
+        OR: [
+          {
+            player_one_id: userId,
+          },
+          {
+            player_two_id: userId,
+          },
+        ],
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+    const formattedGames = await Promise.all(
+      games.map(async (game) => {
+        const playerOne = await this.user.findUnique({
+          where: { id: game.player_one_id },
+          select: {
+            id: true,
+            username: true,
+            avatar: true,
+            name: true,
+          },
+        });
+        const playerTwo = await this.user.findUnique({
+          where: { id: game.player_two_id },
+          select: {
+            id: true,
+            username: true,
+            avatar: true,
+            name: true,
+          },
+
+        });
+        return {
+          id: game.id,
+          playerOne: { ...playerOne, score: game.player_one_score },
+          playerTwo: { ...playerTwo, score: game.player_two_score },
+          status: game.status,
+          winnerId: game.id_winer,
+          createdAt: game.createdAt,
+        };
+      }),
+    );
+    return formattedGames;
   }
 
 

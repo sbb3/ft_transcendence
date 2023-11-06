@@ -117,19 +117,11 @@ function Notifications() {
       //   challengedUserId: currentUser?.id,
       //   challengerUserId: sender?.id,
       // }).unwrap();
-      console.log("accepting game challenge");
       socket?.current?.emit("accept_game_challenge", {
         challengedUserId: currentUser?.id,
         challengerUserId: sender?.id,
       });
       refetch();
-      toast({
-        title: "Done",
-        description: "Game challenge accepted",
-        status: "info",
-        duration: 2000,
-        isClosable: true,
-      });
     } catch (error: any) {
       console.log("error accepting game challenge: ", error);
       toast({
