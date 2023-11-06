@@ -1,15 +1,11 @@
 import { Logger } from '@nestjs/common';
 import {
-	MessageBody,
-	OnGatewayConnection,
 	OnGatewayDisconnect,
 	OnGatewayInit,
 	SubscribeMessage,
 	WebSocketGateway,
 	WebSocketServer,
-	WsResponse,
 } from '@nestjs/websockets';
-import path from 'path';
 import { Server, Socket } from 'socket.io';
 import { Paddle, Ball, canvaState, Room, Boot } from './game.interface';
 import { update, movePaddle, botPaddle, setRandomDirection } from './game.update';
