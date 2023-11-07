@@ -138,28 +138,71 @@ export class GameGateway
 			}
 		}
 	}
+	// private endGame(info) {
+	// 	const room = this.roomMap.get(info.data.room);
+	// 	clearInterval(room.intervalId);
+	// 	const id_player_one = room.idFirstPlayer;
+	// 	const id_player_two = room.idSecondPlayer;
+
+	// 	let player = '-1';
+	// 	if (this.roomMap.get(info.data.room).ball.score_my >= 5) {
+	// 		player = this.roomMap.get(info.data.room).idFirstPlayer
+	// 		// this.wss.to(info.data.room).emit('gameOver', player);
+	// 	}
+
+	// 	else if (this.roomMap.get(info.data.room).ball.score_her >= 5) {
+	// 		player = this.roomMap.get(info.data.room).idSecondPlayer
+	// 		// this.wss.to(info.data.room).emit('gameOver', player);
+	// 	}
+
+	// 	else {
+	// 		if (this.roomMap.get(info.data.room).idSecondPlayer != info.data.id_player) {
+	// 			player = this.roomMap.get(info.data.room).idSecondPlayer
+	// 		}
+	// 		else {
+	// 			player = this.roomMap.get(info.data.room).idFirstPlayer
+	// 		}
+	// 	}
+
+
+	// 	this.gameService.updateUserGameStatus(parseInt(id_player_one, 10), "online");
+	// 	this.gameService.updateUserGameStatus(parseInt(id_player_two, 10), "online");
+
+
+
+	// 	this.wss.to(info.data.room).emit('gameOver', player);
+	// 	this.roomMap.get(info.data.room).socket_first.leave(info.data.room);
+	// 	this.roomMap.get(info.data.room).socket_second.leave(info.data.room);
+
+	// 	this.gameService.updatGameEnd({
+	// 		gameId: parseInt(info.data.game_id, 10),
+	// 		id_winer: parseInt(player, 10),
+	// 		status: "FINISHED",
+	// 		player_one_score: info.playersScore.score_my,
+	// 		player_two_score: info.playersScore.score_her,
+	// 	});
+	// 	this.roomMap.delete(info.data.room);
+
+	// }
 
 	private async endGame(info) {
-		clearInterval(this.roomMap.get(info.data.room).intervalId);
-		const id_player_one = parseInt(this.roomMap.get(info.data.room).idFirstPlayer, 10);
-		const id_player_two = parseInt(this.roomMap.get(info.data.room).idSecondPlayer, 10);
+		const room = this.roomMap.get(info.data.room);
 
-		let player = 0 as number;
-		let gotNewAchievement = false as boolean;
-		if (this.roomMap.get(info.data.room).ball.score_my >= 5) {
+		clearInterval(room.intervalId);
+		const id_player_one = parseInt(room.idFirstPlayer, 10);
+		const id_player_two = parseInt(room.idSecondPlayer, 10);
+
+		let player = -1 as number;
+		if (room.ball.score_my >= 5) {
 			player = id_player_one;
-			gotNewAchievement = await this.gameService.updatePlayerWinGames(
-				id_player_one,
-			);
+
 			this.gameService.updatePlayerLostGames(
 				id_player_two,
 			);
 
-		} else if (this.roomMap.get(info.data.room).ball.score_her >= 5) {
+		} else if (room.ball.score_her >= 5) {
 			player = id_player_two;
-			gotNewAchievement = await this.gameService.updatePlayerWinGames(
-				id_player_two,
-			);
+
 			this.gameService.updatePlayerLostGames(
 				id_player_one,
 			);
@@ -167,24 +210,22 @@ export class GameGateway
 			if (
 				id_player_two != info.data.id_player
 			) {
-
-				gotNewAchievement = await this.gameService.updatePlayerWinGames(
-					id_player_two,
-				);
 				this.gameService.updatePlayerLostGames(
 					id_player_one,
 				);
 				player = id_player_two;
 			} else {
-				gotNewAchievement = await this.gameService.updatePlayerWinGames(
-					id_player_one,
-				);
 				this.gameService.updatePlayerLostGames(
 					id_player_two,
 				);
 				player = id_player_one;
 			}
 		}
+
+		this.gameService.updatePlayerWinGames(
+			player,
+		);
+
 
 		this.gameService.updateUserGameStatus(
 			id_player_one,
@@ -197,7 +238,6 @@ export class GameGateway
 
 		this.wss.to(info.data.room).emit('gameOver', {
 			winnerId: player,
-			gotNewAchievement,
 		});
 		this.roomMap.get(info.data.room).socket_first.leave(info.data.room);
 		this.roomMap.get(info.data.room).socket_second.leave(info.data.room);
@@ -364,7 +404,7 @@ export class GameGateway
 				this.wss
 					.to(data.client.id)
 					.emit('mvBall', this.bootMap.get(data.id_player).ball);
-				this.bootMap.get(data.id_player).bootPaddle = bootPaddel(
+				this.bootMap.get(data.id_player).bootPaddle = botPaddle(
 					this.bootMap.get(data.id_player).bootPaddle,
 					this.bootMap.get(data.id_player).canvasState,
 					this.bootMap.get(data.id_player).ball,

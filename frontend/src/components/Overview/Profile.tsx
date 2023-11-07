@@ -411,6 +411,7 @@ const Profile = ({ user }: { user: UserInterface }) => {
                     </Text>
                   ) :
                     (
+
                       user?.achievements?.map((badge, index) => (
                         <Image
                           key={index}

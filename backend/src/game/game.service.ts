@@ -112,10 +112,7 @@ export class GameService extends PrismaClient {
 				},
 			},
 		});
-		console.log(`WonGames: ${WonGames}`);
-		let gotNewAchievement = false;
 		if (WonGames === 3) {
-			gotNewAchievement = true;
 			await this.updatePlayerAchievements(
 				userId,
 				'https://res.cloudinary.com/dsejzhuix/image/upload/v1699301531/badges/Bronze.webp',
@@ -123,22 +120,20 @@ export class GameService extends PrismaClient {
 			);
 
 		} else if (WonGames === 5) {
-			gotNewAchievement = true;
 			await this.updatePlayerAchievements(
 				userId,
 				'https://res.cloudinary.com/dsejzhuix/image/upload/v1699301531/badges/Silver.webp',
 				2,
 			);
+
 		} else if (WonGames === 10) {
-			gotNewAchievement = true;
 			await this.updatePlayerAchievements(
 				userId,
 				'https://res.cloudinary.com/dsejzhuix/image/upload/v1699301531/badges/Gold.webp',
 				3,
 			);
 		}
-
-		return gotNewAchievement;
+		return false;
 	}
 
 	async getPlayerAchievements(userId: number) {

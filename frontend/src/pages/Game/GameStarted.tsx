@@ -33,15 +33,12 @@ const GameStarted = ({ gameData = {}, handleGameEnded }) => {
 
   const gameOverEvent = ({
     winnerId,
-    gotNewAchievement
   }: {
     winnerId: number;
     gotNewAchievement: boolean;
   }) => {
     if (winnerId === currentUser?.id) {
       (winnerId === gameData?.players[0]?.id) ? setPlayerOneScore(prevScore => prevScore + 1) : setPlayerTwoScore(prevScore => prevScore + 1);
-      if (gotNewAchievement)
-        setGotAnAchievement(true);
       setGameResult("Win");
 
       toast({
@@ -165,21 +162,12 @@ const GameStarted = ({ gameData = {}, handleGameEnded }) => {
     content = (
       <>
         {
-          gotAnAchievement ? (
-            <Image
-              src="/assets/img/AchievementUnlocked.webp"
-              alt="New achivement unlocked"
-              w="150px"
-              h="150px"
-            />
-          ) : (
-            <Image
-              src="/assets/img/winner.webp"
-              alt="You Win"
-              w="150px"
-              h="150px"
-            />
-          )
+          <Image
+            src="/assets/img/winner.webp"
+            alt="You Win"
+            w="150px"
+            h="150px"
+          />
         }
 
         <Button
