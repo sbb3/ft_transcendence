@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { GameController } from './game.controller';
-// import { GameService } from './game.service';
 import { UsersModule } from 'src/users/users.module';
 import { MatchmakingGateway } from './matchmaking.gateway';
 import { GameGateway } from './game.gateway';
@@ -10,6 +9,5 @@ import { GameService } from './game.service';
 	controllers: [GameController],
 	providers: [GameGateway, MatchmakingGateway, GameService],
 	imports: [UsersModule],
-	// exports: [GameService],
 })
 export class GameModule { }

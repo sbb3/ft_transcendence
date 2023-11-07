@@ -1,20 +1,14 @@
 import { Logger, Injectable } from '@nestjs/common';
 import {
-	MessageBody,
 	OnGatewayConnection,
 	OnGatewayDisconnect,
 	OnGatewayInit,
 	SubscribeMessage,
 	WebSocketGateway,
 	WebSocketServer,
-	WsResponse,
 } from '@nestjs/websockets';
-
-
 import { GameService } from './game.service';
 import { Server, Socket } from 'socket.io';
-
-import { PrismaClient } from '@prisma/client';
 
 
 @WebSocketGateway({
@@ -31,53 +25,37 @@ export class MatchmakingGateway
 		private readonly gameService: GameService,
 
 	) { }
-
-
-	first: boolean = false;
+	queue = [];
 	i: number = 0;
 	room: string = 'room';
-	id: number = -1;
-	firstUserId: number = -1;
 
 	@WebSocketServer() wss: Server;
 	private logger: Logger = new Logger('GameGateway');
 
 	handleConnection(client: Socket, ...args: any[]) {
-		console.log(`Client connected: ${client.id}`);
 	}
 
 	handleDisconnect(client: Socket) {
-		if (this.first) {
-			this.first = false;
-			this.firstUserId = -1;
-		}
-		this.logger.log(`Client disconnected looopez: ${client.id}`);
+		this.queue = this.queue.filter(c => c.socketId != client.id);
 	}
 
 	afterInit(server: Server) {
 		this.logger.log('Initialized');
 	}
 
-
 	@SubscribeMessage('cancelMatchmaking')
 	cancelMatchmaking(client: Socket) {
-		console.log('cancel matchmaking');
-		this.first = false;
-		this.firstUserId = -1;
+		this.queue = this.queue.filter(c => c.socketId != client.id);
 	}
 
 	@SubscribeMessage('accept_game_challenge')
 	async acceptGameChallenge(client: Socket, data) {
-		console.log("accept game challenge in the backend")
 		const challengedUserIdStatus = await this.gameService.getUserStatus(data.challengedUserId);
 		const challengerUserIdStatus = await this.gameService.getUserStatus(data.challengerUserId);
 		if (challengedUserIdStatus !== "online" || challengerUserIdStatus !== "online")
 			return;
 		this.room = 'room' + this.i;
 		this.i++;
-
-		console.log(`room name for client : ${this.room}`);
-		console.log("data : ", data)
 		const user1 = await this.gameService.getUserById(data.challengerUserId);
 		const user2 = await this.gameService.getUserById(data.challengedUserId);
 		const game = await this.gameService.createGame({
@@ -104,66 +82,51 @@ export class MatchmakingGateway
 		});
 	}
 
-
 	@SubscribeMessage('join_queue')
 	async initMyPa(client: Socket, data) {
 		const userStatus = await this.gameService.getUserStatus(data.userId);
 		if (userStatus !== "online")
 			return;
-		console.log('id of the first user ', this.i);
-		console.log(`incoming data from frontend : ${client?.id}, ${JSON.stringify(data)}`);
 		if (data.gameType === "bot") {
 			const user1 = await this.gameService.getUserById(data.userId);
 			this.wss.emit('start_game', {
 				gameInfo: {
 					players: [user1],
-					// gameType: "Bot",
 					mode: data?.gameMode,
 					gameMode: "Bot",
 				},
 			});
-			console.log('bot game');
 			return;
 		}
 		else {
-
-			console.log(`first : ${this.first}`);
-
-			if (!this.first) {
-
-				this.firstUserId = data.userId;
-				this.first = true;
-
-			} else if (this.first) {
-				this.room = 'room' + this.i;
-
-				console.log(`room name for client : ${this.room}`);
-				const game = await this.gameService.createGame({
-					player_one_id: this.firstUserId,
-					player_two_id: data.userId,
+			this.queue.push({
+				id : data.userId,
+				socketId : client.id
+			});
+			while (this.queue.length >= 2) {
+				let newRoom = 'room' + this.i;
+				let gameTable = {
+					player_one_id: this.queue.shift().id,
+					player_two_id: this.queue.shift().id,
 					player_one_score: 0,
 					player_two_score: 0,
 					id_winer: -1,
 					status: 'playing',
 					createdAt: new Date(),
-				});
-				if (!game) {
-					console.log('errro game');
-				}
-				const user1 = await this.gameService.getUserById(this.firstUserId);
-				const user2 = await this.gameService.getUserById(data.userId);
+				};
+				this.i++;
+				// Should check if the game is created or not
+				const game = await this.gameService.createGame(gameTable);
+				const user1 = await this.gameService.getUserById(gameTable.player_one_id);
+				const user2 = await this.gameService.getUserById(gameTable.player_two_id);
 				this.wss.emit('start_game', {
 					gameInfo: {
 						id: game?.id,
-						room: this.room,
+						room: newRoom,
 						players: [user1, user2],
 						gameMode: "Multiplayer",
-
 					},
 				});
-				this.firstUserId = -1;
-				this.first = false;
-				this.i++;
 			}
 		}
 	}

@@ -1,16 +1,12 @@
-import { Body, Controller, Get, Param, Post, Logger, BadRequestException, } from '@nestjs/common';
-import { user, Prisma } from '@prisma/client';
+import { Body, Controller, Get, Param, Post, Logger } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { GameService } from './game.service';
-import { UsersService } from 'src/users/users.service';
 
 @Controller('game')
 export class GameController {
 	constructor(private readonly gameService: GameService) { }
-	// constructor(private gameService: GameService) {}
-
 
 	private readonly logger = new Logger(Controller.name);
-
 
 	@Get(':id')
 	findOne(@Param('id') id: string) {
@@ -19,7 +15,6 @@ export class GameController {
 
 	@Get()
 	findAll() {
-		this.logger.log('\nfind all users\n');
 		return this.gameService.findAllGames();
 	}
 

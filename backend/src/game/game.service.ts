@@ -9,7 +9,6 @@ export class GameService extends PrismaClient {
 	}
 
 	async createGame(data: Prisma.gameCreateInput) {
-		// console.log("herererer");
 		const game = await this.game.create({
 			data,
 		});

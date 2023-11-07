@@ -1,23 +1,14 @@
 import { Logger } from '@nestjs/common';
 import {
-	MessageBody,
-	OnGatewayConnection,
 	OnGatewayDisconnect,
 	OnGatewayInit,
 	SubscribeMessage,
 	WebSocketGateway,
 	WebSocketServer,
-	WsResponse,
 } from '@nestjs/websockets';
-import path from 'path';
 import { Server, Socket } from 'socket.io';
 import { Paddle, Ball, canvaState, Room, Boot } from './game.interface';
-import {
-	update,
-	mouvePaddle,
-	bootPaddel,
-	setRandomDirection,
-} from './game.update';
+import { update, movePaddle, botPaddle, setRandomDirection } from './game.update';
 import { GameService } from './game.service';
 import { PrismaClient } from '@prisma/client';
 
@@ -31,7 +22,10 @@ import { PrismaClient } from '@prisma/client';
 export class GameGateway
 	extends PrismaClient
 	implements OnGatewayInit, OnGatewayDisconnect {
-	constructor(private readonly gameService: GameService) {
+
+	constructor(
+		private readonly gameService: GameService,
+	) {
 		super();
 	}
 	@WebSocketServer() wss: Server;
@@ -54,7 +48,8 @@ export class GameGateway
 		score_my: 0,
 		score_her: 0,
 		color: 'white',
-		angl: setRandomDirection(),
+		angle: setRandomDirection(),
+		isSet: false
 	};
 
 	myP: Paddle = {
@@ -82,7 +77,6 @@ export class GameGateway
 	handleConnection(client: Socket, data) { }
 
 	private findKeyByValue(room, targetValue) {
-		// console.log('room 2222==>   ', room.size, targetValue);
 		for (const [roomName, value] of room) {
 			// console.log(`value.idFirstPlayer ==> ${value.idFirstPlayer}  value.idSecondPlayer ==> ${value.idSecondPlayer} targetValue ==> ${targetValue}`);
 			if (
@@ -106,42 +100,26 @@ export class GameGateway
 	}
 
 	handleDisconnect(client: Socket) {
-		// console.log('Client disconnected:' ,client.handshake.query);
-		// console.log("id_user ==> ", client.handshake.query.userId);
-		// const id_user = client.handshake.query.userId.toString();
 
 		const id_user = this.idUserInRoom(client);
-		console.log('id_user ==> ', id_user);
-		// convert id_user to number
-		// id_user.toString();
-		//check if client.id is in bootMap
 		if (this.bootMap.has(parseInt(id_user, 10))) {
 			clearInterval(this.bootMap.get(parseInt(id_user, 10)).intervalId);
-			console.log('client.id is in bootMap gameOver');
 			this.wss.to(client.id).emit('gameOver', parseInt(id_user, 10));
 			this.bootMap.delete(parseInt(id_user, 10));
-			console.log('size of bootMap ==> ', this.bootMap.size);
-		} else {
-			// console.log('id_user ==> ', id_user);
-
-			//get the room of client
+		}
+		else {
 			const room = this.findKeyByValue(this.roomMap, id_user);
-			// console.log('value ==> ', room);
-			if (!room) return;
+			if (!room)
+				return;
 
-			// console.log(`room  ==> ${room}`);
 			const val = this.roomMap.get(room);
 			if (!val) {
-				console.log('val222222  ==> ', val);
 				return;
 			}
 
 			if (val.ball.score_her != 5 && val.ball.score_my != 5) {
-				console.log('Room name : ' + room);
 				this.wss.to(room).emit('befforTime');
-				// return;
 			}
-			console.log('Engame here is ' + this.roomMap.get(room).endGame);
 			if (!this.roomMap.get(room).endGame) {
 				this.roomMap.get(room).endGame == true;
 				this.endGame({
@@ -240,7 +218,6 @@ export class GameGateway
 
 	@SubscribeMessage('initMyP')
 	async initMyPa(client: Socket, data) {
-		// console.log("idfirstplayer ", this.roomMap.get(data[0]).idFirstPlayer);
 		if (data[0] != null) {
 			const game = await this.game.findUnique({
 				where: {
@@ -330,7 +307,6 @@ export class GameGateway
 		console.log('Set interval here');
 		const intervalId = setInterval(() => {
 			if (data.room != null) {
-				// console.log('size of roomMap ==> ', this.roomMap.size)
 				if (this.roomMap.has(data.room)) {
 					this.roomMap.get(data.room).ball = update(
 						this.roomMap.get(data.room)?.ball,
@@ -407,64 +383,35 @@ export class GameGateway
 	mvBall(client: Socket, data) {
 		if (data[0] != null) {
 			if (this.roomMap.get(data.room).startGame == false) {
-				console.log('sssssssssssssssssssssssssssss');
 				this.roomMap.get(data.room).startGame = true;
 			}
 		}
-		console.log('HEre please');
-		// setTimeout(() => {
-		this.start({
-			client: client,
-			room: data.room,
-			id_player: data.player_id,
-			game_id: data.game_id,
-			mode: data.mode,
-		});
-		// }, 1000);
+		this.start(
+			{
+				client: client,
+				room: data.room,
+				id_player: data.player_id,
+				game_id: data.game_id,
+				mode: data.mode,
+			}
+		);
+
 	}
 
 	@SubscribeMessage('mvPaddle')
 	mvPaddel(client: Socket, data) {
-		// console.log("HEre please");
 		if (data.room != null) {
 			if (this.roomMap.get(data.room)?.idFirstPlayer == data.id) {
-				// console.log('one ==> ', this.roomMap.get(data.room).idFirstPlayer, data.id);
-
-				// console.log("Room to emit my paddle : " + data.room);
-				this.roomMap.get(data.room).myPaddle = mouvePaddle(
-					this.roomMap.get(data.room).myPaddle,
-					data.num,
-					this.roomMap.get(data.room).canvasState,
-				);
-				this.wss
-					.to(data.room)
-					.emit('mvPaddle', this.roomMap.get(data.room).myPaddle);
+				this.roomMap.get(data.room).myPaddle = movePaddle(this.roomMap.get(data.room).myPaddle, data.num, this.roomMap.get(data.room).canvasState);
+				this.wss.to(data.room).emit('mvPaddle', this.roomMap.get(data.room).myPaddle);
 			} else if (this.roomMap.get(data.room)?.idSecondPlayer == data.id) {
-				// console.log('two ==> ', this.roomMap.get(data.room).idSecondPlayer, data.id);
-
-				// console.log('data two  ==> ', data.id);
-				// console.log("Room to emit herpaddle : " + data.room);
-				this.roomMap.get(data.room).herPaddle = mouvePaddle(
-					this.roomMap.get(data.room).herPaddle,
-					data.num,
-					this.roomMap.get(data.room).canvasState,
-				);
-				this.wss
-					.to(data.room)
-					.emit('mvPaddle', this.roomMap.get(data.room).herPaddle);
+				this.roomMap.get(data.room).herPaddle = movePaddle(this.roomMap.get(data.room).herPaddle, data.num, this.roomMap.get(data.room).canvasState);
+				this.wss.to(data.room).emit('mvPaddle', this.roomMap.get(data.room).herPaddle);
 			}
-			// } else {
-			//   this.myP = mouvePaddle(this.myP, data[0], this.canvaS);
-			//   client.emit('mvPaddle', this.myP);
-		} else {
-			this.bootMap.get(data.id).myPaddle = mouvePaddle(
-				this.bootMap.get(data.id).myPaddle,
-				data.num,
-				this.bootMap.get(data.id).canvasState,
-			);
-			this.wss
-				.to(client.id)
-				.emit('mvPaddle', this.bootMap.get(data.id).myPaddle);
+		}
+		else {
+			this.bootMap.get(data.id).myPaddle = movePaddle(this.bootMap.get(data.id).myPaddle, data.num, this.bootMap.get(data.id).canvasState);
+			this.wss.to(client.id).emit('mvPaddle', this.bootMap.get(data.id).myPaddle);
 		}
 	}
 }

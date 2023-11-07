@@ -17,7 +17,6 @@ export class CloudinaryService {
       const modifiedFileName = `avatar_${Date.now()}_${
         avatar.originalname.split('.')[0]
       }.${avatar.mimetype.split('/')[1]}`;
-      console.log('modifiedFileName', modifiedFileName);
       const upload = v2.uploader.upload_stream(
         {
           folder: 'avatars',
