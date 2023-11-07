@@ -33,13 +33,11 @@ export class NotificationService extends PrismaClient {
       }
     }
     if (createNotificationDto.type === 'gameRequest') {
-      console.log("in game request")
       if (receiver.blocked.includes(sender.id)) {
         throw new BadRequestException(
           'You cannot send a game request to a player who is already blocking you.',
         );
       }
-      console.log("in game request 2")
       if (receiver.status === 'playing') {
         throw new BadRequestException(
           'You cannot send a game request to a player who is already playing.',
@@ -109,14 +107,12 @@ export class NotificationService extends PrismaClient {
   }
 
   async deleteNotification(id: string) {
-    console.log('id: ', id);
     const notification = await this.notification.findUnique({
       where: { id },
     });
     if (!notification) {
       throw new NotFoundException(`Notification with ID ${id} not found`);
     }
-    console.log('notification: ', notification);
     await this.notification.delete({
       where: { id },
     });

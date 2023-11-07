@@ -5,7 +5,6 @@ import {
   Body,
   Param,
   Delete,
-  Put,
   UseGuards,
   Res,
 } from '@nestjs/common';
@@ -23,6 +22,7 @@ export class NotificationController {
   @Post()
   @ApiOperation({ summary: 'Create a new notification.' })
   @UseGuards(JwtGuard)
+  @ApiBody({type : CreateNotificationDto})
   async createNotification(
     @Body() createNotificationDto: CreateNotificationDto,
     @Res() res: Response,
@@ -36,7 +36,7 @@ export class NotificationController {
           ),
         );
     } catch (error) {
-      return res.status(500).json(error);
+      return res.status(error?.status ? error.status : 500).json(error);
     }
   }
 
@@ -49,7 +49,7 @@ export class NotificationController {
         .status(200)
         .json(await this.notificationService.getNotifications());
     } catch (error) {
-      return res.status(500).json(error);
+      return res.status(error?.status ? error.status : 500).json(error);
     }
   }
 
@@ -63,7 +63,7 @@ export class NotificationController {
         .status(200)
         .json(await this.notificationService.deleteNotification(id));
     } catch (error) {
-      return res.status(500).json(error);
+      return res.status(error?.status ? error.status : 500).json(error);
     }
   }
 }

@@ -120,6 +120,7 @@ export class UsersService extends PrismaClient {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
+
   async getFriends(userId: number) {
     const user = await this.user.findUnique({
       where: { id: userId },

@@ -19,7 +19,6 @@ import {
   ApiBody,
   ApiExcludeEndpoint,
   ApiOperation,
-  ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
 import { userIdDto } from 'src/users/dto/creatuserDto';
@@ -31,7 +30,7 @@ export class AuthController {
 
   @ApiOperation({
     summary:
-      "Initialize the 42 intra authentication process and set 'status' to 'online'",
+      "Initialize the 42 intra authentication process and set 'status' to 'online'.",
   })
   @Get('login')
   @UseGuards(FtGuard)
@@ -69,7 +68,7 @@ export class AuthController {
   }
 
   @Post('logout')
-  @ApiOperation({ summary: "Delete jwt tokens and set 'status' to 'offline'" })
+  @ApiOperation({ summary: "Delete jwt tokens and set 'status' to 'offline'." })
   @ApiBody({ type: userIdDto })
   @UseGuards(JwtGuard)
   async logout(

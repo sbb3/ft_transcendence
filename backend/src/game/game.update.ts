@@ -19,17 +19,17 @@ export function botPaddle(paddle: Paddle, canva: canvaState, ball: Ball, mode: s
 }
 
 export function restBall(ball: Ball, canva: canvaState) {
-		ball.x = canva.width / 2,
-		ball.y = canva.height / 2,
-		ball.radius = 10,
-		ball.speed = 2.5,
-		ball.velocityX = 0,
-		ball.velocityY = 0,
-		ball.score_my = ball.score_my,
-		ball.score_her = ball.score_her,
-		ball.color = "white",
-		ball.angle = setRandomDirection(),
-		ball.isSet = false
+	ball.x = canva.width / 2,
+	ball.y = canva.height / 2,
+	ball.radius = 10,
+	ball.speed = 2.5,
+	ball.velocityX = 0,
+	ball.velocityY = 0,
+	ball.score_my = ball.score_my,
+	ball.score_her = ball.score_her,
+	ball.color = "white",
+	ball.angle = setRandomDirection(),
+	ball.isSet = false
 	return ball;
 }
 
@@ -63,7 +63,6 @@ export function update(ball: Ball, canva: canvaState, myp: Paddle, herp: Paddle,
 		ball.score_my++;
 		ball = restBall(ball, canva);
 		myp.height = 100;
-
 	}
 	else if ((player == herp) && (ball.x + ball.radius > player.x)) {
 		let center = ((ball.y - (player.y + player.height / 2)) / (player.height / 2));

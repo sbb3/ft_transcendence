@@ -78,7 +78,6 @@ export class GameGateway
 
 	private findKeyByValue(room, targetValue) {
 		for (const [roomName, value] of room) {
-			// console.log(`value.idFirstPlayer ==> ${value.idFirstPlayer}  value.idSecondPlayer ==> ${value.idSecondPlayer} targetValue ==> ${targetValue}`);
 			if (
 				value.idFirstPlayer == targetValue ||
 				value.idSecondPlayer == targetValue
@@ -253,7 +252,7 @@ export class GameGateway
 	}
 
 	afterInit(server: Server) {
-		this.logger.log('Initialized');
+		
 	}
 
 	@SubscribeMessage('initMyP')
@@ -265,12 +264,10 @@ export class GameGateway
 				},
 			});
 			if (!game) {
-				console.log('game not found');
 				return;
 			}
 			if (!this.roomMap.has(data[0])) {
 				client.join(data[0]);
-				console.log('Room after joining : ' + data[0]);
 				this.roomMap.set(data[0], {
 					startGame: false,
 					endGame: false,
@@ -288,7 +285,6 @@ export class GameGateway
 				});
 			} else {
 				client.join(data[0]);
-				console.log('Second client : room after joining : ' + data[0]);
 				this.roomMap.set(data[0], {
 					...this.roomMap.get(data[0]),
 					idSecondPlayer: game.player_two_id.toString(),
@@ -303,12 +299,6 @@ export class GameGateway
 					'playing',
 				);
 			}
-			console.log(
-				'obj',
-				this.roomMap.get(data[0]).startGame,
-				this.roomMap.get(data[0]).endGame,
-			);
-			// console.log('roomMap ==> ', this.roomMap);
 			this.wss
 				.to(data[0])
 				.emit(
@@ -339,12 +329,10 @@ export class GameGateway
 					this.bootMap.get(data[1]).myPaddle,
 					this.bootMap.get(data[1]).bootPaddle,
 				);
-			console.log('booot game');
 		}
 	}
 
 	private start(data) {
-		console.log('Set interval here');
 		const intervalId = setInterval(() => {
 			if (data.room != null) {
 				if (this.roomMap.has(data.room)) {
@@ -355,13 +343,10 @@ export class GameGateway
 						this.roomMap.get(data.room)?.herPaddle,
 						null,
 					);
-					// console.log('bbbbbb' , this.roomMap.get(data.room).ball);
 					if (
 						this.roomMap.get(data.room).ball.score_my >= 5 ||
 						this.roomMap.get(data.room).ball.score_her >= 5
 					) {
-						console.log('I just ended the game.');
-						// clearInterval(intervalId);
 						this.endGame({
 							data: data,
 							intervalId: intervalId,
@@ -377,8 +362,6 @@ export class GameGateway
 						.emit('mvBall', this.roomMap.get(data.room).ball);
 				}
 			} else {
-				// console.log("start boot game");
-				// console.log("data.id_player ==> ", data.id_player);
 				this.bootMap.get(data.id_player).intervalId = intervalId;
 				this.bootMap.get(data.id_player).ball = update(
 					this.bootMap.get(data.id_player).ball,
@@ -387,7 +370,6 @@ export class GameGateway
 					this.bootMap.get(data.id_player).bootPaddle,
 					data.mode,
 				);
-				// console.log(this.bootMap.get(data.id_player).ball)
 				if (
 					this.bootMap.get(data.id_player).ball.score_my >= 5 ||
 					this.bootMap.get(data.id_player).ball.score_her >= 5

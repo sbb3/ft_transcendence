@@ -40,7 +40,6 @@ export class MatchmakingGateway
 	}
 
 	afterInit(server: Server) {
-		this.logger.log('Initialized');
 	}
 
 	@SubscribeMessage('cancelMatchmaking')

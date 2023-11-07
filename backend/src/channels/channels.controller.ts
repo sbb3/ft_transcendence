@@ -359,6 +359,7 @@ export class ChannelsController {
   }
 
   @Post('addmessage')
+  @ApiOperation({summary : 'Create a new channel message.'})
   @UseGuards(JwtGuard)
   async createMessage(
     @Body() createMessageDto: CreateChannelMessageDto,
@@ -380,6 +381,7 @@ export class ChannelsController {
   }
 
   @Get('messages')
+  @ApiOperation({summary : 'Get all messages of a specific channel by name.'})
   @ApiQuery({ name: 'channelName' })
   @UseGuards(JwtGuard)
   async getAllChannelMessages(
