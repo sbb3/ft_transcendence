@@ -14,6 +14,7 @@ const GameStarted = ({ gameData = {}, handleGameEnded }) => {
   const currentUser = useSelector((state: any) => state?.user?.currentUser);
   const toast = useToast();
   const [gameResult, setGameResult] = useState<string>("");
+  const [gotAnAchievement, setGotAnAchievement] = useState<boolean>(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [int, setInt] = useState(false);
   const [bool, setBool] = useState<boolean>(true);
@@ -23,16 +24,26 @@ const GameStarted = ({ gameData = {}, handleGameEnded }) => {
   const [playerTwoPaddle, setPlayerTwoPaddle] = useState<Paddle>();
   const [ball, setBall] = useState<Ball>();
   const [canvaS, setCanvaS] = useState<canvaState>();
-  const [currentUserScore, setCurrentUserScore] = useState<number>(0);
-  const [opponentScore, setOpponentScore] = useState<number>(0);
+  const [playerOneScore, setPlayerOneScore] = useState<number>(0);
+  const [playerTwoScore, setPlayerTwoScore] = useState<number>(0);
 
   const mvBallEvent = (bl: Ball) => {
     setBall(bl);
   }
 
-  const gameOverEvent = (id: number) => {
-    if (id === currentUser?.id.toString()) {
+  const gameOverEvent = ({
+    winnerId,
+    gotNewAchievement
+  }: {
+    winnerId: number;
+    gotNewAchievement: boolean;
+  }) => {
+    if (winnerId === currentUser?.id) {
+      (winnerId === gameData?.players[0]?.id) ? setPlayerOneScore(prevScore => prevScore + 1) : setPlayerTwoScore(prevScore => prevScore + 1);
+      if (gotNewAchievement)
+        setGotAnAchievement(true);
       setGameResult("Win");
+
       toast({
         title: "You win",
         status: "success",
@@ -118,8 +129,8 @@ const GameStarted = ({ gameData = {}, handleGameEnded }) => {
       });
       socket?.on("gameOver", gameOverEvent);
     }
-    setCurrentUserScore(ball?.score_my);
-    setOpponentScore(ball?.score_her);
+    setPlayerOneScore(ball?.score_my);
+    setPlayerTwoScore(ball?.score_her);
     draw(canvasRef, ball, playerOnePaddle, playerTwoPaddle, canvaS);
   }, [socket, ball, playerOnePaddle, playerTwoPaddle, canvaS, int]);
 
@@ -153,10 +164,23 @@ const GameStarted = ({ gameData = {}, handleGameEnded }) => {
   if (gameResult === "Win") {
     content = (
       <>
-        <Image
-          src="/assets/img/winner.webp"
-          alt="You Win"
-        />
+        {
+          gotAnAchievement ? (
+            <Image
+              src="/assets/img/AchievementUnlocked.webp"
+              alt="New achivement unlocked"
+              w="150px"
+              h="150px"
+            />
+          ) : (
+            <Image
+              src="/assets/img/winner.webp"
+              alt="You Win"
+              w="150px"
+              h="150px"
+            />
+          )
+        }
 
         <Button
           fontSize={{ base: "sm", sm: "md", md: "lg" }}
@@ -282,7 +306,7 @@ const GameStarted = ({ gameData = {}, handleGameEnded }) => {
             letterSpacing={1}
 
           >
-            {currentUserScore} - {opponentScore}
+            {playerOneScore} - {playerTwoScore}
           </Text>
         </Flex>
 

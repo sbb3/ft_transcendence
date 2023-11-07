@@ -59,6 +59,15 @@ function App() {
 
 export default App;
 
-// TODO: recent games, player rank ...
+// TODO: player rank ...
 // TODO: set port 80 on the backend .env, set canvas back, npm run build for nestjs
-// in game change it with playing, UI winning player score set at 4, it should be 5, score my and score her, winrate and rank
+// in game change it with playing, UI winning player score set at 4, it should be 5, score my and score her, winrate and rank, acheivement,
+// in case, when the game ends, playerOne choose to play another match, same for playerTwo, playerOne start matchmaking, and so for, playerOne, then the server crashes
+
+/*
+/home/brutal/Desktop/ft_transcendence/backend/src/game/game.gateway.ts:224
+    this.roomMap.get(info.data.room).socket_first.leave(info.data.room);
+                                  ^
+TypeError: Cannot read properties of undefined (reading 'socket_first')
+
+*/

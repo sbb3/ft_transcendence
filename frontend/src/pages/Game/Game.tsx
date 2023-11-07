@@ -1,6 +1,4 @@
 import {
-  Avatar,
-  Box,
   Button,
   Flex,
   FormControl,
@@ -27,6 +25,7 @@ import { createSocketClient } from "src/app/socket/client";
 import GridLoader from "react-spinners/GridLoader";
 import GameStarted from "./GameStarted";
 import store from "src/app/store";
+import usersApi from "src/features/users/usersApi";
 
 const Game = () => {
   useTitle("Game");
@@ -69,6 +68,9 @@ const Game = () => {
       dispatch(setMatchmakingLoading(false));
       dispatch(setGameStarted(false));
       dispatch(setGameData({}));
+      store.dispatch(
+        usersApi.util.invalidateTags(["getCurrentUser"])
+      )
     };
   }, [navigate, dispatch, currentUser?.id]);
 

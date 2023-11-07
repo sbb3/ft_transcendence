@@ -3,16 +3,16 @@ import { MdLeaderboard } from "react-icons/md";
 import * as ScrollArea from "@radix-ui/react-scroll-area";
 import "src/styles/scrollbar.css";
 import { useGetLeaderboardQuery } from "src/features/leaderboard/leaderboardApi";
-import Loader from "../../Utils/Loader";
 import LeaderboardCard from "./LeaderboardCard";
 import TopThreePlayers from "./TopThreePlayers";
+import { BeatLoader } from "react-spinners";
 
 interface LeaderboardPlayer {
   id: number;
   name: string;
   username: string;
   avatar: string;
-  level: string;
+  level: number;
 }
 
 const Leaderboard = () => {
@@ -51,7 +51,7 @@ const Leaderboard = () => {
       bgRepeat="no-repeat"
     >
       {isFetching || isLoading ? (
-        <Loader />
+        <BeatLoader size={8} color="#FF8707" />
       ) : (
         <>
           <Flex

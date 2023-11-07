@@ -56,7 +56,6 @@ const Sidebar = () => {
   const currentUser = useSelector((state: any) => state?.user?.currentUser);
   const onlineUsers = useSelector((state: any) => state?.user?.onlineUsers);
   const navigate = useNavigate();
-  const player_lvl = 2;
 
   return (
     <Stack spacing={5} align="center" w="full" pos="relative">
@@ -90,12 +89,12 @@ const Sidebar = () => {
         </Text>
 
         <Text
-          fontSize="10px"
+          fontSize="12px"
           fontStyle={"normal"}
           fontWeight="medium"
           color="pong_cl_primary"
         >
-          Level {"   "} {player_lvl}
+          Level {"   "} {currentUser?.level}
         </Text>
         <Flex w="full" justify="center" align="center" gap={1}>
           <Icon

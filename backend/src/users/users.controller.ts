@@ -52,7 +52,6 @@ export class UsersController extends PrismaClient {
 
   @Get('email/:email')
   async getBlocked(@Param('email') email: string) {
-    // this.logger.log('\n parametere email\n');
     return this.usersService.findByEmail(email);
   }
 

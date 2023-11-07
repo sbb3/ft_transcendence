@@ -1,11 +1,10 @@
-import { Injectable, NotFoundException, } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, game, PrismaClient } from '@prisma/client';
 import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class GameService extends PrismaClient {
-	constructor(
-		private readonly userService: UsersService,) {
+	constructor(private readonly userService: UsersService) {
 		super();
 	}
 
@@ -15,23 +14,19 @@ export class GameService extends PrismaClient {
 			data,
 		});
 		if (!game) {
-			console.log("errro lopez");
+			console.log('errro lopez');
 		}
 		return game;
 	}
 
-	isUserExist = (game: game | null): game is game => {
-		return game !== null;
-	};
-
 	async findOneById(id_game: string): Promise<game> {
 		const game = await this.game.findUnique({
-			where: { id: parseInt(id_game, 10) }
-		})
+			where: { id: parseInt(id_game, 10) },
+		});
 		if (!game) {
 			throw new NotFoundException(`Game with ID ${id_game} not found`);
 		}
-		return
+		return;
 	}
 
 	async updatGameEnd({
@@ -39,7 +34,7 @@ export class GameService extends PrismaClient {
 		id_winer,
 		status,
 		player_one_score,
-		player_two_score
+		player_two_score,
 	}: {
 		gameId: number;
 		id_winer: number;
@@ -56,7 +51,7 @@ export class GameService extends PrismaClient {
 					player_one_score: player_one_score,
 					player_two_score: player_two_score,
 				},
-			})
+			});
 			if (!game) {
 				throw new NotFoundException(`Game with id ${gameId} not found`);
 			}
@@ -79,36 +74,85 @@ export class GameService extends PrismaClient {
 		return user;
 	}
 
-	async updateUserIsWiner(userId: number) {
-		console.log("QWEWQE");
-		const user1 = await this.user.update({
+	async updatePlayerLostGames(userId: number) {
+		return await this.user.update({
 			where: {
-				id: userId
-			},
-			data: {
-				WonGames: {
-					increment: 1
-				}
-			}
-		});
-
-		return user1;
-	}
-
-
-	async updateUserIsLoser(userId: number) {
-		const user1 = await this.user.update({
-			where: {
-				id: userId
+				id: userId,
 			},
 			data: {
 				LostGames: {
-					increment: 1
-				}
-			}
-		});
-		return user1;
+					increment: 1,
+				},
+			},
+		});;
 	}
+
+	async updatePlayerAchievements(userId: number, badgeUrl: string, lvl: number) {
+		const user = await this.user.update({
+			where: {
+				id: userId,
+			},
+			data: {
+				achievements: {
+					push: badgeUrl,
+				},
+				level: lvl,
+			},
+		});
+		return user;
+	}
+
+	async updatePlayerWinGames(userId: number) {
+		const { WonGames } = await this.user.update({
+			where: {
+				id: userId,
+			},
+			data: {
+				WonGames: {
+					increment: 1,
+				},
+			},
+		});
+		console.log(`WonGames: ${WonGames}`);
+		let gotNewAchievement = false;
+		if (WonGames === 3) {
+			gotNewAchievement = true;
+			await this.updatePlayerAchievements(
+				userId,
+				'https://res.cloudinary.com/dsejzhuix/image/upload/v1699301531/badges/Bronze.webp',
+				1,
+			);
+
+		} else if (WonGames === 5) {
+			gotNewAchievement = true;
+			await this.updatePlayerAchievements(
+				userId,
+				'https://res.cloudinary.com/dsejzhuix/image/upload/v1699301531/badges/Silver.webp',
+				2,
+			);
+		} else if (WonGames === 10) {
+			gotNewAchievement = true;
+			await this.updatePlayerAchievements(
+				userId,
+				'https://res.cloudinary.com/dsejzhuix/image/upload/v1699301531/badges/Gold.webp',
+				3,
+			);
+		}
+
+		return gotNewAchievement;
+	}
+
+	async getPlayerAchievements(userId: number) {
+		const user = await this.user.findUnique({
+			where: { id: userId },
+		});
+		if (!user) {
+			throw new NotFoundException(`User with id ${userId} not found`);
+		}
+		return user.achievements;
+	}
+
+
 
 	async findAllGames() {
 		return await this.game.findMany();
@@ -134,8 +178,4 @@ export class GameService extends PrismaClient {
 		}
 		return user;
 	}
-
-
-
-
 }

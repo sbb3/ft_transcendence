@@ -5,7 +5,6 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { User } from './entities/user.entity';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { PrismaClient } from '@prisma/client';
 import { BlockUserDto } from './dto/block-user.dto';
@@ -14,9 +13,6 @@ export class UsersService extends PrismaClient {
   constructor(private cloudinaryService: CloudinaryService) {
     super();
   }
-  isUserExist = (user: User | null): user is User => {
-    return user !== null;
-  };
 
   async findAllUsers() {
     const users = await this.user.findMany();
@@ -55,8 +51,10 @@ export class UsersService extends PrismaClient {
       },
     });
 
-    if (this.isUserExist(user)) return user;
-    else throw new NotFoundException('user not found');
+    if (!user)
+      throw new NotFoundException('user not found');
+
+    return user;
   }
 
   async updateUserDetails(

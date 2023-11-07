@@ -65,6 +65,7 @@ const usersApi = apiSlice.injectEndpoints({
         method: "GET",
         // mode: "no-cors"
       }),
+      providesTags: ["getCurrentUser"],
       async onQueryStarted(_arg: any, { dispatch, queryFulfilled }) {
         try {
           const result = await queryFulfilled;

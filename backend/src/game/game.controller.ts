@@ -30,12 +30,6 @@ export class GameController {
 
 
 	@Post()
-	updateUserWiner(@Param('userid') userid: number) {
-		this.gameService.updateUserIsWiner(userid);
-	}
-
-
-	@Post()
 	async creat(@Body() body: Prisma.gameCreateInput) {
 		return this.gameService.createGame(body);
 	}

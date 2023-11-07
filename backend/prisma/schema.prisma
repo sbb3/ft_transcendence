@@ -10,7 +10,7 @@ datasource db {
 model user {
   id             Int            @id @default(autoincrement())
   createdAt      DateTime       @default(now())
-  level          String?
+  level          Int @default(0)
   friends      Int[] 
   blocked     Int[]
   email                String   @unique
@@ -26,6 +26,7 @@ model user {
   is_profile_completed Boolean  @default(false)
   is_otp_validated     Boolean  @default(false)
   otp_secret           String?
+  achievements String[]
 }
 
 model game {

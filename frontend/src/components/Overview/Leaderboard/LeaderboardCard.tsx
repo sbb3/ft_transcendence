@@ -7,7 +7,7 @@ interface LeaderboardPlayer {
   name: string;
   username: string;
   avatar: string;
-  level: string;
+  level: number;
 }
 
 interface LeaderboardCardProps {
@@ -30,11 +30,11 @@ const LeaderboardCard = ({ player }: LeaderboardCardProps) => {
       align="center"
       cursor={"pointer"}
       bgColor={
-        level == "1"
+        level == 1
           ? "#FFCA28"
-          : level == "2"
+          : level == 2
             ? "#F4F4F4"
-            : level == "3"
+            : level == 3
               ? "#FF8228"
               : "rgba(255, 255, 255, 0.2)"
       }

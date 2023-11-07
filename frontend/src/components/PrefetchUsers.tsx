@@ -1,11 +1,11 @@
 import store from "src/app/store";
 import { Outlet } from "react-router-dom";
 import { useGetCurrentUserQuery } from "src/features/users/usersApi";
-import Loader from "./Utils/Loader";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { setOnlineUsers } from "src/features/users/usersSlice";
 import { createSocketClient } from "src/app/socket/client";
+import { BeatLoader } from "react-spinners";
 
 const PrefetchUsers = () => {
   const dispatch = useDispatch();
@@ -35,7 +35,7 @@ const PrefetchUsers = () => {
   }, []);
 
   return isLoadingCurrentUser || isUninitialized || isFetching ? (
-    <Loader />
+    <BeatLoader size={8} color="#FF8707" />
   ) : (
     <Outlet />
   );

@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { Navigate, Outlet, useNavigate } from "react-router-dom";
 import { useGetNewAccessTokenMutation } from "./authApi";
-import Loader from "src/components/Utils/Loader";
+import { BeatLoader } from "react-spinners";
 
 const StayLoggedIn = () => {
   const accessToken = useSelector((state: any) => state?.auth?.accessToken);
@@ -28,7 +28,7 @@ const StayLoggedIn = () => {
     }
   }, []);
 
-  if ((isLoading || isUninitialized) && !accessToken) return <Loader />;
+  if ((isLoading || isUninitialized) && !accessToken) return <BeatLoader size={8} color="#FF8707" />;
 
   if (isError) return <Outlet />;
 

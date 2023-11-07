@@ -25,8 +25,8 @@ function Overview() {
         <Leaderboard />
       </Flex>
       <Flex direction={{ base: "column", xl: "column" }} gap={4}>
-        <Friends user={currentUser} />
-        <RecentGames />
+        <Friends />
+        <RecentGames userId={currentUser?.id} />
       </Flex>
     </Flex>
   );

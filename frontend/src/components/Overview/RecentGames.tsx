@@ -6,13 +6,15 @@ import { useNavigate } from "react-router-dom";
 import { useGetUserRecentGamesQuery } from "src/features/game/gameApi";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import Loader from "../Utils/Loader";
 import { useSelector } from "react-redux";
+import { BeatLoader } from "react-spinners";
 dayjs.extend(relativeTime);
 
-const RecentGames = () => {
+const RecentGames = (
+  { userId }: { userId: number }
+) => {
   const { currentUser } = useSelector((state: any) => state?.user);
-  const { data: recentGames = [], isLoading, isFetching, isError } = useGetUserRecentGamesQuery(currentUser?.id, {
+  const { data: recentGames = [], isLoading, isFetching, isError } = useGetUserRecentGamesQuery(userId, {
     refetchOnMountOrArgChange: true,
     refetchOnFocus: true,
     refetchOnReconnect: true,
@@ -23,7 +25,7 @@ const RecentGames = () => {
 
   if (isLoading || isFetching)
     return (
-      <Loader />
+      <BeatLoader size={8} color="#FF8707" />
     )
 
   if (isError) {

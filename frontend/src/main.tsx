@@ -16,7 +16,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
   <Provider store={store}>
     <Router>
       <ChakraProvider theme={theme}>
-        <Suspense fallback={<BeatLoader color="#FF8707" />}>
+        <Suspense fallback={<BeatLoader size={8} color="#FF8707" />}>
           <App />
         </Suspense>
       </ChakraProvider>

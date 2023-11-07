@@ -19,7 +19,6 @@ import { HiOutlineMail } from "react-icons/hi";
 import { GiAchievement } from "react-icons/gi";
 import * as ScrollArea from "@radix-ui/react-scroll-area";
 import "src/styles/scrollbar.css";
-import { badges } from "src/config/data/badges";
 import { useSelector } from "react-redux";
 import usersApi, { useDeleteFriendMutation } from "src/features/users/usersApi";
 import conversationApi, {
@@ -30,33 +29,10 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { useNavigate } from "react-router-dom";
 import notificationsApi from "src/features/notifications/notificationsApi";
+import { UserInterface } from "src/interfaces/Interfaces";
 dayjs.extend(relativeTime);
 
-export interface ProfileProps {
-  user: {
-    id: number;
-    username: string;
-    name: string;
-    email: string;
-    avatar: string;
-    status: string;
-    gameWin: string;
-    gameLoss: string;
-    rank: string;
-    level: string;
-    campus: string;
-    recentGames: object[];
-    friends: object[];
-    blocked: number[];
-    is_otp_enabled: boolean;
-    is_otp_validated: boolean;
-    otp_secret: string;
-    otp_url: string;
-    is_profile_completed: boolean;
-  };
-}
-
-const Profile = ({ user }: ProfileProps) => {
+const Profile = ({ user }: { user: UserInterface }) => {
   const currentUser = useSelector((state: any) => state?.user?.currentUser);
   const toast = useToast();
   const navigate = useNavigate();
@@ -69,11 +45,11 @@ const Profile = ({ user }: ProfileProps) => {
 
   const [sendNotification] = notificationsApi.useSendNotificationMutation();
 
-  const gameWonRate =
-    (parseInt(user?.gameWin) /
-      (parseInt(user?.gameWin) + parseInt(user?.gameLoss))) *
+  const gameWonRate = (user?.WonGames === 0 && user?.LostGames === 0) ?
+    0 :
+    (user?.WonGames /
+      (user?.WonGames + user?.LostGames)) *
     100;
-
   const [
     triggerGetConversationByMembersEmails,
     { isLoading: isLoadingGetConversationByMembersEmails },
@@ -111,7 +87,6 @@ const Profile = ({ user }: ProfileProps) => {
       });
     }
   };
-
 
   const handleSendGameChallengeNotification = async () => {
     try {
@@ -426,14 +401,26 @@ const Profile = ({ user }: ProfileProps) => {
                 align={"center"}
               // overflowX="hidden"
               >
-                {badges.map((badge, index) => (
-                  <Image
-                    key={index}
-                    src={`/${badge.link}`}
-                    alt={badge.alt}
-                    boxSize={8}
-                  />
-                ))}
+                {
+                  user?.achievements?.length === 0 ? (
+                    <Text fontSize="14px" fontWeight="medium" color="whiteAlpha.600"
+                      textAlign={"center"}
+                      w={"100%"}
+                    >
+                      No achievements yet
+                    </Text>
+                  ) :
+                    (
+                      user?.achievements?.map((badge, index) => (
+                        <Image
+                          key={index}
+                          src={`${badge}`}
+                          alt={"badge"}
+                          boxSize={8}
+                        />
+                      ))
+                    )
+                }
               </Flex>
             </ScrollArea.Viewport>
             <ScrollArea.Scrollbar
@@ -472,11 +459,11 @@ const Profile = ({ user }: ProfileProps) => {
             borderRadius="40px"
             align="center"
             pl={"10px"}
-            pr="10px"
+            pr="30px"
             pt={1}
             pb={1}
           >
-            <Flex direction="row" gap={3} align="center">
+            <Flex direction="row" gap={3} align="center" justify={"start"}>
               <Text fontSize="13px" fontWeight="regular" color="whiteAlpha.900">
                 {user?.rank}
               </Text>
@@ -520,7 +507,7 @@ const Profile = ({ user }: ProfileProps) => {
                     fontWeight="regular"
                     color="whiteAlpha.600"
                   >
-                    {user?.gameWin} W {user?.gameLoss} L
+                    {user?.WonGames} W {user?.LostGames} L
                   </Text>
                 </Stack>
               </CircularProgressLabel>
@@ -529,8 +516,8 @@ const Profile = ({ user }: ProfileProps) => {
           <Box>
             <CircularProgress
               // isIndeterminate
-              max={10} //TODO: 10 games, dynamic value, MaxGames per level to get to the next level and new rank and achievements
-              value={5} // 5 games played
+              max={user.WonGames <= 3 ? 3 : user.WonGames <= 5 ? 5 : user.WonGames <= 10 ? 10 : 103}
+              value={user?.WonGames}
               aria-valuenow={50}
               color="orange.400"
               size="130px"
@@ -551,7 +538,7 @@ const Profile = ({ user }: ProfileProps) => {
                     fontWeight="semibold"
                     color="whiteAlpha.900"
                   >
-                    {parseInt(user?.gameWin) + parseInt(user?.gameLoss)}
+                    {(user?.WonGames + user?.LostGames).toString()}
                   </Text>
                   <Text
                     fontSize="10px"

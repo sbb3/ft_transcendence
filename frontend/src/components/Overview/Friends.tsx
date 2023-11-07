@@ -23,16 +23,7 @@ import { useNavigate } from "react-router-dom";
 import * as ScrollArea from "@radix-ui/react-scroll-area";
 import "src/styles/scrollbar.css";
 import { useGetFriendsQuery } from "src/features/users/usersApi";
-
-interface FriendsProps {
-  user: {
-    id: number;
-    name: string;
-    username: string;
-    avatar: string;
-    email: string;
-  };
-}
+import store from "src/app/store";
 
 type Friend = {
   id: number;
@@ -47,14 +38,14 @@ interface Friends {
   friends: Friend[];
 }
 
-const Friends = ({ user }: FriendsProps) => {
+const Friends = () => {
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const {
     data: friends = [],
     isLoading: isLoadingFriends,
     isFetching: isFetchingFriends,
-  } = useGetFriendsQuery(user?.id, {
+  } = useGetFriendsQuery(store.getState().auth.userId, {
     refetchOnMountOrArgChange: true,
     refetchOnFocus: true,
     refetchOnReconnect: true,
