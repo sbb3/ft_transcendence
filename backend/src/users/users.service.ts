@@ -232,6 +232,8 @@ export class UsersService extends PrismaClient {
         level: true,
       },
     });
+    if (users?.length === 0)
+        return [];
     return users;
   }
   async getRecentGames(userId: number) {

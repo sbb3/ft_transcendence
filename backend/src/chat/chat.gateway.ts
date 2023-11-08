@@ -5,7 +5,7 @@ import { Server } from 'socket.io';
 @WebSocketGateway({
   namespace: 'chat',
   cors: {
-    origin: 'http://localhost:5173',
+    origin: process.env.FRONT_URL,
     credentials: true,
   },
 })

@@ -15,7 +15,7 @@ import { PrismaClient } from '@prisma/client';
 @WebSocketGateway({
 	namespace: 'play',
 	cors: {
-		origin: 'http://localhost:5173',
+		origin: process.env.FRONT_URL,
 		credentials: true,
 	},
 })
@@ -166,13 +166,13 @@ export class GameGateway
 					id_player_one,
 				);
 				player = id_player_two;
-				console.log("Here first condition.")
+				// console.log("Here first condition.")
 			} else {
 				this.gameService.updatePlayerLostGames(
 					id_player_two,
 				);
 				player = id_player_one;
-				console.log("Here second condition.")
+				// console.log("Here second condition.")
 			}
 		}
 

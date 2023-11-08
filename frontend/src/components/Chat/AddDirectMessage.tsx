@@ -151,7 +151,7 @@ const AddDirectMessage = ({ isOpenDM, onToggleDM }) => {
         toast({
           title: "Message not sent.",
           description: "We've not sent your message to the recipient.",
-          status: "success",
+          status: "error",
           duration: 2000,
           isClosable: true,
         });

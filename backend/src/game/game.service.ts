@@ -1,5 +1,5 @@
 import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
-import { Prisma, game, PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 import { UsersService } from 'src/users/users.service';
 
 @Injectable()
@@ -8,7 +8,7 @@ export class GameService extends PrismaClient {
 		super();
 	}
 
-	async createGame(data: Prisma.gameCreateInput) {
+	async createGame(data: any) {
 		const game = await this.game.create({
 			data,
 		});
@@ -18,7 +18,7 @@ export class GameService extends PrismaClient {
 		return game;
 	}
 
-	async findOneById(id_game: string): Promise<game> {
+	async findOneById(id_game: string) {
 		const game = await this.game.findUnique({
 			where: { id: parseInt(id_game, 10) },
 		});

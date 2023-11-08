@@ -21,8 +21,12 @@ const channelMessagesApi = apiSlice.injectEndpoints({
             console.log("incoming msg: ", data);
             if (data?.data?.receivers.includes(currentUser?.id)) {
               updateCachedData((draft) => {
-                const message = draft?.find((m) => m.id === data?.data?.id);
-                if (!message?.id) draft?.push(data?.data);
+                // if (draft?.map(m => m?.id)?.includes(data?.data?.channelId))
+                // {
+                  const message = draft?.find((m) => m.id === data?.data?.id);
+                  if (!message?.id && message?.channelId === data?.data?.channelId)
+                    draft?.push(data?.data);
+                // }
               });
             }
           });

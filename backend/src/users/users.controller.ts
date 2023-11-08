@@ -185,9 +185,11 @@ export class UsersController extends PrismaClient {
   @ApiOperation({ summary: 'Get leaderboard.' })
   @UseGuards(JwtGuard)
   @Get('leaderboard')
-  async getLeaderboard() {
+  async getLeaderboard(@Res() response: Response) {
     try {
-      return await this.usersService.getLeaderboard();
+      const leaderboard = await this.usersService.getLeaderboard();
+      
+      return response.status(200).json(leaderboard);
     } catch (error) {
       return response.status(error?.status ? error.status : 500).json(error);
     }
@@ -197,7 +199,9 @@ export class UsersController extends PrismaClient {
   @Get(':userId/recentgames')
   async getRecentGames(@Param('userId', ParseIntPipe) userId: number, @Res() response : Response) {
     try {
-      return await this.usersService.getRecentGames(userId);
+      const allGames = await this.usersService.getRecentGames(userId);
+
+      return response.status(200).json(allGames);
     } catch (error) {
       return response.status(error?.status ? error.status : 500).json(error);
     }

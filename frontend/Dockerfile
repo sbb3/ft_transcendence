@@ -22,6 +22,4 @@ RUN npm i -g serve
 
 COPY --from=build-stage /app/dist .
 
-EXPOSE 80
-
 CMD ["serve", "-s", "-L", ".", "-p", "80"]

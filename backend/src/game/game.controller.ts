@@ -50,17 +50,4 @@ export class GameController {
 			return response.status(error?.status ? error?.status : 500).json(error);
 		}
 	}
-
-	@Post()
-	@UseGuards(JwtGuard)
-	async create(@Body() body: Prisma.gameCreateInput, @Res() response : Response) {
-		try {
-			const game = this.gameService.createGame(body);
-
-			return response.status(201).json({message : 'A new game has been created.'});
-		}
-		catch (error) {
-			return response.status(error.status ? error.status : 500).json(error);
-		}
-	}
 }

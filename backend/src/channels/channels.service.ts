@@ -109,9 +109,13 @@ export class ChannelsService extends PrismaClient {
     });
 
     return membersAsUsers.map((member) => {
-      const { role, isMuted } = {
-        ...allMembersIds.find((memberId) => memberId.userId == member.id),
-      };
+      const user = allMembersIds.find((memberId) => memberId.userId == member.id);
+      const role = user.role;
+      const isMuted = user.isMuted;
+
+      // const { role, isMuted } = {
+      //   ...allMembersIds.find((memberId) => memberId.userId == member.id),
+      // };
 
       return { ...member, role, isMuted };
     });
@@ -554,9 +558,8 @@ export class ChannelsService extends PrismaClient {
       },
     });
 
-    if (member.length == 0)
-      throw new NotFoundException('Member not found in channel.');
-    if (member[0].isMuted)
+    const user = member?.find(member => member.userId == senderIdFromJwt && member.channelId == createMessageDto.channelId);
+    if (user?.isMuted)
       throw new ForbiddenException('Muted from this channel.');
 	  this.formatMessageAndEmit(createMessageDto, channel, sender);
     return 'Message created successfully.';

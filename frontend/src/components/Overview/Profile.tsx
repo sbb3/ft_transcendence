@@ -397,7 +397,7 @@ const Profile = ({ user }: { user: UserInterface }) => {
                 w="100%"
                 h="100%"
                 p={2}
-                justify="space-around"
+                justify="space-evenly"
                 align={"center"}
               // overflowX="hidden"
               >

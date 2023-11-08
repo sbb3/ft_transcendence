@@ -13,23 +13,24 @@ services:
 
   frontend:
     build: frontend
-    env_file: .env
+    env_file: frontend/.env
     container_name: frontend
     hostname: frontend
     restart: always
     ports:
-      - "80:80"
+      - "8080:80"
     depends_on:
       - db
 
   backend:
     build: backend
-    env_file: .env
+    env_file: backend/.env
     container_name: backend
     hostname: backend
     restart: always
     ports:
       - "3000:3000"
+      - "5555:5555"
     depends_on:
       - db
 

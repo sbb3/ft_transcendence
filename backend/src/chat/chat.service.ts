@@ -1,11 +1,10 @@
 import {
   BadRequestException,
-  ConflictException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { conversation, PrismaClient, user } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { CreateConversationDto } from './dto/create-conversation.dto';
 import { CreateMessageDataDto } from './dto/create-message-data.dto';
 import UpdateConversationDto from './dto/update-conversation.dto';
@@ -300,9 +299,9 @@ export class ChatService extends PrismaClient {
   }
 
   private formatConversation(
-    conversation: conversation,
-    firstMember: user,
-    secondMember: user,
+    conversation: any,
+    firstMember: any,
+    secondMember: any,
   ) {
     return {
       id: conversation.id,

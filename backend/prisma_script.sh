@@ -1,4 +1,5 @@
 #!/bin/bash
 npx prisma generate
 npx prisma db push
-npm run start:prod
+node /app/dist/main.js
+npx prisma studio

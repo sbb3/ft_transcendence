@@ -22,14 +22,14 @@ export class AuthService extends PrismaClient {
   async generateAccessToken(payload: any) {
     return await this.jwtService.signAsync(payload, {
       expiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN,
-      secret: jwtConstants.atSecret,
+      secret: process.env.ACCESS_TOKEN_SECRET,
     });
   }
 
   async generateRefreshToken(payload: any) {
     return await this.jwtService.signAsync(payload, {
       expiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN,
-      secret: jwtConstants.rtSecret,
+      secret: process.env.REFRESH_TOKEN_SECRET,
     });
   }
 
