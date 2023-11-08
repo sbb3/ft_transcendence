@@ -71,9 +71,8 @@ export class MatchmakingGateway extends PrismaClient
 			status: 'playing',
 			createdAt: new Date(),
 		});
-		if (!game) {
-			console.log('errro game');
-		}
+		if (!game)
+			return ;
 
 		this.wss.emit('game_accepted', {
 			gameInfo: {
@@ -126,6 +125,7 @@ export class MatchmakingGateway extends PrismaClient
 			});
 			while (this.queue.length >= 2) {
 				let newRoom = 'room' + this.i;
+
 				let gameTable = {
 					player_one_id: this.queue.shift().id,
 					player_two_id: this.queue.shift().id,

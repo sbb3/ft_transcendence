@@ -5,7 +5,6 @@ import {
   Param,
   Post,
   Delete,
-  BadRequestException,
   Body,
   Res,
   UploadedFile,
@@ -15,7 +14,7 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { Express, Response } from 'express';
+import { Express, response, Response } from 'express';
 import { ApiBody, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { userIdDto } from './dto/creatuserDto';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
@@ -32,36 +31,71 @@ export class UsersController extends PrismaClient {
   @Get()
   @ApiOperation({summary : 'Get all users.'})
   @UseGuards(JwtGuard)
-  findAll() {
-    return this.usersService.findAllUsers();
+  async findAll(@Res() response : Response) {
+    try {
+      const allUsers = await this.usersService.findAllUsers();
+      
+      return response.status(200).json(allUsers);
+    }
+    catch (error) {
+      return response.status(error?.status ? error.status : 500).json(error);
+    }
   }
 
   @Get('user/:id')
   @ApiOperation({summary : 'Get a single user by id.'})
   @UseGuards(JwtGuard)
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOneById(id);
+  async findOne(@Param('id') id: string, @Res() response : Response) {
+    try {
+      const user = await this.usersService.findOneById(id);
+      
+      return response.status(200).json(user);
+    }
+    catch (error) {
+      return response.status(error?.status ? error.status : 500).json(error);
+    }
   }
 
   @Get('username/:username')
   @ApiOperation({summary : 'Get a single user by username.'})
   @UseGuards(JwtGuard)
-  async getUserByUsername(@Param('username') username: string) {
-    return await this.usersService.findByUsername(username);
+  async getUserByUsername(@Param('username') username: string, @Res() response : Response) {
+    try {
+      const user = await this.usersService.findByUsername(username);
+      
+      return response.status(200).json(user);
+    }
+    catch (error) {
+      return response.status(error?.status ? error.status : 500).json(error);
+    }
   }
 
   @Get('email/:email')
   @ApiOperation({summary : 'Get a single user by mail.'})
   @UseGuards(JwtGuard)
-  async getBlocked(@Param('email') email: string) {
-    return this.usersService.findByEmail(email);
+  async getBlocked(@Param('email') email: string, @Res() response : Response) {
+    try {
+      const user = await this.usersService.findByEmail(email);
+
+      return response.status(200).json(user);
+    }
+    catch (error) {
+      return response.status(error?.status ? error.status : 500).json(error);
+    }
   }
 
   @Get('currentuser/:id')
   @ApiOperation({summary : 'Get current user.'})
   @UseGuards(JwtGuard)
-  async getCurrentUser(@Param('id') userId: number) {
-    return this.usersService.getCurrentUser(userId);
+  async getCurrentUser(@Param('id') userId: number, @Res() response : Response) {
+    try {
+      const user = await this.usersService.getCurrentUser(userId);
+
+      return response.status(200).json(user);
+    }
+    catch (error) {
+      return response.status(error?.status ? error.status : 500).json(error);
+    }
   }
 
   @Patch(':id/settings')
@@ -72,6 +106,7 @@ export class UsersController extends PrismaClient {
     @Param('id', ParseIntPipe) userId: number,
     @Body('username') username: string,
     @UploadedFile() avatar: Express.Multer.File,
+    @Res() response : Response
   ) {
     try {
       const user = await this.usersService.updateUserDetails(
@@ -79,35 +114,56 @@ export class UsersController extends PrismaClient {
         username,
         avatar,
       );
-      return user;
+      return response.status(200).json(user);
     } catch (error) {
-      throw new BadRequestException(error.message);
+      return response.status(error?.status ? error.status : 500).json(error);
     }
   }
 
   @Get(':id/friends')
   @ApiOperation({summary : 'Get a list of friends of a specific user.'})
   @UseGuards(JwtGuard)
-  async getFriends(@Param('id') id: string) {
-    const userId = Number(id);
-    return this.usersService.getFriends(userId);
+  async getFriends(@Param('id') id: string, @Res() response : Response) {
+    try {
+      const userId = Number(id);
+      const friends = await this.usersService.getFriends(userId);
+
+      return response.status(200).json(friends);
+    }
+    catch (error) {
+      return response.status(error?.status ? error.status : 500).json(error);
+    }
   }
 
   @Post(':id/friends')
   @ApiOperation({summary : 'Add a user to the friend\'s list.'})
   @UseGuards(JwtGuard)
-  addFriend(@Param('id') id: string, @Body('friendId') friendId: number) {
-    const userId = Number(id);
-    return this.usersService.addFriend(userId, friendId);
+  async addFriend(@Param('id') id: string, @Body('friendId') friendId: number, @Res() response : Response) {
+    try {
+      const userId = Number(id);
+      const current = await this.usersService.addFriend(userId, friendId);
+
+      return response.status(201).json(current);
+    }
+    catch (error) {
+      return response.status(error?.status ? error.status : 500).json(error);
+    }
   }
 
   @Delete(':id/friends/:friendId')
   @ApiOperation({summary : 'Remove a user from friend\' list.'})
   @UseGuards(JwtGuard)
-  deleteFriend(@Param('id') id: number, @Param('friendId') friendId: number) {
-    const userId = Number(id);
-    const friendIdNumber = Number(friendId);
-    return this.usersService.deleteFriend(userId, friendIdNumber);
+  async deleteFriend(@Param('id') id: number, @Param('friendId') friendId: number, @Res() response : Response) {
+    try {
+      const userId = Number(id);
+      const friendIdNumber = Number(friendId);
+      const currentUser = await this.usersService.deleteFriend(userId, friendIdNumber);
+
+      return response.status(200).json(currentUser);
+    }
+    catch (error) {
+      return response.status(error?.status ? error.status : 500).json(error);
+    }
   }
 
   @ApiBody({ type: userIdDto })
@@ -123,7 +179,7 @@ export class UsersController extends PrismaClient {
 
       return response.status(200).json(user);
     } catch (error) {
-      return response.status(404).json(error);
+      return response.status(error?.status ? error.status : 500).json(error);
     }
   }
   @ApiOperation({ summary: 'Get leaderboard.' })
@@ -133,17 +189,17 @@ export class UsersController extends PrismaClient {
     try {
       return await this.usersService.getLeaderboard();
     } catch (error) {
-      throw new BadRequestException(error.message);
+      return response.status(error?.status ? error.status : 500).json(error);
     }
   }
   @ApiOperation({ summary: 'Get recent games.' })
   @UseGuards(JwtGuard)
   @Get(':userId/recentgames')
-  async getRecentGames(@Param('userId', ParseIntPipe) userId: number) {
+  async getRecentGames(@Param('userId', ParseIntPipe) userId: number, @Res() response : Response) {
     try {
       return await this.usersService.getRecentGames(userId);
     } catch (error) {
-      throw new BadRequestException(error.message);
+      return response.status(error?.status ? error.status : 500).json(error);
     }
   }
 

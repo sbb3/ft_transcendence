@@ -83,7 +83,7 @@ const RecentGames = (
               {recentGames?.length > 0 ? (
                 recentGames
                   .slice()
-                  ?.map(({ id, playerOne, playerTwo, createdAt, status, winnerId }) => (
+                  ?.map(({ id, playerOne, playerTwo, createdAt, winnerId }) => (
                     <Flex
                       key={id}
                       direction="row"
@@ -134,7 +134,7 @@ const RecentGames = (
                           fontWeight="semibold"
                           color="pong_cl_primary"
                         >
-                          {status}
+                          {"FINISHED"}
                         </Text>
                       </Stack>
                       <Stack direction="column" spacing={2} align="center">
@@ -145,7 +145,7 @@ const RecentGames = (
                           borderRadius="15px"
                           cursor={"pointer"}
                           onClick={() =>
-                            navigate(`/profile/${playerTwo?.originalUsername}`)
+                            navigate(`/profile/${playerTwo?.username}`)
                           }
                         />
                         <Text

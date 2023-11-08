@@ -33,11 +33,11 @@ export class UsersService extends PrismaClient {
 
   async findOneById(id: string) {
     const user = await this.user.findUnique({
-      where: { id: parseInt(id, 10) }, // Assuming your ID is an integer
+      where: { id: parseInt(id, 10) },
     });
 
     if (!user) {
-      throw new NotFoundException(`User with ID ${id} not found`);
+      throw new NotFoundException(`User not found.`);
     }
 
     return user;
@@ -51,7 +51,7 @@ export class UsersService extends PrismaClient {
     });
 
     if (!user) {
-      throw new NotFoundException('user not found by username');
+      throw new NotFoundException('User not found.');
     }
     return user;
   }

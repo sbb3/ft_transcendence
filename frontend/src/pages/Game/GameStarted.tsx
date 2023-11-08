@@ -33,7 +33,6 @@ const GameStarted = ({ handleGameEnded }) => {
     winnerId,
   }: {
     winnerId: number;
-    gotNewAchievement: boolean;
   }) => {
     if (winnerId === currentUser?.id) {
       (winnerId === gameData?.players[0]?.id) ? setPlayerOneScore(prevScore => prevScore + 1) : setPlayerTwoScore(prevScore => prevScore + 1);
@@ -57,6 +56,7 @@ const GameStarted = ({ handleGameEnded }) => {
     }
     socket?.close();
   };
+  
 
   const mvPaddleEvent = (paddle: Paddle) => {
     // console.log("I just emitted a mvBootPaddle event loooopeeez");
@@ -98,7 +98,7 @@ const GameStarted = ({ handleGameEnded }) => {
   useEffect(() => {
     if (!int && socket) {
       setInt(true);
-      socket?.emit("initMyP", gameData?.room, gameData?.players[0].id, gameData?.id);
+      socket?.emit("initMyP", gameData?.room, currentUser.id, gameData?.id);
       socket?.on("initMyP", initPaddleSocket);
       if (canvasRef.current && bool)
         canvasRef.current.addEventListener("mousemove", eventPaddel);

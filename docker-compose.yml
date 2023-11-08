@@ -11,27 +11,27 @@ services:
     volumes:
       - postgres:/var/lib/postgresql/data
 
-  # frontend:
-  #   build: frontend
-  #   env_file: .env
-  #   container_name: frontend
-  #   hostname: frontend
-  #   restart: always
-  #   ports:
-  #     - "80:80"
-  #   depends_on:
-  #     - db
+  frontend:
+    build: frontend
+    env_file: .env
+    container_name: frontend
+    hostname: frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - db
 
-  # backend:
-  #   build: backend
-  #   env_file: .env
-  #   container_name: backend
-  #   hostname: backend
-  #   restart: always
-  #   ports:
-  #     - "3000:3000"
-  #   depends_on:
-  #     - db
+  backend:
+    build: backend
+    env_file: .env
+    container_name: backend
+    hostname: backend
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
 
 volumes:
   postgres:

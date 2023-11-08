@@ -89,38 +89,37 @@ export class GameGateway
 
 	private idUserInRoom(socketId) {
 		for (const value of this.bootMap.values()) {
-			if (value.socket == socketId) return value.idUser;
+			if (value.socket.id == socketId.id) return value.idUser;
 		}
 		for (const value of this.roomMap.values()) {
-			if (value.socket_first == socketId || value.socket_second == socketId)
+			if (value.socket_first.id == socketId.id)
 				return value.idFirstPlayer;
+			else if (value.socket_second.id == socketId.id)
+				return value.idSecondPlayer;
 		}
 		return null;
 	}
 
 	handleDisconnect(client: Socket) {
+		let tmp = this.idUserInRoom(client);
 
-		const id_user = this.idUserInRoom(client);
-		if (this.bootMap.has(parseInt(id_user, 10))) {
+		if (this.bootMap.has(parseInt(tmp, 10))) {
+			const id_user = this.idUserInRoom(client);
 			clearInterval(this.bootMap.get(parseInt(id_user, 10)).intervalId);
 			this.wss.to(client.id).emit('gameOver', parseInt(id_user, 10));
 			this.bootMap.delete(parseInt(id_user, 10));
 		}
 		else {
-			const room = this.findKeyByValue(this.roomMap, id_user);
+			const room = this.findKeyByValue(this.roomMap, tmp);
 			if (!room)
 				return;
-
 			const val = this.roomMap.get(room);
 			if (!val) {
 				return;
 			}
-
-			if (val.ball.score_her != 5 && val.ball.score_my != 5) {
-				this.wss.to(room).emit('befforTime');
-			}
 			if (!this.roomMap.get(room).endGame) {
 				this.roomMap.get(room).endGame == true;
+				const id_user = this.idUserInRoom(client);
 				this.endGame({
 					data: {
 						client: client,
@@ -137,52 +136,6 @@ export class GameGateway
 			}
 		}
 	}
-	// private endGame(info) {
-	// 	const room = this.roomMap.get(info.data.room);
-	// 	clearInterval(room.intervalId);
-	// 	const id_player_one = room.idFirstPlayer;
-	// 	const id_player_two = room.idSecondPlayer;
-
-	// 	let player = '-1';
-	// 	if (this.roomMap.get(info.data.room).ball.score_my >= 5) {
-	// 		player = this.roomMap.get(info.data.room).idFirstPlayer
-	// 		// this.wss.to(info.data.room).emit('gameOver', player);
-	// 	}
-
-	// 	else if (this.roomMap.get(info.data.room).ball.score_her >= 5) {
-	// 		player = this.roomMap.get(info.data.room).idSecondPlayer
-	// 		// this.wss.to(info.data.room).emit('gameOver', player);
-	// 	}
-
-	// 	else {
-	// 		if (this.roomMap.get(info.data.room).idSecondPlayer != info.data.id_player) {
-	// 			player = this.roomMap.get(info.data.room).idSecondPlayer
-	// 		}
-	// 		else {
-	// 			player = this.roomMap.get(info.data.room).idFirstPlayer
-	// 		}
-	// 	}
-
-
-	// 	this.gameService.updateUserGameStatus(parseInt(id_player_one, 10), "online");
-	// 	this.gameService.updateUserGameStatus(parseInt(id_player_two, 10), "online");
-
-
-
-	// 	this.wss.to(info.data.room).emit('gameOver', player);
-	// 	this.roomMap.get(info.data.room).socket_first.leave(info.data.room);
-	// 	this.roomMap.get(info.data.room).socket_second.leave(info.data.room);
-
-	// 	this.gameService.updatGameEnd({
-	// 		gameId: parseInt(info.data.game_id, 10),
-	// 		id_winer: parseInt(player, 10),
-	// 		status: "FINISHED",
-	// 		player_one_score: info.playersScore.score_my,
-	// 		player_two_score: info.playersScore.score_her,
-	// 	});
-	// 	this.roomMap.delete(info.data.room);
-
-	// }
 
 	private async endGame(info) {
 		const room = this.roomMap.get(info.data.room);
@@ -213,11 +166,13 @@ export class GameGateway
 					id_player_one,
 				);
 				player = id_player_two;
+				console.log("Here first condition.")
 			} else {
 				this.gameService.updatePlayerLostGames(
 					id_player_two,
 				);
 				player = id_player_one;
+				console.log("Here second condition.")
 			}
 		}
 
@@ -266,7 +221,7 @@ export class GameGateway
 			if (!game) {
 				return;
 			}
-			if (!this.roomMap.has(data[0])) {
+			if (!this.roomMap.has(data[0]) && data[1] == game.player_one_id) {
 				client.join(data[0]);
 				this.roomMap.set(data[0], {
 					startGame: false,
@@ -275,7 +230,7 @@ export class GameGateway
 					idFirstPlayer: game.player_one_id.toString(),
 					socket_first: client,
 					idSecondPlayer: '',
-					socket_second: '',
+					socket_second: null,
 					myPaddle: Object.assign({}, this.myP),
 					herPaddle: Object.assign({}, this.herP),
 					ball: Object.assign({}, this.ball),
@@ -283,7 +238,44 @@ export class GameGateway
 					is_empty: false,
 					canvasState: this.canvaS,
 				});
-			} else {
+			}
+			else if (!this.roomMap.has(data[0]) && data[1] == game.player_two_id)
+			{
+				client.join(data[0]);
+				this.roomMap.set(data[0], {
+					startGame: false,
+					endGame: false,
+					id_game: data[2],
+					idFirstPlayer: '',
+					socket_first: null,
+					idSecondPlayer: game.player_two_id.toString(),
+					socket_second: client,
+					myPaddle: Object.assign({}, this.myP),
+					herPaddle: Object.assign({}, this.herP),
+					ball: Object.assign({}, this.ball),
+					intervalId: {},
+					is_empty: false,
+					canvasState: this.canvaS,
+				});
+			}
+			else if (this.roomMap.has(data[0]) && data[1] == game.player_one_id) {
+				client.join(data[0]);
+				this.roomMap.set(data[0], {
+					...this.roomMap.get(data[0]),
+					idFirstPlayer: game.player_one_id.toString(),
+					socket_first: client,
+				});
+				this.gameService.updateUserGameStatus(
+					parseInt(this.roomMap.get(data[0]).idFirstPlayer, 10),
+					'playing',
+				);
+				this.gameService.updateUserGameStatus(
+					parseInt(this.roomMap.get(data[0]).idSecondPlayer, 10),
+					'playing',
+				);
+			}
+			else if (this.roomMap.has(data[0]) && data[1] == game.player_two_id)
+			{
 				client.join(data[0]);
 				this.roomMap.set(data[0], {
 					...this.roomMap.get(data[0]),
@@ -374,12 +366,12 @@ export class GameGateway
 					this.bootMap.get(data.id_player).ball.score_my >= 5 ||
 					this.bootMap.get(data.id_player).ball.score_her >= 5
 				) {
-					if (this.bootMap.get(data.id_player).ball.score_my >= 5)
-						this.wss.to(data.client.id).emit('gameOver', data.id_player);
-					else this.wss.to(data.client.id).emit('gameOver', -1);
 					clearInterval(
 						this.bootMap.get(parseInt(data.id_player, 10)).intervalId,
 					);
+					if (this.bootMap.get(data.id_player).ball.score_my >= 5)
+						this.wss.to(data.client.id).emit('gameOver', data.id_player);
+					else this.wss.to(data.client.id).emit('gameOver', -1);
 					this.bootMap.delete(parseInt(data.id_player, 10));
 					return;
 				}
