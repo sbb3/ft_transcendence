@@ -1,7 +1,11 @@
-import { Body, Controller, Get, Param, Post, Logger } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Logger, UseGuards, Res } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { GameService } from './game.service';
+import { JwtGuard } from 'src/auth/guards/jwt.guard';
+import { Response } from 'express';
+import { ApiExcludeController } from '@nestjs/swagger';
 
+@ApiExcludeController()
 @Controller('game')
 export class GameController {
 	constructor(private readonly gameService: GameService) { }
@@ -9,23 +13,54 @@ export class GameController {
 	private readonly logger = new Logger(Controller.name);
 
 	@Get(':id')
-	findOne(@Param('id') id: string) {
-		return this.gameService.findOneById(id);
+	@UseGuards(JwtGuard)
+	findOne(@Param('id') id: string, @Res() response : Response) {
+		try {
+			const game = this.gameService.findOneById(id);
+
+			return response.status(200).json(game);
+		}
+		catch (error) {
+			return response.status(error?.status ? error.status : 500).json(error);
+		}
 	}
 
 	@Get()
-	findAll() {
-		return this.gameService.findAllGames();
+	@UseGuards(JwtGuard)
+	findAll(@Res() response : Response) {
+		try {
+			const allGames = this.gameService.findAllGames();
+
+			return response.status(200).json(allGames);
+		}
+		catch (error) {
+			return response.status(error?.status ? error.status : 500).json(error);
+		}
 	}
 
 	@Post()
-	updateUser(@Param('userid') userid: number, status: string) {
-		this.gameService.updateUserGameStatus(userid, status);
+	@UseGuards(JwtGuard)
+	updateUser(@Param('userid') userid: number, status: string, @Res() response : Response) {
+		try {
+			this.gameService.updateUserGameStatus(userid, status);
+
+			return response.status(201).json({message : 'User has been updated.'});
+		}
+		catch (error) {
+			return response.status(error?.status ? error?.status : 500).json(error);
+		}
 	}
 
-
 	@Post()
-	async creat(@Body() body: Prisma.gameCreateInput) {
-		return this.gameService.createGame(body);
+	@UseGuards(JwtGuard)
+	async create(@Body() body: Prisma.gameCreateInput, @Res() response : Response) {
+		try {
+			const game = this.gameService.createGame(body);
+
+			return response.status(201).json({message : 'A new game has been created.'});
+		}
+		catch (error) {
+			return response.status(error.status ? error.status : 500).json(error);
+		}
 	}
 }

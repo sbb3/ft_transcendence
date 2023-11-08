@@ -33,13 +33,11 @@ export class NotificationService extends PrismaClient {
       }
     }
     if (createNotificationDto.type === 'gameRequest') {
-      console.log("in game request")
       if (receiver.blocked.includes(sender.id)) {
         throw new BadRequestException(
           'You cannot send a game request to a player who is already blocking you.',
         );
       }
-      console.log("in game request 2")
       if (receiver.status === 'playing') {
         throw new BadRequestException(
           'You cannot send a game request to a player who is already playing.',

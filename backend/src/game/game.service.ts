@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { Prisma, game, PrismaClient } from '@prisma/client';
 import { UsersService } from 'src/users/users.service';
 
@@ -12,9 +12,9 @@ export class GameService extends PrismaClient {
 		const game = await this.game.create({
 			data,
 		});
-		if (!game) {
-			console.log('errro lopez');
-		}
+
+		if (!game)
+			throw new InternalServerErrorException('Could not create a new game.');
 		return game;
 	}
 
@@ -23,9 +23,9 @@ export class GameService extends PrismaClient {
 			where: { id: parseInt(id_game, 10) },
 		});
 		if (!game) {
-			throw new NotFoundException(`Game with ID ${id_game} not found`);
+			throw new NotFoundException('Game not found.');
 		}
-		return;
+		return game;
 	}
 
 	async updatGameEnd({
@@ -69,7 +69,7 @@ export class GameService extends PrismaClient {
 			},
 		});
 
-		if (!user) throw new NotFoundException();
+		if (!user) throw new NotFoundException('User to update not found.');
 		return user;
 	}
 
@@ -145,8 +145,6 @@ export class GameService extends PrismaClient {
 		}
 		return user.achievements;
 	}
-
-
 
 	async findAllGames() {
 		return await this.game.findMany();
