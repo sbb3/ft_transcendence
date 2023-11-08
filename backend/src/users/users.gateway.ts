@@ -17,8 +17,7 @@ import { Server, Socket } from 'socket.io';
 })
 export class UserGateway
   extends PrismaClient
-  implements OnGatewayConnection, OnGatewayDisconnect
-{
+  implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server: Server;
 
   private connectedUsers: Set<string> = new Set();
@@ -65,5 +64,16 @@ export class UserGateway
 
   async sendOnlineUsers(dataToSend: any) {
     this.server.emit('onlineUsers', { data: dataToSend });
+  }
+
+  async sendToAllUsersThatNewUserIsOnline(dataToSend: any) {
+    this.server.emit('newuser', {
+      data: {
+        id: dataToSend.id,
+        username: dataToSend.username,
+        avatar: dataToSend.avatar,
+        name: dataToSend.name,
+      }
+    });
   }
 }

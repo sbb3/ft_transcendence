@@ -6,15 +6,13 @@ import io, { Socket } from "socket.io-client";
 import { draw, } from "./DrawUtils";
 import { useSelector } from "react-redux";
 import { useToast } from "@chakra-ui/react";
-import store from "src/app/store";
-import { setGameEnded } from "src/features/game/gameSlice";
 
-const GameStarted = ({ gameData = {}, handleGameEnded }) => {
+const GameStarted = ({ handleGameEnded }) => {
   useTitle("Game");
   const currentUser = useSelector((state: any) => state?.user?.currentUser);
+  const gameData = useSelector((state: any) => state?.game?.gameData);
   const toast = useToast();
   const [gameResult, setGameResult] = useState<string>("");
-  const [gotAnAchievement, setGotAnAchievement] = useState<boolean>(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [int, setInt] = useState(false);
   const [bool, setBool] = useState<boolean>(true);
@@ -22,7 +20,7 @@ const GameStarted = ({ gameData = {}, handleGameEnded }) => {
   const [socket, setSocket] = useState<Socket>();
   const [playerOnePaddle, setPlayerOnePaddle] = useState<Paddle>();
   const [playerTwoPaddle, setPlayerTwoPaddle] = useState<Paddle>();
-  const [ball, setBall] = useState<Ball>();
+  const [ball, setBall] = useState<any>();
   const [canvaS, setCanvaS] = useState<canvaState>();
   const [playerOneScore, setPlayerOneScore] = useState<number>(0);
   const [playerTwoScore, setPlayerTwoScore] = useState<number>(0);
@@ -57,7 +55,6 @@ const GameStarted = ({ gameData = {}, handleGameEnded }) => {
         isClosable: true,
       });
     }
-    // handleGameEnded();
     socket?.close();
   };
 
@@ -133,8 +130,8 @@ const GameStarted = ({ gameData = {}, handleGameEnded }) => {
 
 
   const eventPaddel = (event) => {
-    let rect = canvasRef.current.getBoundingClientRect();
-    const num = event.clientY - rect.top;
+    const rect = canvasRef?.current?.getBoundingClientRect() as DOMRect;
+    const num = event.clientY - rect?.top;
     setBool(false);
 
     // console.log("I just emitted a mvPAddle event");
@@ -177,9 +174,7 @@ const GameStarted = ({ gameData = {}, handleGameEnded }) => {
           textTransform={"uppercase"}
           borderRadius={5}
           colorScheme="orange"
-          onClick={() => {
-            store.dispatch(setGameEnded());
-          }}
+          onClick={handleGameEnded}
         >
           Play again
         </Button>

@@ -84,81 +84,79 @@ const RecentGames = (
                 recentGames
                   .slice()
                   ?.map(({ id, playerOne, playerTwo, createdAt, status, winnerId }) => (
-                    <>
-                      <Flex
-                        key={id}
-                        direction="row"
-                        justify="center"
-                        align="start"
-                        gap={"18px"}
-                        borderColor={
-                          winnerId === currentUser?.id
-                            ? "green.400"
-                            : "red.400"
-                        }
-                        borderWidth="1px"
-                        borderRadius="15px"
-                        p={2}
-                      >
-                        <Stack direction="column" spacing={2} align="center">
-                          <Avatar
-                            size="lg"
-                            name={playerOne?.name}
-                            src={playerOne?.avatar}
-                            borderRadius="15px"
-                          />
-                          <Text
-                            fontSize="12px"
-                            fontWeight="medium"
-                            color="whiteAlpha.800"
-                          >
-                            {playerOne?.username}
-                          </Text>
-                        </Stack>
-                        <Stack direction="column" spacing={0.5} align="center">
-                          <Text
-                            fontSize="10px"
-                            fontWeight="normal"
-                            color="gray.400"
-                          >
-                            {dayjs(createdAt).fromNow()}
-                          </Text>
-                          <Text
-                            fontSize="20px"
-                            fontWeight="semibold"
-                            color="whiteAlpha.900"
-                          >
-                            {`${playerOne?.score} - ${playerTwo?.score}`}
-                          </Text>
-                          <Text
-                            fontSize="13px"
-                            fontWeight="semibold"
-                            color="pong_cl_primary"
-                          >
-                            {status}
-                          </Text>
-                        </Stack>
-                        <Stack direction="column" spacing={2} align="center">
-                          <Avatar
-                            size="lg"
-                            name={playerTwo?.name}
-                            src={playerTwo?.avatar}
-                            borderRadius="15px"
-                            cursor={"pointer"}
-                            onClick={() =>
-                              navigate(`/profile/${playerTwo?.originalUsername}`)
-                            }
-                          />
-                          <Text
-                            fontSize="12px"
-                            fontWeight="medium"
-                            color="whiteAlpha.800"
-                          >
-                            {playerTwo?.username}
-                          </Text>
-                        </Stack>
-                      </Flex>
-                    </>
+                    <Flex
+                      key={id}
+                      direction="row"
+                      justify="center"
+                      align="start"
+                      gap={"18px"}
+                      borderColor={
+                        winnerId === currentUser?.id
+                          ? "green.400"
+                          : "red.400"
+                      }
+                      borderWidth="1px"
+                      borderRadius="15px"
+                      p={2}
+                    >
+                      <Stack direction="column" spacing={2} align="center">
+                        <Avatar
+                          size="lg"
+                          name={playerOne?.name}
+                          src={playerOne?.avatar}
+                          borderRadius="15px"
+                        />
+                        <Text
+                          fontSize="12px"
+                          fontWeight="medium"
+                          color="whiteAlpha.800"
+                        >
+                          {playerOne?.username}
+                        </Text>
+                      </Stack>
+                      <Stack direction="column" spacing={0.5} align="center">
+                        <Text
+                          fontSize="10px"
+                          fontWeight="normal"
+                          color="gray.400"
+                        >
+                          {dayjs(createdAt).fromNow()}
+                        </Text>
+                        <Text
+                          fontSize="20px"
+                          fontWeight="semibold"
+                          color="whiteAlpha.900"
+                        >
+                          {`${playerOne?.score} - ${playerTwo?.score}`}
+                        </Text>
+                        <Text
+                          fontSize="13px"
+                          fontWeight="semibold"
+                          color="pong_cl_primary"
+                        >
+                          {status}
+                        </Text>
+                      </Stack>
+                      <Stack direction="column" spacing={2} align="center">
+                        <Avatar
+                          size="lg"
+                          name={playerTwo?.name}
+                          src={playerTwo?.avatar}
+                          borderRadius="15px"
+                          cursor={"pointer"}
+                          onClick={() =>
+                            navigate(`/profile/${playerTwo?.originalUsername}`)
+                          }
+                        />
+                        <Text
+                          fontSize="12px"
+                          fontWeight="medium"
+                          color="whiteAlpha.800"
+                        >
+                          {playerTwo?.username}
+                        </Text>
+                      </Stack>
+                    </Flex>
                   ))
               ) : (
                 <Text

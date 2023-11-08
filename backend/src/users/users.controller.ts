@@ -6,7 +6,6 @@ import {
   Post,
   Delete,
   BadRequestException,
-  Logger,
   Body,
   Res,
   UploadedFile,
@@ -29,10 +28,6 @@ export class UsersController extends PrismaClient {
     super();
   }
 
-  //for debug
-  private readonly logger = new Logger(Controller.name);
-
-  // usersService: any;
   @Get()
   findAll() {
     return this.usersService.findAllUsers();
@@ -40,7 +35,6 @@ export class UsersController extends PrismaClient {
 
   @Get('user/:id')
   findOne(@Param('id') id: string) {
-    this.logger.log('\nfind by id\n');
     return this.usersService.findOneById(id);
   }
 

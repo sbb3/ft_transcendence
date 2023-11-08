@@ -9,10 +9,13 @@ import { jwtConstants } from './auth.constants';
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { generateUsername } from 'unique-username-generator';
+import { UserGateway } from 'src/users/users.gateway';
 
 @Injectable()
 export class AuthService extends PrismaClient {
-  constructor(private jwtService: JwtService) {
+  constructor(private jwtService: JwtService,
+    private userWebSocketGateway: UserGateway
+  ) {
     super();
   }
 
@@ -100,6 +103,7 @@ export class AuthService extends PrismaClient {
     allInfos.status = 'online';
     const dbUser = await this.createUserIfNotFound(allInfos);
     const refreshToken = await this.generateRefreshToken({ id: dbUser.id });
+    this.userWebSocketGateway.sendToAllUsersThatNewUserIsOnline(dbUser);
     this.initCookie(
       'refresh_token',
       refreshToken,

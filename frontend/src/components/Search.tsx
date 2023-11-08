@@ -1,7 +1,6 @@
 import { SearchIcon } from "@chakra-ui/icons";
 import {
   Avatar,
-  AvatarBadge,
   Flex,
   InputGroup,
   InputLeftElement,
@@ -33,8 +32,8 @@ const Search = () => {
     isError,
   } = useGetUsersQuery({
     refetchOnMountOrArgChange: true,
-    refetchOnFocus: true,
-    refetchOnReconnect: true,
+    // refetchOnFocus: true,
+    // refetchOnReconnect: true,
   });
 
   if (isError) {
@@ -122,7 +121,7 @@ const Search = () => {
                 users?.map((user) => (
                   <AutoCompleteItem
                     key={user?.id}
-                    value={user.name}
+                    value={user?.name}
                     textTransform="capitalize"
                     bg="transparent"
                     borderRadius={8}
@@ -150,15 +149,15 @@ const Search = () => {
                         w={"full"}
                         onClick={() => {
                           setQuery("");
-                          navigate(`/profile/${user.username}`, {
+                          navigate(`/profile/${user?.username}`, {
                             state: { user },
                           });
                         }}
                       >
                         <Avatar
                           size="sm"
-                          name={user.name}
-                          src={user.avatar}
+                          name={user?.name}
+                          src={user?.avatar}
                           borderWidth="1px"
                         />
                         <Text
@@ -168,7 +167,7 @@ const Search = () => {
                           ml={2}
                           flex={1}
                         >
-                          {user.name}
+                          {user?.name}
                         </Text>
                       </Flex>
                     </Flex>

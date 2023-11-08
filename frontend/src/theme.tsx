@@ -47,8 +47,8 @@ const theme = extendTheme({
     Drawer,
   },
   fonts: {
-    heading: `'Montserrat', "Poppins", sans-serif`,
-    body: `'Montserrat', "Poppins", sans-serif`,
+    heading: `'Montserrat', sans-serif`,
+    body: `'Montserrat', sans-serif`,
   },
   styles: {
     global: {
@@ -57,7 +57,7 @@ const theme = extendTheme({
         width: "100%",
         m: 0,
         p: 0,
-        fontFamily: `'Montserrat', "Poppins", sans-serif`,
+        fontFamily: `'Montserrat', sans-serif`,
       },
       body: {
         display: "flex",
@@ -70,7 +70,7 @@ const theme = extendTheme({
         boxSizing: "border-box",
         bg: "pong_bg_primary",
         color: "whiteAlpha.900",
-        fontFamily: `'Montserrat', "Poppins", sans-serif`,
+        fontFamily: `'Montserrat', sans-serif`,
         textDecoration: "none",
       },
       a: {

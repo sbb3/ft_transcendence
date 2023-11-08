@@ -35,9 +35,7 @@ const Game = () => {
   const socket = useRef<any>();
   const { matchmakingLoading } = useSelector((state: any) => state?.game);
   const { gameStarted } = useSelector((state: any) => state?.game);
-  const { gameData } = useSelector((state: any) => state?.game);
   const [gameType, setGameType] = useState<"multiplayer" | "bot">("bot");
-
 
   const {
     // register,
@@ -94,7 +92,7 @@ const Game = () => {
   }
 
   const handleGameEnded = async () => {
-    store.dispatch(await setGameEnded());
+    store.dispatch(setGameEnded());
   }
 
   let content;
@@ -138,7 +136,7 @@ const Game = () => {
   else if (gameStarted) {
     content = (
       <>
-        <GameStarted gameData={gameData} handleGameEnded={handleGameEnded} />
+        <GameStarted handleGameEnded={handleGameEnded} />
       </>
 
     );

@@ -8,14 +8,13 @@ interface SocketClientProps {
 export const createSocketClient = ({
   api_url = "http://localhost:5173",
 }: SocketClientProps) => {
-  let socket;
 
-  socket = io(api_url, {
+  const socket = io(api_url, {
     transports: ["websocket"],
-    reconnection: false,
-    // reconnection: true,
-    // reconnectionAttempts: 10,
-    // reconnectionDelay: 1000,
+    // reconnection: false,
+    reconnection: true,
+    reconnectionAttempts: 10,
+    reconnectionDelay: 2000,
     // rejectUnauthorized: false,
     query: {
       token: store.getState().auth.accessToken,

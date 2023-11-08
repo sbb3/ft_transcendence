@@ -30,7 +30,6 @@ import { v4 as uuidv4 } from "uuid";
 import { useCreateConversationWithoutMessageMutation } from "src/features/conversations/conversationsApi";
 import { useSelector } from "react-redux";
 import notificationsApi from "src/features/notifications/notificationsApi";
-import store from "src/app/store";
 import { CgUnblock } from "react-icons/cg";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";

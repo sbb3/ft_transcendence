@@ -88,6 +88,9 @@ export class NotificationService extends PrismaClient {
 
   async getNotifications() {
     const notifications = await this.notification.findMany();
+    if (notifications.length === 0) {
+      return [];
+    }
     const formattedNotifications = await Promise.all(
       notifications.map(async (notification) => ({
         id: notification.id,
@@ -109,14 +112,12 @@ export class NotificationService extends PrismaClient {
   }
 
   async deleteNotification(id: string) {
-    console.log('id: ', id);
     const notification = await this.notification.findUnique({
       where: { id },
     });
     if (!notification) {
       throw new NotFoundException(`Notification with ID ${id} not found`);
     }
-    console.log('notification: ', notification);
     await this.notification.delete({
       where: { id },
     });

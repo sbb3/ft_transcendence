@@ -397,7 +397,7 @@ const Profile = ({ user }: { user: UserInterface }) => {
                 w="100%"
                 h="100%"
                 p={2}
-                justify="start"
+                justify="space-around"
                 align={"center"}
               // overflowX="hidden"
               >
@@ -448,7 +448,7 @@ const Profile = ({ user }: { user: UserInterface }) => {
           justify="flex-start"
         >
           <Text fontSize="16px" fontWeight="medium" color="whiteAlpha.900">
-            Rank
+            Level
           </Text>
 
           <Flex
@@ -466,7 +466,7 @@ const Profile = ({ user }: { user: UserInterface }) => {
           >
             <Flex direction="row" gap={3} align="center" justify={"start"}>
               <Text fontSize="13px" fontWeight="regular" color="whiteAlpha.900">
-                {user?.rank}
+                {user?.level}
               </Text>
               <Avatar size="sm" name={user?.name} src={user?.avatar} />
               <Text fontSize="13px" fontWeight="regular" color="whiteAlpha.900">

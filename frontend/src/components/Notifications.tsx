@@ -21,7 +21,7 @@ import { useNavigate } from "react-router-dom";
 import { useDeleteNotificationMutation } from "src/features/notifications/notificationsApi";
 import { CloseIcon } from "@chakra-ui/icons";
 import usersApi, { useAddFriendMutation } from "src/features/users/usersApi";
-import { useAcceptGameChallengeMutation } from "src/features/game/gameApi";
+// import { useAcceptGameChallengeMutation } from "src/features/game/gameApi";
 import { useSelector } from "react-redux";
 import { useEffect, useRef } from "react";
 import { createSocketClient } from "src/app/socket/client";
@@ -44,7 +44,6 @@ function Notifications() {
     };
   }, []);
 
-  // const location = useLocation();
   const {
     data: notifications = [],
     isLoading: isNotificationsLoading,
@@ -60,8 +59,8 @@ function Notifications() {
 
   const [addFriend, { isLoading: isAddingFriend }] = useAddFriendMutation();
 
-  const [acceptGameChallenge, { isLoading: isAcceptingGameChallenge }] =
-    useAcceptGameChallengeMutation();
+  // const [acceptGameChallenge, { isLoading: isAcceptingGameChallenge }] =
+  //   useAcceptGameChallengeMutation();
 
   const [triggerGetCurrentUser, { isLoading: isLoadingGetCurrentUser }] =
     usersApi.useLazyGetCurrentUserQuery();
@@ -451,13 +450,13 @@ function Notifications() {
                         icon={<Icon as={FaCheck} />}
                         isLoading={
                           isDeleting ||
-                          isLoadingGetCurrentUser ||
-                          isAcceptingGameChallenge
+                          isLoadingGetCurrentUser
+                          // isAcceptingGameChallenge
                         }
                         isDisabled={
                           isDeleting ||
-                          isLoadingGetCurrentUser ||
-                          isAcceptingGameChallenge
+                          isLoadingGetCurrentUser
+                          // isAcceptingGameChallenge
                         }
                         _hover={{
                           bg: "white",

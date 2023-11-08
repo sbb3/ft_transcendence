@@ -23,11 +23,14 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { userIdDto } from 'src/users/dto/creatuserDto';
+import { PrismaClient } from '@prisma/client';
 
 @ApiTags('auth')
 @Controller('auth')
-export class AuthController {
-  constructor(private authService: AuthService) {}
+export class AuthController extends PrismaClient {
+  constructor(private authService: AuthService) {
+    super();
+  }
 
   @ApiOperation({
     summary:
@@ -35,7 +38,7 @@ export class AuthController {
   })
   @Get('login')
   @UseGuards(FtGuard)
-  initOauth(@Req() request: Request) {}
+  initOauth(@Req() request: Request) { }
 
   @ApiExcludeEndpoint()
   @Get('signin')
@@ -60,7 +63,6 @@ export class AuthController {
       const payload = this.authService.decodeToken(refreshToken);
       const { id } = payload;
       const newAccessToken = await this.authService.generateAccessToken({ id });
-
       return res.json({ accessToken: newAccessToken, user: { id } });
     } catch (error) {
       if (error?.status) return res.status(error.status).json(error);

@@ -15,8 +15,20 @@ export class UsersService extends PrismaClient {
   }
 
   async findAllUsers() {
-    const users = await this.user.findMany();
-    return users;
+    try {
+      const users = await this.user.findMany({
+        select: {
+          id: true,
+          username: true,
+          avatar: true,
+          name: true,
+        },
+      });
+      return users;
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
   }
 
   async findOneById(id: string) {

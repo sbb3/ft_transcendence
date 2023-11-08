@@ -6,6 +6,7 @@ import { useGetLeaderboardQuery } from "src/features/leaderboard/leaderboardApi"
 import LeaderboardCard from "./LeaderboardCard";
 import TopThreePlayers from "./TopThreePlayers";
 import { BeatLoader } from "react-spinners";
+import { useNavigate } from "react-router-dom";
 
 interface LeaderboardPlayer {
   id: number;
@@ -17,6 +18,8 @@ interface LeaderboardPlayer {
 
 const Leaderboard = () => {
   const toast = useToast();
+  const navigate = useNavigate();
+
   const {
     data: leaderboardData,
     isLoading,
@@ -92,7 +95,31 @@ const Leaderboard = () => {
                 >
                   {leaderboardData?.length > 0 ? (
                     leaderboardData?.map((player: LeaderboardPlayer) => (
-                      <LeaderboardCard player={player} />
+                      <Flex
+                        key={player?.id}
+                        direction="row"
+                        justify="space-between"
+                        w="220px"
+                        h="40px"
+                        px={2}
+                        gap={2}
+                        borderRadius="22px"
+                        align="center"
+                        cursor={"pointer"}
+                        bgColor={
+                          player?.level == 1
+                            ? "#FFCA28"
+                            : player?.level == 2
+                              ? "#F4F4F4"
+                              : player?.level == 3
+                                ? "#FF8228"
+                                : "rgba(255, 255, 255, 0.2)"
+                        }
+                        onClick={() => navigate(`/profile/${player?.username}`)}
+                      >
+
+                        <LeaderboardCard player={player} />
+                      </Flex>
                     ))
                   ) : (
                     <Text

@@ -109,9 +109,34 @@ const Friends = () => {
           isLoading={isLoadingFriends || isFetchingFriends}
           openOnFocus
           defaultIsOpen={true}
-          listAllValuesOnFocus
+          listAllValuesOnFocus={true}
+          suggestWhenEmpty={true}
+          emptyState={
+            <Flex
+              direction="column"
+              align="center"
+              justify="center"
+              w="full"
+              h="full"
+            >
+              <Text
+                fontSize="14px"
+                fontWeight="regular"
+                color="whiteAlpha.900"
+                letterSpacing={1}
+              >
+                No friend found
+              </Text>
+            </Flex>
+          }
+
           closeOnSelect={false}
-        // flip={false}
+          closeOnBlur={false}
+          emphasize={true}
+          selectOnFocus
+          focusInputOnSelect
+          freeSolo
+          flip={false}
         >
           <InputGroup w="full">
             <InputLeftElement
@@ -167,6 +192,7 @@ const Friends = () => {
               padding: "0px",
             }}
             closeOnSelect={false}
+            closeOnBlur={false}
             p={1}
             mr={2}
           >

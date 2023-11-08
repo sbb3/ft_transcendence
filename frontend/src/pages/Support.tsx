@@ -55,10 +55,12 @@ function Support() {
   });
 
   const onSubmit = async (data: any) => {
-    console.log(data);
     try {
       await submit(data);
-      reset();
+      reset({
+        email: "",
+        msg: "",
+      });
     } catch (error) {
       console.log("error: ", error);
     }

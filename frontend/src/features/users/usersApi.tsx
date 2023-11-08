@@ -7,7 +7,7 @@ const usersApi = apiSlice.injectEndpoints({
     getUsers: builder.query({
       query: () => "users",
       providesTags: ["getUsers"],
-      async onCacheEntryAdded({
+      async onCacheEntryAdded(_arg: any, {
         updateCachedData,
         cacheDataLoaded,
         cacheEntryRemoved,
@@ -18,16 +18,11 @@ const usersApi = apiSlice.injectEndpoints({
         try {
           await cacheDataLoaded;
           socket.on("newuser", (data: any) => {
-            console.log("incoming newuser: ", data);
             updateCachedData((draft: any) => {
               const user = draft?.find((u: any) => u.id === data?.data?.id);
               if (!user?.id) draft?.push(data?.data);
             });
-            // dispatch(
-            //   usersApi.util.prefetch("getUsers", undefined, {
-            //     force: true,
-            //   } as any)
-            // );
+
           });
         } catch (error) {
           console.log("error: ", error);
