@@ -9,6 +9,7 @@ import {
 } from '@nestjs/websockets';
 import { GameService } from './game.service';
 import { Server, Socket } from 'socket.io';
+import { PrismaClient } from '@prisma/client';
 
 
 @WebSocketGateway({
@@ -19,12 +20,14 @@ import { Server, Socket } from 'socket.io';
 	},
 })
 @Injectable()
-export class MatchmakingGateway
+export class MatchmakingGateway extends PrismaClient
 	implements OnGatewayInit, OnGatewayDisconnect, OnGatewayConnection {
 	constructor(
 		private readonly gameService: GameService,
 
-	) { }
+	) {
+		super();
+	}
 	queue = [];
 	i: number = 0;
 	room: string = 'room';
@@ -57,6 +60,8 @@ export class MatchmakingGateway
 		this.i++;
 		const user1 = await this.gameService.getUserById(data.challengerUserId);
 		const user2 = await this.gameService.getUserById(data.challengedUserId);
+		if (!user1 || !user2)
+			return ;
 		const game = await this.gameService.createGame({
 			player_one_id: data.challengerUserId,
 			player_two_id: data.challengedUserId,
@@ -88,6 +93,8 @@ export class MatchmakingGateway
 			return;
 		if (data.gameType === "bot") {
 			const user1 = await this.gameService.getUserById(data.userId);
+			if (!user1)
+				return ;
 			this.wss.emit('start_game', {
 				gameInfo: {
 					players: [user1],
@@ -98,6 +105,21 @@ export class MatchmakingGateway
 			return;
 		}
 		else {
+			if (this.queue.find(c => c.id == data.userId))
+			{
+				client.emit("alreadyInQueue", data.userId);
+				return ;
+			}
+			const currentUser = await this.user.findUnique({
+				where : {
+					id : data.userId,
+				}
+			});
+			if (currentUser.status == "playing")
+			{
+				client.emit("alreadyInGame", data.userId);
+				return ;
+			}
 			this.queue.push({
 				id : data.userId,
 				socketId : client.id
@@ -114,10 +136,13 @@ export class MatchmakingGateway
 					createdAt: new Date(),
 				};
 				this.i++;
-				// Should check if the game is created or not
 				const game = await this.gameService.createGame(gameTable);
+				if (!game)
+					return ;
 				const user1 = await this.gameService.getUserById(gameTable.player_one_id);
 				const user2 = await this.gameService.getUserById(gameTable.player_two_id);
+				if (!user1 || !user2)
+					return ;
 				this.wss.emit('start_game', {
 					gameInfo: {
 						id: game?.id,

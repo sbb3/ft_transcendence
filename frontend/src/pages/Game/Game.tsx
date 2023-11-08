@@ -59,6 +59,15 @@ const Game = () => {
     }
 
     socket?.current?.on("start_game", startGameEvent);
+    socket?.current?.on("alreadyInQueue", () => {
+        dispatch(setMatchmakingLoading(false));
+        dispatch(setGameStarted(false));
+
+    });
+    socket?.current?.on("alreadyInGame", () => {
+        dispatch(setMatchmakingLoading(false));
+        dispatch(setGameStarted(false));
+    })
 
     return () => {
       socket?.current?.off("start_game", startGameEvent);
