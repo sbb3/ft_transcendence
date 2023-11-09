@@ -306,8 +306,8 @@ const GameStarted = ({ handleGameEnded }) => {
         boxShadow={"0px 4px 24px -1px rgba(0, 0, 0, 0.35)"}
         backdropFilter={"blur(20px)"}
         // bgImage={`url('https://th.bing.com/th/id/OIG.70xG4FEh.BOmaKZtaYiG')`}
-        // background="radial-gradient(circle at 50%, rgb(255, 197, 61) 0%, rgb(255, 94, 7) 100%)"
-        bgImage={`url('/assets/img/game_bg_1.jpg')`}
+        background="radial-gradient(circle at 50%, rgb(255, 197, 61) 0%, rgb(255, 94, 7) 100%)"
+        // bgImage={`url('/assets/img/game_bg_1.jpg')`}
         bgSize="cover"
         bgRepeat="no-repeat"
         bgPos={"center"}

@@ -89,8 +89,6 @@ export class MatchmakingGateway extends PrismaClient
 	async initMyPa(client: Socket, data) {
 		const userStatus = await this.gameService.getUserStatus(data.userId);
 
-		console.log("Client id : " + client.id);
-		// console.log("Status " + userStatus);
 		if (userStatus !== "online")
 			return;
 		if (data.gameType === "bot") {

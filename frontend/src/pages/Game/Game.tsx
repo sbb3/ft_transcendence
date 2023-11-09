@@ -27,6 +27,7 @@ import GameStarted from "./GameStarted";
 import store from "src/app/store";
 import usersApi from "src/features/users/usersApi";
 import { setStatusInGame } from "src/features/users/usersSlice";
+import BotGame from "./botGame/BotGame";
 
 const Game = () => {
   useTitle("Game");
@@ -37,6 +38,8 @@ const Game = () => {
   const { matchmakingLoading } = useSelector((state: any) => state?.game);
   const { gameStarted } = useSelector((state: any) => state?.game);
   const [gameType, setGameType] = useState<"multiplayer" | "bot">("bot");
+  const [startBot, setStartBot] = useState(false);
+  const [botMode, setBotMode] = useState("");
 
   const {
     // register,
@@ -101,6 +104,15 @@ const Game = () => {
     });
   };
 
+  const handleStartingBot = async (data: any) => {
+    console.log("handleStartingBot data: ", data)
+    setStartBot(true);
+    setBotMode(data?.gameMode)
+    reset({
+      gameMode: "easy",
+    });
+  };
+
   const handleCancelMatchmaking = () => {
     dispatch(setMatchmakingLoading(false));
     dispatch(setGameEnded());
@@ -154,9 +166,16 @@ const Game = () => {
       <>
         <GameStarted handleGameEnded={handleGameEnded} />
       </>
-
     );
-  } else {
+  }
+  else if (startBot) {
+    content = (
+      <>
+        <BotGame botMode={botMode} />
+      </>
+    );
+  }
+   else {
     content = (
       <>
 
@@ -366,7 +385,16 @@ const Game = () => {
           textTransform={"uppercase"}
           borderRadius={5}
           colorScheme="orange"
-          onClick={handleSubmit(handleMatchmaking)}
+          onClick={() => {
+            console.log("gametype: ", gameType)
+            if (gameType === "bot") 
+            {
+              console.log("in first cond")
+              handleSubmit(handleStartingBot)()
+            }
+            else
+              handleSubmit(handleMatchmaking)()
+          }}
           isDisabled={matchmakingLoading}
           isLoading={matchmakingLoading}
           loadingText="Finding an opponent"
