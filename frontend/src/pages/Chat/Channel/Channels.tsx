@@ -64,8 +64,8 @@ const Channels = () => {
         <Flex justify="start" align="center" direction="row" gap="2px">
           <Menu
             gutter={14}
-            // computePositionOnMount={true}
-            // defaultIsOpen
+            computePositionOnMount={true}
+            defaultIsOpen
             preventOverflow={true}
             boundary="scrollParent"
             closeOnBlur={false}

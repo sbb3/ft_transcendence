@@ -26,6 +26,7 @@ import GridLoader from "react-spinners/GridLoader";
 import GameStarted from "./GameStarted";
 import store from "src/app/store";
 import usersApi from "src/features/users/usersApi";
+import { setStatusInGame } from "src/features/users/usersSlice";
 
 const Game = () => {
   useTitle("Game");
@@ -46,6 +47,9 @@ const Game = () => {
   } = useForm({});
 
   useEffect(() => {
+    store.dispatch(
+      setStatusInGame(true)
+    )
     socket.current = createSocketClient({
       api_url: import.meta.env.VITE_SERVER_MATCHMAKING_SOCKET_URL as string,
     });
@@ -75,6 +79,9 @@ const Game = () => {
       dispatch(setMatchmakingLoading(false));
       dispatch(setGameStarted(false));
       dispatch(setGameData({}));
+      store.dispatch(
+        setStatusInGame(false)
+      )
       store.dispatch(
         usersApi.util.invalidateTags(["getCurrentUser"])
       )

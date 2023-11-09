@@ -67,7 +67,7 @@ export class AuthController extends PrismaClient {
         where : {
           id : payload.id
         }
-      });
+      });``
         
       return res.json({ accessToken: newAccessToken, user: { id } });
     } catch (error) {

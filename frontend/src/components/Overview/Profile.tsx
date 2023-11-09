@@ -303,10 +303,7 @@ const Profile = ({ user }: { user: UserInterface }) => {
                     icon={<AiOutlineUserAdd />}
                     _hover={{ bg: "white", color: "pong_cl_primary" }}
                     onClick={handleSendFriendNotification}
-                  // isLoading={
-                  //   isLoadingCreateConversationWithoutMessage ||
-                  //   isLoadingGetConversationByMembersEmails
-                  // }
+                  
                   />
                 )}
                 {user?.friends?.includes(currentUser?.id) && (
@@ -317,24 +314,13 @@ const Profile = ({ user }: { user: UserInterface }) => {
                       bg={"red.500"}
                       color={"white"}
                       borderRadius={8}
-                      aria-label="Send friend request"
+                      aria-label="Delete friend"
                       icon={<AiOutlineUserDelete />}
                       _hover={{ bg: "white", color: "red.500" }}
                       isLoading={isDeletingFriend || isLoadingGetCurrentUser}
                       isDisabled={isDeletingFriend || isLoadingGetCurrentUser}
                       onClick={() => handleDeleteFriend(user?.id)}
                     />
-                    <IconButton
-                      size="sm"
-                      fontSize="lg"
-                      bg={"pong_cl_primary"}
-                      color={"white"}
-                      borderRadius={8}
-                      aria-label="Send game request"
-                      icon={<IoGameControllerOutline />}
-                      _hover={{ bg: "white", color: "pong_cl_primary" }}
-                    />
-
                   </>
                 )}
               </Flex>

@@ -8,6 +8,7 @@ interface UserState {
 const initialState = {
   currentUser: null,
   onlineUsers: 0,
+  statusInGame: false,
 };
 
 const userSlice = createSlice({
@@ -23,9 +24,12 @@ const userSlice = createSlice({
     setOnlineUsers: (state, action) => {
       state.onlineUsers = action.payload;
     },
+    setStatusInGame: (state, action) => {
+      state.statusInGame = action.payload;
+    },
   },
 });
 
-export const { setCurrentUser, removeUser, setOnlineUsers } = userSlice.actions;
+export const { setCurrentUser, removeUser, setOnlineUsers, setStatusInGame } = userSlice.actions;
 
 export default userSlice.reducer;

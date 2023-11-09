@@ -59,7 +59,6 @@ const GameStarted = ({ handleGameEnded }) => {
   
 
   const mvPaddleEvent = (paddle: Paddle) => {
-    // console.log("I just emitted a mvBootPaddle event loooopeeez");
     if (paddle.x === 0)
       setPlayerOnePaddle(paddle);
     else
@@ -67,6 +66,7 @@ const GameStarted = ({ handleGameEnded }) => {
   }
 
   useEffect(() => {
+   
     const newsocket = io("http://localhost:3000/play", {
       reconnection: false,
     });

@@ -14,6 +14,7 @@ const MotionBox = motion(Box);
 
 const Layout = () => {
   const currentUser = useSelector((state: any) => state?.user?.currentUser);
+
   const { onToggle } = useDisclosure();
   const navigate = useNavigate();
   useEffect(() => {
@@ -23,9 +24,9 @@ const Layout = () => {
 
     socket.on("game_accepted", (data) => {
       if (data.gameInfo.players?.map(p => p.id).includes(currentUser?.id)) {
-        store.dispatch(setGameStarted(true));
-        store.dispatch(setGameData(data?.gameInfo));
-        navigate("/game");
+          store.dispatch(setGameStarted(true));
+          store.dispatch(setGameData(data?.gameInfo));
+          navigate("/game");
       }
     });
 

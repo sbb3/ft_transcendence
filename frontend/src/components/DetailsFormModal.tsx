@@ -71,7 +71,6 @@ const ProfileDetailsFormModal = ({
   });
 
   const onUpdateProfileDetails = async (data: any) => {
-    console.log("onUpdateProfileDetails data: ", data);
     if (
       (data.avatar.length === 0 && data.username === "") ||
       data.username === currentUser?.username

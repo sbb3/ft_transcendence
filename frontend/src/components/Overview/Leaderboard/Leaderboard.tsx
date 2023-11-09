@@ -14,6 +14,7 @@ interface LeaderboardPlayer {
   username: string;
   avatar: string;
   level: number;
+  WonGames: number;
 }
 
 const Leaderboard = () => {
@@ -93,8 +94,8 @@ const Leaderboard = () => {
                   wrap="wrap"
                   overflow="hidden"
                 >
-                  {leaderboardData?.length > 0 ? (
-                    leaderboardData?.map((player: LeaderboardPlayer) => (
+                  {leaderboardData?.length > 0 && (
+                    leaderboardData?.slice()?.sort((a,b) => b.WonGames - a.WonGames)?.slice(0, 3)?.map((player: LeaderboardPlayer, i: number) => (
                       <Flex
                         key={player?.id}
                         direction="row"
@@ -107,13 +108,37 @@ const Leaderboard = () => {
                         align="center"
                         cursor={"pointer"}
                         bgColor={
-                          player?.level == 1
+                          i == 0
                             ? "#FFCA28"
-                            : player?.level == 2
+                            : i == 1
                               ? "#F4F4F4"
-                              : player?.level == 3
+                              : i == 2
                                 ? "#FF8228"
                                 : "rgba(255, 255, 255, 0.2)"
+                        }
+                        onClick={() => navigate(`/profile/${player?.username}`)}
+                      >
+
+                        <LeaderboardCard player={player} />
+                      </Flex>
+                    ))
+                  )
+                      }
+                  {leaderboardData?.length > 0 ? (
+                    leaderboardData?.slice(3)?.sort((a,b) => b.WonGames - a.WonGames)?.map((player: LeaderboardPlayer) => (
+                      <Flex
+                        key={player?.id}
+                        direction="row"
+                        justify="space-between"
+                        w="220px"
+                        h="40px"
+                        px={2}
+                        gap={2}
+                        borderRadius="22px"
+                        align="center"
+                        cursor={"pointer"}
+                        bgColor={
+                          "rgba(255, 255, 255, 0.2)"
                         }
                         onClick={() => navigate(`/profile/${player?.username}`)}
                       >

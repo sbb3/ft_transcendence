@@ -25,6 +25,7 @@ import usersApi, { useAddFriendMutation } from "src/features/users/usersApi";
 import { useSelector } from "react-redux";
 import { useEffect, useRef } from "react";
 import { createSocketClient } from "src/app/socket/client";
+import store from "src/app/store";
 
 dayjs.extend(relativeTime);
 
@@ -59,7 +60,7 @@ function Notifications() {
 
   const [addFriend, { isLoading: isAddingFriend }] = useAddFriendMutation();
 
-  // const [acceptGameChallenge, { isLoading: isAcceptingGameChallenge }] =
+  // const [acceptGameChallenge] =
   //   useAcceptGameChallengeMutation();
 
   const [triggerGetCurrentUser, { isLoading: isLoadingGetCurrentUser }] =
@@ -98,7 +99,6 @@ function Notifications() {
         isClosable: true,
       });
     } catch (error: any) {
-      console.log("error accepting friend request: ", error);
       toast({
         title: "Error",
         description: error?.data?.message || "Error accepting friend request",
@@ -112,24 +112,16 @@ function Notifications() {
   const handleAcceptGameChallenge = async ({ id, sender }) => {
     try {
       await deleteNotification(id).unwrap();
-      // await acceptGameChallenge({
-      //   challengedUserId: currentUser?.id,
-      //   challengerUserId: sender?.id,
-      // }).unwrap();
+      if (store.getState().user.statusInGame)
+        return ;
+      
       socket?.current?.emit("accept_game_challenge", {
         challengedUserId: currentUser?.id,
         challengerUserId: sender?.id,
       });
       refetch();
     } catch (error: any) {
-      console.log("error accepting game challenge: ", error);
-      toast({
-        title: "Error",
-        description: error?.data?.message || "Error accepting game challenge",
-        status: "error",
-        duration: 2000,
-        isClosable: true,
-      });
+      
     }
   };
 
@@ -149,7 +141,7 @@ function Notifications() {
       //   isClosable: true,
       // });
     } catch (error) {
-      console.log("Error rejecting request: ", error);
+      // console.log("Error rejecting request: ", error);
       toast({
         title: "Error",
         description: "Error rejecting request",
@@ -189,10 +181,16 @@ function Notifications() {
                 p={"1px"}
               >
                 {
-                  notifications?.filter(
+                   store.getState().user.statusInGame ? 
+                   notifications?.filter(
                     (notification) =>
-                      notification?.receiverId === currentUser?.id
-                  ).length
+                    notification?.receiverId === currentUser?.id && notification.type !== "gameRequest"
+                    ).length
+                   : 
+                     notifications?.filter(
+                       (notification) =>
+                       notification?.receiverId === currentUser?.id 
+                       ).length
                 }
               </Box>
             </>
@@ -364,7 +362,7 @@ function Notifications() {
                     </Flex>
                   </MenuItem>
                 ) : notification?.type === "gameRequest" &&
-                  notification?.receiverId === currentUser?.id ? (
+                  notification?.receiverId === currentUser?.id && !store.getState().user.statusInGame ? (
                   <MenuItem
                     key={notification?.id}
                     as={Flex}
