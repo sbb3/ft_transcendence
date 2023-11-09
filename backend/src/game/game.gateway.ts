@@ -147,14 +147,12 @@ export class GameGateway
 		let player = -1 as number;
 		if (room.ball.score_my >= 5) {
 			player = id_player_one;
-
 			this.gameService.updatePlayerLostGames(
 				id_player_two,
 			);
 
 		} else if (room.ball.score_her >= 5) {
 			player = id_player_two;
-
 			this.gameService.updatePlayerLostGames(
 				id_player_one,
 			);
@@ -166,20 +164,17 @@ export class GameGateway
 					id_player_one,
 				);
 				player = id_player_two;
-				// console.log("Here first condition.")
 			} else {
 				this.gameService.updatePlayerLostGames(
 					id_player_two,
 				);
 				player = id_player_one;
-				// console.log("Here second condition.")
 			}
+			
 		}
-
 		this.gameService.updatePlayerWinGames(
 			player,
 		);
-
 
 		this.gameService.updateUserGameStatus(
 			id_player_one,
@@ -193,9 +188,10 @@ export class GameGateway
 		this.wss.to(info.data.room).emit('gameOver', {
 			winnerId: player,
 		});
-		this.roomMap.get(info.data.room).socket_first.leave(info.data.room);
-		this.roomMap.get(info.data.room).socket_second.leave(info.data.room);
-
+		if (info.data.room && this.roomMap?.get(info.data.room)?.socket_first)
+			this.roomMap.get(info.data.room)?.socket_first.leave(info.data.room);
+		if (info.data.room && this.roomMap?.get(info.data.room)?.socket_second)
+			this.roomMap.get(info.data.room)?.socket_second.leave(info.data.room);
 		this.gameService.updatGameEnd({
 			gameId: parseInt(info.data.game_id, 10),
 			id_winer: player,
@@ -301,6 +297,10 @@ export class GameGateway
 					this.roomMap.get(data[0]).herPaddle,
 				);
 		} else {
+			// if (this.bootMap.get(data[1]))
+			// {
+			// 	// client.emit()
+			// }
 			this.bootMap.set(data[1], {
 				mode: data[3],
 				idUser: data[1],
@@ -354,6 +354,8 @@ export class GameGateway
 						.emit('mvBall', this.roomMap.get(data.room).ball);
 				}
 			} else {
+				if (!this.bootMap.get(data.id_player))
+					return ;
 				this.bootMap.get(data.id_player).intervalId = intervalId;
 				this.bootMap.get(data.id_player).ball = update(
 					this.bootMap.get(data.id_player).ball,
@@ -372,6 +374,7 @@ export class GameGateway
 					if (this.bootMap.get(data.id_player).ball.score_my >= 5)
 						this.wss.to(data.client.id).emit('gameOver', data.id_player);
 					else this.wss.to(data.client.id).emit('gameOver', -1);
+					this.gameService.updateUserGameStatus(data.id_player, "online");
 					this.bootMap.delete(parseInt(data.id_player, 10));
 					return;
 				}

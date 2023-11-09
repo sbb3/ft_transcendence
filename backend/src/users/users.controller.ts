@@ -98,6 +98,21 @@ export class UsersController extends PrismaClient {
     }
   }
 
+
+  @Post(':id/challenge/accept')
+  @ApiOperation({summary : 'Challenge user.'})
+  @UseGuards(JwtGuard)
+  async acceptGameChallenge(@Param('id') userId: number, @Res() response : Response) {
+    try {
+      const status = await this.usersService.acceptGameChallenge(userId);
+
+      return response.status(200).json(status);
+    }
+    catch (error) {
+      return response.status(error?.status ? error.status : 500).json(error);
+    }
+  }
+
   @Patch(':id/settings')
   @ApiOperation({summary : 'Update user settings.'})
   @UseGuards(JwtGuard)

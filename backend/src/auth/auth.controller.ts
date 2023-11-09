@@ -62,6 +62,13 @@ export class AuthController extends PrismaClient {
       const payload = this.authService.decodeToken(refreshToken);
       const { id } = payload;
       const newAccessToken = await this.authService.generateAccessToken({ id });
+
+      const user = await this.user.findUnique({
+        where : {
+          id : payload.id
+        }
+      });
+        
       return res.json({ accessToken: newAccessToken, user: { id } });
     } catch (error) {
       if (error?.status) return res.status(error.status).json(error);

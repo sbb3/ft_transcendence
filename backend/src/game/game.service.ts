@@ -156,7 +156,7 @@ export class GameService extends PrismaClient {
 			where: { id: userId },
 		});
 		if (!user) {
-			throw new NotFoundException(`User with id ${userId} not found`);
+			throw new NotFoundException(`User not found.`);
 		}
 		return user.status;
 	}

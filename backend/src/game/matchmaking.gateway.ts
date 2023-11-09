@@ -54,7 +54,7 @@ export class MatchmakingGateway extends PrismaClient
 	async acceptGameChallenge(client: Socket, data) {
 		const challengedUserIdStatus = await this.gameService.getUserStatus(data.challengedUserId);
 		const challengerUserIdStatus = await this.gameService.getUserStatus(data.challengerUserId);
-		if (challengedUserIdStatus !== "online" || challengerUserIdStatus !== "online")
+		if (challengedUserIdStatus != "online" || challengerUserIdStatus != "online")
 			return;
 		this.room = 'room' + this.i;
 		this.i++;
@@ -88,12 +88,17 @@ export class MatchmakingGateway extends PrismaClient
 	@SubscribeMessage('join_queue')
 	async initMyPa(client: Socket, data) {
 		const userStatus = await this.gameService.getUserStatus(data.userId);
+
+		console.log("Client id : " + client.id);
+		// console.log("Status " + userStatus);
 		if (userStatus !== "online")
 			return;
 		if (data.gameType === "bot") {
 			const user1 = await this.gameService.getUserById(data.userId);
 			if (!user1)
-				return ;
+			return ;
+
+			await this.gameService.updateUserGameStatus(user1.id, "playing");
 			this.wss.emit('start_game', {
 				gameInfo: {
 					players: [user1],

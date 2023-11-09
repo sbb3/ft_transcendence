@@ -1,3 +1,4 @@
 select custom data from user when sending game_started:
 check game customization in subject
 game request
+check player status (protect 2 simultaneous game requests)

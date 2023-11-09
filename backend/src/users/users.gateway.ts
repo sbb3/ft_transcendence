@@ -35,7 +35,6 @@ export class UserGateway
           },
         })
         .catch((err) => {
-          // console.log('user online update error', err);
         });
       this.connectedUsers.add(userId);
     }
@@ -55,7 +54,6 @@ export class UserGateway
           },
         })
         .catch((err) => {
-          // console.log('user offline update error', err);
         });
       this.connectedUsers.delete(userId);
     }

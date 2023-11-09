@@ -133,6 +133,22 @@ export class UsersService extends PrismaClient {
     }
   }
 
+
+  async acceptGameChallenge(userId: number) {
+    try {
+      const user = await this.user.findUnique({
+        where: { id: parseInt(userId.toString(), 10) },
+      });
+      if (!user) {
+        throw new NotFoundException(`User with id ${userId} not found`);
+      }
+      return user.status;
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+
   async getFriends(userId: number) {
     const user = await this.user.findUnique({
       where: { id: userId },

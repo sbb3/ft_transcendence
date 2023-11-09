@@ -68,7 +68,11 @@ export class AuthService extends PrismaClient {
       user.WonGames = 0;
       user.LostGames = 0;
       user.originalUsername = user.username;
+      user.status = "online";
     }
+    if (dbUser && dbUser.status != "playing")
+      user.status = "online";
+  
     return !dbUser
       ? await this.user.create({
         data: user,
@@ -100,9 +104,9 @@ export class AuthService extends PrismaClient {
 
   async signInLogic(request: Request, response: Response) {
     const allInfos = request['user'];
-    allInfos.status = 'online';
     const dbUser = await this.createUserIfNotFound(allInfos);
     const refreshToken = await this.generateRefreshToken({ id: dbUser.id });
+
     this.userWebSocketGateway.sendToAllUsersThatNewUserIsOnline(dbUser);
     this.initCookie(
       'refresh_token',
