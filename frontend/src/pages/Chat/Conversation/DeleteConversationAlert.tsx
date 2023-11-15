@@ -33,7 +33,7 @@ const DeleteConversationAlert = ({
         isClosable: true,
       });
     } catch (error) {
-      console.log("error: ", error);
+      // console.log("error: ", error);
       toast({
         title: "Error",
         description: "Error happened during deleting conversation.",

@@ -437,6 +437,8 @@ export class ChannelsService extends PrismaClient {
 
     if (memberToEdit && memberToEdit.id == editor.id)
       throw new ConflictException("Editor can't edit himself.");
+    if (memberToEdit && !this.canControl(editor.role, memberToEdit.role))
+      throw new ForbiddenException('No privileges to edit/add this member.');
     if (memberToEdit && this.canControl(editor.role, memberToEdit.role)) {
       await this.channelMember.updateMany({
         where: {

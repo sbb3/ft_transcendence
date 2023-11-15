@@ -93,7 +93,7 @@ const TwoFactorActivation = ({ isOpen, onToggle }) => {
       });
       onToggle();
     } catch (error: any) {
-      console.log("error: ", error);
+      // console.log("error: ", error);
       toast({
         title: "Error",
         description: "Verification code is incorrect.",

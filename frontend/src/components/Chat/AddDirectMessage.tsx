@@ -129,7 +129,6 @@ const AddDirectMessage = ({ isOpenDM, onToggleDM }) => {
       onToggleDM();
       navigate(`/chat/conversation/${conversationId}`);
     } catch (error: any) {
-      console.log("error: ", error);
       if (error?.message === "user not found") {
         toast({
           title: "User not found.",

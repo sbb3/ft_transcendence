@@ -16,8 +16,7 @@ const notificationsApi = apiSlice.injectEndpoints({
         }: any
       ) {
         const socket = createSocketClient({
-          api_url: import.meta.env
-            .VITE_SERVER_NOTIFICATION_SOCKET_URL as string,
+          api_url: import.meta.env.VITE_SERVER_NOTIFICATION_SOCKET_URL as string,
         });
 
         try {
@@ -37,10 +36,10 @@ const notificationsApi = apiSlice.injectEndpoints({
                     getState()?.conversations?.conversationsId !==
                       data?.data?.conversationId
                   ) {
-                    // console.log("msg notification added to cache");
+                    // // console.log("msg notification added to cache");
                     draft?.unshift(data?.data);
                   } else {
-                    // console.log("msg notification not added to cache, deleted");
+                    // // console.log("msg notification not added to cache, deleted");
                     dispatch(
                       notificationsApi?.endpoints?.deleteNotification?.initiate(
                         data?.data?.id
@@ -52,7 +51,7 @@ const notificationsApi = apiSlice.injectEndpoints({
                   data?.data?.type === "gameRequest"
                 ) {
                   if (!notification?.id) {
-                    // console.log("friend or game notification added to cache");
+                    // // console.log("friend or game notification added to cache");
                     draft?.unshift(data?.data);
                   }
                 }
@@ -60,7 +59,7 @@ const notificationsApi = apiSlice.injectEndpoints({
             }
           });
         } catch (error) {
-          console.log("error getNotifications endpoint: ", error);
+          // console.log("error getNotifications endpoint: ", error);
           await cacheEntryRemoved;
           socket.disconnect();
         }
@@ -76,7 +75,7 @@ const notificationsApi = apiSlice.injectEndpoints({
         try {
           await queryFulfilled;
         } catch (error) {
-          console.log("error: ", error);
+          // console.log("error: ", error);
         }
       },
     }),
@@ -89,7 +88,7 @@ const notificationsApi = apiSlice.injectEndpoints({
         try {
           await queryFulfilled;
         } catch (error) {
-          console.log("error: ", error);
+          // console.log("error: ", error);
         }
       },
     }),

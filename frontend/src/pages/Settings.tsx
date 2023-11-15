@@ -104,7 +104,7 @@ const Settings = () => {
         avatar: undefined,
       });
     } catch (error: any) {
-      console.log("error: ", error);
+      // console.log("error: ", error);
       toast({
         title: "Error.",
         description: error?.data?.message || "Something went wrong.",
@@ -126,7 +126,7 @@ const Settings = () => {
         isClosable: true,
       });
     } catch (error: any) {
-      console.log("error: ", error);
+      // console.log("error: ", error);
       toast({
         title: "Error.",
         description:

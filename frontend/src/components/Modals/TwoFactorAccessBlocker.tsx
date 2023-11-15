@@ -57,7 +57,7 @@ const TwoFactorAccessBlocker = ({
     useValidateOTPMutation();
 
   const onOTPValidation = async (data: any) => {
-    // console.log("PIN: ", data);
+    // // console.log("PIN: ", data);
     try {
       await validateOTP({
         userId: userId,
@@ -75,7 +75,7 @@ const TwoFactorAccessBlocker = ({
       });
       onOTPAccessBlockerToggle();
     } catch (error: any) {
-      console.log("error: ", error);
+      // console.log("error: ", error);
       toast({
         title: "Error",
         description: "Verification code is incorrect.",

@@ -67,7 +67,7 @@ const GameStarted = ({ handleGameEnded }) => {
 
   useEffect(() => {
    
-    const newsocket = io("http://localhost:3000/play", {
+    const newsocket = io(import.meta.env.VITE_SERVER_PLAY_SOCKET_URL as string, {
       reconnection: false,
     });
 
@@ -134,8 +134,8 @@ const GameStarted = ({ handleGameEnded }) => {
     const num = event.clientY - rect?.top;
     setBool(false);
 
-    // console.log("I just emitted a mvPAddle event");
-    // console.log("Socket : " + socket);
+    // // console.log("I just emitted a mvPAddle event");
+    // // console.log("Socket : " + socket);
     socket?.emit("mvPaddle", {
       num: num,
       room: gameData.room,
@@ -143,7 +143,7 @@ const GameStarted = ({ handleGameEnded }) => {
     });
     socket?.on("mvPaddle", (paddle: Paddle) => {
       if (paddle.x === 0) {
-        // console.log("I just emitted a mvBootPaddle event");
+        // // console.log("I just emitted a mvBootPaddle event");
         setPlayerOnePaddle(paddle);
       }
       else {

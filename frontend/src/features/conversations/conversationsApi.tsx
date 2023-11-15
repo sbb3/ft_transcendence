@@ -50,7 +50,7 @@ const conversationApi = apiSlice.injectEndpoints({
             }
           });
         } catch (error) {
-          console.log("error: ", error);
+          // console.log("error: ", error);
           await cacheEntryRemoved;
           socket.disconnect();
         }
@@ -77,7 +77,7 @@ const conversationApi = apiSlice.injectEndpoints({
             );
           });
         } catch (error) {
-          console.log("error: ", error);
+          // console.log("error: ", error);
           await cacheEntryRemoved;
           socket.disconnect();
         }
@@ -96,7 +96,7 @@ const conversationApi = apiSlice.injectEndpoints({
         try {
           await queryFulfilled;
         } catch (error) {
-          console.log("error : ", error);
+          // console.log("error : ", error);
         }
       },
     }),
@@ -138,7 +138,7 @@ const conversationApi = apiSlice.injectEndpoints({
             messagesApi.endpoints.createMessage.initiate(messageData)
           );
         } catch (error) {
-          console.log("error : ", error);
+          // console.log("error : ", error);
           patchResult.undo();
         }
       },
@@ -169,7 +169,7 @@ const conversationApi = apiSlice.injectEndpoints({
         try {
           await queryFulfilled;
         } catch (error) {
-          console.log("error : ", error);
+          // console.log("error : ", error);
           patchResult.undo();
         }
       },
@@ -202,7 +202,7 @@ const conversationApi = apiSlice.injectEndpoints({
         try {
           await queryFulfilled;
         } catch (error) {
-          console.log("error: ", error);
+          // console.log("error: ", error);
           patchResult.undo();
         }
       },
@@ -231,7 +231,7 @@ const conversationApi = apiSlice.injectEndpoints({
         try {
           await queryFulfilled;
         } catch (error) {
-          console.log("error: ", error);
+          // console.log("error: ", error);
           patchResult.undo();
         }
       },

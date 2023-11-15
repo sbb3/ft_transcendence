@@ -72,11 +72,11 @@ const ConversationContent = () => {
         currentUser?.email === senderEmail ||
         currentUser?.email === receiverEmail
       ) {
-        console.log("allowed");
+        // console.log("allowed");
         setReceiverEmail(receiverEmail);
         setSkip(false);
       } else {
-        console.log("not allowed");
+        // console.log("not allowed");
         toast({
           title: "Conversation not found.",
           description: "We couldn't find the conversation.",
@@ -109,7 +109,7 @@ const ConversationContent = () => {
         navigate("/chat", { replace: true });
       }
     } catch (error: any) {
-      console.log("error: ", error);
+      // console.log("error: ", error);
       toast({
         title: "Message not sent.",
         description:

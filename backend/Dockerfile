@@ -4,12 +4,10 @@ WORKDIR /app
 
 COPY package*.json ./
 
-RUN npm install
+RUN npm i
 
 COPY . .
 
 RUN npm run build
 
-RUN chmod 777 ./prisma_script.sh
-
-CMD [ "bash", "/app/prisma_script.sh" ]
+CMD sh -c "npx prisma generate && npx prisma db push && node /app/dist/main.js "

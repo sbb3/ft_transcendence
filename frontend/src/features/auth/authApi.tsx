@@ -17,7 +17,7 @@ const authApi = apiSlice.injectEndpoints({
           dispatch(setUserLoggedOut());
           dispatch(removeUser());
         } catch (err: any) {
-          console.log(`err: `, err);
+          // console.log(`err: `, err);
           return;
         }
       },
@@ -39,7 +39,7 @@ const authApi = apiSlice.injectEndpoints({
 
           dispatch(setCurrentUser(result?.data?.user));
         } catch (err: any) {
-          console.log(`err: `, err);
+          // console.log(`err: `, err);
           return;
         }
       },

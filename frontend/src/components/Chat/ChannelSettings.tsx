@@ -144,8 +144,8 @@ const ChannelSettings = ({ channel, onToggleChannelInfo }) => {
             <RadioGroup
               {...field}
               onChange={(inputValue) => {
-                //   console.log("e: ", inputValue);
-                //   console.log("field: ", field);
+                //   // console.log("e: ", inputValue);
+                //   // console.log("field: ", field);
                 field.onChange(inputValue);
                 setIsProtected(inputValue === "protected");
               }}

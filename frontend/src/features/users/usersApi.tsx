@@ -25,7 +25,7 @@ const usersApi = apiSlice.injectEndpoints({
 
           });
         } catch (error) {
-          console.log("error: ", error);
+          // console.log("error: ", error);
           await cacheEntryRemoved;
           socket.disconnect();
         }
@@ -40,7 +40,7 @@ const usersApi = apiSlice.injectEndpoints({
         try {
           await queryFulfilled;
         } catch (error) {
-          console.log("error: ", error);
+          // console.log("error: ", error);
         }
       },
     }),
@@ -50,7 +50,7 @@ const usersApi = apiSlice.injectEndpoints({
         try {
           await queryFulfilled;
         } catch (error) {
-          console.log("error: ", error);
+          // console.log("error: ", error);
         }
       },
     }),
@@ -67,7 +67,7 @@ const usersApi = apiSlice.injectEndpoints({
           const user = result?.data;
           await dispatch(setCurrentUser(user));
         } catch (error) {
-          console.log("error: ", error);
+          // console.log("error: ", error);
         }
       },
     }),
@@ -84,7 +84,7 @@ const usersApi = apiSlice.injectEndpoints({
           const user = result?.data;
           await dispatch(setCurrentUser(user));
         } catch (error) {
-          console.log("error: ", error);
+          // console.log("error: ", error);
 
         }
       },
@@ -104,7 +104,7 @@ const usersApi = apiSlice.injectEndpoints({
           const user = result?.data;
           await dispatch(setCurrentUser(user));
         } catch (error) {
-          console.log("error: ", error);
+          // console.log("error: ", error);
         }
       },
     }),
@@ -125,7 +125,7 @@ const usersApi = apiSlice.injectEndpoints({
           const user = result?.data;
           await dispatch(setCurrentUser(user));
         } catch (error) {
-          console.log("error: ", error);
+          // console.log("error: ", error);
         }
       },
     }),
@@ -148,7 +148,7 @@ const usersApi = apiSlice.injectEndpoints({
           const user = result?.data;
           await dispatch(setCurrentUser(user));
         } catch (error) {
-          console.log("error: ", error);
+          // console.log("error: ", error);
         }
       },
     }),
@@ -164,7 +164,7 @@ const usersApi = apiSlice.injectEndpoints({
           const user = result?.data;
           await dispatch(setCurrentUser(user));
         } catch (error) {
-          console.log("error: ", error);
+          // console.log("error: ", error);
         }
       },
     }),
@@ -180,7 +180,7 @@ const usersApi = apiSlice.injectEndpoints({
           const user = result?.data;
           await dispatch(setCurrentUser(user));
         } catch (error) {
-          console.log("error: ", error);
+          // console.log("error: ", error);
         }
       },
     }),
@@ -196,7 +196,7 @@ const usersApi = apiSlice.injectEndpoints({
           const user = result?.data;
           await dispatch(setCurrentUser(user));
         } catch (error) {
-          console.log("error: ", error);
+          // console.log("error: ", error);
         }
       },
     }),
@@ -218,7 +218,7 @@ const usersApi = apiSlice.injectEndpoints({
           const user = result?.data;
           await dispatch(setCurrentUser(user));
         } catch (error) {
-          console.log("error: ", error);
+          // console.log("error: ", error);
         }
       },
     }),
@@ -240,7 +240,7 @@ const usersApi = apiSlice.injectEndpoints({
           const user = result?.data;
           await dispatch(setCurrentUser(user));
         } catch (error) {
-          console.log("error: ", error);
+          // console.log("error: ", error);
         }
       },
     }),

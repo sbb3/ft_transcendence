@@ -36,7 +36,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 dayjs.extend(relativeTime);
 
 const ChatRightModal = ({ participantUserId, isOpen, toggleProfileDrawer }) => {
-  console.log("participantUserId: ", participantUserId);
+  // console.log("participantUserId: ", participantUserId);
   const currentUser = useSelector((state: any) => state?.user?.currentUser);
   // const prefetchUser = usersApi.usePrefetch("getCurrentUser", {
   //   force: true,
@@ -106,7 +106,7 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleProfileDrawer }) => {
       toggleProfileDrawer();
       navigate(`/chat/conversation/${id}`);
     } catch (error) {
-      console.log("error: ", error);
+      // console.log("error: ", error);
       toast({
         title: "Error",
         description: "Error happened while opening the conversation",
@@ -148,8 +148,8 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleProfileDrawer }) => {
       });
       toggleProfileDrawer();
     } catch (error: any) {
-      console.log("error accepting friend request: ", error);
-      console.log("error: ", error);
+      // console.log("error accepting friend request: ", error);
+      // console.log("error: ", error);
       toast({
         title: "Error",
         description: error?.data?.message || "Error happened",
@@ -178,7 +178,7 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleProfileDrawer }) => {
       });
       toggleProfileDrawer();
     } catch (error: any) {
-      console.log("error: ", error);
+      // console.log("error: ", error);
       toast({
         title: "Error",
         description: error?.data?.message || "Error happened",
@@ -204,7 +204,7 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleProfileDrawer }) => {
       });
       toggleProfileDrawer();
     } catch (error: any) {
-      console.log("error: ", error);
+      // console.log("error: ", error);
       toast({
         title: "Error",
         description: error?.data?.message || "Error happened",
@@ -230,7 +230,7 @@ const ChatRightModal = ({ participantUserId, isOpen, toggleProfileDrawer }) => {
       });
       toggleProfileDrawer();
     } catch (error: any) {
-      console.log("error: ", error);
+      // console.log("error: ", error);
       toast({
         title: "Error",
         description: error?.data?.message || "Error happened",

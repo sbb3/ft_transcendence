@@ -15,10 +15,6 @@ const baseQuery = fetchBaseQuery({
 
 const baseQueryJWTverify = async (args: any, api: any, extraOptions: any) => {
   const originalQuery = await baseQuery(args, api, extraOptions);
-  if (originalQuery?.error?.status === 402) {
-    console.log("40022")
-    api.dispatch(setUserLoggedOut());
-  }
   if (originalQuery?.error?.status === 401) {
     //  access token  expired.  we get new access token using the refresh token.
     const retryQueryWithRefreshToken = await baseQuery(

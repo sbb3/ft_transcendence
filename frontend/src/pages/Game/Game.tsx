@@ -105,7 +105,7 @@ const Game = () => {
   };
 
   const handleStartingBot = async (data: any) => {
-    console.log("handleStartingBot data: ", data)
+    // console.log("handleStartingBot data: ", data)
     setStartBot(true);
     setBotMode(data?.gameMode)
     reset({
@@ -386,10 +386,10 @@ const Game = () => {
           borderRadius={5}
           colorScheme="orange"
           onClick={() => {
-            console.log("gametype: ", gameType)
+            // console.log("gametype: ", gameType)
             if (gameType === "bot") 
             {
-              console.log("in first cond")
+              // console.log("in first cond")
               handleSubmit(handleStartingBot)()
             }
             else

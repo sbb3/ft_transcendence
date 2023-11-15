@@ -6,7 +6,7 @@ import { useDisclosure } from "@chakra-ui/react";
 const CheckOTP = () => {
   const isOTPEnabledAndValidated = useOTP();
   const { onToggle } = useDisclosure({ defaultIsOpen: false });
-  // console.log(`isOTPEnabledAndValidated: ${isOTPEnabledAndValidated}`);
+  // // console.log(`isOTPEnabledAndValidated: ${isOTPEnabledAndValidated}`);
 
   let content;
 

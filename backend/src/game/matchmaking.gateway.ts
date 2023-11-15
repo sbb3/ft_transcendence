@@ -56,12 +56,19 @@ export class MatchmakingGateway extends PrismaClient
 		const challengerUserIdStatus = await this.gameService.getUserStatus(data.challengerUserId);
 		if (challengedUserIdStatus != "online" || challengerUserIdStatus != "online")
 			return;
+		// 	// console.log(ballPosition);
+		// 	// console.log(ballPosition);
+
 		this.room = 'room' + this.i;
 		this.i++;
 		const user1 = await this.gameService.getUserById(data.challengerUserId);
 		const user2 = await this.gameService.getUserById(data.challengedUserId);
 		if (!user1 || !user2)
 			return ;
+		if (this.queue.length > 0) {
+			if (this.queue[0]?.id == user1.id || this.queue[0]?.id == user2.id)
+				return ;
+		}
 		const game = await this.gameService.createGame({
 			player_one_id: data.challengerUserId,
 			player_two_id: data.challengedUserId,

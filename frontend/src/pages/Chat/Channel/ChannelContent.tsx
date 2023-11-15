@@ -86,7 +86,7 @@ const ChannelContent = () => {
     try {
       await createChannelMessage(msg).unwrap();
     } catch (error: any) {
-      console.log("error ", error);
+      // console.log("error ", error);
       toast({
         title: "Message not sent.",
         description: error?.data?.message || "Message not sent to the channel.",

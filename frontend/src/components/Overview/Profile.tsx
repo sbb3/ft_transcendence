@@ -77,7 +77,7 @@ const Profile = ({ user }: { user: UserInterface }) => {
         isClosable: true,
       });
     } catch (error: any) {
-      console.log(error);
+      // console.log(error);
       toast({
         title: "Error",
         description: error?.data?.message || "Error deleting friend",
@@ -106,7 +106,7 @@ const Profile = ({ user }: { user: UserInterface }) => {
         isClosable: true,
       });
     } catch (error: any) {
-      console.log("error: ", error);
+      // console.log("error: ", error);
       toast({
         title: "Error",
         description: error?.data?.message || "Error happened",
@@ -146,7 +146,7 @@ const Profile = ({ user }: { user: UserInterface }) => {
         isClosable: true,
       });
     } catch (error: any) {
-      console.log("error accepting friend request: ", error);
+      // console.log("error accepting friend request: ", error);
       toast({
         title: "Error",
         description: error?.data?.message || "Error happened",
@@ -166,7 +166,7 @@ const Profile = ({ user }: { user: UserInterface }) => {
       if (conversations?.length > 0) {
         const conversation = conversations[0];
         id = conversation.id;
-        // console.log("id->: ", id);
+        // // console.log("id->: ", id);
       } else {
         const conversation = {
           id: uuidv4(),
@@ -192,7 +192,7 @@ const Profile = ({ user }: { user: UserInterface }) => {
       }
       navigate(`/chat/conversation/${id}`);
     } catch (error) {
-      console.log("error: ", error);
+      // console.log("error: ", error);
       toast({
         title: "Error",
         description: "Error happened while opening the conversation",

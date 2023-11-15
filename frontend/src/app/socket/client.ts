@@ -6,7 +6,7 @@ interface SocketClientProps {
 }
 
 export const createSocketClient = ({
-  api_url = "http://localhost:5173",
+  api_url = import.meta.env.VITE_REACT_APP_URL,
 }: SocketClientProps) => {
 
   const socket = io(api_url, {

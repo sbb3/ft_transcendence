@@ -31,7 +31,7 @@ function BotGame({botMode}) {
 
 	useEffect(() => {
 			const handleVisibilityChange = () => {
-			console.log(botMode);
+			// console.log(botMode);
 			  if (!document.hasFocus()) {
 				stopTheGame();
 			  }
@@ -113,12 +113,12 @@ function BotGame({botMode}) {
 
 	// Start the game
 	function startTheGame() {
-		console.log("bot mode : " + botMode);
+		// console.log("bot mode : " + botMode);
 		if (botMode == "hard")
 			COMPUTER_SPEED = 0.06;
 		else
 			COMPUTER_SPEED = (botMode == "normal" ? 0.0070 : 0.0040);
-		console.log("Computer speed : " + COMPUTER_SPEED);
+		// console.log("Computer speed : " + COMPUTER_SPEED);
 		gameIsOn.current = true;
 		if (animationId.current == -1)
 		{
@@ -144,7 +144,7 @@ function BotGame({botMode}) {
 			else
 				velocity.current += SPEED_INCREASE;
 			
-			console.log("Velocity : " + velocity.current);
+			// console.log("Velocity : " + velocity.current);
 			if (newY > 100 - (ballPercentage.current.y / 2))
 				newY = 100 - (ballPercentage.current.y / 2);
 			else if (newY < 0 + (ballPercentage.current.y / 2))
@@ -190,8 +190,6 @@ function BotGame({botMode}) {
 	useEffect(() => {
 		checkCollision();
 		updateComputerPaddle();
-		// if (ballPosition.x <= 5 || ballPosition.x > 95)
-		// 	console.log(ballPosition);
 	}, [ballPosition]);
 
 	return (

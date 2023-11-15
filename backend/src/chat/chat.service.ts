@@ -261,7 +261,7 @@ export class ChatService extends PrismaClient {
   }
 
   async getMessagesByConversationId(conversationId: string, page: number) {
-    const LIMIT = 10;
+    const LIMIT = 25;
     const count = await this.messageData.count({
       where: {
         conversationId,
@@ -278,7 +278,7 @@ export class ChatService extends PrismaClient {
         lastMessageCreatedAt: 'desc',
       },
     });
-
+    
     if (messages.length == 0)
       return { totalPages, messages };
 

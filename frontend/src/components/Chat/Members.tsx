@@ -113,7 +113,6 @@ const Members = ({ channel }: ChannelType) => {
         isClosable: true,
       });
     } catch (error: any) {
-      console.log("error22: ", error);
       toast({
         title: "Member not added.",
         description: error?.data?.message || "Member not added to the channel.",
@@ -143,7 +142,6 @@ const Members = ({ channel }: ChannelType) => {
         isClosable: true,
       });
     } catch (error: any) {
-      console.log("error: ", error);
       toast({
         title: "Member not Kicked.",
         description: error.message,
@@ -169,7 +167,6 @@ const Members = ({ channel }: ChannelType) => {
         isClosable: true,
       });
     } catch (error: any) {
-      console.log("error: ", error);
       toast({
         title: "Error.",
         description: error.message,
@@ -195,7 +192,7 @@ const Members = ({ channel }: ChannelType) => {
         isClosable: true,
       });
     } catch (error: any) {
-      console.log("error: ", error);
+      // console.log("error: ", error);
       toast({
         title: "Error.",
         description: error.message,
@@ -221,7 +218,7 @@ const Members = ({ channel }: ChannelType) => {
         isClosable: true,
       });
     } catch (error: any) {
-      console.log("error: ", error);
+      // console.log("error: ", error);
       toast({
         title: "Member not banned.",
         description: error.message || "Member not banned from the channel.",

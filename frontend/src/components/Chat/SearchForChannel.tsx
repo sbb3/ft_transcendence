@@ -79,7 +79,7 @@ const SearchForChannel = ({
         isClosable: true,
       });
     } catch (error: any) {
-      console.log("error ", error);
+      // console.log("error ", error);
       toast({
         title: "Unable to join channel.",
         description: error?.data?.message || "Unable to join channel.",

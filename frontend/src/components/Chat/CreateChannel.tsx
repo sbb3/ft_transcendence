@@ -116,7 +116,6 @@ const CreateChannel = ({
         isClosable: true,
       });
     } catch (error: any) {
-      console.log("error: ", error);
       toast({
         title: "Channel not created.",
         description: error?.data?.message || "Channel has not been created.",
@@ -211,8 +210,6 @@ const CreateChannel = ({
                   <RadioGroup
                     {...field}
                     onChange={(inputValue) => {
-                      //   console.log("e: ", inputValue);
-                      //   console.log("field: ", field);
                       field.onChange(inputValue);
                       setIsProtected(inputValue === "protected");
                     }}

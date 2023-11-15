@@ -25,7 +25,7 @@ const channelsApi = apiSlice.injectEndpoints({
         try {
           await cacheDataLoaded;
           socket.on("channel", (data) => {
-            console.log("incoming channel: ", data);
+            // console.log("incoming channel: ", data);
             const isDataBelongToThisUser = data.data.members.find(
               (m) => m.id === getState()?.user?.currentUser?.id
             );
@@ -46,7 +46,7 @@ const channelsApi = apiSlice.injectEndpoints({
             }
           });
         } catch (error) {
-          console.log("error: ", error);
+          // console.log("error: ", error);
           await cacheEntryRemoved;
           socket.disconnect();
         }
@@ -64,7 +64,7 @@ const channelsApi = apiSlice.injectEndpoints({
         try {
           await cacheDataLoaded;
           socket.on("channel", (data) => {
-            // console.log("incoming channel data: ", data);
+            // // console.log("incoming channel data: ", data);
             const isDataBelongToThisUser = data.data.members.find(
               (m) => m.id === getState()?.user?.currentUser?.id
             );
@@ -85,7 +85,7 @@ const channelsApi = apiSlice.injectEndpoints({
             }
           });
         } catch (error) {
-          console.log("error: ", error);
+          // console.log("error: ", error);
           await cacheEntryRemoved;
           socket.disconnect();
         }
@@ -105,7 +105,7 @@ const channelsApi = apiSlice.injectEndpoints({
             "getChannelsByMemberId",
             getState()?.user.currentUser?.id,
             (draft) => {
-              console.log("draft: ", draft);
+              // console.log("draft: ", draft);
               const channel = draft?.find((c) => c.id === channelId);
               if (!channel?.id) {
                 draft?.unshift(arg); // arg = channel data
@@ -116,7 +116,7 @@ const channelsApi = apiSlice.injectEndpoints({
         try {
           await queryFulfilled;
         } catch (error) {
-          console.log("error: ", error);
+          // console.log("error: ", error);
           patchResult.undo();
         }
       },
@@ -171,7 +171,7 @@ const channelsApi = apiSlice.injectEndpoints({
         try {
           await queryFulfilled;
         } catch (error) {
-          console.log("error: ", error);
+          // console.log("error: ", error);
           patchResult.undo();
           patchResult2.undo();
         }
@@ -238,7 +238,7 @@ const channelsApi = apiSlice.injectEndpoints({
             )
           );
         } catch (error) {
-          console.log("error: ", error);
+          // console.log("error: ", error);
           patchResult.undo();
           patchResult2.undo();
         }
@@ -287,7 +287,7 @@ const channelsApi = apiSlice.injectEndpoints({
         try {
           await queryFulfilled;
         } catch (error) {
-          console.log("error: ", error);
+          // console.log("error: ", error);
           patchResult.undo();
           patchResult2.undo();
         }
@@ -321,7 +321,7 @@ const channelsApi = apiSlice.injectEndpoints({
         try {
           await queryFulfilled;
         } catch (error) {
-          console.log("error: ", error);
+          // console.log("error: ", error);
           patchResult.undo();
         }
       },
@@ -354,7 +354,7 @@ const channelsApi = apiSlice.injectEndpoints({
         try {
           await queryFulfilled;
         } catch (error) {
-          console.log("error: ", error);
+          // console.log("error: ", error);
           patchResult.undo();
         }
       },
@@ -390,7 +390,7 @@ const channelsApi = apiSlice.injectEndpoints({
         try {
           await queryFulfilled;
         } catch (error) {
-          console.log("error: ", error);
+          // console.log("error: ", error);
           patchResult.undo();
         }
       },
@@ -417,7 +417,7 @@ const channelsApi = apiSlice.injectEndpoints({
             )
           );
         } catch (error) {
-          console.log("error: ", error);
+          // console.log("error: ", error);
         }
       },
     }),
@@ -451,7 +451,7 @@ const channelsApi = apiSlice.injectEndpoints({
         try {
           await queryFulfilled;
         } catch (error) {
-          console.log("error: ", error);
+          // console.log("error: ", error);
           patchResult.undo();
         }
       },
@@ -475,7 +475,7 @@ const channelsApi = apiSlice.injectEndpoints({
             )
           );
         } catch (error) {
-          console.log("error: ", error);
+          // console.log("error: ", error);
         }
       },
     }),

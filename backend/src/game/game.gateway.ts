@@ -107,6 +107,7 @@ export class GameGateway
 			const id_user = this.idUserInRoom(client);
 			clearInterval(this.bootMap.get(parseInt(id_user, 10)).intervalId);
 			this.wss.to(client.id).emit('gameOver', parseInt(id_user, 10));
+			this.gameService.updateUserGameStatus(parseInt(id_user, 10), "online");
 			this.bootMap.delete(parseInt(id_user, 10));
 		}
 		else {

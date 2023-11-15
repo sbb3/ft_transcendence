@@ -60,7 +60,6 @@ const ChannelAbout = ({ channel }: ChannelType) => {
       }).unwrap();
       navigate("/chat", { replace: true });
     } catch (error) {
-      console.log("error did not leave channel : ", error);
     }
   };
 
@@ -68,10 +67,7 @@ const ChannelAbout = ({ channel }: ChannelType) => {
     try {
       await deleteChannel({ id: channel?.id, name: channel?.name }).unwrap();
       navigate("/chat", { replace: true });
-      console.log("channel got deleted");
     } catch (error) {
-      console.log("error: ", error);
-      console.log("did not delete channel");
     }
   };
 

@@ -18,18 +18,18 @@ const channelMessagesApi = apiSlice.injectEndpoints({
         try {
           await cacheDataLoaded;
           socket.on("channelMessage", (data) => {
-            console.log("incoming msg: ", data);
+            // console.log("incoming msg: ", data);
             if (data?.data?.receivers.includes(currentUser?.id)) {
               updateCachedData((draft) => {
                 // if (draft?.map(m => m?.id)?.includes(data?.data?.channelId))
                 // {
                   const message = draft?.find((m) => m.id === data?.data?.id);
                   const channel = draft?.find((m) => m.channelId === data?.data?.channelId);
-                  console.log("msg id channnel ", message?.channelId)
-                   console.log("channel ", channel);
+                  // console.log("msg id channnel ", message?.channelId)
+                   // console.log("channel ", channel);
                   if (!message?.id && channel)
                   {
-                    console.log("in")                    
+                    // console.log("in")                    
                     draft?.push(data?.data);
                   }
                 // }
@@ -37,7 +37,7 @@ const channelMessagesApi = apiSlice.injectEndpoints({
             }
           });
         } catch (error) {
-          console.log("error : ", error);
+          // console.log("error : ", error);
           await cacheEntryRemoved;
           socket.disconnect();
         }
@@ -52,7 +52,7 @@ const channelMessagesApi = apiSlice.injectEndpoints({
       async onQueryStarted(arg, { dispatch, getState, queryFulfilled }: any) {
         const message = arg;
         const { channelName } = message;
-        console.log("channelsname ", channelName);
+        // console.log("channelsname ", channelName);
         // optimistic update
         const patchResultMsg = dispatch(
           channelMessagesApi?.util?.updateQueryData(
@@ -67,7 +67,7 @@ const channelMessagesApi = apiSlice.injectEndpoints({
         try {
           await queryFulfilled;
         } catch (error) {
-          console.log("error : ", error);
+          // console.log("error : ", error);
           await dispatch(
             channelsApi.util.prefetch(
               "getChannelsByMemberId",

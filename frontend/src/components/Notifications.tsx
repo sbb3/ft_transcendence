@@ -78,7 +78,6 @@ function Notifications() {
       refetch();
       navigate(`/chat/conversation/${conversationId}`);
     } catch (error) {
-      console.log("error deleting notification: ", error);
     }
   };
 
@@ -133,15 +132,8 @@ function Notifications() {
     try {
       await deleteNotification(notificationId).unwrap();
       refetch();
-      // toast({
-      //   title: "Info",
-      //   description: "Request rejected",
-      //   status: "info",
-      //   duration: 2000,
-      //   isClosable: true,
-      // });
     } catch (error) {
-      // console.log("Error rejecting request: ", error);
+      // // console.log("Error rejecting request: ", error);
       toast({
         title: "Error",
         description: "Error rejecting request",
