@@ -16,9 +16,13 @@ https://www.figma.com/file/ISQY2rYDToqjEEjBnomyBy/Workflow?type=whiteboard&node-
 
 [![Video Title](https://img.youtube.com/vi/b6LXdtCOGiQ/0.jpg)](https://www.youtube.com/watch?v=b6LXdtCOGiQ)
 
+https://www.youtube.com/watch?v=b6LXdtCOGiQ
+
 OTP:
 
 [![Video Title](https://img.youtube.com/vi/_2xyBh4sYbA/0.jpg)](https://www.youtube.com/watch?v=_2xyBh4sYbA)
+
+https://www.youtube.com/watch?v=_2xyBh4sYbA
 
 ## Usage
 
